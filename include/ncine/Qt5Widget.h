@@ -53,6 +53,8 @@ class DLL_PUBLIC Qt5Widget : public QOpenGLWidget
   private slots:
 	/// The function slot called at each `frameSwapped` signal
 	void autoUpdate();
+	/// The function slot called at each `screenAdded` or `screenRemoved` signal
+	void screenConfigurationChange(QScreen *);
 
   private:
 	PCApplication &application_;

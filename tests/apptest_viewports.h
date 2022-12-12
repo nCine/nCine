@@ -38,6 +38,7 @@ class MyEventHandler :
 	void onPreInit(nc::AppConfiguration &config) override;
 	void onInit() override;
 	void onFrameStart() override;
+	void onResizeWindow(int width, int height) override;
 
 	void onKeyReleased(const nc::KeyboardEvent &event) override;
 	void onMouseButtonPressed(const nc::MouseEvent &event) override;

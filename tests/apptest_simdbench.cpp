@@ -516,8 +516,9 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 void MyEventHandler::onInit()
 {
 #ifdef __ANDROID__
-	ImGuiIO &io = ImGui::GetIO();
-	io.FontGlobalScale = 3.0f;
+	const float scalingFactor = nc::theApplication().gfxDevice().windowScalingFactor();
+	ImGui::GetIO().FontGlobalScale = scalingFactor;
+	ImGui::GetStyle().ScaleAllSizes(scalingFactor);
 #endif
 
 	nums = nctl::makeUnique<float[]>(MaxDataElements);
@@ -568,6 +569,12 @@ void MyEventHandler::onInit()
 
 void MyEventHandler::onFrameStart()
 {
+#ifdef __ANDROID__
+	const float scalingFactor = nc::theApplication().gfxDevice().windowScalingFactor();
+#else
+	const float scalingFactor = 1.0f;
+#endif
+
 	if (runningAllTests)
 	{
 		if (allTestsIndex >= Tests::Count)
@@ -586,7 +593,7 @@ void MyEventHandler::onFrameStart()
 
 	const ImVec2 windowPos(ImGui::GetMainViewport()->Size.x * 0.5f, ImGui::GetMainViewport()->Size.y * 0.5f);
 	ImGui::SetNextWindowPos(windowPos, ImGuiCond_FirstUseEver, ImVec2(0.5f, 0.5f));
-	ImGui::SetNextWindowSize(ImVec2(370.0f, 520.0f), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2(370.0f * scalingFactor, 520.0f * scalingFactor), ImGuiCond_FirstUseEver);
 	if (ImGui::Begin("Benchmark"))
 	{
 		if (ImGui::CollapsingHeader("Load Test Runs"))

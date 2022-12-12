@@ -18,25 +18,25 @@ class SdlGfxDevice : public IGfxDevice
 
 	void setSwapInterval(int interval) override;
 
-	void setResolution(int width, int height) override;
-
 	void setFullScreen(bool fullScreen) override;
-
-	inline void update() override { SDL_GL_SwapWindow(windowHandle_); }
-
-	inline void setWindowPosition(int x, int y) override { SDL_SetWindowPosition(windowHandle_, x, y); }
-	inline void setWindowTitle(const char *windowTitle) override { SDL_SetWindowTitle(windowHandle_, windowTitle); }
-	void setWindowIcon(const char *windowIconFilename) override;
 
 	int windowPositionX() const override;
 	int windowPositionY() const override;
 	const Vector2i windowPosition() const override;
+	inline void setWindowPosition(int x, int y) override { SDL_SetWindowPosition(windowHandle_, x, y); }
 
+	void setWindowSize(int width, int height) override;
+
+	inline void setWindowTitle(const char *windowTitle) override { SDL_SetWindowTitle(windowHandle_, windowTitle); }
+	void setWindowIcon(const char *windowIconFilename) override;
 	void flashWindow() const override;
 
-	const VideoMode &currentVideoMode() const override;
-	bool setVideoMode(unsigned int index) override;
-	void updateVideoModes() override;
+	unsigned int windowMonitorIndex() const override;
+
+	const VideoMode &currentVideoMode(unsigned int monitorIndex) const override;
+	bool setVideoMode(unsigned int modeIndex) override;
+
+	inline void update() override { SDL_GL_SwapWindow(windowHandle_); }
 
 	static inline SDL_Window *windowHandle() { return windowHandle_; }
 
@@ -54,7 +54,9 @@ class SdlGfxDevice : public IGfxDevice
 	/// Initilizes the video subsystem (SDL)
 	void initGraphics();
 	/// Initilizes the OpenGL graphic context
-	void initDevice();
+	void initDevice(const WindowMode &windowMode);
+
+	void updateMonitors() override;
 
 	void convertVideoModeInfo(const SDL_DisplayMode &sdlVideoMode, IGfxDevice::VideoMode &videoMode) const;
 

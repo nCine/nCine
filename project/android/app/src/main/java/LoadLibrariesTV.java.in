@@ -1,14 +1,48 @@
 package @JAVA_PACKAGE@;
 
 import android.app.NativeActivity;
+import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.view.View;
 
-public class LoadLibrariesTV extends NativeActivity {
+public class LoadLibrariesTV extends NativeActivity implements DisplayManager.DisplayListener {
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
+		// Register a display listener to update the monitors array
+		DisplayManager dm = getSystemService(DisplayManager.class);
+		dm.registerDisplayListener(this, null);
+	}
+
+	@Override
+	public void onDisplayAdded(int displayId) {
+		updateMonitors();
+	}
+
+	@Override
+	public void onDisplayChanged(int displayId) {
+		updateMonitors();
+	}
+
+	@Override
+	public void onDisplayRemoved(int displayId) {
+		updateMonitors();
+	}
+
+	// Calls `EglGfxDevice::updateMonitorsCallback()`
+	private native void updateMonitors();
 
 	static {
 		@JAVA_SYSTEM_LOADLIBRARY_OPENAL@
 		@JAVA_SYSTEM_LOADLIBRARY_NCINE@
+		// It needs to be explicitly loaded for jnicall_functions to work (despite `android.app.lib_name`)
+		try {
+			System.loadLibrary("game");
+		} catch (UnsatisfiedLinkError e) {
+			System.err.println("Caught UnsatisfiedLinkError: " + e.getMessage());
+		}
 	}
 
 }

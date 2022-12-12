@@ -162,7 +162,6 @@ void MyEventHandler::onInit()
 
 	width_ = nc::theApplication().widthInt();
 	height_ = nc::theApplication().heightInt();
-	nc::GLViewport::setRect(0, 0, width_, height_);
 	nc::GLDepthTest::enable();
 
 	pauseTri_ = false;
@@ -221,6 +220,12 @@ void MyEventHandler::onFrameStart()
 		angleCube_ += 20.0f * nc::theApplication().interval();
 }
 
+void MyEventHandler::onResizeWindow(int width, int height)
+{
+	width_ = width;
+	height_ = height;
+}
+
 #ifdef __ANDROID__
 void MyEventHandler::onTouchDown(const nc::TouchEvent &event)
 {
@@ -253,7 +258,14 @@ void MyEventHandler::onPointerUp(const nc::TouchEvent &event)
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	if (event.sym == nc::KeySym::ESCAPE)
+	if (event.sym == nc::KeySym::F)
+	{
+		nc::IGfxDevice &gfxDevice = nc::theApplication().gfxDevice();
+		gfxDevice.setFullScreen(!gfxDevice.isFullScreen());
+		if (gfxDevice.isFullScreen() == false)
+			gfxDevice.setWindowSize(nc::theApplication().appConfiguration().resolution);
+	}
+	else if (event.sym == nc::KeySym::ESCAPE)
 		nc::theApplication().quit();
 }
 

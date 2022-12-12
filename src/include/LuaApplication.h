@@ -12,6 +12,8 @@ class LuaApplication
 	static void expose(lua_State *L);
 
   private:
+	static int appConfiguration(lua_State *L);
+
 	static int renderingSettings(lua_State *L);
 	static int setRenderingSettings(lua_State *L);
 

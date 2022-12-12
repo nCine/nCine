@@ -122,3 +122,12 @@ BEGIN\n\
 END")
 	list(APPEND GENERATED_SOURCES ${VERSION_RC_FILE})
 endif()
+
+if(MINGW AND NOT NCINE_WITH_GLFW)
+	message(STATUS "Writing a resource file for HiDPI awareness")
+
+	set(HIDPI_RC_FILE "${GENERATED_SOURCE_DIR}/hidpi.rc")
+	file(WRITE ${HIDPI_RC_FILE} "#include \"windows.h\"\n\nCREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST \"WindowsHiDPI.manifest\"")
+	file(COPY ${NCPROJECT_ROOT}/WindowsHiDPI.manifest DESTINATION ${GENERATED_SOURCE_DIR})
+	target_sources(${NCPROJECT_EXE_NAME} PRIVATE ${HIDPI_RC_FILE})
+endif()

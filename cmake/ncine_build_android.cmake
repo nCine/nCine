@@ -173,6 +173,7 @@ if(NCINE_BUILD_ANDROID)
 	endforeach()
 
 	file(COPY android/app/src/main/cpp/main.cpp DESTINATION android/app/src/main/cpp)
+	file(COPY android/app/src/main/cpp/jnicall_functions.cpp DESTINATION android/app/src/main/cpp)
 	file(COPY android/app/src/main/cpp/CMakeLists.txt DESTINATION android/app/src/main/cpp)
 	file(COPY android/app/src/main/res/values/strings.xml DESTINATION android/app/src/main/res/values)
 
@@ -224,7 +225,7 @@ if(NCINE_BUILD_ANDROID)
 		add_custom_command(OUTPUT ${ANDROID_BINARY_DIR}/${ANDROID_LIBNAME} ${ANDROID_BINARY_DIR}/libncine_main.a
 			COMMAND ${CMAKE_COMMAND} -H${CMAKE_BINARY_DIR}/android/app/src/main/cpp/ -B${ANDROID_BINARY_DIR}
 				-DCMAKE_TOOLCHAIN_FILE=${NDK_DIR}/build/cmake/android.toolchain.cmake
-				-DANDROID_PLATFORM=android-${GRADLE_MINSDK_VERSION} -DANDROID_ABI=${ARCHITECTURE}
+				-DANDROID_PLATFORM=${GRADLE_MINSDK_VERSION} -DANDROID_ABI=${ARCHITECTURE}
 				${RESET_FLAGS_ARGS} ${ANDROID_PASSTHROUGH_ARGS} ${ANDROID_CMAKE_ARGS} ${ANDROID_ARCH_ARGS}
 			COMMAND ${CMAKE_COMMAND} --build ${ANDROID_BINARY_DIR}
 			COMMENT "Compiling the Android library for ${ARCHITECTURE}")

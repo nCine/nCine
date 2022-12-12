@@ -64,7 +64,7 @@ void MyEventHandler::onInit()
 	{
 		for (int j = static_cast<int>(-NumColSprites * 0.5f); j < static_cast<int>(NumColSprites * 0.5f); j++)
 		{
-			sprites_.pushBack(nctl::makeUnique<nc::Sprite>(parent_.get(), megaTexture_.get(), i * 128.0f, j * 128.0f));
+			sprites_.pushBack(nctl::makeUnique<nc::Sprite>(parent_.get(), megaTexture_.get(), 64.0f + i * 128.0f, 64.0f + j * 128.0f));
 			sprites_.back()->setTexRect(texRects[index % NumTextures]);
 			sprites_.back()->setScale(0.75f);
 			index++;
@@ -92,16 +92,23 @@ void MyEventHandler::onFrameStart()
 		const float sine = sinf(angleGroup_);
 		const float cosine = cosf(angleGroup_);
 
-		parent_->setPositionX(nc::theApplication().width() * 0.5f + sine * 100.0f);
-		parent_->setPositionY(nc::theApplication().height() * 0.5f + cosine * 150.0f);
+		const float width = nc::theApplication().width();
+		const float height = nc::theApplication().height();
+		parent_->setPositionX(width * 0.5f + sine * width * 0.2f);
+		parent_->setPositionY(height * 0.5f + cosine * height * 0.2f);
 		parent_->setRotation(angleGroup_ * 8.0f);
 		parent_->setScale(((sine * 0.15f) + 1.0f) * 0.5f);
 
-		dummy_->setPositionX((sine + 1.0f) * 50.0f);
-		dummy_->setPositionY((cosine + 1.0f) * 50.0f);
+		dummy_->setPositionX((sine + 1.0f) * width * 0.05f);
+		dummy_->setPositionY((cosine + 1.0f) * height * 0.05f);
 		dummy_->setRotation(sine * 10.0f);
 		dummy_->setScale(((cosine * 0.1f) + 1.0f) * 0.75f);
 	}
+}
+
+void MyEventHandler::onResizeWindow(int width, int height)
+{
+	debugText_->setPosition(width * 0.5f, height - debugText_->lineHeight() * 0.5f * 2.0f);
 }
 
 #ifdef __ANDROID__
@@ -151,6 +158,13 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		renderingSettings.batchingEnabled = !renderingSettings.batchingEnabled;
 	else if (event.sym == nc::KeySym::C)
 		renderingSettings.cullingEnabled = !renderingSettings.cullingEnabled;
+	else if (event.sym == nc::KeySym::F)
+	{
+		nc::IGfxDevice &gfxDevice = nc::theApplication().gfxDevice();
+		gfxDevice.setFullScreen(!gfxDevice.isFullScreen());
+		if (gfxDevice.isFullScreen() == false)
+			gfxDevice.setWindowSize(nc::theApplication().appConfiguration().resolution);
+	}
 	if (event.sym == nc::KeySym::ESCAPE)
 		nc::theApplication().quit();
 }

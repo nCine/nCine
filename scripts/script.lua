@@ -180,6 +180,9 @@ function ncine.on_resize_window(width, height)
 	nc.sprite.reset_texture(vp_pingsprite_)
 	nc.sprite.reset_texture(vp_pongsprite_)
 
+	nc.sprite.set_position(vp_pingsprite_, width * 0.5, height * 0.5)
+	nc.sprite.set_position(vp_pongsprite_, width * 0.5, height * 0.5)
+
 	nc.shaderstate.set_uniform_float_value2(vp_pingshaderstate_, "", "uResolution", width, height)
 	nc.shaderstate.set_uniform_float_value2(vp_pongshaderstate_, "", "uResolution", width, height)
 end
@@ -223,6 +226,11 @@ function ncine.on_key_released(event)
 		setup_viewport()
 	elseif event.sym == nc.keysym.P then
 		pause_ = not pause_;
+	elseif event.sym == nc.keysym.F then
+		nc.gfx_device.set_fullscreen(not nc.gfx_device.is_fullscreen())
+		if nc.gfx_device.is_fullscreen() == false then
+			nc.gfx_device.set_window_size(nc.application.get_app_configuration().resolution)
+		end
 	elseif event.sym == nc.keysym.ESCAPE then
 		nc.application.quit()
 	end

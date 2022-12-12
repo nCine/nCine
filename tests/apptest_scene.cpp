@@ -466,15 +466,21 @@ int main(int argc, char **argv)
 
 	QWidget *w = new QWidget(&window);
 	w->setLayout(hLayout);
+
 	const int qt5GuiWidth = vLayout->sizeHint().width();
-	nc::theApplication().gfxDevice().setResolution(appCfg.resolution.x - qt5GuiWidth, appCfg.resolution.y);
 	const int screenWidth = nc::theApplication().gfxDevice().currentVideoMode().width;
 	const int screenHeight = nc::theApplication().gfxDevice().currentVideoMode().height;
-	window.setGeometry((screenWidth - appCfg.resolution.x) / 2, (screenHeight - appCfg.resolution.y) / 2, appCfg.resolution.x, appCfg.resolution.y);
-	if (appCfg.isResizable == false)
+
+	const bool configResolutionIsValid = (appCfg.resolution.x != 0 && appCfg.resolution.y != 0);
+	const int width = configResolutionIsValid ? nc::theApplication().gfxDevice().width() : screenWidth;
+	const int height = configResolutionIsValid ? nc::theApplication().gfxDevice().height() : screenHeight;
+
+	nc::theApplication().gfxDevice().setWindowSize(width - qt5GuiWidth, height);
+	window.setGeometry((screenWidth - width) / 2, (screenHeight - height) / 2, width, height);
+	if (appCfg.resizable == false)
 	{
-		window.setMinimumSize(appCfg.resolution.x, appCfg.resolution.y);
-		window.setMaximumSize(appCfg.resolution.x, appCfg.resolution.y);
+		window.setMinimumSize(width, height);
+		window.setMaximumSize(width, height);
 	}
 
 	window.show();

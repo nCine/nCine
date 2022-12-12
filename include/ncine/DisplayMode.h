@@ -21,30 +21,30 @@ class DLL_PUBLIC DisplayMode
 		ENABLED
 	};
 
-	DisplayMode(unsigned int redBits, unsigned int greenBits, unsigned int blueBits)
+	DisplayMode(unsigned char redBits, unsigned char greenBits, unsigned char blueBits)
 	    : DisplayMode(redBits, greenBits, blueBits, 0, 0, 0, DoubleBuffering::ENABLED, VSync::DISABLED) {}
-	DisplayMode(unsigned int redBits, unsigned int greenBits, unsigned int blueBits, unsigned int alphaBits)
+	DisplayMode(unsigned char redBits, unsigned char greenBits, unsigned char blueBits, unsigned char alphaBits)
 	    : DisplayMode(redBits, greenBits, blueBits, alphaBits, 0, 0, DoubleBuffering::ENABLED, VSync::DISABLED) {}
-	DisplayMode(unsigned int depthBits, unsigned int stencilBits, DoubleBuffering dbMode, VSync vsMode)
+	DisplayMode(unsigned char depthBits, unsigned char stencilBits, DoubleBuffering dbMode, VSync vsMode)
 	    : DisplayMode(0, 0, 0, 0, depthBits, stencilBits, dbMode, vsMode) {}
-	DisplayMode(unsigned int redBits, unsigned int greenBits, unsigned int blueBits, unsigned int alphaBits,
-	            unsigned int depthBits, unsigned int stencilBits, DoubleBuffering dbMode, VSync vsMode)
+	DisplayMode(unsigned char redBits, unsigned char greenBits, unsigned char blueBits, unsigned char alphaBits,
+	            unsigned char depthBits, unsigned char stencilBits, DoubleBuffering dbMode, VSync vsMode)
 	    : redBits_(redBits), greenBits_(greenBits), blueBits_(blueBits), alphaBits_(alphaBits),
 	      depthBits_(depthBits), stencilBits_(stencilBits), isDoubleBuffered_(dbMode == DoubleBuffering::ENABLED),
 	      hasVSync_(vsMode == VSync::ENABLED) {}
 
 	/// Returns the number of bits for the red channel
-	inline unsigned int redBits() const { return redBits_; }
+	inline unsigned char redBits() const { return redBits_; }
 	/// Returns the number of bits for the green channel
-	inline unsigned int greenBits() const { return greenBits_; }
+	inline unsigned char greenBits() const { return greenBits_; }
 	/// Returns the number of bits for the blue channel
-	inline unsigned int blueBits() const { return blueBits_; }
+	inline unsigned char blueBits() const { return blueBits_; }
 	/// Returns the number of bits for the alpha channel
-	inline unsigned int alphaBits() const { return alphaBits_; }
+	inline unsigned char alphaBits() const { return alphaBits_; }
 	/// Returns the number of bits for the depth buffer
-	inline unsigned int depthBits() const { return depthBits_; }
+	inline unsigned char depthBits() const { return depthBits_; }
 	/// Returns the number of bits for the stencil buffer
-	inline unsigned int stencilBits() const { return stencilBits_; }
+	inline unsigned char stencilBits() const { return stencilBits_; }
 	/// Returns true if the display is double buffered
 	inline bool isDoubleBuffered() const { return isDoubleBuffered_; }
 	/// Returns true if the dislpay has V-sync enabled
@@ -52,17 +52,17 @@ class DLL_PUBLIC DisplayMode
 
   private:
 	/// Red component bits
-	unsigned int redBits_;
+	unsigned char redBits_;
 	/// Green component bits
-	unsigned int greenBits_;
+	unsigned char greenBits_;
 	/// Blue component bits
-	unsigned int blueBits_;
+	unsigned char blueBits_;
 	/// Alpha component bits
-	unsigned int alphaBits_;
+	unsigned char alphaBits_;
 	/// Depth buffer size in bit
-	unsigned int depthBits_;
+	unsigned char depthBits_;
 	/// Stencil buffer size in bit
-	unsigned int stencilBits_;
+	unsigned char stencilBits_;
 	/// Double buffering flag
 	bool isDoubleBuffered_;
 	/// VSync flag

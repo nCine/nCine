@@ -180,7 +180,16 @@ class GlfwInputManager : public IInputManager
 	static JoyConnectionEvent joyConnectionEvent_;
 	static JoystickEventsSimulator joyEventsSimulator_;
 
+	/// The window width before a window content scale event
+	static int preScalingWidth_;
+	/// The window height before a window content scale event
+	static int preScalingHeight_;
+	/// The last frame a window size callback was called
+	static unsigned long int lastFrameWindowSizeChanged_;
+
+	static void monitorCallback(GLFWmonitor *monitor, int event);
 	static void windowCloseCallback(GLFWwindow *window);
+	static void windowContentScaleCallback(GLFWwindow *window, float xscale, float yscale);
 	static void windowSizeCallback(GLFWwindow *window, int width, int height);
 	static void framebufferSizeCallback(GLFWwindow *window, int width, int height);
 	static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
@@ -194,6 +203,8 @@ class GlfwInputManager : public IInputManager
 	static KeySym keySymValueToEnum(int keysym);
 	static KeyMod keyModValueToEnum(int keymod);
 	static int enumToKeySymValue(KeySym keysym);
+
+	friend class GlfwGfxDevice; // for `setWindowPosition()`
 };
 
 inline const MouseState &GlfwInputManager::mouseState() const

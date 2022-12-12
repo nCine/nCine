@@ -22,6 +22,7 @@ namespace LuaIAppEventHandler {
 	static const char *onDrawViewport = "on_draw_viewport";
 	static const char *onFrameEnd = "on_frame_end";
 	static const char *onResizeWindow = "on_resize_window";
+	static const char *onChangeScalingFactor = "on_change_scaling_factor";
 	static const char *onShutdown = "on_shutdown";
 	static const char *onSuspend = "on_suspend";
 	static const char *onResume = "on_resume";
@@ -148,6 +149,29 @@ void LuaIAppEventHandler::onResizeWindow(lua_State *L, int width, int height)
 	{
 		lua_pop(L, 2);
 		LOGW_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onResizeWindow);
+	}
+}
+
+void LuaIAppEventHandler::onChangeScalingFactor(lua_State *L, float factor)
+{
+	ZoneScopedN("Lua onChangeScalingFactor");
+	lua_getglobal(L, LuaNames::ncine);
+	const int type = lua_getfield(L, -1, LuaNames::LuaIAppEventHandler::onChangeScalingFactor);
+
+	if (type == LUA_TFUNCTION)
+	{
+		LuaUtils::push(L, factor);
+		const int status = lua_pcall(L, 1, 1, 0);
+		if (status != LUA_OK)
+		{
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::LuaIAppEventHandler::onChangeScalingFactor, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			lua_pop(L, 1);
+		}
+	}
+	else
+	{
+		lua_pop(L, 2);
+		LOGW_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onChangeScalingFactor);
 	}
 }
 

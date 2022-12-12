@@ -43,6 +43,15 @@ foreach(SRCAPPTEST ${SRCAPPTESTS})
 			# Should be linked before `ncine_main`
 			target_link_libraries(${SRCAPPTEST} PRIVATE mingw32)
 		endif()
+
+		# Embedding HiDPI awareness manifest or resource file
+		if(NOT WITH_GLFW)
+			if(MSVC)
+				target_sources(${SRCAPPTEST} PRIVATE "${CMAKE_SOURCE_DIR}/WindowsHiDPI.manifest")
+			elseif(MINGW)
+				target_sources(${SRCAPPTEST} PRIVATE ${HIDPI_RC_FILE})
+			endif()
+		endif()
 	endif()
 
 	target_include_directories(${SRCAPPTEST} PRIVATE ${CMAKE_SOURCE_DIR}/include/ncine ${CMAKE_SOURCE_DIR}/src/include)

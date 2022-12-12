@@ -139,6 +139,9 @@ file(COPY ${CMAKE_SOURCE_DIR}/.editorconfig DESTINATION ${CMAKE_BINARY_DIR}/proj
 foreach(FILE IN ITEMS "check_atomic.cmake" "FindGLFW.cmake" "FindOpenGLES2.cmake" "FindSDL2.cmake" "FindVorbis.cmake" "FindWebP.cmake")
 	file(COPY ${CMAKE_SOURCE_DIR}/cmake/${FILE} DESTINATION ${CMAKE_BINARY_DIR}/project/cmake)
 endforeach()
+if(WIN32)
+	file(COPY ${CMAKE_SOURCE_DIR}/WindowsHiDPI.manifest DESTINATION ${CMAKE_BINARY_DIR}/project)
+endif()
 
 include(ncine_installation)
 include(ncine_build_documentation)

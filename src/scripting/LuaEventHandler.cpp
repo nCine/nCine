@@ -126,6 +126,11 @@ void LuaEventHandler::onResizeWindow(int width, int height)
 	LuaIAppEventHandler::onResizeWindow(luaState_->state(), width, height);
 }
 
+void LuaEventHandler::onChangeScalingFactor(float factor)
+{
+	LuaIAppEventHandler::onChangeScalingFactor(luaState_->state(), factor);
+}
+
 void LuaEventHandler::onShutdown()
 {
 	LuaIAppEventHandler::onShutdown(luaState_->state());

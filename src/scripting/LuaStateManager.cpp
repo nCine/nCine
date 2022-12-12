@@ -31,7 +31,9 @@
 
 	#include "LuaTimeStamp.h"
 	#include "LuaFileSystem.h"
+	#include "LuaAppConfiguration.h"
 	#include "LuaApplication.h"
+	#include "LuaIGfxDevice.h"
 	#include "LuaTexture.h"
 	#include "LuaSceneNode.h"
 	#include "LuaSprite.h"
@@ -577,6 +579,7 @@ void LuaStateManager::exposeApi()
 	LuaTimeStamp::expose(L_);
 	LuaFileSystem::expose(L_);
 	LuaApplication::expose(L_);
+	LuaIGfxDevice::expose(L_);
 	if (appCfg.withScenegraph)
 	{
 		LuaViewport::expose(this);
@@ -620,6 +623,7 @@ void LuaStateManager::exposeConstants()
 	LuaILogger::exposeConstants(L_);
 
 	LuaFileSystem::exposeConstants(L_);
+	LuaAppConfiguration::exposeConstants(L_);
 	if (appCfg.withScenegraph)
 	{
 		LuaViewport::exposeConstants(L_);

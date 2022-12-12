@@ -10,6 +10,8 @@ namespace ncine {
 
 namespace LuaNames {
 namespace AppConfiguration {
+	static const char *WindowPositionIgnore = "window_position_ignore";
+
 	static const char *dataPath = "data_path";
 	static const char *logFile = "log_file";
 	static const char *consoleLogLevel = "console_log_level";
@@ -17,8 +19,11 @@ namespace AppConfiguration {
 	static const char *frameTimerLogInterval = "log_interval";
 
 	static const char *resolution = "resolution";
-	static const char *inFullscreen = "fullscreen";
-	static const char *isResizable = "resizable";
+	static const char *refreshRate = "refresh_rate";
+	static const char *windowPosition = "window_position";
+	static const char *fullScreen = "full_screen";
+	static const char *resizable = "resizable";
+	static const char *windowScaling = "window_scaling";
 	static const char *frameLimit = "frame_limit";
 
 	static const char *windowTitle = "window_title";
@@ -53,9 +58,15 @@ namespace AppConfiguration {
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+void LuaAppConfiguration::exposeConstants(lua_State *L)
+{
+	lua_pushinteger(L, AppConfiguration::WindowPositionIgnore);
+	lua_setfield(L, -2, LuaNames::AppConfiguration::WindowPositionIgnore);
+}
+
 void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 {
-	lua_createtable(L, 0, 30);
+	lua_createtable(L, 0, 33);
 
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::dataPath, appCfg.dataPath().data());
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::logFile, appCfg.logFile.data());
@@ -64,8 +75,11 @@ void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::frameTimerLogInterval, appCfg.frameTimerLogInterval);
 
 	LuaVector2iUtils::pushField(L, LuaNames::AppConfiguration::resolution, appCfg.resolution);
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::inFullscreen, appCfg.inFullscreen);
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::isResizable, appCfg.isResizable);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::refreshRate, appCfg.refreshRate);
+	LuaVector2iUtils::pushField(L, LuaNames::AppConfiguration::windowPosition, appCfg.windowPosition);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::fullScreen, appCfg.fullScreen);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::resizable, appCfg.resizable);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::windowScaling, appCfg.windowScaling);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::frameLimit, appCfg.frameLimit);
 
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::windowTitle, appCfg.windowTitle.data());
@@ -127,10 +141,16 @@ void LuaAppConfiguration::retrieveAndSet(lua_State *L, AppConfiguration &appCfg)
 
 	const Vector2i resolution = LuaVector2iUtils::retrieveTableField(L, -1, LuaNames::AppConfiguration::resolution);
 	appCfg.resolution = resolution;
-	const bool inFullscreen = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::inFullscreen);
-	appCfg.inFullscreen = inFullscreen;
-	const bool isResizable = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::isResizable);
-	appCfg.isResizable = isResizable;
+	const float refreshRate = LuaUtils::retrieveField<float>(L, -1, LuaNames::AppConfiguration::refreshRate);
+	appCfg.refreshRate = refreshRate;
+	const Vector2i windowPosition = LuaVector2iUtils::retrieveTableField(L, -1, LuaNames::AppConfiguration::windowPosition);
+	appCfg.windowPosition = windowPosition;
+	const bool fullScreen = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::fullScreen);
+	appCfg.fullScreen = fullScreen;
+	const bool resizable = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::resizable);
+	appCfg.resizable = resizable;
+	const bool windowScaling = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::windowScaling);
+	appCfg.windowScaling = windowScaling;
 	const unsigned int frameLimit = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::AppConfiguration::frameLimit);
 	appCfg.frameLimit = frameLimit;
 

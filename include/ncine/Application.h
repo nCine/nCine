@@ -108,22 +108,19 @@ class DLL_PUBLIC Application
 	/// Returns the elapsed time since the end of the previous frame in seconds
 	float interval() const;
 
-	/// Returns the screen width as a float number
-	inline float width() const { return static_cast<float>(gfxDevice_->width()); }
-	/// Returns the screen height as a float number
-	inline float height() const { return static_cast<float>(gfxDevice_->height()); }
-	/// Returns the screen resolution as a `Vector2f` object
+	/// Returns the drawable screen width as a float number
+	inline float width() const { return static_cast<float>(gfxDevice_->drawableWidth()); }
+	/// Returns the drawable screen height as a float number
+	inline float height() const { return static_cast<float>(gfxDevice_->drawableHeight()); }
+	/// Returns the drawable screen resolution as a `Vector2f` object
 	inline Vector2f resolution() const { return Vector2f(width(), height()); }
 
-	/// Returns the screen width as an integer number
-	inline int widthInt() const { return gfxDevice_->width(); }
-	/// Returns the screen height as an integer number
-	inline int heightInt() const { return gfxDevice_->height(); }
-	/// Returns the screen resolution as a `Vector2i` object
-	inline Vector2i resolutionInt() const { return gfxDevice_->resolution(); }
-
-	/// Resizes the screen viewport, if exists
-	void resizeScreenViewport(int width, int height);
+	/// Returns the drawable screen width as an integer number
+	inline int widthInt() const { return gfxDevice_->drawableWidth(); }
+	/// Returns the drawable screen height as an integer number
+	inline int heightInt() const { return gfxDevice_->drawableHeight(); }
+	/// Returns the drawable screen resolution as a `Vector2i` object
+	inline Vector2i resolutionInt() const { return gfxDevice_->drawableResolution(); }
 
 	/// Returns the value of the suspension flag
 	/*! If `true` the application is suspended, it will neither update nor receive events */
@@ -189,6 +186,12 @@ class DLL_PUBLIC Application
 	/// Sets the focus flag
 	virtual void setFocus(bool hasFocus);
 
+	/// Resizes the screen viewport, if it exists
+	bool resizeScreenViewport(int width, int height);
+
+	/// Checks if the window scaling factor has changed this frame
+	bool updateScalingFactor();
+
   private:
 	/// Deleted copy constructor
 	Application(const Application &) = delete;
@@ -203,8 +206,8 @@ class DLL_PUBLIC Application
 	friend class IGfxDevice;
 #endif
 	friend class Viewport; // for `onDrawViewport()`
-	friend class GlfwInputManager; // for `onResizeWindow()`
-	friend class Qt5Widget; // for `onResizeWindow()`
+	friend class GlfwInputManager; // for `resizeScreenViewport()`
+	friend class Qt5Widget; // for `resizeScreenViewport()`
 };
 
 // Meyers' Singleton
