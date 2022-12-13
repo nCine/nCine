@@ -31,7 +31,7 @@ TEST(AllocatorPoolDeathTest, ZeroAlignment)
 	ASSERT_DEATH(allocator.allocate(ElementSize, 0), "");
 }
 
-#if NCINE_DEBUG
+#ifdef NCINE_DEBUG
 TEST(AllocatorPoolDeathTest, Reallocate)
 {
 	uint8_t buffer[BufferSize];

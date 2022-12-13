@@ -13,7 +13,7 @@ class AllocatorLinearTest : public ::testing::Test
 	nctl::LinearAllocator allocator_;
 };
 
-#if NCINE_DEBUG
+#ifdef NCINE_DEBUG
 TEST(AllocatorLinearDeathTest, Deallocate)
 {
 	uint8_t buffer[BufferSize];

@@ -1,13 +1,13 @@
 #include "NuklearContext.h"
 #include "nuklear.h"
 
-#if WITH_ALLOCATORS
+#ifdef WITH_ALLOCATORS
 	#include <nctl/AllocManager.h>
 #endif
 
 namespace ncine {
 
-#if WITH_ALLOCATORS
+#ifdef WITH_ALLOCATORS
 void *nuklearAllocateFunc(nk_handle handle, void *old, nk_size sz)
 {
 	return nctl::theNuklearAllocator().reallocate(old, sz);
@@ -42,7 +42,7 @@ int NuklearContext::displayHeight_;
 
 void NuklearContext::init()
 {
-#if WITH_ALLOCATORS
+#ifdef WITH_ALLOCATORS
 	nk_allocator nuklearAlloc{ { nullptr }, nuklearAllocateFunc, nuklearFreeFunc };
 	nk_init(&ctx_, &nuklearAlloc, nullptr);
 	nk_buffer_init(&cmds_, &nuklearAlloc, 4 * 1024); // NK_BUFFER_DEFAULT_INITIAL_SIZE

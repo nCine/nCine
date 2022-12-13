@@ -6,7 +6,7 @@
 #if defined(WITH_SDL)
 	#include "SdlGfxDevice.h"
 	#include "SdlInputManager.h"
-	#if WITH_NUKLEAR
+	#ifdef WITH_NUKLEAR
 		#include "NuklearSdlInput.h"
 	#endif
 #elif defined(WITH_GLFW)

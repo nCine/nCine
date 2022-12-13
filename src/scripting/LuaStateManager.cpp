@@ -10,7 +10,7 @@
 #include "LuaStatistics.h"
 #include "LuaNames.h"
 
-#if WITH_SCRIPTING_API
+#ifdef WITH_SCRIPTING_API
 	#include "LuaRect.h"
 	#include "LuaVector2.h"
 	#include "LuaVector3.h"

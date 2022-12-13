@@ -10,7 +10,7 @@
 #include "AndroidJniHelper.h"
 #include "tracy.h"
 
-#if WITH_NUKLEAR
+#ifdef WITH_NUKLEAR
 	#include "NuklearAndroidInput.h"
 #endif
 
@@ -56,7 +56,7 @@ void AndroidApplication::start(struct android_app *state, nctl::UniquePtr<IAppEv
 		int events;
 		struct android_poll_source *source;
 
-#if WITH_NUKLEAR
+#ifdef WITH_NUKLEAR
 		NuklearAndroidInput::inputBegin();
 #endif
 
@@ -75,7 +75,7 @@ void AndroidApplication::start(struct android_app *state, nctl::UniquePtr<IAppEv
 			}
 		}
 
-#if WITH_NUKLEAR
+#ifdef WITH_NUKLEAR
 		NuklearAndroidInput::inputEnd();
 #endif
 

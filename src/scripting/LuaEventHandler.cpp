@@ -57,7 +57,7 @@ extern "C"
 
 #if defined(_WIN32) && !defined(__MINGW32__)
 
-	#if NCINE_DEBUG
+	#ifdef NCINE_DEBUG
 		#define NCINE_LUAOPEN_NAME luaopen_ncine_d
 	#else
 		#define NCINE_LUAOPEN_NAME luaopen_ncine
@@ -65,7 +65,7 @@ extern "C"
 
 #else
 
-	#if NCINE_DEBUG
+	#ifdef NCINE_DEBUG
 		#define NCINE_LUAOPEN_NAME luaopen_libncine_d
 	#else
 		#define NCINE_LUAOPEN_NAME luaopen_libncine
