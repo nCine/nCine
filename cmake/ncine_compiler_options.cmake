@@ -137,7 +137,10 @@ else() # GCC and LLVM
 
 	if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 		target_compile_options(ncine PRIVATE -fdiagnostics-color=auto)
-		target_compile_options(ncine PRIVATE -Wall -pedantic -Wextra -Wold-style-cast -Wno-long-long -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-variadic-macros -Wcast-align)
+		target_compile_options(ncine PRIVATE -Wall -pedantic -Wextra -Wno-long-long -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-variadic-macros -Wcast-align)
+		if (NOT NCINE_WITH_IMGUI)
+			target_compile_options(ncine PRIVATE -Wold-style-cast)
+		endif()
 
 		if(NCINE_DYNAMIC_LIBRARY)
 			target_link_options(ncine PRIVATE -Wl,--no-undefined)
@@ -165,7 +168,10 @@ else() # GCC and LLVM
 		endif()
 	elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
 		target_compile_options(ncine PRIVATE -fcolor-diagnostics)
-		target_compile_options(ncine PRIVATE -Wall -pedantic -Wextra -Wold-style-cast -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-parameter -Wno-variadic-macros -Wno-c++11-long-long -Wno-missing-braces)
+		target_compile_options(ncine PRIVATE -Wall -pedantic -Wextra -Wno-gnu-zero-variadic-macro-arguments -Wno-unused-parameter -Wno-variadic-macros -Wno-c++11-long-long -Wno-missing-braces)
+		if (NOT NCINE_WITH_IMGUI)
+			target_compile_options(ncine PRIVATE -Wold-style-cast)
+		endif()
 
 		if(NCINE_DYNAMIC_LIBRARY)
 			target_link_options(ncine PRIVATE -Wl,-undefined,error)

@@ -133,7 +133,7 @@ namespace {
 			lua_pop(L, 1);
 		}
 
-		return nctl::move(vertices);
+		return vertices;
 	}
 
 	nctl::UniquePtr<MeshSprite::VertexNoTexture[]> retrieveVerticesNoTexture(lua_State *L, int index, unsigned int &length)
@@ -153,7 +153,7 @@ namespace {
 			lua_pop(L, 1);
 		}
 
-		return nctl::move(vertices);
+		return vertices;
 	}
 
 	nctl::UniquePtr<Vector2f[]> retrieveTexels(lua_State *L, int index, unsigned int &length)
@@ -173,7 +173,7 @@ namespace {
 			lua_pop(L, 1);
 		}
 
-		return nctl::move(vertices);
+		return vertices;
 	}
 
 	nctl::UniquePtr<unsigned short[]> retrieveIndices(lua_State *L, int index, unsigned int &length)
@@ -193,7 +193,7 @@ namespace {
 			lua_pop(L, 1);
 		}
 
-		return nctl::move(indices);
+		return indices;
 	}
 
 }

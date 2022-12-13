@@ -119,7 +119,7 @@ TEST(ArrayDeathTest, PushBackBeyondCapacity)
 {
 	printf("Trying to push back an element beyond the capacity of a fixed capacity array\n");
 	nctl::Array<int> array(Capacity, nctl::ArrayMode::FIXED_CAPACITY);
-	for(unsigned int i = 0; i < Capacity; i++)
+	for (unsigned int i = 0; i < Capacity; i++)
 		array.pushBack(i);
 
 	ASSERT_EQ(array.size(), Capacity);
@@ -130,7 +130,7 @@ TEST(ArrayDeathTest, EmplaceBackBeyondCapacity)
 {
 	printf("Trying to emplace back an element beyond the capacity of a fixed capacity array\n");
 	nctl::Array<int> array(Capacity, nctl::ArrayMode::FIXED_CAPACITY);
-	for(unsigned int i = 0; i < Capacity; i++)
+	for (unsigned int i = 0; i < Capacity; i++)
 		array.emplaceBack(i);
 
 	ASSERT_EQ(array.size(), Capacity);

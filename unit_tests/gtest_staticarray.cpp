@@ -115,7 +115,7 @@ TEST(StaticArrayDeathTest, PushBackBeyondCapacity)
 {
 	printf("Trying to push back an element beyond the capacity of a static array\n");
 	nctl::StaticArray<int, Capacity> array;
-	for(unsigned int i = 0; i < Capacity; i++)
+	for (unsigned int i = 0; i < Capacity; i++)
 		array.pushBack(i);
 
 	ASSERT_EQ(array.size(), Capacity);
@@ -126,7 +126,7 @@ TEST(StaticArrayDeathTest, EmplaceBackBeyondCapacity)
 {
 	printf("Trying to emplace back an element beyond the capacity of a static array\n");
 	nctl::StaticArray<int, Capacity> array;
-	for(unsigned int i = 0; i < Capacity; i++)
+	for (unsigned int i = 0; i < Capacity; i++)
 		array.emplaceBack(i);
 
 	ASSERT_EQ(array.size(), Capacity);

@@ -13,7 +13,7 @@
 namespace {
 
 template <class T, typename... Args>
-inline T *newObject(Args &&... args)
+inline T *newObject(Args &&...args)
 {
 #if !NCINE_WITH_ALLOCATORS
 	return new T(nctl::forward<Args>(args)...);

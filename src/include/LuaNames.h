@@ -3,6 +3,11 @@
 
 namespace ncine {
 
+#if (defined __GNUC__ || defined __clang__)
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wunused-variable"
+#endif
+
 namespace LuaNames {
 	static const char *ncine = "ncine";
 
@@ -12,6 +17,10 @@ namespace LuaNames {
 
 	static const char *input = "input";
 }
+
+#if (defined __GNUC__ || defined __clang__)
+	#pragma GCC diagnostic pop
+#endif
 
 }
 

@@ -90,8 +90,6 @@ int LuaClassTracker<T>::deleteObject(lua_State *L)
 template <class T>
 void LuaClassTracker<T>::cloneNode(lua_State *L, const T &other)
 {
-	FATAL_ASSERT(&other != nullptr);
-
 #if !NCINE_WITH_ALLOCATORS
 	T *ptr = new T(nctl::move(other.clone()));
 #else

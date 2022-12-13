@@ -150,7 +150,7 @@ namespace {
 			affector->addColorStep(age, color);
 		}
 
-		return nctl::move(affector);
+		return affector;
 	}
 
 	nctl::UniquePtr<SizeAffector> retrieveSizeSteps(lua_State *L, int index, float baseScale)
@@ -179,7 +179,7 @@ namespace {
 			affector->addSizeStep(age, scale);
 		}
 
-		return nctl::move(affector);
+		return affector;
 	}
 
 	nctl::UniquePtr<RotationAffector> retrieveRotationSteps(lua_State *L, int index)
@@ -208,7 +208,7 @@ namespace {
 			affector->addRotationStep(age, angle);
 		}
 
-		return nctl::move(affector);
+		return affector;
 	}
 
 	nctl::UniquePtr<PositionAffector> retrievePositionSteps(lua_State *L, int index)
@@ -237,7 +237,7 @@ namespace {
 			affector->addPositionStep(age, position);
 		}
 
-		return nctl::move(affector);
+		return affector;
 	}
 
 	nctl::UniquePtr<VelocityAffector> retrieveVelocitySteps(lua_State *L, int index)
@@ -266,7 +266,7 @@ namespace {
 			affector->addVelocityStep(age, velocity);
 		}
 
-		return nctl::move(affector);
+		return affector;
 	}
 
 	void retrieveParticleInitializer(lua_State *L, int index, ParticleInitializer &init)

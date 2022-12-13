@@ -2,8 +2,6 @@
 #include "FontGlyph.h"
 #include "Texture.h"
 #include "RenderCommand.h"
-#include "RenderResources.h"
-#include "GLDebug.h"
 #include "tracy.h"
 
 namespace ncine {

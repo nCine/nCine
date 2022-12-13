@@ -8,7 +8,6 @@
 
 #include "common_defines.h"
 #include "Matrix4x4.h"
-#include "Rect.h"
 
 namespace ncine {
 

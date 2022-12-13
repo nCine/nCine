@@ -1,4 +1,4 @@
-# Doxyfile 1.9.3
+# Doxyfile 1.9.5
 
 #---------------------------------------------------------------------------
 # Project related configuration options
@@ -10,6 +10,7 @@ PROJECT_BRIEF          = "A cross-platform 2D game engine"
 PROJECT_LOGO           = @DOXYGEN_PROJECT_LOGO@
 OUTPUT_DIRECTORY       = @DOXYGEN_OUTPUT_DIR@
 CREATE_SUBDIRS         = NO
+CREATE_SUBDIRS_LEVEL   = 8
 ALLOW_UNICODE_NAMES    = NO
 OUTPUT_LANGUAGE        = English
 BRIEF_MEMBER_DESC      = YES
@@ -115,6 +116,7 @@ WARN_IF_INCOMPLETE_DOC = @DOXYGEN_WARNINGS@
 WARN_NO_PARAMDOC       = NO
 WARN_AS_ERROR          = NO
 WARN_FORMAT            = "$file:$line: $text"
+WARN_LINE_FORMAT       = "at line $line of file $file"
 WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # Configuration options related to the input files
@@ -122,6 +124,7 @@ WARN_LOGFILE           =
 INPUT                  = @DOXYGEN_RELATIVE_PATH@/README.md \
                          @DOXYGEN_INPUT_FILES@
 INPUT_ENCODING         = UTF-8
+INPUT_FILE_ENCODING    =
 FILE_PATTERNS          = *.c \
                          *.cc \
                          *.cxx \
@@ -168,6 +171,7 @@ FILTER_PATTERNS        =
 FILTER_SOURCE_FILES    = NO
 FILTER_SOURCE_PATTERNS =
 USE_MDFILE_AS_MAINPAGE = @DOXYGEN_RELATIVE_PATH@/README.md
+FORTRAN_COMMENT_AFTER  = 72
 #---------------------------------------------------------------------------
 # Configuration options related to source browsing
 #---------------------------------------------------------------------------
@@ -196,6 +200,7 @@ HTML_FOOTER            =
 HTML_STYLESHEET        =
 HTML_EXTRA_STYLESHEET  =
 HTML_EXTRA_FILES       =
+HTML_COLORSTYLE        = AUTO_LIGHT
 HTML_COLORSTYLE_HUE    = 80
 HTML_COLORSTYLE_SAT    = 100
 HTML_COLORSTYLE_GAMMA  = 80
@@ -235,7 +240,6 @@ EXT_LINKS_IN_WINDOW    = NO
 OBFUSCATE_EMAILS       = YES
 HTML_FORMULA_FORMAT    = png
 FORMULA_FONTSIZE       = 10
-FORMULA_TRANSPARENT    = YES
 FORMULA_MACROFILE      =
 USE_MATHJAX            = NO
 MATHJAX_VERSION        = MathJax_2
@@ -339,8 +343,9 @@ DIA_PATH               =
 HIDE_UNDOC_RELATIONS   = YES
 HAVE_DOT               = @DOXYGEN_DOT_FOUND@
 DOT_NUM_THREADS        = 0
-DOT_FONTNAME           = Helvetica
-DOT_FONTSIZE           = 10
+DOT_COMMON_ATTR        = "fontname=Helvetica,fontsize=10"
+DOT_EDGE_ATTR          = "labelfontname=Helvetica,labelfontsize=10"
+DOT_NODE_ATTR          = "shape=box,height=0.2,width=0.4"
 DOT_FONTPATH           =
 CLASS_GRAPH            = YES
 COLLABORATION_GRAPH    = YES
@@ -368,7 +373,6 @@ PLANTUML_CFG_FILE      =
 PLANTUML_INCLUDE_PATH  =
 DOT_GRAPH_MAX_NODES    = 50
 MAX_DOT_GRAPH_DEPTH    = 0
-DOT_TRANSPARENT        = NO
 DOT_MULTI_TARGETS      = NO
 GENERATE_LEGEND        = YES
 DOT_CLEANUP            = YES

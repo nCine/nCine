@@ -6,7 +6,7 @@
 #include "Rect.h"
 #include "SceneNode.h"
 #include "ParticleAffectors.h"
-#include "BaseSprite.h"
+#include "DrawableNode.h"
 
 namespace ncine {
 
