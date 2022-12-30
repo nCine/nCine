@@ -19,10 +19,11 @@ namespace AnimatedSprite {
 	static const char *clearAnimations = "clear_animations";
 
 	static const char *numAnimations = "num_animations";
-	static const char *animationIndex = "animation_index";
+	static const char *animationIndex = "get_animation_index";
 	static const char *setAnimationIndex = "set_animation_index";
 
-	static const char *frame = "frame";
+	static const char *numFrames = "num_frames";
+	static const char *frame = "get_frame";
 	static const char *setFrame = "set_frame";
 }}
 
@@ -52,6 +53,7 @@ void LuaAnimatedSprite::expose(LuaStateManager *stateManager)
 	LuaUtils::addFunction(L, LuaNames::AnimatedSprite::animationIndex, animationIndex);
 	LuaUtils::addFunction(L, LuaNames::AnimatedSprite::setAnimationIndex, setAnimationIndex);
 
+	LuaUtils::addFunction(L, LuaNames::AnimatedSprite::numFrames, numFrames);
 	LuaUtils::addFunction(L, LuaNames::AnimatedSprite::frame, frame);
 	LuaUtils::addFunction(L, LuaNames::AnimatedSprite::setFrame, setFrame);
 
@@ -177,6 +179,18 @@ int LuaAnimatedSprite::setAnimationIndex(lua_State *L)
 		sprite->setAnimationIndex(animIndex);
 
 	return 0;
+}
+
+int LuaAnimatedSprite::numFrames(lua_State *L)
+{
+	AnimatedSprite *sprite = LuaUntrackedUserData<AnimatedSprite>::retrieve(L, -1);
+
+	if (sprite)
+		LuaUtils::push(L, sprite->numFrames());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
 }
 
 int LuaAnimatedSprite::frame(lua_State *L)

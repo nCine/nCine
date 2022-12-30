@@ -70,7 +70,8 @@ void RectAnimation::updateFrame(float interval)
 void RectAnimation::setFrame(unsigned int frameNum)
 {
 	ASSERT(frameNum < rects_.size());
-	currentFrame_ = frameNum;
+	if (frameNum < rects_.size())
+		currentFrame_ = frameNum;
 }
 
 void RectAnimation::addRect(const Recti &rect, float frameDuration)
@@ -83,6 +84,38 @@ void RectAnimation::addRect(int x, int y, int w, int h, float frameDuration)
 {
 	rects_.pushBack(Recti(x, y, w, h));
 	frameDurations_.pushBack(frameDuration);
+}
+
+/*! \return The number of rectangles added */
+unsigned int RectAnimation::addRects(const Vector2i &size, const Recti &srcRect, unsigned int rectsToSkip, const Vector2i &padding, float frameDuration)
+{
+	unsigned int addedRects = 0;
+	unsigned int skippedRects = 0;
+
+	Vector2i topLeft(srcRect.x, srcRect.y);
+	while (true)
+	{
+		if (topLeft.x + padding.x + size.x > srcRect.w)
+		{
+			topLeft.x = 0;
+			topLeft.y += padding.y + size.y;
+		}
+		if (topLeft.y + padding.y + size.y > srcRect.h)
+			break;
+
+		if (rectsToSkip > skippedRects)
+			skippedRects++;
+		else
+		{
+			rects_.emplaceBack(topLeft, size);
+			frameDurations_.pushBack(frameDuration);
+			addedRects++;
+		}
+
+		topLeft.x += padding.x + size.x;
+	}
+
+	return addedRects;
 }
 
 }

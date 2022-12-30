@@ -35,14 +35,7 @@ void MyEventHandler::onInit()
 	animSprite_ = nctl::makeUnique<nc::AnimatedSprite>(&rootNode, texture_.get());
 
 	nc::RectAnimation animation(0.12f, nc::RectAnimation::LoopMode::ENABLED, nc::RectAnimation::RewindMode::FROM_START);
-	animation.addRect(0, 0, 48, 48);
-	animation.addRect(48, 0, 48, 48);
-	animation.addRect(96, 0, 48, 48);
-	animation.addRect(144, 0, 48, 48);
-	animation.addRect(0, 48, 48, 48);
-	animation.addRect(48, 48, 48, 48);
-	animation.addRect(96, 48, 48, 48);
-	animation.addRect(144, 48, 48, 48);
+	animation.addRects(nc::Vector2i(48, 48), texture_->rect());
 	animSprite_->addAnimation(nctl::move(animation));
 
 	animSprite_->setPosition(nc::theApplication().width() * 0.5f, nc::theApplication().height() * 0.5f);

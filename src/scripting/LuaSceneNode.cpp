@@ -13,6 +13,9 @@ namespace SceneNode {
 
 	static const char *parent = "get_parent";
 	static const char *setParent = "set_parent";
+	static const char *numChildren = "num_children";
+	static const char *child = "get_child";
+	static const char *children = "get_children";
 	static const char *addChildNode = "add_child";
 	static const char *removeChildNode = "remove_child";
 	static const char *removeChildNodeAt = "remove_child_at";
@@ -104,6 +107,9 @@ void LuaSceneNode::exposeFunctions(lua_State *L)
 {
 	LuaUtils::addFunction(L, LuaNames::SceneNode::parent, parent);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::setParent, setParent);
+	LuaUtils::addFunction(L, LuaNames::SceneNode::numChildren, numChildren);
+	LuaUtils::addFunction(L, LuaNames::SceneNode::child, child);
+	LuaUtils::addFunction(L, LuaNames::SceneNode::children, children);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::addChildNode, addChildNode);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::removeChildNode, removeChildNode);
 	LuaUtils::addFunction(L, LuaNames::SceneNode::removeChildNodeAt, removeChildNodeAt);
@@ -188,6 +194,52 @@ int LuaSceneNode::setParent(lua_State *L)
 	{
 		const bool result = node->setParent(parent);
 		LuaUtils::push(L, result);
+	}
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaSceneNode::numChildren(lua_State *L)
+{
+	const SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -1);
+
+	if (node)
+		LuaUtils::push(L, node->children().size());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaSceneNode::child(lua_State *L)
+{
+	const SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -2);
+	const unsigned int index = LuaUtils::retrieve<uint64_t>(L, -1);
+
+	if (node && index < node->children().size())
+		LuaUtils::push(L, node->children()[index]);
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaSceneNode::children(lua_State *L)
+{
+	const SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -1);
+
+	if (node)
+	{
+		const unsigned int numChildren = node->children().size();
+		lua_createtable(L, numChildren, 0);
+
+		for (unsigned int i = 0; i < numChildren; i++)
+		{
+			LuaUtils::push(L, node->children()[i]);
+			lua_rawseti(L, -2, i + 1); // Lua arrays start from index 1
+		}
 	}
 	else
 		LuaUtils::pushNil(L);

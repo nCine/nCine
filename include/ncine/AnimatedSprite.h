@@ -64,6 +64,8 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 	/// Returns the constant version of current animation, if any
 	const RectAnimation *currentAnimation() const;
 
+	/// Returns the number of frames of current animation
+	unsigned int numFrames() const;
 	/// Returns the frame number of current animation
 	unsigned int frame() const;
 	/// Sets current animation to a specified frame number

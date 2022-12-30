@@ -28,6 +28,7 @@ class LuaAnimatedSprite
 	static int animationIndex(lua_State *L);
 	static int setAnimationIndex(lua_State *L);
 
+	static int numFrames(lua_State *L);
 	static int frame(lua_State *L);
 	static int setFrame(lua_State *L);
 };

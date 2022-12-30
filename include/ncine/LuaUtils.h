@@ -284,6 +284,7 @@ namespace LuaUtils {
 	DLL_PUBLIC void push(lua_State *L, int (*func)(lua_State *L));
 	DLL_PUBLIC void push(lua_State *L, bool boolean);
 	DLL_PUBLIC void push(lua_State *L, void *lightuserdata);
+	DLL_PUBLIC void push(lua_State *L, const void *lightuserdata);
 
 	template <class T>
 	void pushArray(lua_State *L, int index, int arrayIndex, int length, T *array)

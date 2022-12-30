@@ -77,16 +77,22 @@ void AnimatedSprite::update(float interval)
 
 void AnimatedSprite::addAnimation(const RectAnimation &anim)
 {
-	anims_.pushBack(anim);
-	currentAnimIndex_ = anims_.size() - 1;
-	setTexRect(anims_[currentAnimIndex_].rect());
+	if (anim.rectangles().isEmpty() == false)
+	{
+		anims_.pushBack(anim);
+		currentAnimIndex_ = anims_.size() - 1;
+		setTexRect(anims_[currentAnimIndex_].rect());
+	}
 }
 
 void AnimatedSprite::addAnimation(RectAnimation &&anim)
 {
-	anims_.pushBack(nctl::move(anim));
-	currentAnimIndex_ = anims_.size() - 1;
-	setTexRect(anims_[currentAnimIndex_].rect());
+	if (anim.rectangles().isEmpty() == false)
+	{
+		anims_.pushBack(nctl::move(anim));
+		currentAnimIndex_ = anims_.size() - 1;
+		setTexRect(anims_[currentAnimIndex_].rect());
+	}
 }
 
 void AnimatedSprite::clearAnimations()
@@ -118,6 +124,14 @@ const RectAnimation *AnimatedSprite::currentAnimation() const
 	if (anims_.isEmpty() == false)
 		currentAnim = &anims_[currentAnimIndex_];
 	return currentAnim;
+}
+
+unsigned int AnimatedSprite::numFrames() const
+{
+	unsigned int numframes = 0;
+	if (anims_.isEmpty() == false)
+		numframes = anims_[currentAnimIndex_].numFrames();
+	return numframes;
 }
 
 unsigned int AnimatedSprite::frame() const

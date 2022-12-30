@@ -77,14 +77,7 @@ void MyEventHandler::onInit()
 	animSprite_->setRotation(180.0f);
 
 	nc::RectAnimation animation(0.12f, nc::RectAnimation::LoopMode::ENABLED, nc::RectAnimation::RewindMode::FROM_START);
-	animation.addRect(0, 0, 48, 48);
-	animation.addRect(48, 0, 48, 48);
-	animation.addRect(96, 0, 48, 48);
-	animation.addRect(144, 0, 48, 48);
-	animation.addRect(0, 48, 48, 48);
-	animation.addRect(48, 48, 48, 48);
-	animation.addRect(96, 48, 48, 48);
-	animation.addRect(144, 48, 48, 48);
+	animation.addRects(nc::Vector2i(48, 48), animSpriteTexture_->rect());
 	animSprite_->addAnimation(nctl::move(animation));
 
 	animSprite_->setAnimationIndex(0);

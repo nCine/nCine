@@ -40,6 +40,8 @@ class DLL_PUBLIC RectAnimation
 	/// Updates current frame based on time passed
 	void updateFrame(float interval);
 
+	/// Returns the number of frames (rectangles)
+	inline unsigned int numFrames() const { return rects_.size(); }
 	/// Returns current frame
 	inline unsigned int frame() const { return currentFrame_; }
 	/// Sets current frame
@@ -61,14 +63,25 @@ class DLL_PUBLIC RectAnimation
 	inline void setRewindMode(RewindMode rewindMode) { rewindMode_ = rewindMode; }
 
 	/// Adds a rectangle to the array specifying the frame duration
-	void addRect(const Recti &rect, float frameTime);
+	void addRect(const Recti &rect, float frameDuration);
 	/// Creates a rectangle from origin and size and then adds it to the array, specifying the frame duration
-	void addRect(int x, int y, int w, int h, float frameTime);
+	void addRect(int x, int y, int w, int h, float frameDuration);
 
 	/// Adds a rectangle to the array with the default frame duration
 	inline void addRect(const Recti &rect) { addRect(rect, defaultFrameDuration_); }
 	/// Creates a rectangle from origin and size and then adds it to the array, with the default frame duration
 	inline void addRect(int x, int y, int w, int h) { addRect(x, y, w, h, defaultFrameDuration_); }
+
+	/// Adds rectangles to the array specifying their size, the source rectangle, a number of rectangles to skip, a padding, and the frame duration
+	unsigned int addRects(const Vector2i &size, const Recti &srcRect, unsigned int rectsToSkip, const Vector2i &padding, float frameDuration);
+
+	/// Adds rectangles to the array specifying their size, the source rectangle, and a number of rectangles to skip
+	/*! \return The number of rectangles added */
+	inline unsigned int addRects(const Vector2i &size, const Recti &srcRect, unsigned int rectsToSkip) { return addRects(size, srcRect, rectsToSkip, Vector2i(0, 0), defaultFrameDuration_); }
+
+	/// Adds rectangles to the array specifying their size and the source rectangle
+	/*! \return The number of rectangles added */
+	inline unsigned int addRects(const Vector2i &size, const Recti &srcRect) { return addRects(size, srcRect, 0, Vector2i(0, 0), defaultFrameDuration_); }
 
 	/// Returns the current rectangle
 	inline const Recti &rect() const { return rects_[currentFrame_]; }

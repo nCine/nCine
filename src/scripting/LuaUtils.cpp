@@ -1099,6 +1099,12 @@ void LuaUtils::push(lua_State *L, void *lightuserdata)
 	lua_pushlightuserdata(L, lightuserdata);
 }
 
+void LuaUtils::push(lua_State *L, const void *lightuserdata)
+{
+	// A constant overload is needed or constant pointers will be pushed as booleans
+	lua_pushlightuserdata(L, const_cast<void *>(lightuserdata));
+}
+
 ///////////////////////////////////////////////////////////
 // PUSH FIELD FUNCTIONS
 ///////////////////////////////////////////////////////////
