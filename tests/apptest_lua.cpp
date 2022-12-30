@@ -16,6 +16,7 @@ const char *FontTextureFile = "DroidSans32_256.png";
 const char *FontFntFile = "DroidSans32_256.fnt";
 
 const char *DefaultScriptName = "script.lua";
+const float MinErrorStringScale = 0.5f;
 
 const char *scriptName = nullptr;
 nctl::String dataPathScript;
@@ -77,6 +78,17 @@ void MyEventHandler::onInit()
 void MyEventHandler::onFrameStart()
 {
 	nc::LuaIAppEventHandler::onFrameStart(luaState_.state());
+
+	if (text_)
+	{
+		float scale = 1.0f;
+		while (text_->width() > nc::theApplication().width() && scale >= MinErrorStringScale)
+		{
+			scale -= 0.05f;
+			text_->setScale(scale);
+		}
+		text_->setPosition(text_->width() * 0.5f, text_->height() * 0.5f);
+	}
 }
 
 void MyEventHandler::onPostUpdate()
@@ -127,9 +139,6 @@ void MyEventHandler::onKeyPressed(const nc::KeyboardEvent &event)
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
 	nc::LuaIInputEventHandler::onKeyReleased(luaState_.state(), event);
-
-	if (event.sym == nc::KeySym::ESCAPE)
-		nc::theApplication().quit();
 }
 
 void MyEventHandler::onTextInput(const nc::TextInputEvent &event)

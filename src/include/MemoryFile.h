@@ -19,7 +19,7 @@ class MemoryFile : public IFile
 	long int seek(long int offset, int whence) const override;
 	long int tell() const override;
 	unsigned long int read(void *buffer, unsigned long int bytes) const override;
-	unsigned long int write(void *buffer, unsigned long int bytes) override;
+	unsigned long int write(const void *buffer, unsigned long int bytes) override;
 
   private:
 	unsigned char *bufferPtr_;

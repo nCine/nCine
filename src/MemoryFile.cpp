@@ -112,7 +112,7 @@ unsigned long int MemoryFile::read(void *buffer, unsigned long int bytes) const
 	return bytesRead;
 }
 
-unsigned long int MemoryFile::write(void *buffer, unsigned long int bytes)
+unsigned long int MemoryFile::write(const void *buffer, unsigned long int bytes)
 {
 	ASSERT(buffer);
 

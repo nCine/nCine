@@ -45,24 +45,14 @@ FileLogger::FileLogger(LogLevel consoleLevel)
 }
 
 FileLogger::FileLogger(LogLevel consoleLevel, LogLevel fileLevel, const char *filename)
-    : consoleLevel_(consoleLevel), fileLevel_(fileLevel), canUseColors_(true)
+    : consoleLevel_(LogLevel::OFF), fileLevel_(fileLevel), canUseColors_(true)
 #ifdef WITH_IMGUI
       ,
       logString_(LogStringCapacity)
 #endif
 {
-#ifdef _WIN32
-	if (consoleLevel != LogLevel::OFF)
-	{
-		const char *termEnv = getenv("TERM");
-		createConsole(termEnv);
-
-		const bool hasVTProcessing = enableVirtualTerminalProcessing();
-		// mintty supports color sequences but not the Windows console API calls
-		canUseColors_ = (hasVTProcessing || termEnv);
-	}
-#endif
-
+	// The setter will create the console on Windows, if needed
+	setConsoleLevel(consoleLevel);
 	canUseColors_ &= theApplication().appConfiguration().withConsoleColors;
 
 	openLogFile(filename);
@@ -74,16 +64,39 @@ FileLogger::~FileLogger()
 {
 	write(LogLevel::VERBOSE, "FileLogger::~FileLogger -> End of the log");
 
-#ifdef _WIN32
-	const char *termEnv = getenv("TERM");
-	// mintty does not need to send the "Enter" key
-	destroyConsole(termEnv);
-#endif
+	// The setter will destroy the console on Windows, if needed
+	setConsoleLevel(LogLevel::OFF);
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+void FileLogger::setConsoleLevel(LogLevel consoleLevel)
+{
+#ifdef _WIN32
+	if (consoleLevel == consoleLevel_)
+		return;
+
+	if (consoleLevel_ == LogLevel::OFF) // from OFF to enabled
+	{
+		const char *termEnv = getenv("TERM");
+		createConsole(termEnv);
+
+		const bool hasVTProcessing = enableVirtualTerminalProcessing();
+		// mintty supports color sequences but not the Windows console API calls
+		canUseColors_ = (hasVTProcessing || termEnv);
+	}
+	else if (consoleLevel == LogLevel::OFF) // from enabled to OFF
+	{
+		const char *termEnv = getenv("TERM");
+		// mintty does not need to send the "Enter" key
+		destroyConsole(termEnv);
+	}
+#endif
+
+	consoleLevel_ = consoleLevel;
+}
 
 bool FileLogger::openLogFile(const char *filename)
 {

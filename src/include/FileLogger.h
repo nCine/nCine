@@ -15,7 +15,7 @@ class FileLogger : public ILogger
 	FileLogger(LogLevel consoleLevel, LogLevel fileLevel, const char *filename);
 	~FileLogger() override;
 
-	inline void setConsoleLevel(LogLevel consoleLevel) { consoleLevel_ = consoleLevel; }
+	void setConsoleLevel(LogLevel consoleLevel);
 	inline void setFileLevel(LogLevel fileLevel) { fileLevel_ = fileLevel; }
 	bool openLogFile(const char *filename);
 

@@ -47,7 +47,7 @@ namespace {
 		{
 			lua_pop(L, 2);
 			if (cannotFindWarning)
-				LOGW_X("Cannot find the Lua function \"%s\"", functionName);
+				LOGD_X("Cannot find the Lua function \"%s\"", functionName);
 		}
 	}
 }
@@ -77,7 +77,7 @@ void LuaIAppEventHandler::onPreInit(lua_State *L, AppConfiguration &config)
 	else
 	{
 		lua_pop(L, 2);
-		LOGW_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onPreInit);
+		LOGD_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onPreInit);
 	}
 }
 
@@ -118,7 +118,7 @@ void LuaIAppEventHandler::onDrawViewport(lua_State *L, Viewport &viewport)
 	else
 	{
 		lua_pop(L, 2);
-		LOGW_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onDrawViewport);
+		LOGD_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onDrawViewport);
 	}
 }
 
@@ -148,7 +148,7 @@ void LuaIAppEventHandler::onResizeWindow(lua_State *L, int width, int height)
 	else
 	{
 		lua_pop(L, 2);
-		LOGW_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onResizeWindow);
+		LOGD_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onResizeWindow);
 	}
 }
 
@@ -171,7 +171,7 @@ void LuaIAppEventHandler::onChangeScalingFactor(lua_State *L, float factor)
 	else
 	{
 		lua_pop(L, 2);
-		LOGW_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onChangeScalingFactor);
+		LOGI_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onChangeScalingFactor);
 	}
 }
 

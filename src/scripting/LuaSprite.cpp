@@ -2,6 +2,7 @@
 #include "LuaUntrackedUserData.h"
 #include "LuaClassTracker.h"
 #include "LuaBaseSprite.h"
+#include "LuaVector2Utils.h"
 #include "LuaUtils.h"
 #include "Sprite.h"
 
@@ -50,12 +51,13 @@ void LuaSprite::exposeFunctions(lua_State *L)
 
 int LuaSprite::newObject(lua_State *L)
 {
-	SceneNode *parent = LuaUntrackedUserData<SceneNode>::retrieveOrNil(L, -4);
-	Texture *texture = LuaUntrackedUserData<Texture>::retrieveOrNil(L, -3);
-	const float x = LuaUtils::retrieve<float>(L, -2);
-	const float y = LuaUtils::retrieve<float>(L, -1);
+	int vectorIndex = 0;
+	const Vector2f &pos = LuaVector2fUtils::retrieve(L, -1, vectorIndex);
 
-	LuaClassTracker<Sprite>::newObject(L, parent, texture, x, y);
+	SceneNode *parent = LuaUntrackedUserData<SceneNode>::retrieveOrNil(L, vectorIndex - 2);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieveOrNil(L, vectorIndex - 1);
+
+	LuaClassTracker<Sprite>::newObject(L, parent, texture, pos);
 
 	return 1;
 }

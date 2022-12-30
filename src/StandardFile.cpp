@@ -123,7 +123,7 @@ unsigned long int StandardFile::read(void *buffer, unsigned long int bytes) cons
 	return bytesRead;
 }
 
-unsigned long int StandardFile::write(void *buffer, unsigned long int bytes)
+unsigned long int StandardFile::write(const void *buffer, unsigned long int bytes)
 {
 	ASSERT(buffer);
 
