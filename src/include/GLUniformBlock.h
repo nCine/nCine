@@ -15,7 +15,7 @@ class GLShaderProgram;
 class GLUniformBlock
 {
   public:
-	static const int MaxNameLength = 32;
+	static const int MaxNameLength = 64;
 	enum class DiscoverUniforms
 	{
 		ENABLED,

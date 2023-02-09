@@ -33,6 +33,8 @@ AppConfiguration::AppConfiguration()
       useBufferMapping(false),
       deferShaderQueries(true),
       fixedBatchSize(10),
+      useBinaryShaderCache(false),
+      shaderCacheDirname(64),
 #if defined(WITH_IMGUI) || defined(WITH_NUKLEAR)
       vboSize(512 * 1024),
       iboSize(128 * 1024),
@@ -67,6 +69,7 @@ AppConfiguration::AppConfiguration()
 	logFile = "ncine_log.txt";
 	windowTitle = "nCine";
 	windowIconFilename = "icons/icon48.png";
+	shaderCacheDirname = "nCineShaderCache";
 
 #if defined(__ANDROID__)
 	dataPath() = "asset::";

@@ -162,15 +162,21 @@ class DLL_PUBLIC FileSystem
 	inline static const nctl::String &dataPath() { return dataPath_; }
 	/// Returns the writable directory for saving data
 	static const nctl::String &savePath();
+	/// Returns the writable directory for saving cache data
+	static const nctl::String &cachePath();
 
   private:
 	/// The path for the application to load files from
 	static nctl::String dataPath_;
 	/// The path for the application to write files into
 	static nctl::String savePath_;
+	/// The path for the application to write cache files into
+	static nctl::String cachePath_;
 
 	/// Determines the correct save path based on the platform
 	static void initSavePath();
+	/// Determines the correct cache path based on the platform
+	static void initCachePath();
 
 	/// The `AppConfiguration` class needs to access `dataPath_`
 	friend class AppConfiguration;

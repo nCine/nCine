@@ -109,6 +109,8 @@ namespace {
 		return date;
 	}
 #else
+	wchar_t *wideString = nullptr;
+
 	FileSystem::FileDate nativeTimeToFileDate(const SYSTEMTIME *sysTime)
 	{
 		FileSystem::FileDate date = {};
@@ -133,6 +135,7 @@ namespace {
 
 nctl::String FileSystem::dataPath_(MaxPathLength);
 nctl::String FileSystem::savePath_(MaxPathLength);
+nctl::String FileSystem::cachePath_(MaxPathLength);
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -480,8 +483,13 @@ nctl::String FileSystem::homeDir()
 {
 	nctl::String returnedPath(MaxPathLength);
 #ifdef _WIN32
-	SHGetFolderPathA(HWND_DESKTOP, CSIDL_PROFILE, NULL, SHGFP_TYPE_CURRENT, buffer);
-	return (returnedPath = buffer);
+	SHGetKnownFolderPath(FOLDERID_Profile, KF_FLAG_DEFAULT, nullptr, &wideString);
+	const int length = wcstombs(returnedPath.data(), wideString, returnedPath.capacity());
+	returnedPath.setLength(length);
+	CoTaskMemFree(wideString);
+	wideString = nullptr;
+
+	return returnedPath;
 #else
 	const char *homeEnv = getenv("HOME");
 	if (homeEnv == nullptr || strnlen(homeEnv, MaxPathLength) == 0)
@@ -1155,6 +1163,14 @@ const nctl::String &FileSystem::savePath()
 	return savePath_;
 }
 
+const nctl::String &FileSystem::cachePath()
+{
+	if (cachePath_.isEmpty())
+		initCachePath();
+
+	return cachePath_;
+}
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -1177,30 +1193,11 @@ void FileSystem::initSavePath()
 		}
 	}
 #elif defined(_WIN32)
-	const char *userProfileEnv = getenv("USERPROFILE");
-	if (userProfileEnv == nullptr || strlen(userProfileEnv) == 0)
-	{
-		const char *homeDriveEnv = getenv("HOMEDRIVE");
-		const char *homePathEnv = getenv("HOMEPATH");
-
-		if ((homeDriveEnv == nullptr || strlen(homeDriveEnv) == 0) &&
-		    (homePathEnv == nullptr || strlen(homePathEnv) == 0))
-		{
-			const char *homeEnv = getenv("HOME");
-			if (homeEnv && nctl::strnlen(homeEnv, MaxPathLength))
-				savePath_ = homeEnv;
-		}
-		else
-		{
-			savePath_ = homeDriveEnv;
-			savePath_ += homePathEnv;
-		}
-	}
-	else
-		savePath_ = userProfileEnv;
-
-	if (savePath_.isEmpty() == false)
-		savePath_ += "\\";
+	SHGetKnownFolderPath(FOLDERID_LocalAppData, KF_FLAG_DEFAULT, nullptr, &wideString);
+	const int length = wcstombs(savePath_.data(), wideString, savePath_.capacity());
+	savePath_.setLength(length);
+	CoTaskMemFree(wideString);
+	wideString = nullptr;
 #else
 	const char *homeEnv = getenv("HOME");
 
@@ -1210,6 +1207,28 @@ void FileSystem::initSavePath()
 		savePath_ = homeEnv;
 
 	savePath_ += "/.config/";
+#endif
+}
+
+void FileSystem::initCachePath()
+{
+#if defined(__ANDROID__)
+	// Use `Context.getCacheDir()`
+#elif defined(_WIN32)
+	SHGetKnownFolderPath(FOLDERID_LocalAppData, KF_FLAG_DEFAULT, nullptr, &wideString);
+	const int length = wcstombs(cachePath_.data(), wideString, cachePath_.capacity());
+	cachePath_.setLength(length);
+	CoTaskMemFree(wideString);
+	wideString = nullptr;
+#else
+	const char *homeEnv = getenv("HOME");
+
+	if (homeEnv == nullptr || strnlen(homeEnv, MaxPathLength) == 0)
+		cachePath_ = getpwuid(getuid())->pw_dir;
+	else
+		cachePath_ = homeEnv;
+
+	cachePath_ += "/.cache/";
 #endif
 }
 

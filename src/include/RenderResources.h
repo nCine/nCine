@@ -13,6 +13,7 @@
 
 namespace ncine {
 
+class BinaryShaderCache;
 class RenderBuffersManager;
 class RenderVaoPool;
 class RenderCommandPool;
@@ -63,6 +64,7 @@ class RenderResources
 		unsigned long int updateFrameViewMatrix;
 	};
 
+	static inline BinaryShaderCache &binaryShaderCache() { return *binaryShaderCache_; }
 	static inline RenderBuffersManager &buffersManager() { return *buffersManager_; }
 	static inline RenderVaoPool &vaoPool() { return *vaoPool_; }
 	static inline RenderCommandPool &renderCommandPool() { return *renderCommandPool_; }
@@ -85,6 +87,7 @@ class RenderResources
 	static void setDefaultAttributesParameters(GLShaderProgram &shaderProgram);
 
   private:
+	static nctl::UniquePtr<BinaryShaderCache> binaryShaderCache_;
 	static nctl::UniquePtr<RenderBuffersManager> buffersManager_;
 	static nctl::UniquePtr<RenderVaoPool> vaoPool_;
 	static nctl::UniquePtr<RenderCommandPool> renderCommandPool_;
@@ -106,8 +109,8 @@ class RenderResources
 	static void updateCameraUniforms();
 	static void setCurrentViewport(Viewport *viewport);
 
-	static void create();
 	static void createMinimal();
+	static void create();
 	static void dispose();
 
 	static void registerDefaultBatchedShaders();

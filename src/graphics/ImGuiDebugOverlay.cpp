@@ -18,6 +18,8 @@
 
 #include "IFrameTimer.h"
 #include "RenderStatistics.h"
+#include "RenderResources.h"
+#include "BinaryShaderCache.h"
 #ifdef WITH_LUA
 	#include "LuaStatistics.h"
 #endif
@@ -289,6 +291,7 @@ void ImGuiDebugOverlay::guiWindow()
 	guiWindowSettings();
 	guiAudioPlayers();
 	guiInputState();
+	guiBinaryShaderCache();
 	guiRenderDoc();
 	guiAllocators();
 	if (appCfg.withScenegraph)
@@ -633,10 +636,12 @@ void ImGuiDebugOverlay::guiGraphicsCapabilities()
 		ImGui::Text("GL_MAX_VERTEX_ATTRIB_STRIDE: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_VERTEX_ATTRIB_STRIDE));
 #endif
 		ImGui::Text("GL_MAX_COLOR_ATTACHMENTS: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_COLOR_ATTACHMENTS));
+		ImGui::Text("GL_NUM_PROGRAM_BINARY_FORMATS: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::NUM_PROGRAM_BINARY_FORMATS));
 
 		ImGui::Separator();
 		ImGui::Text("GL_KHR_debug: %d", gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::KHR_DEBUG));
 		ImGui::Text("GL_ARB_texture_storage: %d", gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::ARB_TEXTURE_STORAGE));
+		ImGui::Text("GL_ARB_get_program_binary: %d", gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::ARB_GET_PROGRAM_BINARY));
 		ImGui::Text("GL_EXT_texture_compression_s3tc: %d", gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::EXT_TEXTURE_COMPRESSION_S3TC));
 		ImGui::Text("GL_OES_compressed_ETC1_RGB8_texture: %d", gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::OES_COMPRESSED_ETC1_RGB8_TEXTURE));
 		ImGui::Text("GL_AMD_compressed_ATC_texture: %d", gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::AMD_COMPRESSED_ATC_TEXTURE));
@@ -691,6 +696,8 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 #if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
 		ImGui::Text("Fixed batch size: %u", appCfg.fixedBatchSize);
 #endif
+		ImGui::Text("Binary shader cache: %s", appCfg.useBinaryShaderCache ? "true" : "false");
+		ImGui::Text("Shader cache directory name: \"%s\"", appCfg.shaderCacheDirname.data());
 		ImGui::Text("VBO size: %lu", appCfg.vboSize);
 		ImGui::Text("IBO size: %lu", appCfg.iboSize);
 		ImGui::Text("Vao pool size: %u", appCfg.vaoPoolSize);
@@ -1031,6 +1038,50 @@ void ImGuiDebugOverlay::guiInputState()
 		}
 		else
 			ImGui::TextUnformatted("No joysticks connected");
+	}
+}
+
+void ImGuiDebugOverlay::guiBinaryShaderCache()
+{
+	if (ImGui::CollapsingHeader("Binary Shader Cache"))
+	{
+		BinaryShaderCache &cache = RenderResources::binaryShaderCache();
+		const BinaryShaderCache::Statistics &stats = cache.statistics();
+
+		const bool isAvailable = cache.isAvailable();
+		const bool isEnabled = cache.isEnabled();
+		const bool canBePruned = (stats.TotalFilesCount > stats.PlatformFilesCount);
+		const bool canBeCleared = (stats.TotalFilesCount > 0);
+
+		ImGui::TextUnformatted("Available:");
+		ImGui::SameLine();
+		if (isAvailable)
+			ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "true");
+		else
+			ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "false");
+
+		if (isAvailable)
+		{
+			ImGui::BeginDisabled(isEnabled == false);
+
+			ImGui::Text("Directory: %s", cache.directory().data());
+			ImGui::Text("Requests: %u loaded, %u saved", stats.LoadedShaders, stats.SavedShaders);
+			ImGui::Text("Count: %u (total: %u)", stats.PlatformFilesCount, stats.TotalFilesCount);
+			ImGui::Text("Size: %u Kb (total: %u Kb)", stats.PlatformBytesCount / 1024, stats.TotalBytesCount / 1024);
+
+			ImGui::BeginDisabled(canBePruned == false);
+			if (ImGui::Button("Prune"))
+				cache.prune();
+			ImGui::EndDisabled();
+
+			ImGui::SameLine();
+			ImGui::BeginDisabled(canBeCleared == false);
+			if (ImGui::Button("Clear"))
+				cache.clear();
+			ImGui::EndDisabled();
+
+			ImGui::EndDisabled();
+		}
 	}
 }
 
@@ -1513,6 +1564,7 @@ void ImGuiDebugOverlay::guiTopLeft()
 	const RenderStatistics::Buffers &vboBuffers = RenderStatistics::buffers(RenderBuffersManager::BufferTypes::ARRAY);
 	const RenderStatistics::Buffers &iboBuffers = RenderStatistics::buffers(RenderBuffersManager::BufferTypes::ELEMENT_ARRAY);
 	const RenderStatistics::Buffers &uboBuffers = RenderStatistics::buffers(RenderBuffersManager::BufferTypes::UNIFORM);
+	const BinaryShaderCache::Statistics &shaderCacheStats = RenderResources::binaryShaderCache().statistics();
 
 	const ImVec2 windowPos = ImVec2(Margin, Margin);
 	const ImVec2 windowPosPivot = ImVec2(0.0f, 0.0f);
@@ -1558,6 +1610,8 @@ void ImGuiDebugOverlay::guiTopLeft()
 			ImGui::PlotLines("", plotValues_[ValuesType::UBO_USED].get(), numValues_, 0, nullptr, 0.0f, uboBuffers.size / 1024.0f);
 		}
 
+		if (RenderResources::binaryShaderCache().isAvailable())
+			ImGui::Text("Binary Shaders: %u Kb in %u file(s)", shaderCacheStats.TotalBytesCount / 1024, shaderCacheStats.TotalFilesCount);
 		ImGui::Text("Viewport chain length: %u", Viewport::chain().size());
 
 		ImGui::End();

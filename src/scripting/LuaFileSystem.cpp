@@ -69,8 +69,9 @@ namespace FileSystem {
 	static const char *addPermissions = "add_permissions";
 	static const char *removePermissions = "remove_permissions";
 
-	static const char *datapath = "get_datapath";
-	static const char *savepath = "get_savepath";
+	static const char *dataPath = "get_datapath";
+	static const char *savePath = "get_savepath";
+	static const char *cachePath = "get_cachepath";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -90,7 +91,7 @@ void LuaFileSystem::exposeConstants(lua_State *L)
 
 void LuaFileSystem::expose(lua_State *L)
 {
-	lua_createtable(L, 0, 36);
+	lua_createtable(L, 0, 37);
 
 	LuaUtils::addFunction(L, LuaNames::FileSystem::joinPath, joinPath);
 	LuaUtils::addFunction(L, LuaNames::FileSystem::absoluteJoinPath, absoluteJoinPath);
@@ -138,8 +139,9 @@ void LuaFileSystem::expose(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::FileSystem::addPermissions, addPermissions);
 	LuaUtils::addFunction(L, LuaNames::FileSystem::removePermissions, removePermissions);
 
-	LuaUtils::addFunction(L, LuaNames::FileSystem::datapath, datapath);
-	LuaUtils::addFunction(L, LuaNames::FileSystem::savepath, savepath);
+	LuaUtils::addFunction(L, LuaNames::FileSystem::dataPath, dataPath);
+	LuaUtils::addFunction(L, LuaNames::FileSystem::savePath, savePath);
+	LuaUtils::addFunction(L, LuaNames::FileSystem::cachePath, cachePath);
 
 	lua_setfield(L, -2, LuaNames::FileSystem::FileSystem);
 }
@@ -503,7 +505,7 @@ int LuaFileSystem::removePermissions(lua_State *L)
 	return 1;
 }
 
-int LuaFileSystem::datapath(lua_State *L)
+int LuaFileSystem::dataPath(lua_State *L)
 {
 	const nctl::String dataPath = fs::dataPath();
 	LuaUtils::push(L, dataPath.data());
@@ -511,10 +513,18 @@ int LuaFileSystem::datapath(lua_State *L)
 	return 1;
 }
 
-int LuaFileSystem::savepath(lua_State *L)
+int LuaFileSystem::savePath(lua_State *L)
 {
 	const nctl::String savePath = fs::savePath();
 	LuaUtils::push(L, savePath.data());
+
+	return 1;
+}
+
+int LuaFileSystem::cachePath(lua_State *L)
+{
+	const nctl::String cachePath = fs::cachePath();
+	LuaUtils::push(L, cachePath.data());
 
 	return 1;
 }

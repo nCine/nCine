@@ -44,11 +44,10 @@ struct Instance
 // Single instances data will be collected in a uniform block called `InstancesBlock`
 layout (std140) uniform InstancesBlock
 {
-#ifdef WITH_FIXED_BATCH_SIZE
-	Instance[BATCH_SIZE] instances;
-#else
-	Instance[585] instances;
+#ifndef BATCH_SIZE
+	#define BATCH_SIZE (682) // 64 Kb / 96 b
 #endif
+	Instance[BATCH_SIZE] instances;
 } block;
 
 out vec2 vTexCoords;
@@ -165,11 +164,10 @@ struct Instance
 // Single instances data will be collected in a uniform block called `InstancesBlock`
 layout (std140) uniform InstancesBlock
 {
-#ifdef WITH_FIXED_BATCH_SIZE
-	Instance[BATCH_SIZE] instances;
-#else
-	Instance[585] instances;
+#ifndef BATCH_SIZE
+	#define BATCH_SIZE (585) // 64 Kb / 112 b
 #endif
+	Instance[BATCH_SIZE] instances;
 } block;
 
 in vec2 aTexCoords;
@@ -279,11 +277,10 @@ struct Instance
 // Single instances data will be collected in a uniform block called `InstancesBlock`
 layout (std140) uniform InstancesBlock
 {
-#ifdef WITH_FIXED_BATCH_SIZE
-	Instance[BATCH_SIZE] instances;
-#else
-	Instance[585] instances;
+#ifndef BATCH_SIZE
+	#define BATCH_SIZE (682) // 64 Kb / 96 b
 #endif
+	Instance[BATCH_SIZE] instances;
 } block;
 
 out vec3 vFragPos;

@@ -113,6 +113,11 @@ class DLL_PUBLIC Shader : public Object
 	/// Registers a shaders to be used for batches of render commands
 	void registerBatchedShader(Shader &batchedShader);
 
+	/// Returns true if the binary shader cache is enabled
+	static bool isBinaryCacheEnabled();
+	/// Enables or disables the binary shader cache
+	static void setBinaryCacheEnabled(bool enable);
+
 	inline static ObjectType sType() { return ObjectType::SHADER; }
 
   private:

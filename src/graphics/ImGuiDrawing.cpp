@@ -62,11 +62,12 @@ ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
 
 	imguiShaderProgram_ = nctl::makeUnique<GLShaderProgram>(queryPhase);
 #ifndef WITH_EMBEDDED_SHADERS
-	imguiShaderProgram_->attachShader(GL_VERTEX_SHADER, (fs::dataPath() + "shaders/imgui_vs.glsl").data());
-	imguiShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (fs::dataPath() + "shaders/imgui_fs.glsl").data());
+	imguiShaderProgram_->attachShaderFromFile(GL_VERTEX_SHADER, (fs::dataPath() + "shaders/imgui_vs.glsl").data());
+	imguiShaderProgram_->attachShaderFromFile(GL_FRAGMENT_SHADER, (fs::dataPath() + "shaders/imgui_fs.glsl").data());
 #else
-	imguiShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::imgui_vs);
-	imguiShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::imgui_fs);
+	// Skipping the initial new line character of the raw string literal
+	imguiShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::imgui_vs + 1);
+	imguiShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::imgui_fs + 1);
 #endif
 	imguiShaderProgram_->link(GLShaderProgram::Introspection::ENABLED);
 	FATAL_ASSERT(imguiShaderProgram_->status() != GLShaderProgram::Status::LINKING_FAILED);

@@ -86,4 +86,5 @@ set(SOURCES
 	${NCINE_ROOT}/src/graphics/Viewport.cpp
 	${NCINE_ROOT}/src/graphics/ScreenViewport.cpp
 	${NCINE_ROOT}/src/graphics/Camera.cpp
+	${NCINE_ROOT}/src/graphics/BinaryShaderCache.cpp
 )

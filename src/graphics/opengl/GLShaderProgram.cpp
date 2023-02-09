@@ -4,9 +4,17 @@
 #include "GLDebug.h"
 #include "RenderResources.h"
 #include "RenderVaoPool.h"
+#include "BinaryShaderCache.h"
 #include "tracy.h"
 
 namespace ncine {
+
+namespace {
+
+	unsigned int bufferSize = 0;
+	nctl::UniquePtr<uint8_t[]> bufferPtr;
+
+}
 
 ///////////////////////////////////////////////////////////
 // STATIC DEFINITIONS
@@ -25,19 +33,22 @@ GLShaderProgram::GLShaderProgram()
 }
 
 GLShaderProgram::GLShaderProgram(QueryPhase queryPhase)
-    : glHandle_(0), attachedShaders_(AttachedShadersInitialSize),
+    : glHandle_(0), attachedShaders_(AttachedShadersInitialSize), hashName_(0),
       status_(Status::NOT_LINKED), queryPhase_(queryPhase), shouldLogOnErrors_(true),
       uniformsSize_(0), uniformBlocksSize_(0), uniforms_(UniformsInitialSize),
       uniformBlocks_(UniformBlocksInitialSize), attributes_(AttributesInitialSize)
 {
 	glHandle_ = glCreateProgram();
+
+	if (RenderResources::binaryShaderCache().isAvailable())
+		glProgramParameteri(glHandle_, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
 }
 
 GLShaderProgram::GLShaderProgram(const char *vertexFile, const char *fragmentFile, Introspection introspection, QueryPhase queryPhase)
     : GLShaderProgram(queryPhase)
 {
-	const bool hasCompiledVS = attachShader(GL_VERTEX_SHADER, vertexFile);
-	const bool hasCompiledFS = attachShader(GL_FRAGMENT_SHADER, fragmentFile);
+	const bool hasCompiledVS = attachShaderFromFile(GL_VERTEX_SHADER, vertexFile);
+	const bool hasCompiledFS = attachShaderFromFile(GL_FRAGMENT_SHADER, fragmentFile);
 
 	if (hasCompiledVS && hasCompiledFS)
 		link(introspection);
@@ -95,31 +106,28 @@ void GLShaderProgram::retrieveInfoLog(nctl::String &infoLog) const
 	}
 }
 
-bool GLShaderProgram::attachShader(GLenum type, const char *filename)
+bool GLShaderProgram::attachShaderFromFile(GLenum type, const char *filename)
 {
-	nctl::UniquePtr<GLShader> shader = nctl::makeUnique<GLShader>(type, filename);
-	glAttachShader(glHandle_, shader->glHandle());
-
-	const GLShader::ErrorChecking errorChecking = (queryPhase_ == GLShaderProgram::QueryPhase::IMMEDIATE)
-	                                                  ? GLShader::ErrorChecking::IMMEDIATE
-	                                                  : GLShader::ErrorChecking::DEFERRED;
-	const bool hasCompiled = shader->compile(errorChecking, shouldLogOnErrors_);
-
-	if (hasCompiled)
-	{
-		GLDebug::objectLabel(GLDebug::LabelTypes::SHADER, shader->glHandle(), filename);
-		attachedShaders_.pushBack(nctl::move(shader));
-	}
-	else
-		status_ = Status::COMPILATION_FAILED;
-
-	return hasCompiled;
+	return attachShaderFromStringsAndFile(type, nullptr, filename);
 }
 
 bool GLShaderProgram::attachShaderFromString(GLenum type, const char *string)
 {
+	static const char *strings[2] = { nullptr, nullptr };
+
+	strings[0] = string;
+	return attachShaderFromStringsAndFile(type, strings, nullptr);
+}
+
+bool GLShaderProgram::attachShaderFromStrings(GLenum type, const char **strings)
+{
+	return attachShaderFromStringsAndFile(type, strings, nullptr);
+}
+
+bool GLShaderProgram::attachShaderFromStringsAndFile(GLenum type, const char **strings, const char *filename)
+{
 	nctl::UniquePtr<GLShader> shader = nctl::makeUnique<GLShader>(type);
-	shader->loadFromString(string);
+	shader->loadFromStringsAndFile(strings, filename);
 	glAttachShader(glHandle_, shader->glHandle());
 
 	const GLShader::ErrorChecking errorChecking = (queryPhase_ == GLShaderProgram::QueryPhase::IMMEDIATE)
@@ -138,7 +146,52 @@ bool GLShaderProgram::attachShaderFromString(GLenum type, const char *string)
 bool GLShaderProgram::link(Introspection introspection)
 {
 	introspection_ = introspection;
-	glLinkProgram(glHandle_);
+
+	hashName_ = 0;
+	for (const nctl::UniquePtr<GLShader> &shader : attachedShaders_)
+		hashName_ += shader->sourceHash();
+	LOGI_X("Shader program %u - hash: 0x%016llx", glHandle_, hashName_);
+
+	bool binaryHasLoaded = false;
+	if (RenderResources::binaryShaderCache().isEnabled())
+	{
+		const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
+		const int numBinaryFormats = gfxCaps.value(IGfxCapabilities::GLIntValues::NUM_PROGRAM_BINARY_FORMATS);
+
+		for (unsigned int i = 0; i < numBinaryFormats; i++)
+		{
+			const int binFormat = gfxCaps.arrayValue(IGfxCapabilities::GLArrayIntValues::PROGRAM_BINARY_FORMATS, i);
+			const unsigned int binLength = RenderResources::binaryShaderCache().binarySize(binFormat, hashName_);
+			if (binLength > 0)
+			{
+				const void *buffer = RenderResources::binaryShaderCache().loadFromCache(binFormat, hashName_);
+				binaryHasLoaded = loadBinary(binFormat, buffer, binLength);
+				break;
+			}
+		}
+	}
+
+	if (binaryHasLoaded == false)
+	{
+		glLinkProgram(glHandle_);
+		if (RenderResources::binaryShaderCache().isEnabled())
+		{
+			const int binLength = binaryLength();
+			if (binLength > 0)
+			{
+				if (bufferSize < binLength)
+				{
+					bufferSize = binLength;
+					bufferPtr = nctl::makeUnique<uint8_t[]>(bufferSize);
+				}
+
+				unsigned int format = 0;
+				saveBinary(binLength, format, bufferPtr.get());
+
+				RenderResources::binaryShaderCache().saveToCache(binLength, bufferPtr.get(), format, hashName_);
+			}
+		}
+	}
 
 	if (queryPhase_ == QueryPhase::IMMEDIATE)
 	{
@@ -230,9 +283,11 @@ void GLShaderProgram::reset()
 		glDeleteProgram(glHandle_);
 
 		RenderResources::removeCameraUniformData(this);
+		// In case there is a batched version of this shader
 		RenderResources::unregisterBatchedShader(this);
 
 		glHandle_ = glCreateProgram();
+		hashName_ = 0;
 	}
 
 	status_ = Status::NOT_LINKED;
@@ -246,6 +301,37 @@ void GLShaderProgram::setObjectLabel(const char *label)
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+bool GLShaderProgram::loadBinary(unsigned int binaryFormat, const void *buffer, int bufferSize)
+{
+	ASSERT(buffer);
+	ASSERT(bufferSize > 0);
+
+	status_ = Status::NOT_LINKED;
+	glProgramBinary(glHandle_, binaryFormat, buffer, bufferSize);
+	const bool linked = checkLinking();
+
+	return linked;
+}
+
+int GLShaderProgram::binaryLength() const
+{
+	GLint length = 0;
+	glGetProgramiv(glHandle_, GL_PROGRAM_BINARY_LENGTH, &length);
+	return length;
+}
+
+bool GLShaderProgram::saveBinary(int bufferSize, unsigned int &binaryFormat, void *buffer) const
+{
+	ASSERT(bufferSize > 0);
+	ASSERT(buffer);
+
+	GLsizei length = 0;
+	if (buffer != nullptr && bufferSize > 0)
+		glGetProgramBinary(glHandle_, bufferSize, &length, &binaryFormat, buffer);
+
+	return (length > 0 && bufferSize >= length);
+}
 
 bool GLShaderProgram::deferredQueries()
 {
@@ -363,7 +449,7 @@ void GLShaderProgram::discoverUniforms()
 			uniformsSize_ += uniform.memorySize();
 			uniforms_.pushBack(uniform);
 
-			LOGD_X("Shader %u - uniform %d : \"%s\"", glHandle_, uniform.location(), uniform.name());
+			LOGD_X("Shader program %u - uniform %d : \"%s\"", glHandle_, uniform.location(), uniform.name());
 		}
 	}
 }
@@ -380,7 +466,8 @@ void GLShaderProgram::discoverUniformBlocks(GLUniformBlock::DiscoverUniforms dis
 		uniformBlocksSize_ += uniformBlock.size();
 		uniformBlocks_.pushBack(uniformBlock);
 
-		LOGD_X("Shader %u - uniform block %u : \"%s\"", glHandle_, uniformBlock.index(), uniformBlock.name());
+		LOGD_X("Shader program %u - uniform block %u : \"%s\" (%d bytes with %u align)", glHandle_,
+		       uniformBlock.index(), uniformBlock.name(), uniformBlock.size(), uniformBlock.alignAmount());
 	}
 }
 
@@ -395,7 +482,7 @@ void GLShaderProgram::discoverAttributes()
 		GLAttribute attribute(glHandle_, i);
 		attributes_.pushBack(attribute);
 
-		LOGD_X("Shader %u - attribute %d : \"%s\"", glHandle_, attribute.location(), attribute.name());
+		LOGD_X("Shader program %u - attribute %d : \"%s\"", glHandle_, attribute.location(), attribute.name());
 	}
 }
 

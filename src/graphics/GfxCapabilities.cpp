@@ -22,6 +22,9 @@ GfxCapabilities::GfxCapabilities()
 	for (unsigned int i = 0; i < GLExtensions::COUNT; i++)
 		glExtensions_[i] = false;
 
+	for (unsigned int i = 0; i < MaxProgramBinaryFormats; i++)
+		programBinaryFormats_[i] = -1;
+
 	init();
 }
 
@@ -47,6 +50,16 @@ int GfxCapabilities::value(GLIntValues::Enum valueName) const
 
 	if (valueName >= 0 && valueName < GLIntValues::COUNT)
 		value = glIntValues_[valueName];
+
+	return value;
+}
+
+int GfxCapabilities::arrayValue(GLArrayIntValues::Enum valueName, unsigned int index) const
+{
+	int value = 0;
+
+	if (valueName == GLArrayIntValues::PROGRAM_BINARY_FORMATS && index < glIntValues_[GLIntValues::NUM_PROGRAM_BINARY_FORMATS])
+		value = programBinaryFormats_[index];
 
 	return value;
 }
@@ -90,15 +103,16 @@ void GfxCapabilities::init()
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIB_STRIDE, &glIntValues_[GLIntValues::MAX_VERTEX_ATTRIB_STRIDE]);
 #endif
 	glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &glIntValues_[GLIntValues::MAX_COLOR_ATTACHMENTS]);
+	glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &glIntValues_[GLIntValues::NUM_PROGRAM_BINARY_FORMATS]);
 
 #ifndef __EMSCRIPTEN__
 	const char *extensionNames[GLExtensions::COUNT] = {
-		"GL_KHR_debug", "GL_ARB_texture_storage", "GL_EXT_texture_compression_s3tc", "GL_OES_compressed_ETC1_RGB8_texture",
+		"GL_KHR_debug", "GL_ARB_texture_storage", "GL_ARB_get_program_binary", "GL_EXT_texture_compression_s3tc", "GL_OES_compressed_ETC1_RGB8_texture",
 		"GL_AMD_compressed_ATC_texture", "GL_IMG_texture_compression_pvrtc", "GL_KHR_texture_compression_astc_ldr"
 	};
 #else
 	const char *extensionNames[GLExtensions::COUNT] = {
-		"GL_KHR_debug", "GL_ARB_texture_storage", "WEBGL_compressed_texture_s3tc", "WEBGL_compressed_texture_etc1",
+		"GL_KHR_debug", "GL_ARB_texture_storage", "GL_ARB_get_program_binary", "WEBGL_compressed_texture_s3tc", "WEBGL_compressed_texture_etc1",
 		"WEBGL_compressed_texture_atc", "WEBGL_compressed_texture_pvrtc", "WEBGL_compressed_texture_astc"
 	};
 #endif
@@ -107,6 +121,9 @@ void GfxCapabilities::init()
 		glExtensions_[i] = false;
 
 	checkGLExtensions(extensionNames, glExtensions_, GLExtensions::COUNT);
+
+	ASSERT(glIntValues_[GLIntValues::NUM_PROGRAM_BINARY_FORMATS] <= MaxProgramBinaryFormats);
+	glGetIntegerv(GL_PROGRAM_BINARY_FORMATS, programBinaryFormats_);
 }
 
 void GfxCapabilities::logGLInfo()
@@ -144,9 +161,11 @@ void GfxCapabilities::logGLCaps() const
 	LOGI_X("GL_MAX_VERTEX_ATTRIB_STRIDE: %d", glIntValues_[GLIntValues::MAX_VERTEX_ATTRIB_STRIDE]);
 #endif
 	LOGI_X("GL_MAX_COLOR_ATTACHMENTS: %d", glIntValues_[GLIntValues::MAX_COLOR_ATTACHMENTS]);
+	LOGI_X("GL_NUM_PROGRAM_BINARY_FORMATS: %d", glIntValues_[GLIntValues::NUM_PROGRAM_BINARY_FORMATS]);
 	LOGI("---");
 	LOGI_X("GL_KHR_debug: %d", glExtensions_[GLExtensions::KHR_DEBUG]);
 	LOGI_X("GL_ARB_texture_storage: %d", glExtensions_[GLExtensions::ARB_TEXTURE_STORAGE]);
+	LOGI_X("GL_ARB_get_program_binary: %d", glExtensions_[GLExtensions::ARB_GET_PROGRAM_BINARY]);
 	LOGI_X("GL_EXT_texture_compression_s3tc: %d", glExtensions_[GLExtensions::EXT_TEXTURE_COMPRESSION_S3TC]);
 	LOGI_X("GL_OES_compressed_ETC1_RGB8_texture: %d", glExtensions_[GLExtensions::OES_COMPRESSED_ETC1_RGB8_TEXTURE]);
 	LOGI_X("GL_AMD_compressed_ATC_texture: %d", glExtensions_[GLExtensions::AMD_COMPRESSED_ATC_TEXTURE]);

@@ -39,6 +39,9 @@ class LuaShader
 	static int setGLShaderProgramLabel(lua_State *L);
 
 	static int registerBatchedShader(lua_State *L);
+
+	static int isBinaryCacheEnabled(lua_State *L);
+	static int setBinaryCacheEnabled(lua_State *L);
 };
 
 }

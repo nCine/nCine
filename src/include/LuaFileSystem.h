@@ -59,8 +59,9 @@ class LuaFileSystem
 	static int addPermissions(lua_State *L);
 	static int removePermissions(lua_State *L);
 
-	static int datapath(lua_State *L);
-	static int savepath(lua_State *L);
+	static int dataPath(lua_State *L);
+	static int savePath(lua_State *L);
+	static int cachePath(lua_State *L);
 };
 
 }

@@ -65,8 +65,11 @@ class GLShaderProgram
 	/// Returns the total memory needed for all uniforms inside of blocks
 	inline unsigned int uniformBlocksSize() const { return uniformBlocksSize_; }
 
-	bool attachShader(GLenum type, const char *filename);
+	bool attachShaderFromFile(GLenum type, const char *filename);
 	bool attachShaderFromString(GLenum type, const char *string);
+	bool attachShaderFromStrings(GLenum type, const char **strings);
+	bool attachShaderFromStringsAndFile(GLenum type, const char **strings, const char *filename);
+
 	bool link(Introspection introspection);
 	void use();
 	bool validate();
@@ -82,6 +85,8 @@ class GLShaderProgram
 	/// Deletes the current OpenGL shader program so that new shaders can be attached
 	void reset();
 
+	/// Returns a unique identification code to retrieve the corresponding compiled binary in the cache
+	inline uint64_t hashName() const { return hashName_; }
 	void setObjectLabel(const char *label);
 
 	/// Returns the automatic log on errors flag
@@ -94,14 +99,15 @@ class GLShaderProgram
 	/// Max number of discoverable uniforms
 	static const unsigned int MaxNumUniforms = 32;
 
+	static GLuint boundProgram_;
+
 	static const unsigned int MaxInfoLogLength = 512;
 	static char infoLogString_[MaxInfoLogLength];
-
-	static GLuint boundProgram_;
 
 	GLuint glHandle_;
 	static const int AttachedShadersInitialSize = 4;
 	nctl::Array<nctl::UniquePtr<GLShader>> attachedShaders_;
+	uint64_t hashName_;
 	Status status_;
 	Introspection introspection_;
 	QueryPhase queryPhase_;
@@ -121,6 +127,13 @@ class GLShaderProgram
 
 	nctl::StaticHashMap<nctl::String, int, GLVertexFormat::MaxAttributes> attributeLocations_;
 	GLVertexFormat vertexFormat_;
+
+	/// Loads a shader program from a binary representation
+	bool loadBinary(unsigned int binaryFormat, const void *buffer, int bufferSize);
+	/// Returns the length in bytes of the binary representation of the shader program
+	int binaryLength() const;
+	/// Retrieves the binary representation of the shader program, if it is linked
+	bool saveBinary(int bufferSize, unsigned int &binaryFormat, void *buffer) const;
 
 	bool deferredQueries();
 	bool checkLinking();

@@ -56,6 +56,9 @@ namespace Shader {
 	static const char *setGLShaderProgramLabel = "set_glshaderprogram_label";
 
 	static const char *registerBatchedShader = "register_batched_shader";
+
+	static const char *isBinaryCacheEnabled = "is_binary_cache_enabled";
+	static const char *setBinaryCacheEnabled = "set_binary_cache_enabled";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -102,7 +105,7 @@ void LuaShader::exposeConstants(lua_State *L)
 void LuaShader::expose(LuaStateManager *stateManager)
 {
 	lua_State *L = stateManager->state();
-	lua_createtable(L, 0, 12);
+	lua_createtable(L, 0, 17);
 
 	if (stateManager->apiType() == LuaStateManager::ApiType::FULL)
 	{
@@ -131,6 +134,9 @@ void LuaShader::expose(LuaStateManager *stateManager)
 	LuaUtils::addFunction(L, LuaNames::Shader::setGLShaderProgramLabel, setGLShaderProgramLabel);
 
 	LuaUtils::addFunction(L, LuaNames::Shader::registerBatchedShader, registerBatchedShader);
+
+	LuaUtils::addFunction(L, LuaNames::Shader::isBinaryCacheEnabled, isBinaryCacheEnabled);
+	LuaUtils::addFunction(L, LuaNames::Shader::setBinaryCacheEnabled, setBinaryCacheEnabled);
 
 	lua_setfield(L, -2, LuaNames::Shader::Shader);
 }
@@ -328,6 +334,22 @@ int LuaShader::registerBatchedShader(lua_State *L)
 
 	if (shader)
 		shader->registerBatchedShader(*batchedShader);
+
+	return 0;
+}
+
+int LuaShader::isBinaryCacheEnabled(lua_State *L)
+{
+	LuaUtils::push(L, Shader::isBinaryCacheEnabled());
+
+	return 1;
+}
+
+int LuaShader::setBinaryCacheEnabled(lua_State *L)
+{
+	const bool enable = LuaUtils::retrieve<bool>(L, -1);
+
+	Shader::setBinaryCacheEnabled(enable);
 
 	return 0;
 }
