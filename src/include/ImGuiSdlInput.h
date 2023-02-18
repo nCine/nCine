@@ -27,8 +27,10 @@ class ImGuiSdlInput
 
 	static SDL_Window *window_;
 	static unsigned long int time_;
+	static unsigned int mouseWindowID_;
 	static int mouseButtonsDown_;
 	static SDL_Cursor *mouseCursors_[ImGuiMouseCursor_COUNT];
+	static SDL_Cursor *lastMouseCursor_;
 	static char *clipboardTextData_;
 
 	static const char *clipboardText(void *userData);

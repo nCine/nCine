@@ -45,6 +45,14 @@ if(EMSCRIPTEN)
 		set_target_properties(WebP::WebP PROPERTIES
 			IMPORTED_LOCATION ${EXTERNAL_EMSCRIPTEN_DIR}/lib/libwebp.a
 			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_EMSCRIPTEN_DIR}/include")
+		if(EXISTS ${EXTERNAL_EMSCRIPTEN_DIR}/lib/libsharpyuv.a)
+			# Since libwebp 1.3.0, libwebp.a needs some symbols from libsharpyuv.a
+			add_library(WebP::SharpYUV STATIC IMPORTED)
+			set_target_properties(WebP::SharpYUV PROPERTIES
+				IMPORTED_LOCATION ${EXTERNAL_EMSCRIPTEN_DIR}/lib/libsharpyuv.a)
+			set_target_properties(WebP::WebP PROPERTIES
+				INTERFACE_LINK_LIBRARIES WebP::SharpYUV)
+		endif()
 		set(WEBP_FOUND 1)
 	endif()
 
@@ -176,6 +184,14 @@ if(ANDROID)
 		set_target_properties(WebP::WebP PROPERTIES
 			IMPORTED_LOCATION ${EXTERNAL_ANDROID_DIR}/webp/${ANDROID_ABI}/libwebp.a
 			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_ANDROID_DIR}/webp/include")
+		if(EXISTS ${EXTERNAL_ANDROID_DIR}/webp/${ANDROID_ABI}/libsharpyuv.a)
+			# Since libwebp 1.3.0, libwebp.a needs some symbols from libsharpyuv.a
+			add_library(WebP::SharpYUV STATIC IMPORTED)
+			set_target_properties(WebP::SharpYUV PROPERTIES
+				IMPORTED_LOCATION ${EXTERNAL_ANDROID_DIR}/webp/${ANDROID_ABI}/libsharpyuv.a)
+			set_target_properties(WebP::WebP PROPERTIES
+				INTERFACE_LINK_LIBRARIES WebP::SharpYUV)
+		endif()
 		set(WEBP_FOUND 1)
 	endif()
 

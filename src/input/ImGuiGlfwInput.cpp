@@ -4,11 +4,23 @@
 #include "ImGuiJoyMappedInput.h"
 
 #include <GLFW/glfw3.h>
+
 #ifdef _WIN32
 	#undef APIENTRY
 	#define GLFW_EXPOSE_NATIVE_WIN32
-	#include <GLFW/glfw3native.h> // for glfwGetWin32Window
+
+	#include <GLFW/glfw3native.h>   // for glfwGetWin32Window()
 #endif
+#ifdef __APPLE__
+	#define GLFW_EXPOSE_NATIVE_COCOA
+	#include <GLFW/glfw3native.h>   // for glfwGetCocoaWindow()
+#endif
+
+#ifdef __EMSCRIPTEN__
+	#include <emscripten.h>
+	#include <emscripten/html5.h>
+#endif
+
 // We gather version tests as define in order to easily see which features are version-dependent.
 #define GLFW_VERSION_COMBINED           (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 + GLFW_VERSION_REVISION)
 #ifdef GLFW_RESIZE_NESW_CURSOR          // Let's be nice to people who pulled GLFW between 2019-04-16 (3.4 define) and 2019-11-29 (cursors defines) // FIXME: Remove when GLFW 3.4 is released?
@@ -156,26 +168,15 @@ namespace {
 		}
 	}
 
-	int glfwKeyToModifier(int key)
-	{
-		if (key == GLFW_KEY_LEFT_CONTROL || key == GLFW_KEY_RIGHT_CONTROL)
-			return GLFW_MOD_CONTROL;
-		if (key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT)
-			return GLFW_MOD_SHIFT;
-		if (key == GLFW_KEY_LEFT_ALT || key == GLFW_KEY_RIGHT_ALT)
-			return GLFW_MOD_ALT;
-		if (key == GLFW_KEY_LEFT_SUPER || key == GLFW_KEY_RIGHT_SUPER)
-			return GLFW_MOD_SUPER;
-		return 0;
-	}
-
-	void updateKeyModifiers(int mods)
+	// X11 does not include current pressed/released modifier key in 'mods' flags submitted by GLFW
+	// See https://github.com/ocornut/imgui/issues/6034 and https://github.com/glfw/glfw/issues/1630
+	void updateKeyModifiers(GLFWwindow *window)
 	{
 		ImGuiIO &io = ImGui::GetIO();
-		io.AddKeyEvent(ImGuiMod_Ctrl, (mods & GLFW_MOD_CONTROL) != 0);
-		io.AddKeyEvent(ImGuiMod_Shift, (mods & GLFW_MOD_SHIFT) != 0);
-		io.AddKeyEvent(ImGuiMod_Alt, (mods & GLFW_MOD_ALT) != 0);
-		io.AddKeyEvent(ImGuiMod_Super, (mods & GLFW_MOD_SUPER) != 0);
+		io.AddKeyEvent(ImGuiMod_Ctrl, (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS));
+		io.AddKeyEvent(ImGuiMod_Shift, (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS));
+		io.AddKeyEvent(ImGuiMod_Alt, (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_RIGHT_ALT) == GLFW_PRESS));
+		io.AddKeyEvent(ImGuiMod_Super, (glfwGetKey(window, GLFW_KEY_LEFT_SUPER) == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_RIGHT_SUPER) == GLFW_PRESS));
 	}
 
 	int translateUntranslatedKey(int key, int scancode)
@@ -219,6 +220,26 @@ namespace {
 		return (v < 0.0f) ? 0.0f : (v > 1.0f) ? 1.0f : v;
 	}
 
+#ifdef __EMSCRIPTEN__
+	EM_BOOL emscriptenWheelCallback(int eventType, const EmscriptenWheelEvent *wheelEvent, void *userData)
+	{
+		// Mimic emscriptenHandleWheel() in SDL.
+		// Corresponding equivalent in GLFW JS emulation layer has incorrect quantizing preventing small values. See #6096
+		float multiplier = 0.0f;
+
+		if (wheelEvent->deltaMode == DOM_DELTA_PIXEL)       { multiplier = 1.0f / 100.0f; } // 100 pixels make up a step.
+		else if (wheelEvent->deltaMode == DOM_DELTA_LINE)   { multiplier = 1.0f / 3.0f; }   // 3 lines make up a step.
+		else if (wheelEvent->deltaMode == DOM_DELTA_PAGE)   { multiplier = 80.0f; }         // A page makes up 80 steps.
+		float wheelX = wheelEvent->deltaX * -multiplier;
+		float wheelY = wheelEvent->deltaY * -multiplier;
+
+		ImGuiIO& io = ImGui::GetIO();
+		io.AddMouseWheelEvent(wheelX, wheelY);
+
+		return EM_TRUE;
+	}
+#endif
+
 }
 
 ///////////////////////////////////////////////////////////
@@ -256,11 +277,6 @@ void ImGuiGlfwInput::init(GLFWwindow *window, bool withCallbacks)
 	io.GetClipboardTextFn = clipboardText;
 	io.ClipboardUserData = window_;
 
-	// Set platform dependent data in viewport
-#if defined(_WIN32)
-	ImGui::GetMainViewport()->PlatformHandleRaw = reinterpret_cast<void *>(glfwGetWin32Window(window));
-#endif
-
 	// Create mouse cursors
 	// (By design, on X11 cursors are user configurable and some cursors may be missing. When a cursor doesn't exist,
 	// GLFW will emit an error which will often be printed by the app, so we temporarily disable error reporting.
@@ -290,6 +306,23 @@ void ImGuiGlfwInput::init(GLFWwindow *window, bool withCallbacks)
 	// Chain GLFW callbacks: our callbacks will call the user's previously installed callbacks, if any.
 	if (withCallbacks)
 		installCallbacks(window);
+
+	// Register Emscripten Wheel callback to workaround issue in Emscripten GLFW Emulation (#6096)
+	// We intentionally do not check 'if (install_callbacks)' here, as some users may set it to false and call GLFW callback themselves.
+	// FIXME: May break chaining in case user registered their own Emscripten callback?
+#ifdef __EMSCRIPTEN__
+	emscripten_set_wheel_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT, NULL, false, emscriptenWheelCallback);
+#endif
+
+	// Set platform dependent data in viewport
+	ImGuiViewport *mainViewport = ImGui::GetMainViewport();
+#ifdef _WIN32
+	mainViewport->PlatformHandleRaw = glfwGetWin32Window(window_);
+#elif defined(__APPLE__)
+	mainViewport->PlatformHandleRaw = (void*)glfwGetCocoaWindow(window_);
+#else
+	(void)mainViewport;
+#endif
 }
 
 void ImGuiGlfwInput::shutdown()
@@ -345,7 +378,7 @@ void ImGuiGlfwInput::mouseButtonCallback(GLFWwindow *window, int button, int act
 	if (inputEnabled_ == false)
 		return;
 
-	updateKeyModifiers(mods);
+	updateKeyModifiers(window);
 	ImGuiIO &io = ImGui::GetIO();
 	if (button >= 0 && button < ImGuiMouseButton_COUNT)
 		io.AddMouseButtonEvent(button, action == GLFW_PRESS);
@@ -359,6 +392,11 @@ void ImGuiGlfwInput::scrollCallback(GLFWwindow *window, double xoffset, double y
 	if (inputEnabled_ == false)
 		return;
 
+#ifdef __EMSCRIPTEN__
+	// Ignore GLFW events: will be processed in emscriptenWheelCallback().
+	return;
+#endif
+
 	ImGuiIO &io = ImGui::GetIO();
 	io.AddMouseWheelEvent(static_cast<float>(xoffset), static_cast<float>(yoffset));
 }
@@ -371,10 +409,7 @@ void ImGuiGlfwInput::keyCallback(GLFWwindow *window, int keycode, int scancode, 
 	if (inputEnabled_ == false)
 		return;
 
-	// Workaround: X11 does not include current pressed/released modifier key in 'mods' flags. https://github.com/glfw/glfw/issues/1630
-	if (int keycodeToMod = glfwKeyToModifier(keycode))
-		mods = (action == GLFW_PRESS) ? (mods | keycodeToMod) : (mods & ~keycodeToMod);
-	updateKeyModifiers(mods);
+	updateKeyModifiers(window);
 
 	keycode = translateUntranslatedKey(keycode, scancode);
 
@@ -490,24 +525,27 @@ void ImGuiGlfwInput::updateMouseData()
 		return;
 	}
 
-#ifdef __EMSCRIPTEN__
-	const bool isAppFocused = true;
-#else
-	const bool isAppFocused = glfwGetWindowAttrib(window_, GLFW_FOCUSED) != 0;
-#endif
-	if (isAppFocused)
+	// (those braces are here to reduce diff with multi-viewports support in 'docking' branch)
 	{
-		// (Optional) Set OS mouse position from Dear ImGui if requested (rarely used, only when ImGuiConfigFlags_NavEnableSetMousePos is enabled by user)
-		if (io.WantSetMousePos)
-			glfwSetCursorPos(window_, static_cast<double>(io.MousePos.x), static_cast<double>(io.MousePos.y));
-
-		// (Optional) Fallback to provide mouse position when focused (ImGui_ImplGlfw_CursorPosCallback already provides this when hovered or captured)
-		if (isAppFocused && window_ == nullptr)
+#ifdef __EMSCRIPTEN__
+		const bool isWindowFocused = true;
+#else
+		const bool isWindowFocused = glfwGetWindowAttrib(window_, GLFW_FOCUSED) != 0;
+#endif
+		if (isWindowFocused)
 		{
-			double mouseX, mouseY;
-			glfwGetCursorPos(window_, &mouseX, &mouseY);
-			io.AddMousePosEvent(static_cast<float>(mouseX), static_cast<float>(mouseY));
-			lastValidMousePos_ = ImVec2(static_cast<float>(mouseX), static_cast<float>(mouseY));
+			// (Optional) Set OS mouse position from Dear ImGui if requested (rarely used, only when ImGuiConfigFlags_NavEnableSetMousePos is enabled by user)
+			if (io.WantSetMousePos)
+				glfwSetCursorPos(window_, static_cast<double>(io.MousePos.x), static_cast<double>(io.MousePos.y));
+
+			// (Optional) Fallback to provide mouse position when focused (ImGui_ImplGlfw_CursorPosCallback already provides this when hovered or captured)
+			if (window_ == nullptr)
+			{
+				double mouseX, mouseY;
+				glfwGetCursorPos(window_, &mouseX, &mouseY);
+				lastValidMousePos_ = ImVec2(static_cast<float>(mouseX), static_cast<float>(mouseY));
+				io.AddMousePosEvent(static_cast<float>(mouseX), static_cast<float>(mouseY));
+			}
 		}
 	}
 }
@@ -518,18 +556,21 @@ void ImGuiGlfwInput::updateMouseCursor()
 	if ((io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange) || glfwGetInputMode(window_, GLFW_CURSOR) == GLFW_CURSOR_DISABLED)
 		return;
 
-	ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
-	if (imgui_cursor == ImGuiMouseCursor_None || io.MouseDrawCursor)
+	ImGuiMouseCursor imguiCursor = ImGui::GetMouseCursor();
+	// (those braces are here to reduce diff with multi-viewports support in 'docking' branch)
 	{
-		// Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
-		glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-	}
-	else
-	{
-		// Show OS mouse cursor
-		// FIXME-PLATFORM: Unfocused windows seems to fail changing the mouse cursor with GLFW 3.2, but 3.3 works here.
-		glfwSetCursor(window_, mouseCursors_[imgui_cursor] ? mouseCursors_[imgui_cursor] : mouseCursors_[ImGuiMouseCursor_Arrow]);
-		glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		if (imguiCursor == ImGuiMouseCursor_None || io.MouseDrawCursor)
+		{
+			// Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
+			glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+		}
+		else
+		{
+			// Show OS mouse cursor
+			// FIXME-PLATFORM: Unfocused windows seems to fail changing the mouse cursor with GLFW 3.2, but 3.3 works here.
+			glfwSetCursor(window_, mouseCursors_[imguiCursor] ? mouseCursors_[imguiCursor] : mouseCursors_[ImGuiMouseCursor_Arrow]);
+			glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		}
 	}
 }
 

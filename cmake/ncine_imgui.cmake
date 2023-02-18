@@ -1,5 +1,5 @@
 if(NCINE_WITH_IMGUI)
-	set(IMGUI_VERSION_TAG "v1.89.1" CACHE STRING "The Git release, tag, branch or commit for ImGui")
+	set(IMGUI_VERSION_TAG "v1.89.3" CACHE STRING "The Git release, tag, branch or commit for ImGui")
 	# Download release archive (TRUE) or Git repository (FALSE)
 	set(IMGUI_DOWNLOAD_ARCHIVE TRUE)
 

@@ -26,6 +26,23 @@ namespace {
 		SDL_SetClipboardText(text);
 	}
 
+	// Note: native IME will only display if user calls SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1") _before_ SDL_CreateWindow().
+	void setPlatformImeData(ImGuiViewport *viewport, ImGuiPlatformImeData *data)
+	{
+		if (data->WantVisible)
+		{
+			SDL_Rect r;
+			r.x = static_cast<int>(data->InputPos.x);
+			r.y = static_cast<int>(data->InputPos.y);
+			r.w = 1;
+			r.h = static_cast<int>(data->InputLineHeight);
+			SDL_SetTextInputRect(&r);
+			SDL_StartTextInput();
+		}
+		else
+			SDL_StopTextInput();
+	}
+
 	ImGuiKey sdlKeycodeToImGuiKey(int keycode)
 	{
 		switch (keycode)
@@ -159,8 +176,10 @@ bool ImGuiSdlInput::mouseCanUseGlobalState_ = false;
 unsigned int ImGuiSdlInput::pendingMouseLeaveFrame_ = 0;
 SDL_Window *ImGuiSdlInput::window_ = nullptr;
 unsigned long int ImGuiSdlInput::time_ = 0;
+unsigned int ImGuiSdlInput::mouseWindowID_ = 0;
 int ImGuiSdlInput::mouseButtonsDown_ = 0;
 SDL_Cursor *ImGuiSdlInput::mouseCursors_[ImGuiMouseCursor_COUNT] = {};
+SDL_Cursor *ImGuiSdlInput::lastMouseCursor_ = nullptr;
 char *ImGuiSdlInput::clipboardTextData_ = nullptr;
 
 ///////////////////////////////////////////////////////////
@@ -191,7 +210,7 @@ void ImGuiSdlInput::init(SDL_Window *window)
 #endif
 
 	// Setup backend capabilities flags
-	io.BackendPlatformName = "nCine_SDL";
+	io.BackendPlatformName = "nCine_SDL2";
 	io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors; // We can honor GetMouseCursor() values (optional)
 	io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos; // We can honor io.WantSetMousePos requests (optional, rarely used)
 
@@ -213,22 +232,34 @@ void ImGuiSdlInput::init(SDL_Window *window)
 	mouseCursors_[ImGuiMouseCursor_NotAllowed] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NO);
 
 	// Set platform dependent data in viewport
-#ifdef _WIN32
+	// Our mouse update function expect PlatformHandle to be filled for the main viewport
+	ImGuiViewport *mainViewport = ImGui::GetMainViewport();
+	mainViewport->PlatformHandleRaw = nullptr;
 	SDL_SysWMinfo info;
 	SDL_VERSION(&info.version);
 	if (SDL_GetWindowWMInfo(window, &info))
-		ImGui::GetMainViewport()->PlatformHandleRaw = (void *)info.info.win.window;
-#else
-	(void)window;
+	{
+#if defined(SDL_VIDEO_DRIVER_WINDOWS)
+		mainViewport->PlatformHandleRaw = (void *)info.info.win.window;
+#elif defined(__APPLE__) && defined(SDL_VIDEO_DRIVER_COCOA)
+		mainViewport->PlatformHandleRaw = (void *)info.info.cocoa.window;
 #endif
+	}
 
-// From 2.0.5: Set SDL hint to receive mouse click events on window focus, otherwise SDL doesn't emit the event.
-// Without this, when clicking to gain focus, our widgets wouldn't activate even though they showed as hovered.
-// (This is unfortunately a global SDL setting, so enabling it might have a side-effect on your application.
-// It is unlikely to make a difference, but if your app absolutely needs to ignore the initial on-focus click:
-// you can ignore SDL_MOUSEBUTTONDOWN events coming right after a SDL_WINDOWEVENT_FOCUS_GAINED)
+	// From 2.0.5: Set SDL hint to receive mouse click events on window focus, otherwise SDL doesn't emit the event.
+	// Without this, when clicking to gain focus, our widgets wouldn't activate even though they showed as hovered.
+	// (This is unfortunately a global SDL setting, so enabling it might have a side-effect on your application.
+	// It is unlikely to make a difference, but if your app absolutely needs to ignore the initial on-focus click:
+	// you can ignore SDL_MOUSEBUTTONDOWN events coming right after a SDL_WINDOWEVENT_FOCUS_GAINED)
 #ifdef SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH
 	SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
+#endif
+
+	// From 2.0.18: Enable native IME.
+	// IMPORTANT: This is used at the time of SDL_CreateWindow() so this will only affects secondary windows, if any.
+	// For the main window to be affected, your application needs to call this manually before calling SDL_CreateWindow().
+#ifdef SDL_HINT_IME_SHOW_UI
+	SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
 #endif
 
 	// From 2.0.22: Disable auto-capture, this is preventing drag and drop across multiple windows (see #5710)
@@ -249,6 +280,7 @@ void ImGuiSdlInput::shutdown()
 	// Destroy SDL mouse cursors
 	for (ImGuiMouseCursor i = 0; i < ImGuiMouseCursor_COUNT; i++)
 		SDL_FreeCursor(mouseCursors_[i]);
+	lastMouseCursor_ = nullptr;
 
 	ImGuiIO &io = ImGui::GetIO();
 	io.BackendPlatformName = nullptr;
@@ -280,8 +312,9 @@ void ImGuiSdlInput::newFrame()
 
 	if (pendingMouseLeaveFrame_ && pendingMouseLeaveFrame_ >= ImGui::GetFrameCount() && mouseButtonsDown_ == 0)
 	{
-		io.AddMousePosEvent(-FLT_MAX, -FLT_MAX);
+		mouseWindowID_ = 0;
 		pendingMouseLeaveFrame_ = 0;
+		io.AddMousePosEvent(-FLT_MAX, -FLT_MAX);
 	}
 
 	updateMouseData();
@@ -306,13 +339,22 @@ bool ImGuiSdlInput::processEvent(const SDL_Event *event)
 	{
 		case SDL_MOUSEMOTION:
 		{
-			io.AddMousePosEvent(static_cast<float>(event->motion.x), static_cast<float>(event->motion.y));
+			const ImVec2 mousePos(static_cast<float>(event->motion.x), static_cast<float>(event->motion.y));
+			io.AddMousePosEvent(mousePos.x, mousePos.y);
 			return true;
 		}
 		case SDL_MOUSEWHEEL:
 		{
-			const float wheelX = (event->wheel.x > 0) ? 1.0f : (event->wheel.x < 0) ? -1.0f : 0.0f;
-			const float wheelY = (event->wheel.y > 0) ? 1.0f : (event->wheel.y < 0) ? -1.0f : 0.0f;
+#if SDL_VERSION_ATLEAST(2, 0, 18) // If this fails to compile on Emscripten: update to latest Emscripten!
+			float wheelX = -event->wheel.preciseX;
+			const float wheelY = event->wheel.preciseY;
+#else
+			float wheelX = static_cast<float>(-event->wheel.x);
+			const float wheelY = static_cast<float>(event->wheel.y);
+#endif
+#ifdef __EMSCRIPTEN__
+			wheelX /= 100.0f;
+#endif
 			io.AddMouseWheelEvent(wheelX, wheelY);
 			return true;
 		}
@@ -360,7 +402,10 @@ bool ImGuiSdlInput::processEvent(const SDL_Event *event)
 			//   we delay process the SDL_WINDOWEVENT_LEAVE events by one frame. See issue #5012 for details.
 			const Uint8 windowEvent = event->window.event;
 			if (windowEvent == SDL_WINDOWEVENT_ENTER)
+			{
+				mouseWindowID_ = event->window.windowID;
 				pendingMouseLeaveFrame_ = 0;
+			}
 			if (windowEvent == SDL_WINDOWEVENT_LEAVE)
 				pendingMouseLeaveFrame_ = ImGui::GetFrameCount() + 1;
 			if (windowEvent == SDL_WINDOWEVENT_FOCUS_GAINED)
@@ -392,7 +437,7 @@ void ImGuiSdlInput::updateMouseData()
 	// We forward mouse input when hovered or captured (via SDL_MOUSEMOTION) or when focused (below)
 #if SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE
 	// SDL_CaptureMouse() let the OS know e.g. that our imgui drag outside the SDL window boundaries shouldn't e.g. trigger other operations outside
-	SDL_CaptureMouse((mouseButtonsDown_ != 0 && ImGui::GetDragDropPayload() == nullptr) ? SDL_TRUE : SDL_FALSE);
+	SDL_CaptureMouse((mouseButtonsDown_ != 0) ? SDL_TRUE : SDL_FALSE);
 	SDL_Window *focusedWindow = SDL_GetKeyboardFocus();
 	const bool isAppFocused = (window_ == focusedWindow);
 #else
@@ -431,8 +476,12 @@ void ImGuiSdlInput::updateMouseCursor()
 	else
 	{
 		// Show OS mouse cursor
-		SDL_SetCursor(mouseCursors_[imguiCursor] ? mouseCursors_[imguiCursor] : mouseCursors_[ImGuiMouseCursor_Arrow]);
-		SDL_ShowCursor(SDL_TRUE);
+		SDL_Cursor *expectedCursor = mouseCursors_[imguiCursor] ?mouseCursors_[imguiCursor] : mouseCursors_[ImGuiMouseCursor_Arrow];
+		if (lastMouseCursor_ != expectedCursor)
+		{
+			SDL_SetCursor(expectedCursor); // SDL function doesn't have an early out (see #6113)
+			lastMouseCursor_ = expectedCursor;
+		}
 	}
 }
 
