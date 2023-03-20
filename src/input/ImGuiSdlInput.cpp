@@ -305,8 +305,11 @@ void ImGuiSdlInput::newFrame()
 		io.DisplayFramebufferScale = ImVec2(static_cast<float>(displayW) / w, static_cast<float>(displayH) / h);
 
 	// Setup time step (we don't use SDL_GetTicks() because it is using millisecond resolution)
+	// (Accept SDL_GetPerformanceCounter() not returning a monotonically increasing value. Happens in VMs and Emscripten, see #6189, #6114, #3644)
 	static Uint64 frequency = SDL_GetPerformanceFrequency();
-	const Uint64 currentTime = SDL_GetPerformanceCounter();
+	Uint64 currentTime = SDL_GetPerformanceCounter();
+	if (currentTime <= time_)
+		currentTime = time_ + 1;
 	io.DeltaTime = time_ > 0 ? static_cast<float>((static_cast<double>(currentTime - time_) / frequency)) : static_cast<float>(1.0f / 60.0f);
 	time_ = currentTime;
 

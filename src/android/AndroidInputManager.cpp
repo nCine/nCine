@@ -120,8 +120,6 @@ void AndroidJoystickState::createGuid(uint16_t bus, uint16_t vendor, uint16_t pr
 
 void AndroidJoystickState::updateGuidWithCapabilities()
 {
-	uint16_t *guid16 = reinterpret_cast<uint16_t *>(guid_);
-
 	uint16_t axisMask = 0;
 	if (numAxes_ >= 2)
 		axisMask |= 0x01 | 0x02;
@@ -146,8 +144,10 @@ void AndroidJoystickState::updateGuidWithCapabilities()
 	if (hasDPad_ || hasHatAxes_)
 		buttonMask |= 0x800 | 0x1000 | 0x2000 | 0x4000;
 
-	guid16[6] = static_cast<uint16_t>(buttonMask);
-	guid16[7] = axisMask;
+	guid_[12] = buttonMask & 0xff;
+	guid_[13] = (buttonMask >> 8) & 0xff;
+	guid_[14] = axisMask & 0xff;
+	guid_[15] = (axisMask >> 8) & 0xff;
 }
 
 AndroidInputManager::AndroidInputManager(struct android_app *state)

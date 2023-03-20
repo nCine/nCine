@@ -30,6 +30,7 @@
 #endif
 #define GLFW_HAS_GAMEPAD_API            (GLFW_VERSION_COMBINED >= 3300) // 3.3+ glfwGetGamepadState() new api
 #define GLFW_HAS_GETKEYNAME             (GLFW_VERSION_COMBINED >= 3200) // 3.2+ glfwGetKeyName()
+#define GLFW_HAS_GETERROR               (GLFW_VERSION_COMBINED >= 3300) // 3.3+ glfwGetError()
 
 namespace ncine {
 
@@ -192,7 +193,7 @@ namespace {
 		GLFWerrorfun prevErrorCallback = glfwSetErrorCallback(nullptr);
 		const char *keyName = glfwGetKeyName(key, scancode);
 		glfwSetErrorCallback(prevErrorCallback);
-	#if (GLFW_VERSION_COMBINED >= 3300) // Eat errors (see #5908)
+	#if GLFW_HAS_GETERROR && !defined(__EMSCRIPTEN__) // Eat errors (see #5908)
 		(void)glfwGetError(nullptr);
 	#endif
 		if (keyName && keyName[0] != 0 && keyName[1] == 0)
@@ -299,7 +300,7 @@ void ImGuiGlfwInput::init(GLFWwindow *window, bool withCallbacks)
 	mouseCursors_[ImGuiMouseCursor_NotAllowed] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
 #endif
 	glfwSetErrorCallback(prevErrorCallback);
-#if (GLFW_VERSION_COMBINED >= 3300) // Eat errors (see #5785)
+#if GLFW_HAS_GETERROR && !defined(__EMSCRIPTEN__) // Eat errors (see #5908)
 	(void)glfwGetError(nullptr);
 #endif
 
@@ -585,7 +586,7 @@ void ImGuiGlfwInput::updateGamepads()
 	if (joyMappedInput == false)
 	{
 		io.BackendFlags &= ~ImGuiBackendFlags_HasGamepad;
-#if GLFW_HAS_GAMEPAD_API
+#if GLFW_HAS_GAMEPAD_API && !defined(__EMSCRIPTEN__)
 		GLFWgamepadstate gamepad;
 		if (!glfwGetGamepadState(GLFW_JOYSTICK_1, &gamepad))
 			return;
