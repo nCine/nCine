@@ -135,6 +135,7 @@ class GLShaderProgram
 	/// Retrieves the binary representation of the shader program, if it is linked
 	bool saveBinary(int bufferSize, unsigned int &binaryFormat, void *buffer) const;
 
+	bool compileAttachedShaders();
 	bool deferredQueries();
 	bool checkLinking();
 	void performIntrospection();

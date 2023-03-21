@@ -44,6 +44,9 @@ class GLShader
 	/// Loads a shader from the specified file
 	bool loadFromFile(const char *filename);
 
+	/// Used to force a `COMPILED` status when the shader program is loaded from a binary
+	inline void setStatus(Status status) { status_ = status; }
+
 	bool compile(ErrorChecking errorChecking, bool logOnErrors);
 	bool checkCompilation(bool logOnErrors);
 

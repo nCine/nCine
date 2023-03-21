@@ -58,7 +58,8 @@ class DLL_PUBLIC AppConfiguration
 	bool deferShaderQueries;
 	/// Fixed size of render commands to be collected for batching on Emscripten and ANGLE
 	/*! \note Increasing this value too much might negatively affect batching shaders compilation time.
-	A value of zero restores the default behavior of non fixed size for batches. */
+	A value of zero restores the default behavior of non fixed size for batches.
+	\warning If this value is changed, the binary shader cache needs to be manually cleared. */
 	unsigned int fixedBatchSize;
 	/// The flag is `true` if the shader cache is enabled to load and save binary shader programs
 	/*! \note Even if the flag is `true` the functionality might still not be supported by the OpenGL context */

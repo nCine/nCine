@@ -4,6 +4,24 @@
 
 namespace ncine {
 
+int javaStringToCString(jstring stringObject, char *destination, int maxStringSize)
+{
+	const jsize length = AndroidJniHelper::jniEnv->GetStringUTFLength(stringObject);
+
+	if (stringObject)
+	{
+		const char *string = AndroidJniHelper::jniEnv->GetStringUTFChars(stringObject, 0);
+		strncpy(destination, string, maxStringSize);
+		destination[maxStringSize - 1] = '\0';
+		AndroidJniHelper::jniEnv->ReleaseStringUTFChars(stringObject, string);
+		AndroidJniHelper::jniEnv->DeleteLocalRef(stringObject);
+	}
+	else
+		strncpy(destination, static_cast<const char *>("Unknown"), maxStringSize);
+
+	return (int(length) < maxStringSize) ? int(length) : maxStringSize;
+}
+
 ///////////////////////////////////////////////////////////
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
@@ -37,17 +55,23 @@ jmethodID AndroidJniClass_KeyEvent::midConstructor_ = nullptr;
 jmethodID AndroidJniClass_KeyEvent::midGetUnicodeCharMetaState_ = nullptr;
 jmethodID AndroidJniClass_KeyEvent::midGetUnicodeChar_ = nullptr;
 jmethodID AndroidJniClass_KeyEvent::midIsPrintingKey_ = nullptr;
-jclass AndroidJniClass_Display::javaClass_ = nullptr;
-jmethodID AndroidJniClass_Display::midGetMode_ = nullptr;
-jmethodID AndroidJniClass_Display::midGetName_ = nullptr;
-jmethodID AndroidJniClass_Display::midGetSupportedModes_ = nullptr;
 jclass AndroidJniClass_DisplayMode::javaClass_ = nullptr;
 jmethodID AndroidJniClass_DisplayMode::midGetPhysicalHeight_ = nullptr;
 jmethodID AndroidJniClass_DisplayMode::midGetPhysicalWidth_ = nullptr;
 jmethodID AndroidJniClass_DisplayMode::midGetRefreshRate_ = nullptr;
+jclass AndroidJniClass_Display::javaClass_ = nullptr;
+jmethodID AndroidJniClass_Display::midGetMode_ = nullptr;
+jmethodID AndroidJniClass_Display::midGetName_ = nullptr;
+jmethodID AndroidJniClass_Display::midGetSupportedModes_ = nullptr;
 
 jobject AndroidJniWrap_Activity::activityObject_ = nullptr;
 jmethodID AndroidJniWrap_Activity::midFinishAndRemoveTask_ = nullptr;
+
+jclass AndroidJniClass_File::javaClass_ = nullptr;
+jmethodID AndroidJniClass_File::midGetAbsolutePath_ = nullptr;
+
+jobject AndroidJniWrap_Context::contextObject_ = nullptr;
+jmethodID AndroidJniWrap_Context::midGetCacheDir_ = nullptr;
 
 jobject AndroidJniWrap_InputMethodManager::inputMethodManagerObject_ = nullptr;
 jmethodID AndroidJniWrap_InputMethodManager::midToggleSoftInput_ = nullptr;
@@ -90,6 +114,7 @@ void AndroidJniHelper::attachJVM(struct android_app *state)
 		{
 			initClasses();
 			AndroidJniWrap_Activity::init(state);
+			AndroidJniWrap_Context::init(state);
 			AndroidJniWrap_InputMethodManager::init(state);
 			AndroidJniWrap_DisplayManager::init(state);
 
@@ -121,8 +146,9 @@ void AndroidJniHelper::initClasses()
 	AndroidJniClass_InputDevice::init();
 	AndroidJniClass_KeyCharacterMap::init();
 	AndroidJniClass_KeyEvent::init();
-	AndroidJniClass_Display::init();
 	AndroidJniClass_DisplayMode::init();
+	AndroidJniClass_Display::init();
+	AndroidJniClass_File::init();
 }
 
 // ------------------- AndroidJniClass -------------------
@@ -270,39 +296,13 @@ int AndroidJniClass_InputDevice::getDeviceIds(int *destination, int maxSize)
 int AndroidJniClass_InputDevice::getName(char *destination, int maxStringSize) const
 {
 	jstring strDeviceName = static_cast<jstring>(AndroidJniHelper::jniEnv->CallObjectMethod(javaObject_, midGetName_));
-	const jsize length = AndroidJniHelper::jniEnv->GetStringUTFLength(strDeviceName);
-
-	if (strDeviceName)
-	{
-		const char *deviceName = AndroidJniHelper::jniEnv->GetStringUTFChars(strDeviceName, 0);
-		strncpy(destination, deviceName, maxStringSize);
-		destination[maxStringSize - 1] = '\0';
-		AndroidJniHelper::jniEnv->ReleaseStringUTFChars(strDeviceName, deviceName);
-		AndroidJniHelper::jniEnv->DeleteLocalRef(strDeviceName);
-	}
-	else
-		strncpy(destination, static_cast<const char *>("Unknown"), maxStringSize);
-
-	return (int(length) < maxStringSize) ? int(length) : maxStringSize;
+	return javaStringToCString(strDeviceName, destination, maxStringSize);
 }
 
 int AndroidJniClass_InputDevice::getDescriptor(char *destination, int maxStringSize) const
 {
 	jstring strDeviceDescriptor = static_cast<jstring>(AndroidJniHelper::jniEnv->CallObjectMethod(javaObject_, midGetDescriptor_));
-	const jsize length = AndroidJniHelper::jniEnv->GetStringUTFLength(strDeviceDescriptor);
-
-	if (strDeviceDescriptor)
-	{
-		const char *deviceDescriptor = AndroidJniHelper::jniEnv->GetStringUTFChars(strDeviceDescriptor, 0);
-		strncpy(destination, deviceDescriptor, maxStringSize);
-		destination[maxStringSize - 1] = '\0';
-		AndroidJniHelper::jniEnv->ReleaseStringUTFChars(strDeviceDescriptor, deviceDescriptor);
-		AndroidJniHelper::jniEnv->DeleteLocalRef(strDeviceDescriptor);
-	}
-	else if (maxStringSize > 0)
-		destination[0] = '\0';
-
-	return (int(length) < maxStringSize) ? int(length) : maxStringSize;
+	return javaStringToCString(strDeviceDescriptor, destination, maxStringSize);
 }
 
 int AndroidJniClass_InputDevice::getProductId() const
@@ -506,20 +506,7 @@ AndroidJniClass_DisplayMode AndroidJniClass_Display::getMode() const
 int AndroidJniClass_Display::getName(char *destination, int maxStringSize) const
 {
 	jstring strDisplayName = static_cast<jstring>(AndroidJniHelper::jniEnv->CallObjectMethod(javaObject_, midGetName_));
-	const jsize length = AndroidJniHelper::jniEnv->GetStringUTFLength(strDisplayName);
-
-	if (strDisplayName)
-	{
-		const char *displayName = AndroidJniHelper::jniEnv->GetStringUTFChars(strDisplayName, 0);
-		strncpy(destination, displayName, maxStringSize);
-		destination[maxStringSize - 1] = '\0';
-		AndroidJniHelper::jniEnv->ReleaseStringUTFChars(strDisplayName, displayName);
-		AndroidJniHelper::jniEnv->DeleteLocalRef(strDisplayName);
-	}
-	else
-		strncpy(destination, static_cast<const char *>("Unknown"), maxStringSize);
-
-	return (int(length) < maxStringSize) ? int(length) : maxStringSize;
+	return javaStringToCString(strDisplayName, destination, maxStringSize);
 }
 
 int AndroidJniClass_Display::getSupportedModes(AndroidJniClass_DisplayMode *destination, int maxSize) const
@@ -555,6 +542,40 @@ void AndroidJniWrap_Activity::finishAndRemoveTask()
 	// Check if SDK version requirements are met
 	if (AndroidJniHelper::sdkVersion() >= 21)
 		AndroidJniHelper::jniEnv->CallVoidMethod(activityObject_, midFinishAndRemoveTask_);
+}
+
+// ------------------- AndroidJniClass_File -------------------
+
+void AndroidJniClass_File::init()
+{
+	javaClass_ = findClass("java/io/File");
+	midGetAbsolutePath_ = getMethodID(javaClass_, "getAbsolutePath", "()Ljava/lang/String;");
+}
+
+int AndroidJniClass_File::getAbsolutePath(char *destination, int maxStringSize) const
+{
+	jstring strAbsolutePath = static_cast<jstring>(AndroidJniHelper::jniEnv->CallObjectMethod(javaObject_, midGetAbsolutePath_));
+	return javaStringToCString(strAbsolutePath, destination, maxStringSize);
+}
+
+// ------------------- AndroidJniWrap_Context -------------------
+
+void AndroidJniWrap_Context::init(struct android_app *state)
+{
+	// Retrieve `Context` class
+	jclass contextClass = AndroidJniClass::findClass("android/content/Context");
+
+	// Retrieve `Context` object
+	contextObject_ = state->activity->clazz;
+
+	midGetCacheDir_ = AndroidJniClass::getMethodID(contextClass, "getCacheDir", "()Ljava/io/File;");
+}
+
+AndroidJniClass_File AndroidJniWrap_Context::getCacheDir()
+{
+	jobject fileObject = AndroidJniHelper::jniEnv->CallObjectMethod(contextObject_, midGetCacheDir_);
+	AndroidJniClass_File file(fileObject);
+	return file;
 }
 
 // ------------------- AndroidJniWrap_InputMethodManager -------------------

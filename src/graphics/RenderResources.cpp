@@ -19,7 +19,7 @@
 namespace ncine {
 
 namespace {
-	char const * const BatchSizeFormatString = "#define BATCH_SIZE (%d)\n#line 0\n";
+	char const * const BatchSizeFormatString = "#ifndef BATCH_SIZE\n\t#define BATCH_SIZE (%d)\n#endif\n#line 0\n";
 }
 
 ///////////////////////////////////////////////////////////
@@ -321,14 +321,14 @@ void RenderResources::create()
 		// The vertex shader source string can be either the first one or the second one, if the first defines the `BATCH_SIZE`
 		vertexStrings[compileTwice ? 1 : 0] = shaderToLoad.vertexShader;
 
-		const bool vertexHasCompiled = shaderToLoad.shaderProgram->attachShaderFromStrings(GL_VERTEX_SHADER, vertexStrings);
-		const bool fragmentHasCompiled = shaderToLoad.shaderProgram->attachShaderFromString(GL_FRAGMENT_SHADER, shaderToLoad.fragmentShader);
+		const bool vertexHasLoaded = shaderToLoad.shaderProgram->attachShaderFromStrings(GL_VERTEX_SHADER, vertexStrings);
+		const bool fragmentHasLoaded = shaderToLoad.shaderProgram->attachShaderFromString(GL_FRAGMENT_SHADER, shaderToLoad.fragmentShader);
 #else
-		const bool vertexHasCompiled = shaderToLoad.shaderProgram->attachShaderFromStringsAndFile(GL_VERTEX_SHADER, vertexStrings, (fs::dataPath() + "shaders/" + shaderToLoad.vertexShader).data());
-		const bool fragmentHasCompiled = shaderToLoad.shaderProgram->attachShaderFromFile(GL_FRAGMENT_SHADER, (fs::dataPath() + "shaders/" + shaderToLoad.fragmentShader).data());
+		const bool vertexHasLoaded = shaderToLoad.shaderProgram->attachShaderFromStringsAndFile(GL_VERTEX_SHADER, vertexStrings, (fs::dataPath() + "shaders/" + shaderToLoad.vertexShader).data());
+		const bool fragmentHasLoaded = shaderToLoad.shaderProgram->attachShaderFromFile(GL_FRAGMENT_SHADER, (fs::dataPath() + "shaders/" + shaderToLoad.fragmentShader).data());
 #endif
-		ASSERT(vertexHasCompiled == true);
-		ASSERT(fragmentHasCompiled == true);
+		ASSERT(vertexHasLoaded == true);
+		ASSERT(fragmentHasLoaded == true);
 
 		shaderToLoad.shaderProgram->setObjectLabel(shaderToLoad.objectLabel);
 		// The first compilation of a batched shader needs the introspection
@@ -350,14 +350,14 @@ void RenderResources::create()
 				sourceString.format(BatchSizeFormatString, batchSize);
 
 #ifdef WITH_EMBEDDED_SHADERS
-				const bool finalVertexHasCompiled = shaderToLoad.shaderProgram->attachShaderFromStrings(GL_VERTEX_SHADER, vertexStrings);
-				const bool finalFragmentHasCompiled = shaderToLoad.shaderProgram->attachShaderFromString(GL_FRAGMENT_SHADER, shaderToLoad.fragmentShader);
+				const bool finalVertexHasLoaded = shaderToLoad.shaderProgram->attachShaderFromStrings(GL_VERTEX_SHADER, vertexStrings);
+				const bool finalFragmentHasLoaded = shaderToLoad.shaderProgram->attachShaderFromString(GL_FRAGMENT_SHADER, shaderToLoad.fragmentShader);
 #else
-				const bool finalVertexHasCompiled = shaderToLoad.shaderProgram->attachShaderFromStringsAndFile(GL_VERTEX_SHADER, vertexStrings, (fs::dataPath() + "shaders/" + shaderToLoad.vertexShader).data());
-				const bool finalFragmentHasCompiled = shaderToLoad.shaderProgram->attachShaderFromFile(GL_FRAGMENT_SHADER, (fs::dataPath() + "shaders/" + shaderToLoad.fragmentShader).data());
+				const bool finalVertexHasLoaded = shaderToLoad.shaderProgram->attachShaderFromStringsAndFile(GL_VERTEX_SHADER, vertexStrings, (fs::dataPath() + "shaders/" + shaderToLoad.vertexShader).data());
+				const bool finalFragmentHasLoaded = shaderToLoad.shaderProgram->attachShaderFromFile(GL_FRAGMENT_SHADER, (fs::dataPath() + "shaders/" + shaderToLoad.fragmentShader).data());
 #endif
-				ASSERT(finalVertexHasCompiled == true);
-				ASSERT(finalFragmentHasCompiled == true);
+				ASSERT(finalVertexHasLoaded == true);
+				ASSERT(finalFragmentHasLoaded == true);
 
 				const bool finalProgramHasLinked = shaderToLoad.shaderProgram->link(shaderToLoad.introspection);
 				FATAL_ASSERT_MSG_X(finalProgramHasLinked, "Failed to compile shader program \"%s\"", shaderToLoad.objectLabel);

@@ -362,7 +362,7 @@ if(NCINE_INSTALL_DEV_SUPPORT)
 	endif()
 endif()
 if(NOT NCINE_EMBED_SHADERS)
-	install(DIRECTORY src/shaders/ DESTINATION ${SHADERS_INSTALL_DESTINATION} COMPONENT devsupport)
+	install(DIRECTORY src/shaders/ DESTINATION ${SHADERS_INSTALL_DESTINATION} COMPONENT libraries)
 endif()
 
 include(CMakePackageConfigHelpers)

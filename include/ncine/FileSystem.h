@@ -100,8 +100,6 @@ class DLL_PUBLIC FileSystem
 	static nctl::String currentDir();
 	/// Sets the current working directory, the starting point for interpreting relative paths
 	static bool setCurrentDir(const char *path);
-	/// Returns the path of the user home directory
-	static nctl::String homeDir();
 #ifdef __ANDROID__
 	/// Returns the path of the Android external storage directory
 	static nctl::String externalStorageDir();
@@ -160,6 +158,8 @@ class DLL_PUBLIC FileSystem
 
 	/// Returns the base directory for data loading
 	inline static const nctl::String &dataPath() { return dataPath_; }
+	/// Returns the current user home directory
+	static const nctl::String &homePath();
 	/// Returns the writable directory for saving data
 	static const nctl::String &savePath();
 	/// Returns the writable directory for saving cache data
@@ -168,11 +168,15 @@ class DLL_PUBLIC FileSystem
   private:
 	/// The path for the application to load files from
 	static nctl::String dataPath_;
+	/// The path for the current user home directory
+	static nctl::String homePath_;
 	/// The path for the application to write files into
 	static nctl::String savePath_;
 	/// The path for the application to write cache files into
 	static nctl::String cachePath_;
 
+	/// Determines the current user home directory based on the platform
+	static void initHomePath();
 	/// Determines the correct save path based on the platform
 	static void initSavePath();
 	/// Determines the correct cache path based on the platform

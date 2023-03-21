@@ -27,8 +27,8 @@ class BinaryShaderCache
 	inline bool isAvailable() const { return isAvailable_; }
 	/// Returns true if the binary shader cache is currently enabled
 	inline bool isEnabled() const { return isEnabled_; }
-	/// Enables or disables the binary shader cache
-	inline void setEnabled(bool enabled) { isEnabled_ = (enabled && isAvailable_); }
+	/// Enables or disables the binary shader cache (it can be enabled only if available)
+	void setEnabled(bool enabled);
 
 	/// Returns the hash for the current platform
 	inline uint64_t platformHash() const { return platformHash_; }
@@ -58,6 +58,8 @@ class BinaryShaderCache
   private:
 	/// A flag that indicates that the OpenGL context supports binary shaders and the cache is available
 	bool isAvailable_;
+	/// A flag that indicates that the binary shader cache has been already initialized
+	bool isInitialized_;
 	/// A flag that indicates that the binary shader cache is enabled and should be used if available
 	bool isEnabled_;
 
@@ -69,6 +71,9 @@ class BinaryShaderCache
 
 	/// The statistics structure about the files in the cache
 	Statistics statistics_;
+
+	/// Initializes the cache the first time it is enabled
+	bool initialize();
 
 	/// Scans the cache directory to collect statistics
 	void collectStatistics();

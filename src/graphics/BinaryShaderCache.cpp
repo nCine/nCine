@@ -27,52 +27,24 @@ namespace {
 ///////////////////////////////////////////////////////////
 
 BinaryShaderCache::BinaryShaderCache(bool enable, const char *dirname)
-    : isAvailable_(false), isEnabled_(false), platformHash_(0)
+    : isAvailable_(false), isInitialized_(false), isEnabled_(false), platformHash_(0)
 {
 	const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
-	const bool isSupported = gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::ARB_GET_PROGRAM_BINARY);
+	const bool isSupported = gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::ARB_GET_PROGRAM_BINARY) &&
+	                         gfxCaps.value(IGfxCapabilities::GLIntValues::NUM_PROGRAM_BINARY_FORMATS) > 0;
 
 	if (isSupported)
 	{
-		const IGfxCapabilities::GlInfoStrings &infoStrings = gfxCaps.glInfoStrings();
-
-		// For a stable hash, the OpenGL strings need to be copied so that padding bytes can be set to zero
-		nctl::StaticString<512> platformString;
-
-		// 1) GL_RENDERER string
-		platformString.assign(reinterpret_cast<const char *>(infoStrings.renderer), platformString.capacity());
-
-		unsigned int paddedLength = platformString.length() + 8 - (platformString.length() % 8) + 7;
-		// Set padding bytes to zero for a deterministic hash
-		for (unsigned int i = platformString.length(); i < paddedLength; i++)
-			platformString.data()[i] = '\0';
-
-		platformHash_ += nctl::fasthash64(platformString.data(), platformString.length(), HashSeed);
-
-		// 2) GL_VERSION string
-		platformString.assign(reinterpret_cast<const char *>(infoStrings.glVersion), platformString.capacity());
-
-		paddedLength = platformString.length() + 8 - (platformString.length() % 8) + 7;
-		// Set padding bytes to zero for a deterministic hash
-		for (unsigned int i = platformString.length(); i < paddedLength; i++)
-			platformString.data()[i] = '\0';
-
-		platformHash_ += nctl::fasthash64(platformString.data(), platformString.length(), HashSeed);
+		const bool cacheDirWriteable = fs::isDirectory(fs::cachePath().data()) && fs::isWritable(fs::cachePath().data());
 
 		directory_ = fs::joinPath(fs::cachePath(), dirname);
-		if (fs::isDirectory(directory_.data()) == false)
-			fs::createDir(directory_.data());
-		else
-			collectStatistics();
+		isAvailable_ = (isSupported && cacheDirWriteable);
 
-		bufferSize = 64 * 1024;
-		bufferPtr = nctl::makeUnique<uint8_t[]>(bufferSize);
-
-		const bool dirExists = fs::isDirectory(directory_.data());
-		isAvailable_ = (isSupported && dirExists);
+		if (isAvailable_ && enable)
+			initialize();
 	}
 	else
-		LOGW_X("GL_ARB_get_program_binary extensions not supported, the binary shader cache is not enabled");
+		LOGW_X("The get_program_binary extension is not supported, the binary shader cache is not enabled");
 
 	isEnabled_ = enable && isAvailable_;
 }
@@ -80,6 +52,14 @@ BinaryShaderCache::BinaryShaderCache(bool enable, const char *dirname)
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+void BinaryShaderCache::setEnabled(bool enabled)
+{
+	if (enabled && isAvailable_)
+		initialize();
+
+	isEnabled_ = enabled;
+}
 
 uint64_t BinaryShaderCache::hashSources(unsigned int count, const char **strings, const int *lengths) const
 {
@@ -248,8 +228,62 @@ bool BinaryShaderCache::setDirectory(const char *dirPath)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+bool BinaryShaderCache::initialize()
+{
+	if (isAvailable_ == false || isInitialized_)
+		return isInitialized_;
+
+	// Check the cache directory existence before attempting the initialization
+	const bool dirExistedAlready = fs::isDirectory(directory_.data());
+	if (dirExistedAlready == false)
+		fs::createDir(directory_.data());
+
+	const bool dirExistsNow = fs::isDirectory(directory_.data());
+	isAvailable_ = (isAvailable_ && dirExistsNow);
+
+	if (isAvailable_)
+	{
+		const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
+		const IGfxCapabilities::GlInfoStrings &infoStrings = gfxCaps.glInfoStrings();
+
+		// For a stable hash, the OpenGL strings need to be copied so that padding bytes can be set to zero
+		nctl::StaticString<512> platformString;
+
+		// 1) `GL_RENDERER` string
+		platformString.assign(reinterpret_cast<const char *>(infoStrings.renderer), platformString.capacity());
+
+		unsigned int paddedLength = platformString.length() + 8 - (platformString.length() % 8) + 7;
+		// Set padding bytes to zero for a deterministic hash
+		for (unsigned int i = platformString.length(); i < paddedLength; i++)
+			platformString.data()[i] = '\0';
+
+		platformHash_ += nctl::fasthash64(platformString.data(), platformString.length(), HashSeed);
+
+		// 2) `GL_VERSION` string
+		platformString.assign(reinterpret_cast<const char *>(infoStrings.glVersion), platformString.capacity());
+
+		paddedLength = platformString.length() + 8 - (platformString.length() % 8) + 7;
+		// Set padding bytes to zero for a deterministic hash
+		for (unsigned int i = platformString.length(); i < paddedLength; i++)
+			platformString.data()[i] = '\0';
+
+		platformHash_ += nctl::fasthash64(platformString.data(), platformString.length(), HashSeed);
+
+		// Always collect statistics after having calculated the platform hash
+		if (dirExistedAlready)
+			collectStatistics();
+
+		bufferSize = 64 * 1024;
+		bufferPtr = nctl::makeUnique<uint8_t[]>(bufferSize);
+		isInitialized_ = true;
+	}
+	return isInitialized_;
+}
+
 void BinaryShaderCache::collectStatistics()
 {
+	ASSERT(platformHash_ != 0);
+
 	clearStatistics();
 	uint64_t platformHash = 0;
 

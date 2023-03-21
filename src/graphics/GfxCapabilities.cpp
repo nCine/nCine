@@ -105,14 +105,20 @@ void GfxCapabilities::init()
 	glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &glIntValues_[GLIntValues::MAX_COLOR_ATTACHMENTS]);
 	glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &glIntValues_[GLIntValues::NUM_PROGRAM_BINARY_FORMATS]);
 
+#if defined(__ANDROID__) || defined(WITH_ANGLE) || defined(WITH_OPENGLES)
+	const char *getProgramBinaryExtString = "GL_OES_get_program_binary";
+#elif !defined(__EMSCRIPTEN__)
+	const char *getProgramBinaryExtString = "GL_ARB_get_program_binary";
+#endif
+
 #ifndef __EMSCRIPTEN__
 	const char *extensionNames[GLExtensions::COUNT] = {
-		"GL_KHR_debug", "GL_ARB_texture_storage", "GL_ARB_get_program_binary", "GL_EXT_texture_compression_s3tc", "GL_OES_compressed_ETC1_RGB8_texture",
+		"GL_KHR_debug", "GL_ARB_texture_storage", getProgramBinaryExtString, "GL_EXT_texture_compression_s3tc", "GL_OES_compressed_ETC1_RGB8_texture",
 		"GL_AMD_compressed_ATC_texture", "GL_IMG_texture_compression_pvrtc", "GL_KHR_texture_compression_astc_ldr"
 	};
 #else
 	const char *extensionNames[GLExtensions::COUNT] = {
-		"GL_KHR_debug", "GL_ARB_texture_storage", "GL_ARB_get_program_binary", "WEBGL_compressed_texture_s3tc", "WEBGL_compressed_texture_etc1",
+		"GL_KHR_debug", "GL_ARB_texture_storage", "UNSUPPORTED_get_program_binary", "WEBGL_compressed_texture_s3tc", "WEBGL_compressed_texture_etc1",
 		"WEBGL_compressed_texture_atc", "WEBGL_compressed_texture_pvrtc", "WEBGL_compressed_texture_astc"
 	};
 #endif

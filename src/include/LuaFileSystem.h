@@ -28,7 +28,6 @@ class LuaFileSystem
 
 	static int currentDir(lua_State *L);
 	static int setCurrentDir(lua_State *L);
-	static int homeDir(lua_State *L);
 
 	static int isDirectory(lua_State *L);
 	static int isFile(lua_State *L);
@@ -60,6 +59,7 @@ class LuaFileSystem
 	static int removePermissions(lua_State *L);
 
 	static int dataPath(lua_State *L);
+	static int homePath(lua_State *L);
 	static int savePath(lua_State *L);
 	static int cachePath(lua_State *L);
 };

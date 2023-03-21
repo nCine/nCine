@@ -38,7 +38,6 @@ namespace FileSystem {
 
 	static const char *currentDir = "get_current_dir";
 	static const char *setCurrentDir = "set_current_dir";
-	static const char *homeDir = "get_home_dir";
 
 	static const char *isDirectory = "is_directory";
 	static const char *isFile = "is_file";
@@ -69,9 +68,10 @@ namespace FileSystem {
 	static const char *addPermissions = "add_permissions";
 	static const char *removePermissions = "remove_permissions";
 
-	static const char *dataPath = "get_datapath";
-	static const char *savePath = "get_savepath";
-	static const char *cachePath = "get_cachepath";
+	static const char *dataPath = "get_data_path";
+	static const char *homePath = "get_home_path";
+	static const char *savePath = "get_save_path";
+	static const char *cachePath = "get_cache_path";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -108,7 +108,6 @@ void LuaFileSystem::expose(lua_State *L)
 
 	LuaUtils::addFunction(L, LuaNames::FileSystem::currentDir, currentDir);
 	LuaUtils::addFunction(L, LuaNames::FileSystem::setCurrentDir, setCurrentDir);
-	LuaUtils::addFunction(L, LuaNames::FileSystem::homeDir, homeDir);
 
 	LuaUtils::addFunction(L, LuaNames::FileSystem::isDirectory, isDirectory);
 	LuaUtils::addFunction(L, LuaNames::FileSystem::isFile, isFile);
@@ -140,6 +139,7 @@ void LuaFileSystem::expose(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::FileSystem::removePermissions, removePermissions);
 
 	LuaUtils::addFunction(L, LuaNames::FileSystem::dataPath, dataPath);
+	LuaUtils::addFunction(L, LuaNames::FileSystem::homePath, homePath);
 	LuaUtils::addFunction(L, LuaNames::FileSystem::savePath, savePath);
 	LuaUtils::addFunction(L, LuaNames::FileSystem::cachePath, cachePath);
 
@@ -253,14 +253,6 @@ int LuaFileSystem::setCurrentDir(lua_State *L)
 
 	const bool dirChanged = fs::setCurrentDir(path);
 	LuaUtils::push(L, dirChanged);
-
-	return 1;
-}
-
-int LuaFileSystem::homeDir(lua_State *L)
-{
-	const nctl::String homeDir = fs::homeDir();
-	LuaUtils::push(L, homeDir.data());
 
 	return 1;
 }
@@ -509,6 +501,14 @@ int LuaFileSystem::dataPath(lua_State *L)
 {
 	const nctl::String dataPath = fs::dataPath();
 	LuaUtils::push(L, dataPath.data());
+
+	return 1;
+}
+
+int LuaFileSystem::homePath(lua_State *L)
+{
+	const nctl::String homePath = fs::homePath();
+	LuaUtils::push(L, homePath.data());
 
 	return 1;
 }

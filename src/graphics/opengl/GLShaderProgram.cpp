@@ -127,34 +127,29 @@ bool GLShaderProgram::attachShaderFromStrings(GLenum type, const char **strings)
 bool GLShaderProgram::attachShaderFromStringsAndFile(GLenum type, const char **strings, const char *filename)
 {
 	nctl::UniquePtr<GLShader> shader = nctl::makeUnique<GLShader>(type);
-	shader->loadFromStringsAndFile(strings, filename);
-	glAttachShader(glHandle_, shader->glHandle());
+	const bool hasLoaded = shader->loadFromStringsAndFile(strings, filename);
 
-	const GLShader::ErrorChecking errorChecking = (queryPhase_ == GLShaderProgram::QueryPhase::IMMEDIATE)
-	                                                  ? GLShader::ErrorChecking::IMMEDIATE
-	                                                  : GLShader::ErrorChecking::DEFERRED;
-	const bool hasCompiled = shader->compile(errorChecking, shouldLogOnErrors_);
-
-	if (hasCompiled)
+	if (hasLoaded)
+	{
+		glAttachShader(glHandle_, shader->glHandle());
 		attachedShaders_.pushBack(nctl::move(shader));
-	else
-		status_ = Status::COMPILATION_FAILED;
+	}
 
-	return hasCompiled;
+	return hasLoaded;
 }
 
 bool GLShaderProgram::link(Introspection introspection)
 {
 	introspection_ = introspection;
 
-	hashName_ = 0;
-	for (const nctl::UniquePtr<GLShader> &shader : attachedShaders_)
-		hashName_ += shader->sourceHash();
-	LOGI_X("Shader program %u - hash: 0x%016llx", glHandle_, hashName_);
-
 	bool binaryHasLoaded = false;
 	if (RenderResources::binaryShaderCache().isEnabled())
 	{
+		hashName_ = 0;
+		for (const nctl::UniquePtr<GLShader> &shader : attachedShaders_)
+			hashName_ += shader->sourceHash();
+		LOGI_X("Shader program %u - hash: 0x%016llx", glHandle_, hashName_);
+
 		const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
 		const int numBinaryFormats = gfxCaps.value(IGfxCapabilities::GLIntValues::NUM_PROGRAM_BINARY_FORMATS);
 
@@ -171,8 +166,15 @@ bool GLShaderProgram::link(Introspection introspection)
 		}
 	}
 
-	if (binaryHasLoaded == false)
+	if (binaryHasLoaded)
 	{
+		// If a binary program has been successfully loaded, its shaders should be in a compiled state
+		for (nctl::UniquePtr<GLShader> &shader : attachedShaders_)
+			shader->setStatus(GLShader::Status::COMPILED);
+	}
+	else
+	{
+		compileAttachedShaders();
 		glLinkProgram(glHandle_);
 		if (RenderResources::binaryShaderCache().isEnabled())
 		{
@@ -331,6 +333,26 @@ bool GLShaderProgram::saveBinary(int bufferSize, unsigned int &binaryFormat, voi
 		glGetProgramBinary(glHandle_, bufferSize, &length, &binaryFormat, buffer);
 
 	return (length > 0 && bufferSize >= length);
+}
+
+bool GLShaderProgram::compileAttachedShaders()
+{
+	bool hasCompiled = true;
+	for (nctl::UniquePtr<GLShader> &shader : attachedShaders_)
+	{
+		const GLShader::ErrorChecking errorChecking = (queryPhase_ == GLShaderProgram::QueryPhase::IMMEDIATE)
+		                                                  ? GLShader::ErrorChecking::IMMEDIATE
+		                                                  : GLShader::ErrorChecking::DEFERRED;
+		hasCompiled = (hasCompiled && shader->compile(errorChecking, shouldLogOnErrors_));
+
+		if (hasCompiled == false)
+		{
+			status_ = Status::COMPILATION_FAILED;
+			break;
+		}
+	}
+
+	return hasCompiled;
 }
 
 bool GLShaderProgram::deferredQueries()

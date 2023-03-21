@@ -36,8 +36,8 @@ function nc.on_init()
 	pos_ = {x = resolution.x * 0.5, y = resolution.y * 0.5}
 	angle_ = 0
 
-	font_ = nc.font.new(nc.fs.get_datapath().."fonts/DroidSans32_256.fnt",
-	                    nc.fs.get_datapath().."fonts/"..font_tex_file)
+	font_ = nc.font.new(nc.fs.get_data_path().."fonts/DroidSans32_256.fnt",
+	                    nc.fs.get_data_path().."fonts/"..font_tex_file)
 	textnode_ = nc.textnode.new(rootnode, font_, 256)
 	nc.textnode.set_string(textnode_, "This is script.lua, press V to turn blur on and off.")
 	nc.textnode.set_layer(textnode_, 100)
@@ -48,9 +48,9 @@ function nc.on_init()
 	color.b = 1.0
 	nc.textnode.set_color(textnode_, color)
 
-	texture_ = nc.texture.new(nc.fs.get_datapath().."textures/"..texture_file)
-	texture2_ = nc.texture.new(nc.fs.get_datapath().."textures/"..texture2_file)
-	texture3_ = nc.texture.new(nc.fs.get_datapath().."textures/"..texture3_file)
+	texture_ = nc.texture.new(nc.fs.get_data_path().."textures/"..texture_file)
+	texture2_ = nc.texture.new(nc.fs.get_data_path().."textures/"..texture2_file)
+	texture3_ = nc.texture.new(nc.fs.get_data_path().."textures/"..texture3_file)
 
 	local resolution_int = { x = math.floor(resolution.x), y = math.floor(resolution.y) }
 	vp_texture0_ = nc.texture.new_init("Ping texture", nc.tex_format.RGB8, 1, resolution_int)
@@ -127,7 +127,7 @@ void main()
 	})
 	nc.particle_system.add_size_affector(particlesys_, 0.5, {{0.0, 0.25}, {0.45, 0.35}, {1.0, 0.75}})
 
-	audiobuffer_ = nc.audiobuffer.new(nc.fs.get_datapath().."sounds/"..sound_file)
+	audiobuffer_ = nc.audiobuffer.new(nc.fs.get_data_path().."sounds/"..sound_file)
 	player_ = nc.audiobuffer_player.new(audiobuffer_)
 	pause_ = false
 

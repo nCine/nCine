@@ -638,10 +638,15 @@ void ImGuiDebugOverlay::guiGraphicsCapabilities()
 		ImGui::Text("GL_MAX_COLOR_ATTACHMENTS: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_COLOR_ATTACHMENTS));
 		ImGui::Text("GL_NUM_PROGRAM_BINARY_FORMATS: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::NUM_PROGRAM_BINARY_FORMATS));
 
+#if defined(__ANDROID__) || defined(WITH_ANGLE)
+		const char *getProgramBinaryExtString = "GL_OES_get_program_binary";
+#else
+		const char *getProgramBinaryExtString = "GL_ARB_get_program_binary";
+#endif
 		ImGui::Separator();
 		ImGui::Text("GL_KHR_debug: %d", gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::KHR_DEBUG));
 		ImGui::Text("GL_ARB_texture_storage: %d", gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::ARB_TEXTURE_STORAGE));
-		ImGui::Text("GL_ARB_get_program_binary: %d", gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::ARB_GET_PROGRAM_BINARY));
+		ImGui::Text("%s: %d", getProgramBinaryExtString, gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::ARB_GET_PROGRAM_BINARY));
 		ImGui::Text("GL_EXT_texture_compression_s3tc: %d", gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::EXT_TEXTURE_COMPRESSION_S3TC));
 		ImGui::Text("GL_OES_compressed_ETC1_RGB8_texture: %d", gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::OES_COMPRESSED_ETC1_RGB8_TEXTURE));
 		ImGui::Text("GL_AMD_compressed_ATC_texture: %d", gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::AMD_COMPRESSED_ATC_TEXTURE));
@@ -719,16 +724,25 @@ void ImGuiDebugOverlay::guiRenderingSettings()
 	if (ImGui::CollapsingHeader("Rendering Settings"))
 	{
 		Application::RenderingSettings &settings = theApplication().renderingSettings();
-		int minBatchSize = settings.minBatchSize;
-		int maxBatchSize = settings.maxBatchSize;
 
 		ImGui::Checkbox("Batching", &settings.batchingEnabled);
 		ImGui::SameLine();
 		ImGui::Checkbox("Batching with indices", &settings.batchingWithIndices);
 		ImGui::SameLine();
 		ImGui::Checkbox("Culling", &settings.cullingEnabled);
-		ImGui::DragIntRange2("Batch size", &minBatchSize, &maxBatchSize, 1.0f, 0, 512);
 
+		int minBatchSize = settings.minBatchSize;
+		int maxBatchSize = settings.maxBatchSize;
+#if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
+		const unsigned int fixedBatchSize = theApplication().appConfiguration().fixedBatchSize;
+		const int maxBatchSizeRange = fixedBatchSize;
+#else
+		const int maxBatchSizeRange = 512;
+#endif
+		ImGui::DragIntRange2("Batch size", &minBatchSize, &maxBatchSize, 1.0f, 0, maxBatchSizeRange);
+#if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
+		ImGui::Text("Fixed batch size: %u", fixedBatchSize);
+#endif
 		settings.minBatchSize = minBatchSize;
 		settings.maxBatchSize = maxBatchSize;
 	}
@@ -1059,6 +1073,13 @@ void ImGuiDebugOverlay::guiBinaryShaderCache()
 			ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "true");
 		else
 			ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "false");
+
+		if (isAvailable)
+		{
+			ImGui::SameLine();
+			if (ImGui::Button(isEnabled ? "Disable" : "Enable"))
+				cache.setEnabled(!isEnabled);
+		}
 
 		if (isAvailable)
 		{

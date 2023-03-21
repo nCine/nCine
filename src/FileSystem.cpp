@@ -22,13 +22,14 @@
 	#include <fcntl.h>
 #endif
 
-#if defined(__linux__)
+#ifdef __linux__
 	#include <sys/sendfile.h>
 #endif
 
 #ifdef __ANDROID__
 	#include "AndroidApplication.h"
 	#include "AssetFile.h"
+	#include "AndroidJniHelper.h"
 #endif
 
 namespace ncine {
@@ -134,6 +135,7 @@ namespace {
 ///////////////////////////////////////////////////////////
 
 nctl::String FileSystem::dataPath_(MaxPathLength);
+nctl::String FileSystem::homePath_(MaxPathLength);
 nctl::String FileSystem::savePath_(MaxPathLength);
 nctl::String FileSystem::cachePath_(MaxPathLength);
 
@@ -476,35 +478,6 @@ bool FileSystem::setCurrentDir(const char *path)
 #else
 	const int status = ::chdir(path);
 	return (status == 0);
-#endif
-}
-
-nctl::String FileSystem::homeDir()
-{
-	nctl::String returnedPath(MaxPathLength);
-#ifdef _WIN32
-	SHGetKnownFolderPath(FOLDERID_Profile, KF_FLAG_DEFAULT, nullptr, &wideString);
-	const int length = wcstombs(returnedPath.data(), wideString, returnedPath.capacity());
-	returnedPath.setLength(length);
-	CoTaskMemFree(wideString);
-	wideString = nullptr;
-
-	return returnedPath;
-#else
-	const char *homeEnv = getenv("HOME");
-	if (homeEnv == nullptr || strnlen(homeEnv, MaxPathLength) == 0)
-	{
-	#ifndef __EMSCRIPTEN__
-		// `getpwuid()` is not yet implemented on Emscripten
-		const struct passwd *pw = ::getpwuid(getuid());
-		if (pw)
-			return (returnedPath = pw->pw_dir);
-		else
-	#endif
-			return currentDir();
-	}
-	else
-		return (returnedPath = homeEnv);
 #endif
 }
 
@@ -1155,6 +1128,14 @@ bool FileSystem::removePermissions(const char *path, int mode)
 #endif
 }
 
+const nctl::String &FileSystem::homePath()
+{
+	if (homePath_.isEmpty())
+		initHomePath();
+
+	return homePath_;
+}
+
 const nctl::String &FileSystem::savePath()
 {
 	if (savePath_.isEmpty())
@@ -1174,6 +1155,32 @@ const nctl::String &FileSystem::cachePath()
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+void FileSystem::initHomePath()
+{
+#ifdef _WIN32
+	SHGetKnownFolderPath(FOLDERID_Profile, KF_FLAG_DEFAULT, nullptr, &wideString);
+	const int length = wcstombs(homePath_.data(), wideString, homePath_.capacity());
+	homePath_.setLength(length);
+	CoTaskMemFree(wideString);
+	wideString = nullptr;
+#else
+	const char *homeEnv = getenv("HOME");
+	if (homeEnv == nullptr || strnlen(homeEnv, MaxPathLength) == 0)
+	{
+	#ifndef __EMSCRIPTEN__
+		// `getpwuid()` is not yet implemented on Emscripten
+		const struct passwd *pw = ::getpwuid(getuid());
+		if (pw)
+			homePath_ = pw->pw_dir;
+		else
+	#endif
+			homePath_ = currentDir();
+	}
+	else
+		homePath_ = homeEnv;
+#endif
+}
 
 void FileSystem::initSavePath()
 {
@@ -1199,21 +1206,23 @@ void FileSystem::initSavePath()
 	CoTaskMemFree(wideString);
 	wideString = nullptr;
 #else
-	const char *homeEnv = getenv("HOME");
+	if (homePath_.isEmpty())
+		initHomePath();
 
-	if (homeEnv == nullptr || strnlen(homeEnv, MaxPathLength) == 0)
-		savePath_ = getpwuid(getuid())->pw_dir;
-	else
-		savePath_ = homeEnv;
-
-	savePath_ += "/.config/";
+	#if defined(__APPLE__)
+	savePath_ = homePath_ + "/Library/Preferences/";
+	#else
+	savePath_ = homePath_ + "/.config/";
+	#endif
 #endif
 }
 
 void FileSystem::initCachePath()
 {
 #if defined(__ANDROID__)
-	// Use `Context.getCacheDir()`
+	AndroidJniClass_File cacheFile = AndroidJniWrap_Context::getCacheDir();
+	const int length = cacheFile.getAbsolutePath(cachePath_.data(), cachePath_.capacity());
+	cachePath_.setLength(length);
 #elif defined(_WIN32)
 	SHGetKnownFolderPath(FOLDERID_LocalAppData, KF_FLAG_DEFAULT, nullptr, &wideString);
 	const int length = wcstombs(cachePath_.data(), wideString, cachePath_.capacity());
@@ -1221,14 +1230,14 @@ void FileSystem::initCachePath()
 	CoTaskMemFree(wideString);
 	wideString = nullptr;
 #else
-	const char *homeEnv = getenv("HOME");
+	if (homePath_.isEmpty())
+		initHomePath();
 
-	if (homeEnv == nullptr || strnlen(homeEnv, MaxPathLength) == 0)
-		cachePath_ = getpwuid(getuid())->pw_dir;
-	else
-		cachePath_ = homeEnv;
-
-	cachePath_ += "/.cache/";
+	#if defined(__APPLE__)
+	cachePath_ = homePath_ + "/Library/Caches/";
+	#else
+	cachePath_ = homePath_ + "/.cache/";
+	#endif
 #endif
 }
 

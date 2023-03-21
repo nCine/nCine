@@ -221,6 +221,32 @@ class AndroidJniWrap_Activity
 	static jmethodID midFinishAndRemoveTask_;
 };
 
+/// A class to handle JNI requests to `java.io.File`
+class AndroidJniClass_File : public AndroidJniClass
+{
+  public:
+	static void init();
+	explicit AndroidJniClass_File(jobject javaObject)
+	    : AndroidJniClass(javaObject) {}
+	int getAbsolutePath(char *destination, int maxStringSize) const;
+
+  private:
+	static jclass javaClass_;
+	static jmethodID midGetAbsolutePath_;
+};
+
+/// A class to handle JNI requests to `android.content.Context`
+class AndroidJniWrap_Context
+{
+  public:
+	static void init(struct android_app *state);
+	static AndroidJniClass_File getCacheDir();
+
+  private:
+	static jobject contextObject_;
+	static jmethodID midGetCacheDir_;
+};
+
 /// A class to handle JNI requests to `android.view.inputmethod.InputMethodManager`
 class AndroidJniWrap_InputMethodManager
 {
