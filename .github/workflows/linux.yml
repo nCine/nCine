@@ -106,7 +106,8 @@ jobs:
         export CC=${{ matrix.CC }}
         export CXX=${{ matrix.CXX }}
 
-        export CMAKE_ARGS="-B ../nCine-buildtests-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_UNIT_TESTS=ON -D NCINE_BUILD_TESTS=OFF -D NCINE_WITH_IMGUI=OFF -D CMAKE_PREFIX_PATH=$(pwd)/../nCine-external"
+        # Compile the nCine with no support for WebP or tests will not run as they will not find libsharpyuv.so.0
+        export CMAKE_ARGS="-B ../nCine-buildtests-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_UNIT_TESTS=ON -D NCINE_BUILD_TESTS=OFF -D NCINE_WITH_IMGUI=OFF -D NCINE_WITH_WEBP=OFF -D CMAKE_PREFIX_PATH=$(pwd)/../nCine-external"
 
         cmake $CMAKE_ARGS
         make -j2 -C ../nCine-buildtests-${{ matrix.BuildType }}

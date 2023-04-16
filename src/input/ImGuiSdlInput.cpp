@@ -37,10 +37,7 @@ namespace {
 			r.w = 1;
 			r.h = static_cast<int>(data->InputLineHeight);
 			SDL_SetTextInputRect(&r);
-			SDL_StartTextInput();
 		}
-		else
-			SDL_StopTextInput();
 	}
 
 	ImGuiKey sdlKeycodeToImGuiKey(int keycode)
@@ -343,6 +340,7 @@ bool ImGuiSdlInput::processEvent(const SDL_Event *event)
 		case SDL_MOUSEMOTION:
 		{
 			const ImVec2 mousePos(static_cast<float>(event->motion.x), static_cast<float>(event->motion.y));
+			io.AddMouseSourceEvent(event->motion.which == SDL_TOUCH_MOUSEID ? ImGuiMouseSource_TouchScreen : ImGuiMouseSource_Mouse);
 			io.AddMousePosEvent(mousePos.x, mousePos.y);
 			return true;
 		}
@@ -358,6 +356,7 @@ bool ImGuiSdlInput::processEvent(const SDL_Event *event)
 #ifdef __EMSCRIPTEN__
 			wheelX /= 100.0f;
 #endif
+			io.AddMouseSourceEvent(event->wheel.which == SDL_TOUCH_MOUSEID ? ImGuiMouseSource_TouchScreen : ImGuiMouseSource_Mouse);
 			io.AddMouseWheelEvent(wheelX, wheelY);
 			return true;
 		}
@@ -377,6 +376,7 @@ bool ImGuiSdlInput::processEvent(const SDL_Event *event)
 				mouseButton = 4;
 			if (mouseButton == -1)
 				break;
+			io.AddMouseSourceEvent(event->wheel.which == SDL_TOUCH_MOUSEID ? ImGuiMouseSource_TouchScreen : ImGuiMouseSource_Mouse);
 			io.AddMouseButtonEvent(mouseButton, (event->type == SDL_MOUSEBUTTONDOWN));
 			mouseButtonsDown_ = (event->type == SDL_MOUSEBUTTONDOWN) ? (mouseButtonsDown_ | (1 << mouseButton)) : (mouseButtonsDown_ & ~(1 << mouseButton));
 			return true;

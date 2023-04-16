@@ -45,6 +45,9 @@ namespace {
 	GLFWkeyfun prevUserCallbackKey = nullptr;
 	GLFWcharfun prevUserCallbackChar = nullptr;
 	GLFWmonitorfun prevUserCallbackMonitor = nullptr;
+#ifdef _WIN32
+	WNDPROC glfwWndProc = nullptr;
+#endif
 
 	const char *clipboardText(void *userData)
 	{
@@ -241,6 +244,35 @@ namespace {
 	}
 #endif
 
+#ifdef _WIN32
+	// GLFW doesn't allow to distinguish Mouse vs TouchScreen vs Pen.
+	// Add support for Win32 (based on imgui_impl_win32), because we rely on _TouchScreen info to trickle inputs differently.
+	ImGuiMouseSource getMouseSourceFromMessageExtraInfo()
+	{
+		LPARAM extra_info = ::GetMessageExtraInfo();
+		if ((extra_info & 0xFFFFFF80) == 0xFF515700)
+			return ImGuiMouseSource_Pen;
+		if ((extra_info & 0xFFFFFF80) == 0xFF515780)
+			return ImGuiMouseSource_TouchScreen;
+		return ImGuiMouseSource_Mouse;
+	}
+
+	LRESULT CALLBACK ImGui_ImplGlfw_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+	{
+		switch (msg)
+		{
+			case WM_MOUSEMOVE: case WM_NCMOUSEMOVE:
+			case WM_LBUTTONDOWN: case WM_LBUTTONDBLCLK: case WM_LBUTTONUP:
+			case WM_RBUTTONDOWN: case WM_RBUTTONDBLCLK: case WM_RBUTTONUP:
+			case WM_MBUTTONDOWN: case WM_MBUTTONDBLCLK: case WM_MBUTTONUP:
+			case WM_XBUTTONDOWN: case WM_XBUTTONDBLCLK: case WM_XBUTTONUP:
+				ImGui::GetIO().AddMouseSourceEvent(getMouseSourceFromMessageExtraInfo());
+				break;
+		}
+		return ::CallWindowProc(glfwWndProc, hWnd, msg, wParam, lParam);
+	}
+#endif
+
 }
 
 ///////////////////////////////////////////////////////////
@@ -324,6 +356,13 @@ void ImGuiGlfwInput::init(GLFWwindow *window, bool withCallbacks)
 #else
 	(void)mainViewport;
 #endif
+
+	// Windows: register a WndProc hook so we can intercept some messages.
+#ifdef _WIN32
+	glfwWndProc = (WNDPROC)::GetWindowLongPtr((HWND)mainViewport->PlatformHandleRaw, GWLP_WNDPROC);
+	IM_ASSERT(glfwWndProc != nullptr);
+	::SetWindowLongPtr((HWND)mainViewport->PlatformHandleRaw, GWLP_WNDPROC, (LONG_PTR)ImGui_ImplGlfw_WndProc);
+#endif
 }
 
 void ImGuiGlfwInput::shutdown()
@@ -335,6 +374,13 @@ void ImGuiGlfwInput::shutdown()
 
 	for (ImGuiMouseCursor i = 0; i < ImGuiMouseCursor_COUNT; i++)
 		glfwDestroyCursor(mouseCursors_[i]);
+
+		// Windows: register a WndProc hook so we can intercept some messages.
+#ifdef _WIN32
+	ImGuiViewport *mainViewport = ImGui::GetMainViewport();
+	::SetWindowLongPtr((HWND)mainViewport->PlatformHandleRaw, GWLP_WNDPROC, (LONG_PTR)glfwWndProc);
+	glfwWndProc = nullptr;
+#endif
 
 	io.BackendPlatformName = nullptr;
 

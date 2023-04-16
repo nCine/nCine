@@ -276,6 +276,22 @@ bool ImGuiAndroidInput::processEvent(const AInputEvent *event)
 			int32_t eventAction = AMotionEvent_getAction(event);
 			const int32_t eventPointerIndex = (eventAction & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK) >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
 			eventAction &= AMOTION_EVENT_ACTION_MASK;
+
+			switch (AMotionEvent_getToolType(event, eventPointerIndex))
+			{
+				case AMOTION_EVENT_TOOL_TYPE_MOUSE:
+					io.AddMouseSourceEvent(ImGuiMouseSource_Mouse);
+					break;
+				case AMOTION_EVENT_TOOL_TYPE_STYLUS:
+				case AMOTION_EVENT_TOOL_TYPE_ERASER:
+					io.AddMouseSourceEvent(ImGuiMouseSource_Pen);
+					break;
+				case AMOTION_EVENT_TOOL_TYPE_FINGER:
+				default:
+					io.AddMouseSourceEvent(ImGuiMouseSource_TouchScreen);
+					break;
+			}
+
 			switch (eventAction)
 			{
 				case AMOTION_EVENT_ACTION_DOWN:
