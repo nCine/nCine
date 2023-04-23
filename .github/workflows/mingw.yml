@@ -7,6 +7,7 @@ env:
 
      - nCine artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
   DEPLOY_BRANCH: nCine-BRANCH_NAME-OS-COMPILER
+  NUM_THREADS: 2
 
 on: [push, workflow_dispatch]
 
@@ -126,10 +127,10 @@ jobs:
         $env:CXX = "${{ matrix.CXX }}"
         $env:MSYSTEM = "MINGW64"
 
-        C:\msys64\usr\bin\bash.exe -lc 'cmake -G \"MSYS Makefiles\" -B ../nCine-buildtests-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_UNIT_TESTS=ON -D NCINE_BUILD_TESTS=OFF -D NCINE_WITH_IMGUI=OFF'
-        C:\msys64\usr\bin\bash.exe -lc 'make -j2 -C ../nCine-buildtests-${{ matrix.BuildType }}'
+        C:\msys64\usr\bin\bash.exe -lc 'cmake -G \"MSYS Makefiles\" -B ../nCine-buildtests-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=UnitTests'
+        C:\msys64\usr\bin\bash.exe -lc 'make -j $NUM_THREADS -C ../nCine-buildtests-${{ matrix.BuildType }}'
         cd ..\nCine-buildtests-${{ matrix.BuildType }}
-        C:\msys64\usr\bin\bash.exe -lc 'ctest -j2 --build-config ${{ matrix.BuildType }}'
+        C:\msys64\usr\bin\bash.exe -lc 'ctest -j $NUM_THREADS --build-config ${{ matrix.BuildType }}'
 
     - name: 'CMake Configuration'
       env:
@@ -144,7 +145,7 @@ jobs:
           { $EnableTracy = 'OFF' }
 
         if ("${{ matrix.BuildType }}" -eq "DevDist" -Or "${{ matrix.BuildType }}" -eq "LuaDist")
-          { C:\msys64\usr\bin\bash.exe -lc 'cmake -G \"MSYS Makefiles\" -B ../nCine-build-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }} -D NDK_DIR=$(cygpath -m $ANDROID_NDK_LATEST_HOME)' }
+          { C:\msys64\usr\bin\bash.exe -lc 'cmake -G \"MSYS Makefiles\" -B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=Release -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }} -D NDK_DIR=$(cygpath -m $ANDROID_NDK_LATEST_HOME)' }
         else
           { C:\msys64\usr\bin\bash.exe -lc 'cmake -G \"MSYS Makefiles\" -B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_BENCHMARKS=ON -D NCINE_WITH_TRACY=$EnableTracy -D NCINE_WITH_RENDERDOC=ON -D RENDERDOC_DIR=$PWD/../RenderDoc' }
 
@@ -154,7 +155,7 @@ jobs:
       run: |
         $env:MSYSTEM = "MINGW64"
 
-        C:\msys64\usr\bin\bash.exe -lc 'make -j2 -C ../nCine-build-${{ matrix.BuildType }}'
+        C:\msys64\usr\bin\bash.exe -lc 'make -j $NUM_THREADS -C ../nCine-build-${{ matrix.BuildType }}'
 
     - name: 'Package'
       if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'

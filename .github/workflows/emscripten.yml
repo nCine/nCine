@@ -7,6 +7,7 @@ env:
 
      - nCine artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
   DEPLOY_BRANCH: nCine-BRANCH_NAME-OS-COMPILER
+  NUM_THREADS: 2
 
 on: [push, workflow_dispatch]
 
@@ -63,18 +64,18 @@ jobs:
         source ../emsdk/emsdk_env.sh
 
         # Not using emcmake to avoid issue #10028 with CMAKE_CROSSCOMPILING_EMULATOR path
-        cmake -B ../nCine-buildtests-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_UNIT_TESTS=ON -D NCINE_BUILD_TESTS=OFF -D NCINE_WITH_IMGUI=OFF -D CMAKE_CROSSCOMPILING_EMULATOR=$EMSDK_NODE -D CMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
+        cmake -B ../nCine-buildtests-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=UnitTests -D CMAKE_CROSSCOMPILING_EMULATOR=$EMSDK_NODE -D CMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
 
-        make -j2 -C ../nCine-buildtests-${{ matrix.BuildType }}
+        make -j $NUM_THREADS -C ../nCine-buildtests-${{ matrix.BuildType }}
         cd ../nCine-buildtests-${{ matrix.BuildType }}
-        ctest -j2 --build-config ${{ matrix.BuildType }}
+        ctest -j $NUM_THREADS --build-config ${{ matrix.BuildType }}
 
     - name: 'CMake Configuration'
       run: |
         source ../emsdk/emsdk_env.sh
 
         if [[ "${{ matrix.BuildType }}" == "DevDist" || "${{ matrix.BuildType }}" == "LuaDist" ]]; then
-          export CMAKE_ARGS="-B ../nCine-build-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }}"
+          export CMAKE_ARGS="-B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=Release -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }}"
         else
           export CMAKE_ARGS="-B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }}"
         fi
@@ -83,7 +84,7 @@ jobs:
 
     - name: 'Make'
       run: |
-        make -j2 -C ../nCine-build-${{ matrix.BuildType }}
+        make -j $NUM_THREADS -C ../nCine-build-${{ matrix.BuildType }}
 
     - name: 'Package'
       if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'

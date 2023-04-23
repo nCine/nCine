@@ -7,6 +7,7 @@ env:
 
      - nCine artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
   DEPLOY_BRANCH: nCine-BRANCH_NAME-OS-COMPILER
+  NUM_THREADS: 2
 
 on: [push, workflow_dispatch]
 
@@ -57,26 +58,26 @@ jobs:
     - name: 'CMake Configuration, Make and Test'
       if: matrix.BuildType != 'DevDist' && matrix.BuildType != 'LuaDist'
       run: |
-        export CMAKE_ARGS="-B ../nCine-buildtests-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_UNIT_TESTS=ON -D NCINE_BUILD_TESTS=OFF -D NCINE_WITH_IMGUI=OFF"
+        export CMAKE_ARGS="-B ../nCine-buildtests-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=UnitTests"
 
         cmake $CMAKE_ARGS
-        make -j2 -C ../nCine-buildtests-${{ matrix.BuildType }}
+        make -j $NUM_THREADS -C ../nCine-buildtests-${{ matrix.BuildType }}
         cd ../nCine-buildtests-${{ matrix.BuildType }}
-        ctest -j2 --build-config ${{ matrix.BuildType }}
+        ctest -j $NUM_THREADS --build-config ${{ matrix.BuildType }}
 
     - name: 'CMake Configuration'
       run: |
         if [[ "${{ matrix.BuildType }}" == "DevDist" || "${{ matrix.BuildType }}" == "LuaDist" ]]; then
-          export CMAKE_ARGS="-B ../nCine-build-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }} -D NDK_DIR=$ANDROID_NDK_LATEST_HOME"
+          export CMAKE_ARGS="-B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=Release -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }} -D NDK_DIR=$ANDROID_NDK_LATEST_HOME"
         else
           export CMAKE_ARGS="-B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_BENCHMARKS=ON -D NCINE_WITH_TRACY=ON"
         fi
 
-         cmake $CMAKE_ARGS
+        cmake $CMAKE_ARGS
 
     - name: 'Make'
       run: |
-        make -j2 -C ../nCine-build-${{ matrix.BuildType }}
+        make -j $NUM_THREADS -C ../nCine-build-${{ matrix.BuildType }}
 
     - name: 'Package'
       if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'

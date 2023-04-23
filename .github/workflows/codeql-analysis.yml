@@ -2,6 +2,7 @@ name: 'CodeQL'
 
 env:
   LIBRARIES_BRANCH: libraries-OS-COMPILER
+  NUM_THREADS: 2
 
 on: [push, workflow_dispatch]
 
@@ -59,7 +60,7 @@ jobs:
 
         cd nCine
         cmake -B ../nCine-build-$BuildType -D CMAKE_BUILD_TYPE=$BuildType -D NCINE_BUILD_UNIT_TESTS=ON -D CMAKE_PREFIX_PATH=$(pwd)/../nCine-external
-        make -j2 -C ../nCine-build-$BuildType
+        make -j $NUM_THREADS -C ../nCine-build-$BuildType
 
     - name: 'Perform CodeQL Analysis'
       uses: github/codeql-action/analyze@v1

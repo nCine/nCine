@@ -7,6 +7,7 @@ env:
 
      - nCine artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
   DEPLOY_BRANCH: nCine-BRANCH_NAME-OS-COMPILER
+  NUM_THREADS: 2
 
 on: [push, workflow_dispatch]
 
@@ -90,10 +91,10 @@ jobs:
           "windows-2019" {"Visual Studio 16 2019"}
         }
 
-        cmake -G "$env:generator" -A x64 -B ../nCine-buildtests-${{ matrix.BuildType }} -D NCINE_BUILD_UNIT_TESTS=ON -D NCINE_BUILD_TESTS=OFF -D NCINE_WITH_IMGUI=OFF
+        cmake -G "$env:generator" -A x64 -B ../nCine-buildtests-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=UnitTests
         cmake --build ../nCine-buildtests-${{ matrix.BuildType }} --config ${{ matrix.BuildType }}
         cd ../nCine-buildtests-${{ matrix.BuildType }}
-        ctest -j2 --build-config ${{ matrix.BuildType }}
+        ctest -j $env:NUM_THREADS --build-config ${{ matrix.BuildType }}
 
     - name: 'CMake Configuration'
       run: |
