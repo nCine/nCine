@@ -285,8 +285,7 @@ bool Font::loadTextureFromMemory(const char *texBufferName, const unsigned char 
 {
 	if (texture_ == nullptr)
 		texture_ = nctl::makeUnique<Texture>();
-	if (texturePtr_ != nullptr)
-		texturePtr_ = nullptr;
+	texturePtr_ = nullptr;
 
 	const bool texHasLoaded = texture_->loadFromMemory(texBufferName, texBufferPtr, texBufferSize);
 	return texHasLoaded;
@@ -296,8 +295,7 @@ bool Font::loadTextureFromFile(const char *texFilename)
 {
 	if (texture_ == nullptr)
 		texture_ = nctl::makeUnique<Texture>();
-	if (texturePtr_ != nullptr)
-		texturePtr_ = nullptr;
+	texturePtr_ = nullptr;
 
 	const bool texHasLoaded = texture_->loadFromFile(texFilename);
 	return texHasLoaded;

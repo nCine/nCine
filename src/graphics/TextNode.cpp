@@ -101,7 +101,8 @@ void TextNode::setFont(Font *font)
 		const bool hasChanged = renderCommand_->material().setShaderProgramType(shaderProgramType);
 		if (hasChanged)
 			shaderHasChanged();
-		renderCommand_->material().setTexture(*font_->texture());
+		if (font_->texture())
+			renderCommand_->material().setTexture(*font_->texture());
 
 		dirtyDraw_ = true;
 		dirtyBoundaries_ = true;
@@ -343,7 +344,7 @@ void TextNode::init()
 	renderCommand_->material().setShaderProgramType(shaderProgramType);
 	shaderHasChanged();
 
-	if (font_)
+	if (font_ && font_->texture())
 		renderCommand_->material().setTexture(*font_->texture());
 
 	renderCommand_->geometry().setPrimitiveType(GL_TRIANGLE_STRIP);
@@ -454,7 +455,7 @@ void TextNode::processGlyph(const FontGlyph *glyph, Degenerate degen)
 	const float topPos = -yAdvance_ - offset.y;
 	const float bottomPos = topPos - size.y;
 
-	const Vector2i texSize = font_->texture()->size();
+	const Vector2i texSize = font_ && font_->texture() ? font_->texture()->size() : Vector2i::Zero;
 	const Recti texRect = glyph->texRect();
 
 	const float leftCoord = float(texRect.x) / float(texSize.x);

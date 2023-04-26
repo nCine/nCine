@@ -69,6 +69,19 @@ class MyEventHandler :
 	nc::LuaStateManager luaState_;
 	nctl::UniquePtr<nc::Font> font_;
 	nctl::UniquePtr<nc::TextNode> text_;
+
+	enum class LoadMode
+	{
+		NORMAL,
+		FAST
+	};
+
+	void expose(lua_State *L);
+	static int reloadScript(lua_State *L);
+	static int showGui(lua_State *L);
+	static int isGuiHidden(lua_State *L);
+
+	bool loadScript(LoadMode mode);
 };
 
 #endif

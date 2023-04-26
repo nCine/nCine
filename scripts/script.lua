@@ -188,32 +188,53 @@ function ncine.on_resize_window(width, height)
 end
 
 function ncine.on_shutdown()
+	-- For a fast reload to work correctly, every object should be set to `nil` after deletion
 	nc.audiobuffer_player.delete(player_)
+	player_ = nil
 	nc.audiobuffer.delete(audiobuffer_)
+	audiobuffer_ = nil
 
 	nc.particle_system.delete(particlesys_)
+	particlesys_ = nil
 
 	nc.mesh_sprite.delete(meshsprite_)
+	meshsprite_ = nil
 	nc.sprite.delete(sprite_)
+	sprite_ = nil
 
 	nc.shaderstate.delete(vp_pongshaderstate_)
+	vp_pongshaderstate_ = nil
 	nc.sprite.delete(vp_pongsprite_)
+	vp_pongsprite_ = nil
 	nc.shaderstate.delete(vp_pingshaderstate_)
+	vp_pingshaderstate_ = nil
 	nc.sprite.delete(vp_pingsprite_)
+	vp_pingsprite_ = nil
 	nc.shader.delete(blur_shader_)
+	blur_shader_ = nil
 
 	nc.viewport.delete(pong_viewport_)
+	pong_viewport_ = nil
 	nc.viewport.delete(ping_viewport_)
+	ping_viewport_ = nil
 	nc.viewport.delete(scene_viewport_)
+	scene_viewport_ = nil
 	nc.texture.delete(vp_texture1_)
+	vp_texture1_ = nil
 	nc.texture.delete(vp_texture0_)
+	vp_texture0_ = nil
 
 	nc.texture.delete(texture3_)
+	texture3_ = nil
 	nc.texture.delete(texture2_)
+	texture2_ = nil
 	nc.texture.delete(texture_)
+	texture_  = nil
 
 	nc.textnode.delete(textnode_)
+	textnode_ = nil
 	nc.font.delete(font_)
+	font_ = nil
 end
 
 function ncine.on_key_released(event)
@@ -230,6 +251,16 @@ function ncine.on_key_released(event)
 		nc.gfx_device.set_fullscreen(not nc.gfx_device.is_fullscreen())
 		if nc.gfx_device.is_fullscreen() == false then
 			nc.gfx_device.set_window_size(nc.application.get_app_configuration().resolution)
+		end
+	elseif event.sym == nc.keysym.F5 or event.sym == nc.keysym.N5 then
+		-- Don't call `reload_script()` if the function is not available, like when using the Lua interpreter directly
+		if reload_script then
+			reload_script()
+		end
+	elseif event.mod == nc.keymod.CTRL and event.sym == nc.keysym.H then
+		-- Don't call `show_gui()` if the function is not available, like when using the Lua interpreter directly
+		if show_gui and is_gui_hidden then
+			show_gui(is_gui_hidden())
 		end
 	elseif event.sym == nc.keysym.ESCAPE then
 		nc.application.quit()

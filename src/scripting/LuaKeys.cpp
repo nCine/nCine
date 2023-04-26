@@ -115,7 +115,7 @@ void LuaKeys::exposeConstants(lua_State *L)
 	LuaUtils::pushField(L, "F12", static_cast<int64_t>(KeySym::F12));
 	LuaUtils::pushField(L, "F13", static_cast<int64_t>(KeySym::F13));
 	LuaUtils::pushField(L, "F14", static_cast<int64_t>(KeySym::F14));
-	LuaUtils::pushField(L, "F5", static_cast<int64_t>(KeySym::F15));
+	LuaUtils::pushField(L, "F15", static_cast<int64_t>(KeySym::F15));
 
 	LuaUtils::pushField(L, "NUM_LOCK", static_cast<int64_t>(KeySym::NUM_LOCK));
 	LuaUtils::pushField(L, "CAPS_LOCK", static_cast<int64_t>(KeySym::CAPS_LOCK));

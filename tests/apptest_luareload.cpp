@@ -103,7 +103,7 @@ void MyEventHandler::onTouchMove(const nc::TouchEvent &event)
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 {
-	if (event.sym == nc::KeySym::N5)
+	if (event.sym == nc::KeySym::F5 || event.sym == nc::KeySym::N5)
 		runScript();
 	else if (event.sym == nc::KeySym::P)
 		pause_ = !pause_;
