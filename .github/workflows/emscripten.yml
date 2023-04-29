@@ -104,11 +104,15 @@ jobs:
 
         export OS=emscripten
         export CC=emcc
+        export PACKAGE_EXT=tar.gz
+
+        cd ../nCine-build-${{ matrix.BuildType }}
+        echo -e "include(CPackConfig.cmake)\nexecute_process(COMMAND \${CMAKE_COMMAND} -E echo_append \"\${CPACK_PACKAGE_NAME}\")" > package_name.cmake
+        export PACKAGE_NAME=$(cmake -P package_name.cmake)
+        echo -e "include(CPackConfig.cmake)\nexecute_process(COMMAND \${CMAKE_COMMAND} -E echo_append \"\${CPACK_PACKAGE_FILE_NAME}\")" > package_file_name.cmake
+        export PACKAGE_FILE_NAME=$(cmake -P package_file_name.cmake)
 
         cd ..
-        if [[ "${{ matrix.BuildType }}" == "LuaDist" ]]; then
-            export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/nCine/nCineLua/'`
-        fi
         export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/BRANCH_NAME/'"$BRANCH_NAME"'/'`
         export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/OS/'"$OS"'/'`
         export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/COMPILER/'"$CC"'/'`
@@ -117,8 +121,8 @@ jobs:
         git checkout $DEPLOY_BRANCH || git checkout --orphan $DEPLOY_BRANCH
         git reset
         git clean -f
-        git rm * || true
-        mv -f ../nCine-build-${{ matrix.BuildType }}/*.tar.gz .
-        git add *.tar.gz
+        git rm $PACKAGE_NAME-*.$PACKAGE_EXT || true
+        mv -f ../nCine-build-${{ matrix.BuildType }}/$PACKAGE_FILE_NAME.$PACKAGE_EXT .
+        git add $PACKAGE_FILE_NAME.$PACKAGE_EXT
         git commit --amend -m "$DEPLOY_MESSAGE" || git commit -m "$DEPLOY_MESSAGE"
         git push --force || git push --set-upstream origin $DEPLOY_BRANCH

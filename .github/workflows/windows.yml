@@ -139,10 +139,16 @@ jobs:
           "windows-2019" {"vs2019"}
         }
 
-        if ("${{ matrix.BuildType }}" -eq "LuaDist")
-            { $env:DEPLOY_BRANCH = $env:DEPLOY_BRANCH -replace "nCine","nCineLua" }
         $env:DEPLOY_BRANCH = $env:DEPLOY_BRANCH -replace "BRANCH_NAME",$env:branch_name
         $env:DEPLOY_BRANCH = $env:DEPLOY_BRANCH -replace "OS","windows" -replace "COMPILER",$env:vsversion
+        $env:package_ext0 = "exe"
+        $env:package_ext1 = "zip"
+
+        cd ..\nCine-build-${{ matrix.BuildType }}
+        Set-Content -Path package_name.cmake -Value 'include(CPackConfig.cmake)','execute_process(COMMAND ${CMAKE_COMMAND} -E echo_append "${CPACK_PACKAGE_NAME}")'
+        $env:package_name = cmake -P package_name.cmake
+        Set-Content -Path package_file_name.cmake -Value 'include(CPackConfig.cmake)','execute_process(COMMAND ${CMAKE_COMMAND} -E echo_append "${CPACK_PACKAGE_FILE_NAME}")'
+        $env:package_file_name = cmake -P package_file_name.cmake
 
         cd ..
         git clone https://$env:PUBLIC_REPO_TOKEN@github.com/nCine/nCine-artifacts.git 2>&1>$null
@@ -150,11 +156,11 @@ jobs:
         git checkout $env:DEPLOY_BRANCH; if (-not $?) { git checkout --orphan $env:DEPLOY_BRANCH }
         git reset
         git clean -f
-        git rm *
+        git rm "$env:package_name-*.$env:package_ext0" "$env:package_name-*.$env:package_ext1"
 
-        Move-Item -Path ..\nCine-build-${{ matrix.BuildType }}\*.exe -Destination .
-        Move-Item -Path ..\nCine-build-${{ matrix.BuildType }}\*.zip -Destination .
-        git add *.exe *.zip
+        Move-Item -Path ..\nCine-build-${{ matrix.BuildType }}\$env:package_file_name.$env:package_ext0 -Destination .
+        Move-Item -Path ..\nCine-build-${{ matrix.BuildType }}\$env:package_file_name.$env:package_ext1 -Destination .
+        git add "$env:package_file_name.$env:package_ext0" "$env:package_file_name.$env:package_ext1"
 
         git commit --amend -m "$env:DEPLOY_MESSAGE"; if (-not $?) { git commit -m "$env:DEPLOY_MESSAGE" }
         git push --force; if (-not $?) { git push --set-upstream origin $env:DEPLOY_BRANCH }
