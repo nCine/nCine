@@ -229,6 +229,7 @@ int LuaApplication::interval(lua_State *L)
 
 int LuaApplication::numFrames(lua_State *L)
 {
+	// The cast disambiguate the `push` function on Emscripten
 	LuaUtils::push(L, static_cast<uint64_t>(theApplication().numFrames()));
 	return 1;
 }

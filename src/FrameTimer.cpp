@@ -7,11 +7,18 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-/*! Constructs a timer which calculates average FPS every `avgInterval`
- *  seconds and writes to the log every `logInterval` seconds. */
-FrameTimer::FrameTimer(float logInterval, float avgInterval)
-    : logInterval_(logInterval), avgInterval_(avgInterval),
-      totNumFrames_(0L), avgNumFrames_(0L), logNumFrames_(0L), fps_(0.0f)
+/*! \note Defined here to avoid emitting its vtable in every translation unit */
+IFrameTimer::~IFrameTimer()
+{
+}
+
+/*! Constructs a timer which calculates average FPS every `averageInterval`
+ *  seconds and writes to the log every `loggingInterval` seconds. */
+FrameTimer::FrameTimer(float averageInterval, float loggingInterval)
+    : averageInterval_(averageInterval), loggingInterval_(loggingInterval),
+      frameDuration_(0.0f),
+      totNumFrames_(0L), avgNumFrames_(0L), logNumFrames_(0L),
+      avgFps_(0.0f), avgFrameTime_(0.0f), logLevel_(ILogger::LogLevel::INFO)
 {
 }
 
@@ -19,9 +26,81 @@ FrameTimer::FrameTimer(float logInterval, float avgInterval)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+bool FrameTimer::loggingEnabled() const
+{
+	return (loggingInterval_ > 0.0f && logLevel_ != ILogger::LogLevel::OFF);
+}
+
+void FrameTimer::setAverageInterval(float averageInterval)
+{
+	if (averageInterval == averageInterval_)
+		return;
+
+	if (averageInterval <= 0.0f)
+	{
+		avgNumFrames_ = 0L;
+		averageInterval_ = 0.0f;
+	}
+	else
+	{
+		if (averageInterval < averageInterval_ || averageInterval_ <= 0.0f)
+		{
+			avgNumFrames_ = 0L;
+			lastAvgUpdate_ = TimeStamp::now();
+		}
+		averageInterval_ = averageInterval;
+	}
+}
+
+void FrameTimer::setLoggingInterval(float loggingInterval)
+{
+	if (loggingInterval == loggingInterval_)
+		return;
+
+	if (loggingInterval <= 0.0f)
+	{
+		// Stop logging
+		logNumFrames_ = 0L;
+	}
+	else
+	{
+		// Resume logging
+		if (loggingInterval < loggingInterval_ || loggingInterval_ <= 0.0f)
+		{
+			logNumFrames_ = 0L;
+			lastLogUpdate_ = TimeStamp::now();
+		}
+	}
+
+	loggingInterval_ = (loggingInterval >= 0.0f) ? loggingInterval : 0.0f;
+}
+
+void FrameTimer::setLogLevel(ILogger::LogLevel logLevel)
+{
+	if (logLevel == logLevel_)
+		return;
+
+	if (logLevel == ILogger::LogLevel::OFF)
+	{
+		// Stop logging
+		logNumFrames_ = 0L;
+	}
+	else
+	{
+		// Resume logging
+		if (loggingInterval_ > 0.0f)
+		{
+			logNumFrames_ = 0L;
+			lastLogUpdate_ = TimeStamp::now();
+		}
+	}
+
+	logLevel_ = logLevel;
+}
+
 void FrameTimer::addFrame()
 {
-	frameInterval_ = frameStart_.secondsSince();
+	frameDuration_ = frameStart_.secondsSince();
 
 	// Start counting for the next frame interval
 	frameStart_ = TimeStamp::now();
@@ -32,9 +111,10 @@ void FrameTimer::addFrame()
 
 	// Update the FPS average calculation every `avgInterval_` seconds
 	const float secsSinceLastAvgUpdate = (frameStart_ - lastAvgUpdate_).seconds();
-	if (avgInterval_ > 0.0f && secsSinceLastAvgUpdate > avgInterval_)
+	if (averageEnabled() && secsSinceLastAvgUpdate > averageInterval_)
 	{
-		fps_ = static_cast<float>(avgNumFrames_) / secsSinceLastAvgUpdate;
+		avgFps_ = static_cast<float>(avgNumFrames_) / secsSinceLastAvgUpdate;
+		avgFrameTime_ = secsSinceLastAvgUpdate / static_cast<float>(avgNumFrames_);
 
 		avgNumFrames_ = 0L;
 		lastAvgUpdate_ = TimeStamp::now();
@@ -42,11 +122,11 @@ void FrameTimer::addFrame()
 
 	const float secsSinceLastLogUpdate = (frameStart_ - lastLogUpdate_).seconds();
 	// Log number of frames and FPS every `logInterval_` seconds
-	if (logInterval_ > 0.0f && avgNumFrames_ != 0 && secsSinceLastLogUpdate > logInterval_)
+	if (loggingEnabled() && avgNumFrames_ != 0 && secsSinceLastLogUpdate > loggingInterval_)
 	{
-		fps_ = static_cast<float>(logNumFrames_) / logInterval_;
-		const float msPerFrame = (logInterval_ * 1000.0f) / static_cast<float>(logNumFrames_);
-		LOGV_X("%lu frames in %.0f seconds = %f FPS (%.3f ms per frame)", logNumFrames_, logInterval_, fps_, msPerFrame);
+		const float fps = static_cast<float>(logNumFrames_) / secsSinceLastLogUpdate;
+		const float frameTime = secsSinceLastLogUpdate / static_cast<float>(logNumFrames_);
+		LOG_X(logLevel_, "%lu frames in %.2f seconds = %f FPS (%.3f ms per frame)", logNumFrames_, secsSinceLastLogUpdate, fps, frameTime * 1000.0f);
 
 		logNumFrames_ = 0L;
 		lastLogUpdate_ = TimeStamp::now();

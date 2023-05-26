@@ -9,6 +9,7 @@
 
 namespace ncine {
 
+class IFrameTimer;
 class FrameTimer;
 class SceneNode;
 class Viewport;
@@ -105,8 +106,10 @@ class DLL_PUBLIC Application
 
 	/// Returns the total number of frames already rendered
 	unsigned long int numFrames() const;
-	/// Returns the elapsed time since the end of the previous frame in seconds
+	/// Returns the time in seconds that last frame took to complete
 	float interval() const;
+	/// Returns the frame timer interface
+	IFrameTimer &frameTimer();
 
 	/// Returns the drawable screen width as a float number
 	inline float width() const { return static_cast<float>(gfxDevice_->drawableWidth()); }

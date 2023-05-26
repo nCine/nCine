@@ -16,6 +16,7 @@
 	#include "IAudioPlayer.h"
 #endif
 
+#include "IFrameTimer.h"
 #include "RenderStatistics.h"
 #ifdef WITH_LUA
 	#include "LuaStatistics.h"
@@ -279,6 +280,7 @@ void ImGuiDebugOverlay::guiWindow()
 	guiPreprocessorDefines();
 	guiVersionStrings();
 	guiInitTimes();
+	guiFrameTimer();
 	guiLog();
 	guiGraphicsCapabilities();
 	guiApplicationConfiguration();
@@ -545,6 +547,43 @@ void ImGuiDebugOverlay::guiInitTimes()
 		ImGui::Text("Pre-Init Time: %.3f s", timings[Application::Timings::PRE_INIT]);
 		ImGui::Text("Init Time: %.3f s", timings[Application::Timings::INIT_COMMON]);
 		ImGui::Text("Application Init Time: %.3f s", timings[Application::Timings::APP_INIT]);
+	}
+}
+
+void ImGuiDebugOverlay::guiFrameTimer()
+{
+	if (ImGui::CollapsingHeader("Frame Timer"))
+	{
+		IFrameTimer &frameTimer = theApplication().frameTimer();
+
+		float averageInterval = frameTimer.averageInterval();
+		bool averageEnabled = frameTimer.averageEnabled();
+		ImGui::BeginDisabled(averageEnabled == false);
+		ImGui::SliderFloat("Average Update Time", &averageInterval, 0.05f, 1.0f, "%.2f s", ImGuiSliderFlags_AlwaysClamp);
+		frameTimer.setAverageInterval(averageInterval);
+		ImGui::EndDisabled();
+		ImGui::SameLine();
+		if (ImGui::Checkbox("##EnableAvgUpdate", &averageEnabled))
+			averageInterval = averageEnabled ? theApplication().appConfiguration().profileTextUpdateTime() : 0.0f;
+		frameTimer.setAverageInterval(averageInterval);
+
+		int logLevel = static_cast<int>(frameTimer.logLevel());
+		ImGui::Combo("Log Level", &logLevel, "Off\0Verbose\0Debug\0Info\0Warning\0Error\0Fatal\0");
+		frameTimer.setLogLevel(static_cast<ILogger::LogLevel>(logLevel ));
+
+		float loggingInterval = frameTimer.loggingInterval();
+		bool loggingEnabled = frameTimer.loggingEnabled();
+		ImGui::BeginDisabled(loggingEnabled == false);
+		ImGui::SliderFloat("Print Log Time", &loggingInterval, 1.0f, 10.0f, "%.2f s", ImGuiSliderFlags_AlwaysClamp);
+		frameTimer.setLoggingInterval(loggingInterval);
+		ImGui::EndDisabled();
+		ImGui::SameLine();
+		if (ImGui::Checkbox("##EnableLogging", &loggingEnabled))
+			loggingInterval = loggingEnabled ? theApplication().appConfiguration().frameTimerLogInterval : 0.0f;
+		frameTimer.setLoggingInterval(loggingInterval);
+
+		ImGui::Text("Total Number of Frames: %lu", frameTimer.totalNumberFrames());
+		ImGui::Text("Average: %.2f FPS (%.2f ms)", frameTimer.averageFps(), frameTimer.averageFrameTime() * 1000.0f);
 	}
 }
 

@@ -1,16 +1,39 @@
 #ifndef CLASS_NCINE_FRAMETIMER
 #define CLASS_NCINE_FRAMETIMER
 
+#include "IFrameTimer.h"
 #include "TimeStamp.h"
 
 namespace ncine {
 
-/// Frame interval and average FPS calculator class
-class FrameTimer
+/// Frame interval and average FPS calculator implementation class
+class FrameTimer : public IFrameTimer
 {
   public:
 	/// Constructor
-	FrameTimer(float logInterval, float avgInterval);
+	FrameTimer(float averageInterval, float loggingInterval);
+
+	/// Returns the total number of frames counted
+	inline unsigned long int totalNumberFrames() const override { return totNumFrames_; }
+	/// Returns the duration in seconds between the last two subsequent calls to `addFrame()`
+	inline float lastFrameDuration() const override { return frameDuration_; }
+	/// Returns the duration in seconds since the last call to `addFrame()`
+	inline float currentFrameDuration() const override { return frameStart_.secondsSince(); }
+
+	inline float averageFps() const override { return avgFps_; }
+	inline float averageFrameTime() const override { return avgFrameTime_; }
+
+	inline bool averageEnabled() const override { return averageInterval_ > 0.0f; }
+	bool loggingEnabled() const override;
+
+	inline float averageInterval() const override { return averageInterval_; }
+	void setAverageInterval(float averageInterval) override;
+
+	inline float loggingInterval() const override { return loggingInterval_; }
+	void setLoggingInterval(float loggingInterval) override;
+
+	inline ILogger::LogLevel logLevel() const override { return logLevel_; }
+	void setLogLevel(ILogger::LogLevel logLevel) override;
 
 	/// Adds a frame to the counter and calculates the interval since the previous one
 	void addFrame();
@@ -21,26 +44,17 @@ class FrameTimer
 	/*! \return A timestamp with last suspension duration */
 	TimeStamp resume();
 
-	/// Returns the total number of frames counted
-	inline unsigned long int totalNumberFrames() const { return totNumFrames_; }
-	/// Returns the interval in seconds between the last two subsequent calls to `addFrame()`
-	inline float lastFrameInterval() const { return frameInterval_; }
-	/// Returns the interval in seconds since the last call to `addFrame()`
-	inline float frameInterval() const { return frameStart_.secondsSince(); }
-	/// Returns the average FPS during the update interval
-	inline float averageFps() const { return fps_; }
-
   private:
-	/// Number of seconds between two log events (user defined)
-	float logInterval_;
 	/// Number of seconds between two average FPS calculations (user defined)
-	float avgInterval_;
+	float averageInterval_;
+	/// Number of seconds between two logging events (user defined)
+	float loggingInterval_;
 
-	/// Time stamp at the beginning of a frame
+	/// Timestamp at the beginning of a frame
 	TimeStamp frameStart_;
-	/// Seconds elapsed since previous frame
-	float frameInterval_;
-	/// Time stamp at the begininng of application suspension
+	/// Last frame duration in seconds
+	float frameDuration_;
+	/// Timestamp at the begininng of application suspension
 	TimeStamp suspensionStart_;
 
 	/// Total number of frames counted
@@ -50,13 +64,17 @@ class FrameTimer
 	/// Frame counter for logging
 	unsigned long int logNumFrames_;
 
-	/// Time stamp at last average FPS calculation
+	/// Average FPS calulated during the specified interval
+	float avgFps_;
+	/// Average frame time calulated during the specified interval
+	float avgFrameTime_;
+
+	/// Timestamp at last average FPS calculation
 	TimeStamp lastAvgUpdate_;
-	/// Time stamp at last log event
+	/// Timestamp at last logging event
 	TimeStamp lastLogUpdate_;
 
-	/// Average FPS calulated during the specified interval
-	float fps_;
+	ILogger::LogLevel logLevel_;
 };
 
 }

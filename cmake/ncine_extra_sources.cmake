@@ -241,6 +241,7 @@ if(LUA_FOUND)
 			${NCINE_ROOT}/src/include/LuaJoystickEvents.h
 			${NCINE_ROOT}/src/include/LuaTouchEvents.h
 			${NCINE_ROOT}/src/include/LuaTimeStamp.h
+			${NCINE_ROOT}/src/include/LuaIFrameTimer.h
 			${NCINE_ROOT}/src/include/LuaFileSystem.h
 			${NCINE_ROOT}/src/include/LuaApplication.h
 			${NCINE_ROOT}/src/include/LuaAppConfiguration.h
@@ -275,6 +276,7 @@ if(LUA_FOUND)
 			${NCINE_ROOT}/src/scripting/LuaJoystickEvents.cpp
 			${NCINE_ROOT}/src/scripting/LuaTouchEvents.cpp
 			${NCINE_ROOT}/src/scripting/LuaTimeStamp.cpp
+			${NCINE_ROOT}/src/scripting/LuaIFrameTimer.cpp
 			${NCINE_ROOT}/src/scripting/LuaFileSystem.cpp
 			${NCINE_ROOT}/src/scripting/LuaApplication.cpp
 			${NCINE_ROOT}/src/scripting/LuaAppConfiguration.cpp
@@ -440,11 +442,9 @@ endif()
 
 if(NCINE_WITH_TRACY)
 	target_compile_definitions(ncine PRIVATE "WITH_TRACY")
-	if(NOT ANDROID AND NOT APPLE AND NOT EMSCRIPTEN)
-		target_compile_definitions(ncine PRIVATE "WITH_TRACY_OPENGL")
-	endif()
 	target_compile_definitions(ncine PUBLIC "TRACY_ENABLE")
 	target_compile_definitions(ncine PRIVATE "TRACY_DELAYED_INIT")
+	target_compile_definitions(ncine INTERFACE "TRACY_IMPORTS")
 
 	# For external projects compiling using an nCine build directory
 	set(TRACY_INCLUDE_ONLY_DIR ${TRACY_SOURCE_DIR}/include_only)
@@ -455,6 +455,8 @@ if(NCINE_WITH_TRACY)
 	file(COPY "${TRACY_SOURCE_DIR}/public/common/TracySystem.cpp" DESTINATION ${TRACY_INCLUDE_ONLY_DIR}/tracy/common)
 	file(GLOB TRACY_CLIENT_HPP "${TRACY_SOURCE_DIR}/public/client/*.hpp" "${TRACY_SOURCE_DIR}/public/client/*.h")
 	file(COPY ${TRACY_CLIENT_HPP} DESTINATION ${TRACY_INCLUDE_ONLY_DIR}/tracy/client)
+	file(GLOB TRACY_LIBBACKTRACE_HPP "${TRACY_SOURCE_DIR}/public/libbacktrace/*.hpp" "${TRACY_SOURCE_DIR}/public/libbacktrace/*.h")
+	file(COPY ${TRACY_LIBBACKTRACE_HPP} DESTINATION ${TRACY_INCLUDE_ONLY_DIR}/tracy/client)
 	file(COPY "${TRACY_SOURCE_DIR}/LICENSE" DESTINATION ${TRACY_INCLUDE_ONLY_DIR}/tracy)
 
 	list(APPEND HEADERS

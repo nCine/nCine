@@ -22,6 +22,7 @@
 #define LOGW_X(fmt, ...) ncine::theServiceLocator().logger().write(ncine::ILogger::LogLevel::WARN, static_cast<const char *>("%s -> " fmt), FUNCTION, ##__VA_ARGS__)
 #define LOGE_X(fmt, ...) ncine::theServiceLocator().logger().write(ncine::ILogger::LogLevel::ERROR, static_cast<const char *>("%s -> " fmt), FUNCTION, ##__VA_ARGS__)
 #define LOGF_X(fmt, ...) ncine::theServiceLocator().logger().write(ncine::ILogger::LogLevel::FATAL, static_cast<const char *>("%s -> " fmt), FUNCTION, ##__VA_ARGS__)
+#define LOG_X(logLevel, fmt, ...) ncine::theServiceLocator().logger().write(logLevel, static_cast<const char *>("%s -> " fmt), FUNCTION, ##__VA_ARGS__)
 
 #define LOGV(fmt) ncine::theServiceLocator().logger().write(ncine::ILogger::LogLevel::VERBOSE, static_cast<const char *>("%s -> " fmt), FUNCTION)
 #define LOGD(fmt) ncine::theServiceLocator().logger().write(ncine::ILogger::LogLevel::DEBUG, static_cast<const char *>("%s -> " fmt), FUNCTION)
@@ -29,6 +30,7 @@
 #define LOGW(fmt) ncine::theServiceLocator().logger().write(ncine::ILogger::LogLevel::WARN, static_cast<const char *>("%s -> " fmt), FUNCTION)
 #define LOGE(fmt) ncine::theServiceLocator().logger().write(ncine::ILogger::LogLevel::ERROR, static_cast<const char *>("%s -> " fmt), FUNCTION)
 #define LOGF(fmt) ncine::theServiceLocator().logger().write(ncine::ILogger::LogLevel::FATAL, static_cast<const char *>("%s -> " fmt), FUNCTION)
+#define LOG(logLevel, fmt) ncine::theServiceLocator().logger().write(logLevel, static_cast<const char *>("%s -> " fmt), FUNCTION)
 
 #ifdef NCINE_ASSERT_BREAK
 	#ifdef _MSC_VER

@@ -16,14 +16,14 @@ class DLL_PUBLIC ILogger
 	/// Log levels, from less to more severe
 	enum class LogLevel
 	{
-		UNKNOWN = 0,
+		UNKNOWN = -1,
+		OFF = 0,
 		VERBOSE,
 		DEBUG,
 		INFO,
 		WARN,
 		ERROR,
-		FATAL,
-		OFF
+		FATAL
 	};
 
 	virtual ~ILogger() = 0;

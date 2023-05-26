@@ -37,6 +37,7 @@
 	#include "NuklearDrawing.h"
 #endif
 
+#include "tracy.h"
 #include "tracy_opengl.h"
 
 #ifdef WITH_RENDERDOC
@@ -78,6 +79,11 @@ Viewport &Application::screenViewport()
 	return *screenViewport_;
 }
 
+IFrameTimer &Application::frameTimer()
+{
+	return *frameTimer_;
+}
+
 unsigned long int Application::numFrames() const
 {
 	return frameTimer_->totalNumberFrames();
@@ -85,7 +91,7 @@ unsigned long int Application::numFrames() const
 
 float Application::interval() const
 {
-	return frameTimer_->lastFrameInterval();
+	return frameTimer_->lastFrameDuration();
 }
 
 ///////////////////////////////////////////////////////////
@@ -133,7 +139,7 @@ void Application::initCommon()
 	FrameMark;
 	TracyGpuCollect;
 
-	frameTimer_ = nctl::makeUnique<FrameTimer>(appCfg_.frameTimerLogInterval, appCfg_.profileTextUpdateTime());
+	frameTimer_ = nctl::makeUnique<FrameTimer>(appCfg_.profileTextUpdateTime(), appCfg_.frameTimerLogInterval);
 
 #ifdef WITH_IMGUI
 	imguiDrawing_ = nctl::makeUnique<ImGuiDrawing>(appCfg_.withScenegraph);
@@ -332,7 +338,7 @@ void Application::step()
 	if (appCfg_.frameLimit > 0)
 	{
 		const float frameTimeDuration = 1.0f / static_cast<float>(appCfg_.frameLimit);
-		while (frameTimer_->frameInterval() < frameTimeDuration)
+		while (frameTimer_->currentFrameDuration() < frameTimeDuration)
 			Timer::sleep(0.0f);
 	}
 }

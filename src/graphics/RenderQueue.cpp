@@ -9,6 +9,7 @@
 #include "GLScissorTest.h"
 #include "GLDepthTest.h"
 #include "GLBlending.h"
+#include "tracy.h"
 #include "tracy_opengl.h"
 
 namespace ncine {

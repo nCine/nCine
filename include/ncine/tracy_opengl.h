@@ -1,4 +1,6 @@
-#if defined(WITH_TRACY) && defined(WITH_TRACY_OPENGL)
+#define WITH_TRACY_OPENGL (!defined(__ANDROID__) && !defined(__APPLE__) && !defined(__EMSCRIPTEN__))
+
+#if (defined(WITH_TRACY) || NCINE_WITH_TRACY) && defined(WITH_TRACY_OPENGL)
 
 	#ifdef __ANDROID__
 		#define GL_TIMESTAMP GL_TIMESTAMP_EXT
