@@ -568,7 +568,7 @@ void JoyMapping::checkConnectedJoystics()
 	}
 }
 
-int JoyMapping::findMappingByGuid(const MappedJoystick::Guid &guid)
+int JoyMapping::findMappingByGuid(const MappedJoystick::Guid &guid) const
 {
 	int index = InvalidMappingIndex;
 
@@ -585,7 +585,7 @@ int JoyMapping::findMappingByGuid(const MappedJoystick::Guid &guid)
 	return index;
 }
 
-int JoyMapping::findMappingByName(const char *name)
+int JoyMapping::findMappingByName(const char *name) const
 {
 	int index = InvalidMappingIndex;
 

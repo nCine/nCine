@@ -64,6 +64,14 @@ if(MSVC)
 				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${WEBP_IMPORTED_LOCATION} $<TARGET_FILE_DIR:${NCPROJECT_EXE_NAME}>
 				COMMENT "Copying WebP DLL...")
 			set_target_properties(copy_webp_dll PROPERTIES FOLDER "CustomCopyTargets")
+
+			string(REPLACE webp sharpyuv SHARPYUV_LOCATION ${WEBP_IMPORTED_LOCATION})
+			if(EXISTS ${SHARPYUV_LOCATION})
+				add_custom_target(copy_sharpyuv_dll ALL
+					COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SHARPYUV_LOCATION} $<TARGET_FILE_DIR:${NCPROJECT_EXE_NAME}>
+					COMMENT "Copying SharpYUV DLL...")
+				set_target_properties(copy_sharpyuv_dll PROPERTIES FOLDER "CustomCopyTargets")
+			endif()
 		endif()
 		if(OPENAL_FOUND AND NCINE_WITH_AUDIO)
 			add_custom_target(copy_openal_dll ALL

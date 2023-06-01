@@ -313,12 +313,12 @@ void JoyMapping::checkConnectedJoystics()
 {
 }
 
-int JoyMapping::findMappingByGuid(const MappedJoystick::Guid &guid)
+int JoyMapping::findMappingByGuid(const MappedJoystick::Guid &guid) const
 {
 	return 0;
 }
 
-int JoyMapping::findMappingByName(const char *name)
+int JoyMapping::findMappingByName(const char *name) const
 {
 	return 0;
 }

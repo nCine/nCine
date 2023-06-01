@@ -281,6 +281,7 @@ void ImGuiSdlInput::shutdown()
 
 	ImGuiIO &io = ImGui::GetIO();
 	io.BackendPlatformName = nullptr;
+	io.BackendFlags &= ~(ImGuiBackendFlags_HasMouseCursors | ImGuiBackendFlags_HasSetMousePos | ImGuiBackendFlags_HasGamepad);
 
 	ImGui::DestroyContext();
 }

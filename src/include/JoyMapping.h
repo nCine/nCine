@@ -138,8 +138,8 @@ class JoyMapping
 	MappedJoystick createAndroidDefaultMapping() const;
 #endif
 	void checkConnectedJoystics();
-	int findMappingByGuid(const MappedJoystick::Guid &guid);
-	int findMappingByName(const char *name);
+	int findMappingByGuid(const MappedJoystick::Guid &guid) const;
+	int findMappingByName(const char *name) const;
 	bool parseMappingFromString(const char *mappingString, MappedJoystick &map);
 	bool parsePlatformKeyword(const char *start, const char *end) const;
 	bool parsePlatformName(const char *start, const char *end) const;

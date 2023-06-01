@@ -924,6 +924,8 @@ void AndroidInputManager::deviceInfo(int deviceId, int joyId)
 				break;
 		}
 		joyState.numButtons_ = numFoundButtons;
+		if (numFoundButtons == 0)
+			deviceInfoString.append(" not detected");
 		LOGV_X("device (%d, %d) - Buttons%s", deviceId, joyId, deviceInfoString.data());
 
 		// Checking hats buttons from AKEYCODE_DPAD_UP to AKEYCODE_DPAD_CENTER
@@ -1006,9 +1008,11 @@ void AndroidInputManager::deviceInfo(int deviceId, int joyId)
 				}
 			}
 		}
-		LOGV_X("device (%d, %d) - Axes%s", deviceId, joyId, deviceInfoString.data());
 		joyState.numAxes_ = numAxes;
 		joyState.numMappedAxes_ = numMappedAxes;
+		if (numAxes == 0)
+			deviceInfoString.append(" not detected");
+		LOGV_X("device (%d, %d) - Axes%s", deviceId, joyId, deviceInfoString.data());
 
 		joyState.numHats_ = 0;
 		if (joyState.hasDPad_ || joyState.hasHatAxes_)

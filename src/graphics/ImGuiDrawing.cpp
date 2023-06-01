@@ -84,6 +84,7 @@ ImGuiDrawing::~ImGuiDrawing()
 	ImGuiIO &io = ImGui::GetIO();
 	io.Fonts->SetTexID(nullptr);
 	io.BackendRendererName = nullptr;
+	io.BackendFlags &= ~ImGuiBackendFlags_RendererHasVtxOffset;
 }
 
 ///////////////////////////////////////////////////////////

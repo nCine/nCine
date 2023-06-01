@@ -169,6 +169,9 @@ void ImGuiAndroidInput::init(ANativeWindow *window)
 
 void ImGuiAndroidInput::shutdown()
 {
+	ImGuiIO &io = ImGui::GetIO();
+	io.BackendPlatformName = nullptr;
+
 	ImGui::DestroyContext();
 }
 
