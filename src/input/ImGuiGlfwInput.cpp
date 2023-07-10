@@ -403,7 +403,10 @@ void ImGuiGlfwInput::newFrame()
 		io.DisplayFramebufferScale = ImVec2(static_cast<float>(displayW) / w, static_cast<float>(displayH) / h);
 
 	// Setup time step
+	// (Accept glfwGetTime() not returning a monotonically increasing value. Seems to happens on disconnecting peripherals and probably on VMs and Emscripten, see #6491, #6189, #6114, #3644)
 	double currentTime = glfwGetTime();
+	if (currentTime <= time_)
+		currentTime = time_ + 0.00001f;
 	io.DeltaTime = time_ > 0.0 ? static_cast<float>(currentTime - time_) : static_cast<float>(1.0f / 60.0f);
 	time_ = currentTime;
 

@@ -307,6 +307,13 @@ elseif(MSVC)
 			IMPORTED_IMPLIB ${MSVC_LIBDIR}/libwebp_dll.lib
 			IMPORTED_LOCATION ${MSVC_BINDIR}/libwebp.dll
 			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include")
+		if (EXISTS ${MSVC_LIBDIR}/libsharpyuv_dll.lib AND EXISTS ${MSVC_BINDIR}/libsharpyuv.dll)
+			add_library(WebP::SharpYUV SHARED IMPORTED)
+			set_target_properties(WebP::SharpYUV PROPERTIES
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/libsharpyuv_dll.lib
+			IMPORTED_LOCATION ${MSVC_BINDIR}/libsharpyuv.dll)
+			set_target_properties(WebP::WebP PROPERTIES INTERFACE_LINK_LIBRARIES WebP::SharpYUV)
+		endif()
 		set(WEBP_FOUND 1)
 	endif()
 
