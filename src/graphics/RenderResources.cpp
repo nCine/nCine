@@ -26,6 +26,8 @@ namespace {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
+char const * const RenderResources::ShadersDir = "shaders";
+
 nctl::UniquePtr<BinaryShaderCache> RenderResources::binaryShaderCache_;
 nctl::UniquePtr<RenderBuffersManager> RenderResources::buffersManager_;
 nctl::UniquePtr<RenderVaoPool> RenderResources::vaoPool_;
@@ -289,8 +291,8 @@ void RenderResources::create()
 	};
 
 	const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
-	// Clamping the value as some drivers report a maximum size similar to SSBO one
-	const int maxUniformBlockSize = nctl::clamp(gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_UNIFORM_BLOCK_SIZE), 0, 64 * 1024);
+	// Clamped between 16 KB and 64 KB
+	const int maxUniformBlockSize = gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_UNIFORM_BLOCK_SIZE);
 
 	nctl::StaticString<48> sourceString;
 	const char *vertexStrings[3] = { nullptr, nullptr, nullptr };
@@ -324,8 +326,8 @@ void RenderResources::create()
 		const bool vertexHasLoaded = shaderToLoad.shaderProgram->attachShaderFromStrings(GL_VERTEX_SHADER, vertexStrings);
 		const bool fragmentHasLoaded = shaderToLoad.shaderProgram->attachShaderFromString(GL_FRAGMENT_SHADER, shaderToLoad.fragmentShader);
 #else
-		const bool vertexHasLoaded = shaderToLoad.shaderProgram->attachShaderFromStringsAndFile(GL_VERTEX_SHADER, vertexStrings, (fs::dataPath() + "shaders/" + shaderToLoad.vertexShader).data());
-		const bool fragmentHasLoaded = shaderToLoad.shaderProgram->attachShaderFromFile(GL_FRAGMENT_SHADER, (fs::dataPath() + "shaders/" + shaderToLoad.fragmentShader).data());
+		const bool vertexHasLoaded = shaderToLoad.shaderProgram->attachShaderFromStringsAndFile(GL_VERTEX_SHADER, vertexStrings, (fs::dataPath() + ShadersDir + "/" + shaderToLoad.vertexShader).data());
+		const bool fragmentHasLoaded = shaderToLoad.shaderProgram->attachShaderFromFile(GL_FRAGMENT_SHADER, (fs::dataPath() + ShadersDir + "/" + shaderToLoad.fragmentShader).data());
 #endif
 		ASSERT(vertexHasLoaded == true);
 		ASSERT(fragmentHasLoaded == true);
@@ -353,8 +355,8 @@ void RenderResources::create()
 				const bool finalVertexHasLoaded = shaderToLoad.shaderProgram->attachShaderFromStrings(GL_VERTEX_SHADER, vertexStrings);
 				const bool finalFragmentHasLoaded = shaderToLoad.shaderProgram->attachShaderFromString(GL_FRAGMENT_SHADER, shaderToLoad.fragmentShader);
 #else
-				const bool finalVertexHasLoaded = shaderToLoad.shaderProgram->attachShaderFromStringsAndFile(GL_VERTEX_SHADER, vertexStrings, (fs::dataPath() + "shaders/" + shaderToLoad.vertexShader).data());
-				const bool finalFragmentHasLoaded = shaderToLoad.shaderProgram->attachShaderFromFile(GL_FRAGMENT_SHADER, (fs::dataPath() + "shaders/" + shaderToLoad.fragmentShader).data());
+				const bool finalVertexHasLoaded = shaderToLoad.shaderProgram->attachShaderFromStringsAndFile(GL_VERTEX_SHADER, vertexStrings, (fs::dataPath() + ShadersDir + "/" + shaderToLoad.vertexShader).data());
+				const bool finalFragmentHasLoaded = shaderToLoad.shaderProgram->attachShaderFromFile(GL_FRAGMENT_SHADER, (fs::dataPath() + ShadersDir + "/" + shaderToLoad.fragmentShader).data());
 #endif
 				ASSERT(finalVertexHasLoaded == true);
 				ASSERT(finalFragmentHasLoaded == true);

@@ -627,7 +627,13 @@ void ImGuiDebugOverlay::guiGraphicsCapabilities()
 		ImGui::Separator();
 		ImGui::Text("GL_MAX_TEXTURE_SIZE: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_TEXTURE_SIZE));
 		ImGui::Text("GL_MAX_TEXTURE_IMAGE_UNITS: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_TEXTURE_IMAGE_UNITS));
-		ImGui::Text("GL_MAX_UNIFORM_BLOCK_SIZE: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_UNIFORM_BLOCK_SIZE));
+
+		const int UNCLAMPED_MAX_UNIFORM_BLOCK_SIZE = gfxCaps.value(IGfxCapabilities::GLIntValues::UNCLAMPED_MAX_UNIFORM_BLOCK_SIZE);
+		const int MAX_UNIFORM_BLOCK_SIZE = gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_UNIFORM_BLOCK_SIZE);
+		if (UNCLAMPED_MAX_UNIFORM_BLOCK_SIZE != MAX_UNIFORM_BLOCK_SIZE)
+			ImGui::Text("Unclamped GL_MAX_UNIFORM_BLOCK_SIZE: %d", UNCLAMPED_MAX_UNIFORM_BLOCK_SIZE);
+		ImGui::Text("GL_MAX_UNIFORM_BLOCK_SIZE: %d", MAX_UNIFORM_BLOCK_SIZE);
+
 		ImGui::Text("GL_MAX_UNIFORM_BUFFER_BINDINGS: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_UNIFORM_BUFFER_BINDINGS));
 		ImGui::Text("GL_MAX_VERTEX_UNIFORM_BLOCKS: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_VERTEX_UNIFORM_BLOCKS));
 		ImGui::Text("GL_MAX_FRAGMENT_UNIFORM_BLOCKS: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_FRAGMENT_UNIFORM_BLOCKS));
@@ -1080,6 +1086,7 @@ void ImGuiDebugOverlay::guiBinaryShaderCache()
 			if (ImGui::Button(isEnabled ? "Disable" : "Enable"))
 				cache.setEnabled(!isEnabled);
 		}
+		ImGui::Text("Shader source directory name: \"%s\"", RenderResources::ShadersDir);
 
 		if (isAvailable)
 		{

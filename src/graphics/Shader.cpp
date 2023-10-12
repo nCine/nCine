@@ -32,9 +32,9 @@ namespace {
 		return GLShaderProgram::Introspection::ENABLED;
 	}
 
-	bool isBatchedVertex(Shader::DefaultVertex vertex)
+	bool isBatchedVertex(Shader::DefaultVertex defaultVertex)
 	{
-		switch (vertex)
+		switch (defaultVertex)
 		{
 			case Shader::DefaultVertex::BATCHED_SPRITES:
 			case Shader::DefaultVertex::BATCHED_SPRITES_NOTEXTURE:
@@ -86,57 +86,57 @@ Shader::Shader(LoadMode loadMode, const char *vertex, const char *fragment)
 {
 }
 
-Shader::Shader(const char *shaderName, LoadMode loadMode, Introspection introspection, DefaultVertex vertex, const char *fragment)
+Shader::Shader(const char *shaderName, LoadMode loadMode, Introspection introspection, DefaultVertex defaultVertex, const char *fragment)
     : Shader()
 {
 	const bool hasLoaded = (loadMode == LoadMode::STRING)
-	                           ? loadFromMemory(shaderName, introspection, vertex, fragment)
-	                           : loadFromFile(shaderName, introspection, vertex, fragment);
+	                           ? loadFromMemory(shaderName, introspection, defaultVertex, fragment)
+	                           : loadFromFile(shaderName, introspection, defaultVertex, fragment);
 
 	if (hasLoaded == false)
 		LOGE_X("Shader \"%s\" cannot be loaded", shaderName);
 }
 
-Shader::Shader(const char *shaderName, LoadMode loadMode, DefaultVertex vertex, const char *fragment)
+Shader::Shader(const char *shaderName, LoadMode loadMode, DefaultVertex defaultVertex, const char *fragment)
     : Shader()
 {
 	const bool hasLoaded = (loadMode == LoadMode::STRING)
-	                           ? loadFromMemory(shaderName, vertex, fragment)
-	                           : loadFromFile(shaderName, vertex, fragment);
+	                           ? loadFromMemory(shaderName, defaultVertex, fragment)
+	                           : loadFromFile(shaderName, defaultVertex, fragment);
 
 	if (hasLoaded == false)
 		LOGE_X("Shader \"%s\" cannot be loaded", shaderName);
 }
 
-Shader::Shader(LoadMode loadMode, DefaultVertex vertex, const char *fragment)
-    : Shader(nullptr, loadMode, vertex, fragment)
+Shader::Shader(LoadMode loadMode, DefaultVertex defaultVertex, const char *fragment)
+    : Shader(nullptr, loadMode, defaultVertex, fragment)
 {
 }
 
-Shader::Shader(const char *shaderName, LoadMode loadMode, Introspection introspection, const char *vertex, DefaultFragment fragment)
+Shader::Shader(const char *shaderName, LoadMode loadMode, Introspection introspection, const char *vertex, DefaultFragment defaultFragment)
     : Shader()
 {
 	const bool hasLoaded = (loadMode == LoadMode::STRING)
-	                           ? loadFromMemory(shaderName, introspection, vertex, fragment)
-	                           : loadFromFile(shaderName, introspection, vertex, fragment);
+	                           ? loadFromMemory(shaderName, introspection, vertex, defaultFragment)
+	                           : loadFromFile(shaderName, introspection, vertex, defaultFragment);
 
 	if (hasLoaded == false)
 		LOGE_X("Shader \"%s\" cannot be loaded", shaderName);
 }
 
-Shader::Shader(const char *shaderName, LoadMode loadMode, const char *vertex, DefaultFragment fragment)
+Shader::Shader(const char *shaderName, LoadMode loadMode, const char *vertex, DefaultFragment defaultFragment)
     : Shader()
 {
 	const bool hasLoaded = (loadMode == LoadMode::STRING)
-	                           ? loadFromMemory(shaderName, vertex, fragment)
-	                           : loadFromFile(shaderName, vertex, fragment);
+	                           ? loadFromMemory(shaderName, vertex, defaultFragment)
+	                           : loadFromFile(shaderName, vertex, defaultFragment);
 
 	if (hasLoaded == false)
 		LOGE_X("Shader \"%s\" cannot be loaded", shaderName);
 }
 
-Shader::Shader(LoadMode loadMode, const char *vertex, DefaultFragment fragment)
-    : Shader(nullptr, loadMode, vertex, fragment)
+Shader::Shader(LoadMode loadMode, const char *vertex, DefaultFragment defaultFragment)
+    : Shader(nullptr, loadMode, vertex, defaultFragment)
 {
 }
 
@@ -179,7 +179,7 @@ bool Shader::loadFromMemory(const char *vertex, const char *fragment)
 	return loadFromMemory(nullptr, vertex, fragment);
 }
 
-bool Shader::loadFromMemory(const char *shaderName, Introspection introspection, DefaultVertex vertex, const char *fragment)
+bool Shader::loadFromMemory(const char *shaderName, Introspection introspection, DefaultVertex defaultVertex, const char *fragment)
 {
 	ZoneScoped;
 	if (shaderName)
@@ -191,25 +191,25 @@ bool Shader::loadFromMemory(const char *shaderName, Introspection introspection,
 	glShaderProgram_->reset(); // reset before attaching new shaders
 	setName(shaderName);
 	glShaderProgram_->setObjectLabel(shaderName);
-	loadDefaultShader(vertex);
+	loadDefaultShader(defaultVertex);
 	glShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, fragment);
 	glShaderProgram_->link(shaderToShaderProgramIntrospection(introspection));
 
 	return isLinked();
 }
 
-bool Shader::loadFromMemory(const char *shaderName, DefaultVertex vertex, const char *fragment)
+bool Shader::loadFromMemory(const char *shaderName, DefaultVertex defaultVertex, const char *fragment)
 {
-	const Introspection introspection = isBatchedVertex(vertex) ? Introspection::NO_UNIFORMS_IN_BLOCKS : Introspection::ENABLED;
-	return loadFromMemory(shaderName, introspection, vertex, fragment);
+	const Introspection introspection = isBatchedVertex(defaultVertex) ? Introspection::NO_UNIFORMS_IN_BLOCKS : Introspection::ENABLED;
+	return loadFromMemory(shaderName, introspection, defaultVertex, fragment);
 }
 
-bool Shader::loadFromMemory(DefaultVertex vertex, const char *fragment)
+bool Shader::loadFromMemory(DefaultVertex defaultVertex, const char *fragment)
 {
-	return loadFromMemory(nullptr, vertex, fragment);
+	return loadFromMemory(nullptr, defaultVertex, fragment);
 }
 
-bool Shader::loadFromMemory(const char *shaderName, Introspection introspection, const char *vertex, DefaultFragment fragment)
+bool Shader::loadFromMemory(const char *shaderName, Introspection introspection, const char *vertex, DefaultFragment defaultFragment)
 {
 	ZoneScoped;
 	if (shaderName)
@@ -222,20 +222,20 @@ bool Shader::loadFromMemory(const char *shaderName, Introspection introspection,
 	setName(shaderName);
 	glShaderProgram_->setObjectLabel(shaderName);
 	glShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, vertex);
-	loadDefaultShader(fragment);
+	loadDefaultShader(defaultFragment);
 	glShaderProgram_->link(shaderToShaderProgramIntrospection(introspection));
 
 	return isLinked();
 }
 
-bool Shader::loadFromMemory(const char *shaderName, const char *vertex, DefaultFragment fragment)
+bool Shader::loadFromMemory(const char *shaderName, const char *vertex, DefaultFragment defaultFragment)
 {
-	return loadFromMemory(shaderName, Introspection::ENABLED, vertex, fragment);
+	return loadFromMemory(shaderName, Introspection::ENABLED, vertex, defaultFragment);
 }
 
-bool Shader::loadFromMemory(const char *vertex, DefaultFragment fragment)
+bool Shader::loadFromMemory(const char *vertex, DefaultFragment defaultFragment)
 {
-	return loadFromMemory(nullptr, vertex, fragment);
+	return loadFromMemory(nullptr, vertex, defaultFragment);
 }
 
 bool Shader::loadFromFile(const char *shaderName, Introspection introspection, const char *vertex, const char *fragment)
@@ -267,7 +267,7 @@ bool Shader::loadFromFile(const char *vertex, const char *fragment)
 	return loadFromFile(nullptr, vertex, fragment);
 }
 
-bool Shader::loadFromFile(const char *shaderName, Introspection introspection, DefaultVertex vertex, const char *fragment)
+bool Shader::loadFromFile(const char *shaderName, Introspection introspection, DefaultVertex defaultVertex, const char *fragment)
 {
 	ZoneScoped;
 	if (shaderName)
@@ -279,25 +279,25 @@ bool Shader::loadFromFile(const char *shaderName, Introspection introspection, D
 	glShaderProgram_->reset(); // reset before attaching new shaders
 	setName(shaderName);
 	glShaderProgram_->setObjectLabel(shaderName);
-	loadDefaultShader(vertex);
+	loadDefaultShader(defaultVertex);
 	glShaderProgram_->attachShaderFromFile(GL_FRAGMENT_SHADER, fragment);
 	glShaderProgram_->link(shaderToShaderProgramIntrospection(introspection));
 
 	return isLinked();
 }
 
-bool Shader::loadFromFile(const char *shaderName, DefaultVertex vertex, const char *fragment)
+bool Shader::loadFromFile(const char *shaderName, DefaultVertex defaultVertex, const char *fragment)
 {
-	const Introspection introspection = isBatchedVertex(vertex) ? Introspection::NO_UNIFORMS_IN_BLOCKS : Introspection::ENABLED;
-	return loadFromFile(shaderName, introspection, vertex, fragment);
+	const Introspection introspection = isBatchedVertex(defaultVertex) ? Introspection::NO_UNIFORMS_IN_BLOCKS : Introspection::ENABLED;
+	return loadFromFile(shaderName, introspection, defaultVertex, fragment);
 }
 
-bool Shader::loadFromFile(DefaultVertex vertex, const char *fragment)
+bool Shader::loadFromFile(DefaultVertex defaultVertex, const char *fragment)
 {
-	return loadFromFile(nullptr, vertex, fragment);
+	return loadFromFile(nullptr, defaultVertex, fragment);
 }
 
-bool Shader::loadFromFile(const char *shaderName, Introspection introspection, const char *vertex, DefaultFragment fragment)
+bool Shader::loadFromFile(const char *shaderName, Introspection introspection, const char *vertex, DefaultFragment defaultFragment)
 {
 	ZoneScoped;
 	if (shaderName)
@@ -310,20 +310,20 @@ bool Shader::loadFromFile(const char *shaderName, Introspection introspection, c
 	setName(shaderName);
 	glShaderProgram_->setObjectLabel(shaderName);
 	glShaderProgram_->attachShaderFromFile(GL_VERTEX_SHADER, vertex);
-	loadDefaultShader(fragment);
+	loadDefaultShader(defaultFragment);
 	glShaderProgram_->link(shaderToShaderProgramIntrospection(introspection));
 
 	return isLinked();
 }
 
-bool Shader::loadFromFile(const char *shaderName, const char *vertex, DefaultFragment fragment)
+bool Shader::loadFromFile(const char *shaderName, const char *vertex, DefaultFragment defaultFragment)
 {
-	return loadFromFile(shaderName, Introspection::ENABLED, vertex, fragment);
+	return loadFromFile(shaderName, Introspection::ENABLED, vertex, defaultFragment);
 }
 
-bool Shader::loadFromFile(const char *vertex, DefaultFragment fragment)
+bool Shader::loadFromFile(const char *vertex, DefaultFragment defaultFragment)
 {
-	return loadFromFile(nullptr, vertex, fragment);
+	return loadFromFile(nullptr, vertex, defaultFragment);
 }
 
 bool Shader::setAttribute(const char *name, int stride, unsigned long int pointer)
@@ -384,11 +384,11 @@ void Shader::setBinaryCacheEnabled(bool enable)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-bool Shader::loadDefaultShader(DefaultVertex vertex)
+bool Shader::loadDefaultShader(DefaultVertex defaultVertex)
 {
 	const char *vertexShader = nullptr;
 #ifndef WITH_EMBEDDED_SHADERS
-	switch (vertex)
+	switch (defaultVertex)
 	{
 		case DefaultVertex::SPRITE:
 			vertexShader = "sprite_vs.glsl";
@@ -421,10 +421,10 @@ bool Shader::loadDefaultShader(DefaultVertex vertex)
 			vertexShader = "batched_textnodes_vs.glsl";
 			break;
 	}
-	const bool hasCompiled = glShaderProgram_->attachShaderFromFile(GL_VERTEX_SHADER, (fs::dataPath() + "shaders/" + vertexShader).data());
+	const bool hasCompiled = glShaderProgram_->attachShaderFromFile(GL_VERTEX_SHADER, (fs::dataPath() + RenderResources::ShadersDir + "/" + vertexShader).data());
 #else
 	// Skipping the initial new line character of the raw string literal
-	switch (vertex)
+	switch (defaultVertex)
 	{
 		case DefaultVertex::SPRITE:
 			vertexShader = ShaderStrings::sprite_vs + 1;
@@ -462,11 +462,11 @@ bool Shader::loadDefaultShader(DefaultVertex vertex)
 	return hasCompiled;
 }
 
-bool Shader::loadDefaultShader(DefaultFragment fragment)
+bool Shader::loadDefaultShader(DefaultFragment defaultFragment)
 {
 	const char *fragmentShader = nullptr;
 #ifndef WITH_EMBEDDED_SHADERS
-	switch (fragment)
+	switch (defaultFragment)
 	{
 		case DefaultFragment::SPRITE:
 			fragmentShader = "sprite_fs.glsl";
@@ -483,14 +483,11 @@ bool Shader::loadDefaultShader(DefaultFragment fragment)
 		case DefaultFragment::TEXTNODE_RED:
 			fragmentShader = "textnode_red_fs.glsl";
 			break;
-		case DefaultFragment::TEXTNODE_SPRITE:
-			fragmentShader = "sprite_fs.glsl";
-			break;
 	}
-	const bool hasCompiled = glShaderProgram_->attachShaderFromFile(GL_FRAGMENT_SHADER, (fs::dataPath() + "shaders/" + fragmentShader).data());
+	const bool hasCompiled = glShaderProgram_->attachShaderFromFile(GL_FRAGMENT_SHADER, (fs::dataPath() + RenderResources::ShadersDir + "/" + fragmentShader).data());
 #else
 	// Skipping the initial new line character of the raw string literal
-	switch (fragment)
+	switch (defaultFragment)
 	{
 		case DefaultFragment::SPRITE:
 			fragmentShader = ShaderStrings::sprite_fs + 1;
@@ -506,9 +503,6 @@ bool Shader::loadDefaultShader(DefaultFragment fragment)
 			break;
 		case DefaultFragment::TEXTNODE_RED:
 			fragmentShader = ShaderStrings::textnode_red_fs + 1;
-			break;
-		case DefaultFragment::TEXTNODE_SPRITE:
-			fragmentShader = ShaderStrings::sprite_fs + 1;
 			break;
 	}
 	const bool hasCompiled = glShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, fragmentShader);

@@ -150,19 +150,11 @@ bool GLShaderProgram::link(Introspection introspection)
 			hashName_ += shader->sourceHash();
 		LOGI_X("Shader program %u - hash: 0x%016llx", glHandle_, hashName_);
 
-		const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
-		const int numBinaryFormats = gfxCaps.value(IGfxCapabilities::GLIntValues::NUM_PROGRAM_BINARY_FORMATS);
-
-		for (unsigned int i = 0; i < numBinaryFormats; i++)
+		const unsigned int binLength = RenderResources::binaryShaderCache().binarySize(hashName_);
+		if (binLength > 0)
 		{
-			const int binFormat = gfxCaps.arrayValue(IGfxCapabilities::GLArrayIntValues::PROGRAM_BINARY_FORMATS, i);
-			const unsigned int binLength = RenderResources::binaryShaderCache().binarySize(binFormat, hashName_);
-			if (binLength > 0)
-			{
-				const void *buffer = RenderResources::binaryShaderCache().loadFromCache(binFormat, hashName_);
-				binaryHasLoaded = loadBinary(binFormat, buffer, binLength);
-				break;
-			}
+			const void *buffer = RenderResources::binaryShaderCache().loadFromCache(hashName_);
+			binaryHasLoaded = loadBinary(RenderResources::binaryShaderCache().binaryFormat(), buffer, binLength);
 		}
 	}
 

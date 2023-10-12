@@ -7,7 +7,6 @@
 #include <nctl/UniquePtr.h>
 #include <nctl/HashMap.h>
 #include "Material.h"
-#include "Matrix4x4.h"
 #include "GLShaderProgram.h" // For the UniquePtr to invoke the destructor
 #include "GLShaderUniforms.h"
 
@@ -63,6 +62,9 @@ class RenderResources
 		unsigned long int updateFrameProjectionMatrix;
 		unsigned long int updateFrameViewMatrix;
 	};
+
+	/// The name of the directory, inside the data path, that contains the default shader files
+	static char const * const ShadersDir;
 
 	static inline BinaryShaderCache &binaryShaderCache() { return *binaryShaderCache_; }
 	static inline RenderBuffersManager &buffersManager() { return *buffersManager_; }

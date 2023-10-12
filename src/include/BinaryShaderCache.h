@@ -32,15 +32,23 @@ class BinaryShaderCache
 
 	/// Returns the hash for the current platform
 	inline uint64_t platformHash() const { return platformHash_; }
+	/// Returns the symbolic constant of the first available binary format
+	inline uint32_t binaryFormat() const { return binaryFormat_; }
 	/// Returns a hash number by hashing all characters of the given source strings
 	uint64_t hashSources(unsigned int count, const char **strings, const int *lengths) const;
 
 	/// Returns the size in bytes of the binary shader from the cache with the given format and hash id
 	unsigned int binarySize(uint32_t binaryFormat, uint64_t hash) const;
+	/// Returns the size in bytes of the binary shader from the cache with the first available format and the given hash id
+	inline unsigned int binarySize(uint64_t hash) const { return binarySize(binaryFormat_, hash); }
 	/// Loads a binary shader from the cache with the given format and hash id
 	const void *loadFromCache(uint32_t binaryFormat, uint64_t hash);
+	/// Loads a binary shader from the cache with the first available format and the given hash id
+	inline const void *loadFromCache(uint64_t hash) { return loadFromCache(binaryFormat_, hash); }
 	/// Saves a binary shader to the cache with the given format and hash id
 	bool saveToCache(int length, const void *buffer, uint32_t binaryFormat, uint64_t hash);
+	/// Saves a binary shader to the cache with the first available format and the given hash id
+	inline bool saveToCache(int length, const void *buffer, uint64_t hash) { return saveToCache(length, buffer, binaryFormat_, hash); }
 
 	/// Deletes all binary shaders that don't belong to this platform from the cache directory
 	void prune();
@@ -62,6 +70,9 @@ class BinaryShaderCache
 	bool isInitialized_;
 	/// A flag that indicates that the binary shader cache is enabled and should be used if available
 	bool isEnabled_;
+
+	/// The first symbolic constant in the `GL_PROGRAM_BINARY_FORMATS` list
+	uint32_t binaryFormat_;
 
 	/// The hash value that identifies a specific OpenGL platform
 	uint64_t platformHash_;

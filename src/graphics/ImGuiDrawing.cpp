@@ -62,8 +62,8 @@ ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
 
 	imguiShaderProgram_ = nctl::makeUnique<GLShaderProgram>(queryPhase);
 #ifndef WITH_EMBEDDED_SHADERS
-	imguiShaderProgram_->attachShaderFromFile(GL_VERTEX_SHADER, (fs::dataPath() + "shaders/imgui_vs.glsl").data());
-	imguiShaderProgram_->attachShaderFromFile(GL_FRAGMENT_SHADER, (fs::dataPath() + "shaders/imgui_fs.glsl").data());
+	imguiShaderProgram_->attachShaderFromFile(GL_VERTEX_SHADER, (fs::dataPath() + RenderResources::ShadersDir + "/imgui_vs.glsl").data());
+	imguiShaderProgram_->attachShaderFromFile(GL_FRAGMENT_SHADER, (fs::dataPath() + RenderResources::ShadersDir + "/imgui_fs.glsl").data());
 #else
 	// Skipping the initial new line character of the raw string literal
 	imguiShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::imgui_vs + 1);

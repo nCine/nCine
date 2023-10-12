@@ -4,6 +4,7 @@
 #include "common_headers.h"
 #include "common_macros.h"
 #include "GfxCapabilities.h"
+#include <nctl/algorithms.h> // for clamp()
 
 namespace ncine {
 
@@ -94,7 +95,9 @@ void GfxCapabilities::init()
 
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &glIntValues_[GLIntValues::MAX_TEXTURE_SIZE]);
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &glIntValues_[GLIntValues::MAX_TEXTURE_IMAGE_UNITS]);
-	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &glIntValues_[GLIntValues::MAX_UNIFORM_BLOCK_SIZE]);
+	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &glIntValues_[GLIntValues::UNCLAMPED_MAX_UNIFORM_BLOCK_SIZE]);
+	// Clamping the value as some drivers report a maximum size similar to a SSBO (huge) or smaller than the spec minimum (16 KB)
+	glIntValues_[GLIntValues::MAX_UNIFORM_BLOCK_SIZE] = nctl::clamp(glIntValues_[GLIntValues::UNCLAMPED_MAX_UNIFORM_BLOCK_SIZE], 16 * 1024, 64 * 1024);
 	glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &glIntValues_[GLIntValues::MAX_UNIFORM_BUFFER_BINDINGS]);
 	glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &glIntValues_[GLIntValues::MAX_VERTEX_UNIFORM_BLOCKS]);
 	glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &glIntValues_[GLIntValues::MAX_FRAGMENT_UNIFORM_BLOCKS]);
@@ -158,6 +161,7 @@ void GfxCapabilities::logGLCaps() const
 	LOGI("--- OpenGL device capabilities ---");
 	LOGI_X("GL_MAX_TEXTURE_SIZE: %d", glIntValues_[GLIntValues::MAX_TEXTURE_SIZE]);
 	LOGI_X("GL_MAX_TEXTURE_IMAGE_UNITS: %d", glIntValues_[GLIntValues::MAX_TEXTURE_IMAGE_UNITS]);
+	LOGI_X("Unclamped GL_MAX_UNIFORM_BLOCK_SIZE: %d", glIntValues_[GLIntValues::UNCLAMPED_MAX_UNIFORM_BLOCK_SIZE]);
 	LOGI_X("GL_MAX_UNIFORM_BLOCK_SIZE: %d", glIntValues_[GLIntValues::MAX_UNIFORM_BLOCK_SIZE]);
 	LOGI_X("GL_MAX_UNIFORM_BUFFER_BINDINGS: %d", glIntValues_[GLIntValues::MAX_UNIFORM_BUFFER_BINDINGS]);
 	LOGI_X("GL_MAX_VERTEX_UNIFORM_BLOCKS: %d", glIntValues_[GLIntValues::MAX_VERTEX_UNIFORM_BLOCKS]);

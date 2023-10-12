@@ -27,7 +27,7 @@ namespace {
 ///////////////////////////////////////////////////////////
 
 BinaryShaderCache::BinaryShaderCache(bool enable, const char *dirname)
-    : isAvailable_(false), isInitialized_(false), isEnabled_(false), platformHash_(0)
+    : isAvailable_(false), isInitialized_(false), isEnabled_(false), binaryFormat_(0), platformHash_(0)
 {
 	const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
 	const bool isSupported = gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::ARB_GET_PROGRAM_BINARY) &&
@@ -35,6 +35,9 @@ BinaryShaderCache::BinaryShaderCache(bool enable, const char *dirname)
 
 	if (isSupported)
 	{
+		// Initialize with the first available program binary format
+		binaryFormat_ = static_cast<uint32_t>(gfxCaps.arrayValue(IGfxCapabilities::GLArrayIntValues::PROGRAM_BINARY_FORMATS, 0));
+
 		const bool cacheDirWriteable = fs::isDirectory(fs::cachePath().data()) && fs::isWritable(fs::cachePath().data());
 
 		directory_ = fs::joinPath(fs::cachePath(), dirname);

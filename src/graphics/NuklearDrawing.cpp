@@ -56,8 +56,8 @@ NuklearDrawing::NuklearDrawing(bool withSceneGraph)
 	// Nuklear shaders are the same as ImGui
 	nuklearShaderProgram_ = nctl::makeUnique<GLShaderProgram>(queryPhase);
 #ifndef WITH_EMBEDDED_SHADERS
-	nuklearShaderProgram_->attachShaderFromFile(GL_VERTEX_SHADER, (fs::dataPath() + "shaders/imgui_vs.glsl").data());
-	nuklearShaderProgram_->attachShaderFromFile(GL_FRAGMENT_SHADER, (fs::dataPath() + "shaders/imgui_fs.glsl").data());
+	nuklearShaderProgram_->attachShaderFromFile(GL_VERTEX_SHADER, (fs::dataPath() + RenderResources::ShadersDir + "/imgui_vs.glsl").data());
+	nuklearShaderProgram_->attachShaderFromFile(GL_FRAGMENT_SHADER, (fs::dataPath() + RenderResources::ShadersDir + "/imgui_fs.glsl").data());
 #else
 	// Skipping the initial new line character of the raw string literal
 	nuklearShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::imgui_vs + 1);
