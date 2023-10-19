@@ -658,8 +658,8 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 		ImGui::Text("%s Minor: %d", openglApiName, appCfg.glMinorVersion());
 
 		ImGui::Separator();
-		ImGui::Text("Data path: %s", appCfg.dataPath().data());
-		ImGui::Text("Log file: %s", appCfg.logFile.data());
+		ImGui::Text("Data path: \"%s\"", appCfg.dataPath().data());
+		ImGui::Text("Log file: \"%s\"", appCfg.logFile.data());
 		ImGui::Text("Console log level: %d", static_cast<int>(appCfg.consoleLogLevel));
 		ImGui::Text("File log level: %d", static_cast<int>(appCfg.fileLogLevel));
 		ImGui::Text("Frametimer Log interval: %f", appCfg.frameTimerLogInterval);
@@ -682,12 +682,15 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 		ImGui::Text("Frame Limit: %u", appCfg.frameLimit);
 
 		ImGui::Separator();
-		ImGui::Text("Window title: %s", appCfg.windowTitle.data());
-		ImGui::Text("Window icon: %s", appCfg.windowIconFilename.data());
+		ImGui::Text("Window title: \"%s\"", appCfg.windowTitle.data());
+		ImGui::Text("Window icon: \"%s\"", appCfg.windowIconFilename.data());
 
 		ImGui::Separator();
 		ImGui::Text("Buffer mapping: %s", appCfg.useBufferMapping ? "true" : "false");
 		ImGui::Text("Defer shader queries: %s", appCfg.deferShaderQueries ? "true" : "false");
+#if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
+		ImGui::Text("Fixed batch size: %u", appCfg.fixedBatchSize);
+#endif
 		ImGui::Text("VBO size: %lu", appCfg.vboSize);
 		ImGui::Text("IBO size: %lu", appCfg.iboSize);
 		ImGui::Text("Vao pool size: %u", appCfg.vaoPoolSize);
