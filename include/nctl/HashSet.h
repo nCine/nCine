@@ -1,6 +1,7 @@
 #ifndef CLASS_NCTL_HASHSET
 #define CLASS_NCTL_HASHSET
 
+#include <new>
 #include <ncine/common_macros.h>
 #include "HashFunctions.h"
 #include "ReverseIterator.h"

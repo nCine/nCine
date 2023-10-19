@@ -868,11 +868,11 @@ int JoyMapping::hatStateToIndex(unsigned char hatState) const
 
 void JoyMapping::trimSpaces(const char **start, const char **end) const
 {
-	while (**start == ' ')
+	while (**start == ' ' || **start == '\t')
 		(*start)++;
 
 	(*end)--;
-	while (**end == ' ')
+	while (**end == ' ' || **end == '\t')
 		(*end)--;
 	(*end)++;
 }
