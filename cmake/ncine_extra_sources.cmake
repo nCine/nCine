@@ -229,6 +229,7 @@ if(LUA_FOUND)
 		list(APPEND PRIVATE_HEADERS
 			${NCINE_ROOT}/src/include/LuaClassTracker.h
 			${NCINE_ROOT}/src/include/LuaILogger.h
+			${NCINE_ROOT}/src/include/LuaHash64.h
 			${NCINE_ROOT}/src/include/LuaRect.h
 			${NCINE_ROOT}/src/include/LuaVector2.h
 			${NCINE_ROOT}/src/include/LuaVector3.h
@@ -267,6 +268,7 @@ if(LUA_FOUND)
 		list(APPEND SOURCES
 			${NCINE_ROOT}/src/scripting/LuaIAppEventHandler.cpp
 			${NCINE_ROOT}/src/scripting/LuaILogger.cpp
+			${NCINE_ROOT}/src/scripting/LuaHash64.cpp
 			${NCINE_ROOT}/src/scripting/LuaColor.cpp
 			${NCINE_ROOT}/src/scripting/LuaIInputManager.cpp
 			${NCINE_ROOT}/src/scripting/LuaIInputEventHandler.cpp

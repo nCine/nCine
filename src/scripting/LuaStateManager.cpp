@@ -29,6 +29,7 @@
 	#include "LuaShader.h"
 	#include "LuaShaderState.h"
 
+	#include "LuaHash64.h"
 	#include "LuaTimeStamp.h"
 	#include "LuaIFrameTimer.h"
 	#include "LuaFileSystem.h"
@@ -577,6 +578,7 @@ void LuaStateManager::exposeApi()
 	LuaKeyboardEvents::expose(L_);
 	LuaJoystickEvents::expose(L_);
 
+	LuaHash64::expose(L_);
 	LuaTimeStamp::expose(L_);
 	LuaIFrameTimer::expose(L_);
 	LuaFileSystem::expose(L_);
