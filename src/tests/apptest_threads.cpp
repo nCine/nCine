@@ -6,18 +6,18 @@
 
 namespace {
 
-const int NumThreads = 2;
+const int NumThreads = 16;
 const int NumFloats = 100000000;
 nctl::UniquePtr<float[]> globalArray;
 
 void threadFunction(void *arg)
 {
-	int threadNum = *(static_cast<int *>(arg));
-	int startIndex = threadNum * (NumFloats / NumThreads);
-	int endIndex = (threadNum + 1) * (NumFloats / NumThreads);
-	LOGI_X("THREAD #%d: %d-%d", threadNum, startIndex, endIndex);
+	const unsigned int threadNum = *(static_cast<unsigned int *>(arg));
+	const unsigned int startIndex = threadNum * (NumFloats / NumThreads);
+	const unsigned int endIndex = (threadNum + 1) * (NumFloats / NumThreads);
+	LOGI_X("THREAD #%u: %u-%u", threadNum, startIndex, endIndex);
 
-	for (int i = startIndex; i < endIndex; i++)
+	for (unsigned int i = startIndex; i < endIndex; i++)
 	{
 		globalArray[i] = 0.0f;
 
@@ -45,12 +45,12 @@ void MyEventHandler::onInit()
 	LOGI_X("APPTEST_THREADS: %d threads for %d numbers on %u processor(s)", NumThreads, NumFloats, nc::Thread::numProcessors());
 
 	nc::Thread threads[NumThreads];
-	int threadNums[NumThreads];
+	unsigned int threadNums[NumThreads];
 
 	globalArray = nctl::makeUnique<float[]>(NumFloats);
 
 	nc::TimeStamp startTime;
-	for (int i = 0; i < NumThreads; i++)
+	for (unsigned int i = 0; i < NumThreads; i++)
 	{
 		threadNums[i] = i;
 		threads[i].run(threadFunction, &threadNums[i]);
@@ -59,7 +59,7 @@ void MyEventHandler::onInit()
 	for (int i = 0; i < NumThreads; i++)
 		threads[i].join();
 
-	LOGI_X("APPTEST_THREADS: total time %fms", startTime.millisecondsSince());
+	LOGI_X("APPTEST_THREADS: total time %f ms", startTime.millisecondsSince());
 
 	globalArray.reset(nullptr);
 }

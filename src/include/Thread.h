@@ -11,9 +11,11 @@
 	#include <pthread.h>
 #endif
 
-#ifdef __APPLE__
+#if defined(__APPLE__)
 	#include <mach/mach_init.h>
 #endif
+
+#include <nctl/UniquePtr.h>
 
 namespace ncine {
 
@@ -42,7 +44,7 @@ class ThreadAffinityMask
   private:
 	#if defined(_WIN32)
 	DWORD_PTR affinityMask_;
-	#elif __APPLE__
+	#elif defined(__APPLE__)
 	integer_t affinityTag_;
 	#else
 	cpu_set_t cpuSet_;
@@ -62,15 +64,33 @@ class Thread
 	/// A default constructor for an object without the associated function
 	Thread();
 	/// Creates a thread around a function and runs it
-	Thread(ThreadFunctionPtr startFunction, void *arg);
+	Thread(ThreadFunctionPtr threadFunction, void *threadArg);
+	/// Destructor that detaches the thread
+	~Thread();
+
+	/// Move constructor
+	Thread(Thread &&other);
+	/// Move assignment operator
+	Thread &operator=(Thread &&other);
+	/// Deleted copy constructor
+	Thread(const Thread &) = delete;
+	/// Deleted assignment operator
+	Thread &operator=(const Thread &) = delete;
+
+	/// Swaps the state of two thread objects
+	void swap(Thread &first, Thread &second);
 
 	/// Returns the number of processors in the machine
 	static unsigned int numProcessors();
 
 	/// Spawns a new thread if the object hasn't one already associated
-	void run(ThreadFunctionPtr startFunction, void *arg);
+	void run(ThreadFunctionPtr threadFunction, void *threadArg);
 	/// Joins the thread
-	void *join();
+	bool join();
+	/// Returns true if the thread id is valid
+	bool joinable() const;
+	/// Detaches the thread
+	bool detach();
 
 #ifndef __EMSCRIPTEN__
 	#ifndef __APPLE__
@@ -90,13 +110,13 @@ class Thread
 	/// Returns the calling thread id
 	static long int self();
 	/// Terminates the calling thread
-	[[noreturn]] static void exit(void *retVal);
+	[[noreturn]] static void exit();
 	/// Yields the calling thread in favour of another one with the same priority
 	static void yieldExecution();
 
 #ifndef __ANDROID__
 	/// Asks the thread for termination
-	void cancel();
+	bool cancel();
 
 	#ifndef __EMSCRIPTEN__
 	/// Gets the thread affinity mask
@@ -110,10 +130,8 @@ class Thread
 	/// The structure wrapping the information for thread creation
 	struct ThreadInfo
 	{
-		ThreadInfo()
-		    : startFunction(nullptr), threadArg(nullptr) {}
-		ThreadFunctionPtr startFunction;
-		void *threadArg;
+		ThreadFunctionPtr threadFunction = nullptr;
+		void *threadArg = nullptr;
 	};
 
 #if defined(_WIN32)
@@ -122,7 +140,9 @@ class Thread
 	pthread_t tid_;
 #endif
 
-	ThreadInfo threadInfo_;
+	/// The information structure for thread creation
+	/*! \note It needs to stay on the heap as thread creation can occur after a moved object goes out of scope */
+	nctl::UniquePtr<ThreadInfo> threadInfo_;
 	/// The wrapper start function for thread creation
 #if defined(_WIN32)
 	#ifdef __MINGW32__
@@ -134,6 +154,54 @@ class Thread
 	static void *wrapperFunction(void *arg);
 #endif
 };
+
+inline Thread::~Thread()
+{
+	detach();
+}
+
+/// Move constructor
+inline Thread::Thread(Thread &&other)
+    : Thread()
+{
+	swap(*this, other);
+}
+
+inline Thread &Thread::operator=(Thread &&other)
+{
+	// Avoid self-assignment
+	if (this != &other)
+	{
+#ifndef __ANDROID__
+		cancel();
+#else
+		detach();
+#endif
+		// At this point the thread id should be 0 and objects can be swapped
+		swap(*this, other);
+	}
+
+	return *this;
+}
+
+inline void Thread::swap(Thread &first, Thread &second)
+{
+#if defined(_WIN32)
+	nctl::swap(first.handle_, second.handle_);
+#else
+	nctl::swap(first.tid_, second.tid_);
+#endif
+	nctl::swap(first.threadInfo_, second.threadInfo_);
+}
+
+inline bool Thread::joinable() const
+{
+#if defined(_WIN32)
+	return (handle_ != 0);
+#else
+	return (tid_ != 0);
+#endif
+}
 
 }
 

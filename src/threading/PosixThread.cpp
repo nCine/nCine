@@ -69,14 +69,14 @@ bool ThreadAffinityMask::isSet(int cpuNum)
 ///////////////////////////////////////////////////////////
 
 Thread::Thread()
-    : tid_(0)
+    : tid_(0), threadInfo_(nctl::makeUnique<ThreadInfo>())
 {
 }
 
-Thread::Thread(ThreadFunctionPtr startFunction, void *arg)
-    : tid_(0)
+Thread::Thread(ThreadFunctionPtr threadFunction, void *threadArg)
+    : Thread()
 {
-	run(startFunction, arg);
+	run(threadFunction, threadArg);
 }
 
 ///////////////////////////////////////////////////////////
@@ -100,25 +100,41 @@ unsigned int Thread::numProcessors()
 	return numProcs;
 }
 
-void Thread::run(ThreadFunctionPtr startFunction, void *arg)
+void Thread::run(ThreadFunctionPtr threadFunction, void *threadArg)
 {
 	if (tid_ == 0)
 	{
-		threadInfo_.startFunction = startFunction;
-		threadInfo_.threadArg = arg;
-		const int error = pthread_create(&tid_, nullptr, wrapperFunction, &threadInfo_);
-		FATAL_ASSERT_MSG_X(!error, "Error in pthread_create(): %d", error);
+		threadInfo_->threadFunction = threadFunction;
+		threadInfo_->threadArg = threadArg;
+		const int retValue = pthread_create(&tid_, nullptr, wrapperFunction, threadInfo_.get());
+		FATAL_ASSERT_MSG_X(!retValue, "Error in pthread_create(): %d", retValue);
 	}
 	else
 		LOGW_X("Thread %u is already running", tid_);
 }
 
-void *Thread::join()
+bool Thread::join()
 {
-	void *pRetVal = nullptr;
-	pthread_join(tid_, &pRetVal);
-	tid_ = 0;
-	return pRetVal;
+	bool success = false;
+	if (tid_ != 0)
+	{
+		const int retValue = pthread_join(tid_, nullptr);
+		success = (retValue == 0);
+		tid_ = 0;
+	}
+	return success;
+}
+
+bool Thread::detach()
+{
+	bool success = false;
+	if (tid_ != 0)
+	{
+		const int retValue = pthread_detach(tid_);
+		success = (retValue == 0);
+		tid_ = 0;
+	}
+	return success;
 }
 
 #ifndef __EMSCRIPTEN__
@@ -203,9 +219,9 @@ long int Thread::self()
 #endif
 }
 
-[[noreturn]] void Thread::exit(void *retVal)
+[[noreturn]] void Thread::exit()
 {
-	pthread_exit(retVal);
+	pthread_exit(nullptr);
 }
 
 void Thread::yieldExecution()
@@ -214,10 +230,16 @@ void Thread::yieldExecution()
 }
 
 #ifndef __ANDROID__
-void Thread::cancel()
+bool Thread::cancel()
 {
-	pthread_cancel(tid_);
-	tid_ = 0;
+	bool success = false;
+	if (tid_ != 0)
+	{
+		const int retValue = pthread_cancel(tid_);
+		success = (retValue == 0);
+		tid_ = 0;
+	}
+	return success;
 }
 
 	#ifndef __EMSCRIPTEN__
@@ -229,7 +251,7 @@ ThreadAffinityMask Thread::affinityMask() const
 	{
 		#ifdef __APPLE__
 		thread_affinity_policy_data_t threadAffinityPolicy;
-		thread_port_t threadPort = pthread_mach_thread_np(tid_);
+		const thread_port_t threadPort = pthread_mach_thread_np(tid_);
 		mach_msg_type_number_t policyCount = THREAD_AFFINITY_POLICY_COUNT;
 		boolean_t getDefault = FALSE;
 		thread_policy_get(threadPort, THREAD_AFFINITY_POLICY, reinterpret_cast<thread_policy_t>(&threadAffinityPolicy), &policyCount, &getDefault);
@@ -250,7 +272,7 @@ void Thread::setAffinityMask(ThreadAffinityMask affinityMask)
 	{
 		#ifdef __APPLE__
 		thread_affinity_policy_data_t threadAffinityPolicy = { affinityMask.affinityTag_ };
-		thread_port_t threadPort = pthread_mach_thread_np(tid_);
+		const thread_port_t threadPort = pthread_mach_thread_np(tid_);
 		thread_policy_set(threadPort, THREAD_AFFINITY_POLICY, reinterpret_cast<thread_policy_t>(&threadAffinityPolicy), THREAD_AFFINITY_POLICY_COUNT);
 		#else
 		pthread_setaffinity_np(tid_, sizeof(cpu_set_t), &affinityMask.cpuSet_);
@@ -269,7 +291,7 @@ void Thread::setAffinityMask(ThreadAffinityMask affinityMask)
 void *Thread::wrapperFunction(void *arg)
 {
 	const ThreadInfo *pThreadInfo = static_cast<ThreadInfo *>(arg);
-	pThreadInfo->startFunction(pThreadInfo->threadArg);
+	pThreadInfo->threadFunction(pThreadInfo->threadArg);
 
 	return nullptr;
 }
