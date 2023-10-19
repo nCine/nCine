@@ -3,6 +3,7 @@ set(HEADERS
 	${NCINE_ROOT}/include/ncine/common_constants.h
 	${NCINE_ROOT}/include/ncine/common_macros.h
 	${NCINE_ROOT}/include/ncine/Random.h
+	${NCINE_ROOT}/include/ncine/Hash64.h
 	${NCINE_ROOT}/include/ncine/Rect.h
 	${NCINE_ROOT}/include/ncine/Color.h
 	${NCINE_ROOT}/include/ncine/Colorf.h
