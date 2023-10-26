@@ -66,6 +66,9 @@ class DLL_PUBLIC AppConfiguration
 	bool useBinaryShaderCache;
 	/// The directory name (not the complete path) for the binary shaders cache
 	nctl::String shaderCacheDirname;
+	/// The flag is `true` if, on devices with UBOs smaller than 64 KB, batched shaders will be compiled twice to identify their maximum batch size
+	/*! \note When enabled, compatibility with such devices will increase because shaders with standard batch size will not compile */
+	bool compileBatchedShadersTwice;
 
 	/// The maximum size in bytes for each VBO collecting geometry data
 	unsigned long vboSize;

@@ -6,6 +6,7 @@
 #include <nctl/Array.h>
 #include "RenderResources.h"
 #include "BinaryShaderCache.h"
+#include "Hash64.h"
 
 #if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
 	#include "Application.h"
@@ -108,6 +109,12 @@ bool GLShader::loadFromStrings(const char **strings)
 
 bool GLShader::loadFromStringsAndFile(const char **strings, const char *filename)
 {
+	return loadFromStringsAndFile(strings, filename, 0);
+}
+
+/*! \note If the provided hash is zero, it will be calculated from the given sources and file */
+bool GLShader::loadFromStringsAndFile(const char **strings, const char *filename, uint64_t sourceHash)
+{
 	const bool noStrings = (strings == nullptr || strings[0] == nullptr);
 	if (noStrings && filename == nullptr)
 		return false;
@@ -124,10 +131,13 @@ bool GLShader::loadFromStringsAndFile(const char **strings, const char *filename
 		sourceLengths.setCapacity(numStrings + 2);
 	}
 
+	// Patch lines are normally taken into account for hashing, but calculation is skipped if `sourceHash` is different than zero.
+	// In this case, changing the `fixedBatchSize` value will not trigger an automatic recompilation of the binary shader.
 	GLsizei count = 1;
 	sourceStrings.pushBack(patchLines.data());
 	sourceLengths.pushBack(static_cast<GLint>(patchLines.length()));
 
+	sourceHash_ = sourceHash;
 	if (numStrings > 0)
 	{
 		for (unsigned int i = 0; i < numStrings; i++)
@@ -138,6 +148,8 @@ bool GLShader::loadFromStringsAndFile(const char **strings, const char *filename
 			sourceLengths.pushBack(sourceLength);
 			count++;
 		}
+		if (sourceHash == 0 && RenderResources::binaryShaderCache().isEnabled())
+			sourceHash_ += RenderResources::hash64().hashStrings(count, sourceStrings.data(), sourceLengths.data());
 	}
 
 	if (filename)
@@ -159,10 +171,11 @@ bool GLShader::loadFromStringsAndFile(const char **strings, const char *filename
 			count++;
 
 			setObjectLabel(filename);
+			if (sourceHash == 0 && RenderResources::binaryShaderCache().isEnabled())
+				sourceHash_ += RenderResources::hash64().hashFileStat(filename);
 		}
 	}
 
-	sourceHash_ = RenderResources::binaryShaderCache().hashSources(count, sourceStrings.data(), sourceLengths.data());
 	LOGD_X("%s Shader %u - hash: 0x%016llx", typeToString(type_), glHandle_, sourceHash_);
 	glShaderSource(glHandle_, count, sourceStrings.data(), sourceLengths.data());
 

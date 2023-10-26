@@ -37,6 +37,7 @@ namespace Shader {
 	static const char *loadFromMemory = "load_from_memory";
 	static const char *loadFromMemoryDefaultVertex = "load_from_memory_default_vertex";
 	static const char *loadFromMemoryDefaultFragment = "load_from_memory_default_fragment";
+	static const char *loadFromMemoryWithHashes = "load_from_memory_with_hashes";
 
 	static const char *loadFromFile = "load_from_file";
 	static const char *loadFromFileDefaultVertex = "load_from_file_default_vertex";
@@ -103,7 +104,7 @@ void LuaShader::exposeConstants(lua_State *L)
 void LuaShader::expose(LuaStateManager *stateManager)
 {
 	lua_State *L = stateManager->state();
-	lua_createtable(L, 0, 17);
+	lua_createtable(L, 0, 18);
 
 	if (stateManager->apiType() == LuaStateManager::ApiType::FULL)
 	{
@@ -114,6 +115,7 @@ void LuaShader::expose(LuaStateManager *stateManager)
 	LuaUtils::addFunction(L, LuaNames::Shader::loadFromMemory, loadFromMemory);
 	LuaUtils::addFunction(L, LuaNames::Shader::loadFromMemoryDefaultVertex, loadFromMemoryDefaultVertex);
 	LuaUtils::addFunction(L, LuaNames::Shader::loadFromMemoryDefaultFragment, loadFromMemoryDefaultFragment);
+	LuaUtils::addFunction(L, LuaNames::Shader::loadFromMemoryWithHashes, loadFromMemoryWithHashes);
 
 	LuaUtils::addFunction(L, LuaNames::Shader::loadFromFile, loadFromFile);
 	LuaUtils::addFunction(L, LuaNames::Shader::loadFromFileDefaultVertex, loadFromFileDefaultVertex);
@@ -194,6 +196,22 @@ int LuaShader::loadFromMemoryDefaultFragment(lua_State *L)
 
 	if (shader)
 		shader->loadFromMemory(shaderName, introspection, vertex, fragment);
+
+	return 0;
+}
+
+int LuaShader::loadFromMemoryWithHashes(lua_State *L)
+{
+	Shader *shader = LuaUntrackedUserData<Shader>::retrieve(L, -7);
+	const char *shaderName = LuaUtils::retrieve<const char *>(L, -6);
+	const Shader::Introspection introspection = static_cast<Shader::Introspection>(LuaUtils::retrieve<int64_t>(L, -5));
+	const char *vertex = LuaUtils::retrieve<const char *>(L, -4);
+	const char *fragment = LuaUtils::retrieve<const char *>(L, -3);
+	const uint64_t vertexHash = LuaUtils::retrieve<uint64_t>(L, -2);
+	const uint64_t fragmentHash = LuaUtils::retrieve<uint64_t>(L, -1);
+
+	if (shader)
+		shader->loadFromMemory(shaderName, introspection, vertex, fragment, vertexHash, fragmentHash);
 
 	return 0;
 }

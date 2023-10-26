@@ -78,6 +78,46 @@ GLShaderProgram::~GLShaderProgram()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+/*! The method will not call `reset()` and will fail if a shader program has been already loaded */
+bool GLShaderProgram::initFromBinary(const char *filename, Introspection introspection)
+{
+	if (status_ != Status::NOT_LINKED || filename == nullptr ||
+	    RenderResources::binaryShaderCache().isEnabled() == false)
+	{
+		return false;
+	}
+
+	ZoneScoped;
+	ZoneText(filename, nctl::strnlen(filename, nctl::String::MaxCStringLength));
+
+	uint32_t binaryFormat = 0UL;
+	uint64_t shaderHash = 0ULL;
+	const bool isShaderFilename = RenderResources::binaryShaderCache().parseShaderFilename(filename, nullptr, &binaryFormat, &shaderHash);
+	if (isShaderFilename == false)
+		return false;
+
+	const unsigned int binLength = RenderResources::binaryShaderCache().binarySize(binaryFormat, shaderHash);
+	if (binLength == 0)
+		return false;
+
+	const void *buffer = RenderResources::binaryShaderCache().loadFromCache(binaryFormat, shaderHash);
+	const bool binaryHasLoaded = loadBinary(binaryFormat, buffer, binLength);
+	if (binaryHasLoaded == false)
+		return false;
+
+	introspection_ = introspection;
+	if (queryPhase_ == QueryPhase::IMMEDIATE)
+	{
+		// A shader program is considered to perform an implicit linking operation when loaded from a binary
+		if (introspection_ != Introspection::DISABLED)
+			performIntrospection();
+	}
+	else
+		status_ = GLShaderProgram::Status::LINKED_WITH_DEFERRED_QUERIES;
+
+	return true;
+}
+
 bool GLShaderProgram::isLinked() const
 {
 	return (status_ == Status::LINKED ||
@@ -106,28 +146,28 @@ void GLShaderProgram::retrieveInfoLog(nctl::String &infoLog) const
 	}
 }
 
-bool GLShaderProgram::attachShaderFromFile(GLenum type, const char *filename)
+bool GLShaderProgram::attachShaderFromFile(GLenum type, const char *filename, uint64_t sourceHash)
 {
-	return attachShaderFromStringsAndFile(type, nullptr, filename);
+	return attachShaderFromStringsAndFile(type, nullptr, filename, sourceHash);
 }
 
-bool GLShaderProgram::attachShaderFromString(GLenum type, const char *string)
+bool GLShaderProgram::attachShaderFromString(GLenum type, const char *string, uint64_t sourceHash)
 {
 	static const char *strings[2] = { nullptr, nullptr };
 
 	strings[0] = string;
-	return attachShaderFromStringsAndFile(type, strings, nullptr);
+	return attachShaderFromStringsAndFile(type, strings, nullptr, sourceHash);
 }
 
-bool GLShaderProgram::attachShaderFromStrings(GLenum type, const char **strings)
+bool GLShaderProgram::attachShaderFromStrings(GLenum type, const char **strings, uint64_t sourceHash)
 {
-	return attachShaderFromStringsAndFile(type, strings, nullptr);
+	return attachShaderFromStringsAndFile(type, strings, nullptr, sourceHash);
 }
 
-bool GLShaderProgram::attachShaderFromStringsAndFile(GLenum type, const char **strings, const char *filename)
+bool GLShaderProgram::attachShaderFromStringsAndFile(GLenum type, const char **strings, const char *filename, uint64_t sourceHash)
 {
 	nctl::UniquePtr<GLShader> shader = nctl::makeUnique<GLShader>(type);
-	const bool hasLoaded = shader->loadFromStringsAndFile(strings, filename);
+	const bool hasLoaded = shader->loadFromStringsAndFile(strings, filename, sourceHash);
 
 	if (hasLoaded)
 	{
@@ -138,8 +178,29 @@ bool GLShaderProgram::attachShaderFromStringsAndFile(GLenum type, const char **s
 	return hasLoaded;
 }
 
+bool GLShaderProgram::attachShaderFromFile(GLenum type, const char *filename)
+{
+	return attachShaderFromFile(type, filename, 0);
+}
+
+bool GLShaderProgram::attachShaderFromString(GLenum type, const char *string)
+{
+	return attachShaderFromString(type, string, 0);
+}
+
+bool GLShaderProgram::attachShaderFromStrings(GLenum type, const char **strings)
+{
+	return attachShaderFromStrings(type, strings, 0);
+}
+
+bool GLShaderProgram::attachShaderFromStringsAndFile(GLenum type, const char **strings, const char *filename)
+{
+	return attachShaderFromStringsAndFile(type, strings, filename, 0);
+}
+
 bool GLShaderProgram::link(Introspection introspection)
 {
+	ZoneScoped;
 	introspection_ = introspection;
 
 	bool binaryHasLoaded = false;
@@ -256,7 +317,7 @@ void GLShaderProgram::defineVertexFormat(const GLBufferObject *vbo, const GLBuff
 	}
 }
 
-void GLShaderProgram::reset()
+void GLShaderProgram::reset(QueryPhase queryPhase)
 {
 	if (status_ != Status::NOT_LINKED && status_ != Status::COMPILATION_FAILED)
 	{
@@ -284,6 +345,7 @@ void GLShaderProgram::reset()
 		hashName_ = 0;
 	}
 
+	queryPhase_ = queryPhase;
 	status_ = Status::NOT_LINKED;
 }
 

@@ -55,15 +55,21 @@ NuklearDrawing::NuklearDrawing(bool withSceneGraph)
 
 	// Nuklear shaders are the same as ImGui
 	nuklearShaderProgram_ = nctl::makeUnique<GLShaderProgram>(queryPhase);
+
+	RenderResources::ShaderProgramCompileInfo shaderProgramInfo(nuklearShaderProgram_, GLShaderProgram::Introspection::ENABLED, "ImGui");
 #ifndef WITH_EMBEDDED_SHADERS
-	nuklearShaderProgram_->attachShaderFromFile(GL_VERTEX_SHADER, (fs::dataPath() + RenderResources::ShadersDir + "/imgui_vs.glsl").data());
-	nuklearShaderProgram_->attachShaderFromFile(GL_FRAGMENT_SHADER, (fs::dataPath() + RenderResources::ShadersDir + "/imgui_fs.glsl").data());
+	const nctl::String vertexShaderPath = fs::dataPath() + RenderResources::ShadersDir + "/imgui_vs.glsl";
+	const nctl::String fragmentShaderPath = fs::dataPath() + RenderResources::ShadersDir + "/imgui_fs.glsl";
+	shaderProgramInfo.vertexInfo.shaderFile = vertexShaderPath.data();
+	shaderProgramInfo.fragmentInfo.shaderFile = fragmentShaderPath.data();
 #else
 	// Skipping the initial new line character of the raw string literal
-	nuklearShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::imgui_vs + 1);
-	nuklearShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::imgui_fs + 1);
+	shaderProgramInfo.vertexInfo.shaderString = ShaderStrings::imgui_vs + 1;
+	shaderProgramInfo.fragmentInfo.shaderString = ShaderStrings::imgui_fs + 1;
+	shaderProgramInfo.vertexInfo.hashString = ShaderHashes::imgui_vs;
+	shaderProgramInfo.fragmentInfo.hashString = ShaderHashes::imgui_fs;
 #endif
-	nuklearShaderProgram_->link(GLShaderProgram::Introspection::ENABLED);
+	RenderResources::compileShader(shaderProgramInfo);
 
 	if (withSceneGraph == false)
 		setupBuffersAndShader();

@@ -48,6 +48,9 @@ class GLShaderProgram
 	GLShaderProgram(const char *vertexFile, const char *fragmentFile);
 	~GLShaderProgram();
 
+	/// Initializes a shader program from a binary shader file
+	bool initFromBinary(const char *filename, Introspection introspection);
+
 	inline GLuint glHandle() const { return glHandle_; }
 	inline Status status() const { return status_; }
 	inline Introspection introspection() const { return introspection_; }
@@ -64,6 +67,11 @@ class GLShaderProgram
 	inline unsigned int uniformsSize() const { return uniformsSize_; }
 	/// Returns the total memory needed for all uniforms inside of blocks
 	inline unsigned int uniformBlocksSize() const { return uniformBlocksSize_; }
+
+	bool attachShaderFromFile(GLenum type, const char *filename, uint64_t sourceHash);
+	bool attachShaderFromString(GLenum type, const char *string, uint64_t sourceHash);
+	bool attachShaderFromStrings(GLenum type, const char **strings, uint64_t sourceHash);
+	bool attachShaderFromStringsAndFile(GLenum type, const char **strings, const char *filename, uint64_t sourceHash);
 
 	bool attachShaderFromFile(GLenum type, const char *filename);
 	bool attachShaderFromString(GLenum type, const char *string);
@@ -82,8 +90,10 @@ class GLShaderProgram
 	inline void defineVertexFormat(const GLBufferObject *vbo, const GLBufferObject *ibo) { defineVertexFormat(vbo, ibo, 0); }
 	void defineVertexFormat(const GLBufferObject *vbo, const GLBufferObject *ibo, unsigned int vboOffset);
 
-	/// Deletes the current OpenGL shader program so that new shaders can be attached
-	void reset();
+	/// Deletes the current OpenGL shader program so that new shaders can be attached (with the specified query phase)
+	void reset(QueryPhase queryPhase);
+	/// Deletes the current OpenGL shader program so that new shaders can be attached (retaining the previous query phase)
+	void reset() { reset(queryPhase_); }
 
 	/// Returns a unique identification code to retrieve the corresponding compiled binary in the cache
 	inline uint64_t hashName() const { return hashName_; }

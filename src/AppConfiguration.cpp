@@ -45,6 +45,7 @@ AppConfiguration::AppConfiguration()
       useBinaryShaderCache(false),
 #endif
       shaderCacheDirname(64),
+      compileBatchedShadersTwice(true),
 #if defined(WITH_IMGUI) || defined(WITH_NUKLEAR)
       vboSize(512 * 1024),
       iboSize(128 * 1024),

@@ -1,6 +1,7 @@
 #ifndef CLASS_NCINE_SHADER
 #define CLASS_NCINE_SHADER
 
+#include <stdint.h>
 #include "Object.h"
 
 namespace nctl {
@@ -54,26 +55,32 @@ class DLL_PUBLIC Shader : public Object
 	/// Creates an OpenGL shader program name
 	Shader();
 
+	Shader(const char *shaderName, LoadMode loadMode, Introspection introspection, const char *vertex, const char *fragment, uint64_t vertexHash, uint64_t fragmentHash);
 	Shader(const char *shaderName, LoadMode loadMode, Introspection introspection, const char *vertex, const char *fragment);
 	Shader(const char *shaderName, LoadMode loadMode, const char *vertex, const char *fragment);
 	Shader(LoadMode loadMode, const char *vertex, const char *fragment);
 
+	Shader(const char *shaderName, LoadMode loadMode, Introspection introspection, DefaultVertex defaultVertex, const char *fragment, uint64_t fragmentHash);
 	Shader(const char *shaderName, LoadMode loadMode, Introspection introspection, DefaultVertex defaultVertex, const char *fragment);
 	Shader(const char *shaderName, LoadMode loadMode, DefaultVertex defaultVertex, const char *fragment);
 	Shader(LoadMode loadMode, DefaultVertex defaultVertex, const char *fragment);
+	Shader(const char *shaderName, LoadMode loadMode, Introspection introspection, const char *vertex, DefaultFragment defaultFragment, uint64_t vertexHash);
 	Shader(const char *shaderName, LoadMode loadMode, Introspection introspection, const char *vertex, DefaultFragment defaultFragment);
 	Shader(const char *shaderName, LoadMode loadMode, const char *vertex, DefaultFragment defaultFragment);
 	Shader(LoadMode loadMode, const char *vertex, DefaultFragment defaultFragment);
 
 	~Shader() override;
 
+	bool loadFromMemory(const char *shaderName, Introspection introspection, const char *vertex, const char *fragment, uint64_t vertexHash, uint64_t fragmentHash);
 	bool loadFromMemory(const char *shaderName, Introspection introspection, const char *vertex, const char *fragment);
 	bool loadFromMemory(const char *shaderName, const char *vertex, const char *fragment);
 	bool loadFromMemory(const char *vertex, const char *fragment);
 
+	bool loadFromMemory(const char *shaderName, Introspection introspection, DefaultVertex defaultVertex, const char *fragment, uint64_t fragmentHash);
 	bool loadFromMemory(const char *shaderName, Introspection introspection, DefaultVertex defaultVertex, const char *fragment);
 	bool loadFromMemory(const char *shaderName, DefaultVertex defaultVertex, const char *fragment);
 	bool loadFromMemory(DefaultVertex defaultVertex, const char *fragment);
+	bool loadFromMemory(const char *shaderName, Introspection introspection, const char *vertex, DefaultFragment defaultFragment, uint64_t vertexHash);
 	bool loadFromMemory(const char *shaderName, Introspection introspection, const char *vertex, DefaultFragment defaultFragment);
 	bool loadFromMemory(const char *shaderName, const char *vertex, DefaultFragment defaultFragment);
 	bool loadFromMemory(const char *vertex, DefaultFragment defaultFragment);
@@ -123,8 +130,9 @@ class DLL_PUBLIC Shader : public Object
 	/// The OpenGL shader program
 	nctl::UniquePtr<GLShaderProgram> glShaderProgram_;
 
-	bool loadDefaultShader(DefaultVertex defaultVertex);
-	bool loadDefaultShader(DefaultFragment defaultFragment);
+	/// The method that all wrappers use to load a shader. It supports all arguments and combinations.
+	bool load(LoadMode loadMode, const char *shaderName, Introspection introspection, const char *vertex, const char *fragment,
+	          DefaultVertex defaultVertex, DefaultFragment defaultFragment, uint64_t vertexHash, uint64_t fragmentHash);
 
 	/// Deleted copy constructor
 	Shader(const Shader &) = delete;

@@ -1,3 +1,5 @@
+#include <nctl/HashMapIterator.h>
+
 #include "imgui.h"
 #include "ImGuiDebugOverlay.h"
 #include "Application.h"
@@ -20,6 +22,8 @@
 #include "RenderStatistics.h"
 #include "RenderResources.h"
 #include "BinaryShaderCache.h"
+#include "Hash64.h"
+
 #ifdef WITH_LUA
 	#include "LuaStatistics.h"
 #endif
@@ -709,6 +713,7 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 #endif
 		ImGui::Text("Binary shader cache: %s", appCfg.useBinaryShaderCache ? "true" : "false");
 		ImGui::Text("Shader cache directory name: \"%s\"", appCfg.shaderCacheDirname.data());
+		ImGui::Text("Compile batched shaders twice: %s", appCfg.compileBatchedShadersTwice ? "true" : "false");
 		ImGui::Text("VBO size: %lu", appCfg.vboSize);
 		ImGui::Text("IBO size: %lu", appCfg.iboSize);
 		ImGui::Text("Vao pool size: %u", appCfg.vaoPoolSize);
@@ -1093,9 +1098,83 @@ void ImGuiDebugOverlay::guiBinaryShaderCache()
 			ImGui::BeginDisabled(isEnabled == false);
 
 			ImGui::Text("Directory: %s", cache.directory().data());
+			// Reporting statistics for shaders hashing
+			const Hash64::Statistics &hash64Stats = RenderResources::hash64().statistics();
+			ImGui::Text("Hashed: %u sources (%u strings, %u characters), %u files, %u scanned",
+						hash64Stats.HashStringCalls, hash64Stats.HashedStrings, hash64Stats.HashedCharacters, hash64Stats.HashedFiles, hash64Stats.ScannedHashStrings);
 			ImGui::Text("Requests: %u loaded, %u saved", stats.LoadedShaders, stats.SavedShaders);
 			ImGui::Text("Count: %u (total: %u)", stats.PlatformFilesCount, stats.TotalFilesCount);
 			ImGui::Text("Size: %u Kb (total: %u Kb)", stats.PlatformBytesCount / 1024, stats.TotalBytesCount / 1024);
+
+			const unsigned int numDefaultVertexShaders = static_cast<unsigned int>(RenderResources::DefaultVertexShader::COUNT);
+			widgetName_.format("Default vertex shaders (%u)", numDefaultVertexShaders);
+			if (ImGui::TreeNode(widgetName_.data()))
+			{
+				for (unsigned int i = 0; i < numDefaultVertexShaders; i++)
+				{
+					const RenderResources::ShaderProgramCompileInfo::ShaderCompileInfo &vertexInfo = RenderResources::defaultVertexShaderInfo(i);
+					if (ImGui::TreeNode(&vertexInfo, "#%u", i))
+					{
+#ifndef WITH_EMBEDDED_SHADERS
+						ImGui::Text("Filename: %s", vertexInfo.shaderFile);
+#else
+						ImGui::TextUnformatted("Source:");
+						ImGui::Separator();
+						ImGui::Text("%s", vertexInfo.shaderString);
+						ImGui::Separator();
+#endif
+						if (vertexInfo.hash != 0)
+							ImGui::Text("Hash: 0x%016llx", vertexInfo.hash);
+						if (vertexInfo.hashString)
+							ImGui::Text("Hash string: 0x%s", vertexInfo.hashString);
+						ImGui::TreePop();
+					}
+				}
+				ImGui::TreePop();
+			}
+
+			const unsigned int numDefaultFragmentShaders = static_cast<unsigned int>(RenderResources::DefaultFragmentShader::COUNT);
+			widgetName_.format("Default fragment shaders (%u)", numDefaultFragmentShaders);
+			if (ImGui::TreeNode(widgetName_.data()))
+			{
+				for (unsigned int i = 0; i < numDefaultFragmentShaders; i++)
+				{
+					const RenderResources::ShaderProgramCompileInfo::ShaderCompileInfo &fragmentInfo = RenderResources::defaultFragmentShaderInfo(i);
+					if (ImGui::TreeNode(&fragmentInfo, "#%u", i))
+					{
+#ifndef WITH_EMBEDDED_SHADERS
+						ImGui::Text("Filename: %s", fragmentInfo.shaderFile);
+#else
+						ImGui::TextUnformatted("Source:");
+						ImGui::Separator();
+						ImGui::Text("%s", fragmentInfo.shaderString);
+						ImGui::Separator();
+#endif
+						if (fragmentInfo.hash != 0)
+							ImGui::Text("Hash: 0x%016llx", fragmentInfo.hash);
+						if (fragmentInfo.hashString)
+							ImGui::Text("Hash string: 0x%s", fragmentInfo.hashString);
+						ImGui::TreePop();
+					}
+				}
+				ImGui::TreePop();
+			}
+
+			widgetName_.format("Shader Info Hashmap (%u)", cache.shaderInfoHashMap().size());
+			if (ImGui::TreeNode(widgetName_.data()))
+			{
+				for (BinaryShaderCache::ShaderInfoHashMapType::ConstIterator i = cache.shaderInfoHashMap().begin(); i != cache.shaderInfoHashMap().end(); ++i)
+				{
+					const BinaryShaderCache::ShaderInfo &shaderInfo = i.value();
+					if (ImGui::TreeNode(&shaderInfo, "%s", shaderInfo.objectLabel.data()))
+					{
+						ImGui::Text("Binary file: %s", shaderInfo.binaryFilename.data());
+						ImGui::Text("Batch size: %u", shaderInfo.batchSize);
+						ImGui::TreePop();
+					}
+				}
+				ImGui::TreePop();
+			}
 
 			ImGui::BeginDisabled(canBePruned == false);
 			if (ImGui::Button("Prune"))

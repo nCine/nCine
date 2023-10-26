@@ -34,6 +34,7 @@ namespace AppConfiguration {
 	static const char *fixedBatchSize = "fixed_batch_size";
 	static const char *useBinaryShaderCache = "binary_shader_cache";
 	static const char *shaderCacheDirname = "shader_cache_dirname";
+	static const char *compileBatchedShadersTwice = "compile_batched_shaders_twice";
 	static const char *vboSize = "vbo_size";
 	static const char *iboSize = "ibo_size";
 	static const char *vaoPoolSize = "vao_pool_size";
@@ -68,7 +69,7 @@ void LuaAppConfiguration::exposeConstants(lua_State *L)
 
 void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 {
-	lua_createtable(L, 0, 36);
+	lua_createtable(L, 0, 37);
 
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::dataPath, appCfg.dataPath().data());
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::logFile, appCfg.logFile.data());
@@ -92,6 +93,7 @@ void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::fixedBatchSize, appCfg.fixedBatchSize);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::useBinaryShaderCache, appCfg.useBinaryShaderCache);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::shaderCacheDirname, appCfg.shaderCacheDirname.data());
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::compileBatchedShadersTwice, appCfg.compileBatchedShadersTwice);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::vboSize, static_cast<int64_t>(appCfg.vboSize));
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::iboSize, static_cast<int64_t>(appCfg.iboSize));
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::vaoPoolSize, appCfg.vaoPoolSize);
@@ -173,6 +175,8 @@ void LuaAppConfiguration::retrieveAndSet(lua_State *L, AppConfiguration &appCfg)
 	appCfg.useBinaryShaderCache = useBinaryShaderCache;
 	const char *shaderCacheDirname = LuaUtils::retrieveField<const char *>(L, -1, LuaNames::AppConfiguration::shaderCacheDirname);
 	appCfg.shaderCacheDirname = shaderCacheDirname;
+	const bool compileBatchedShadersTwice = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::compileBatchedShadersTwice);
+	appCfg.compileBatchedShadersTwice = compileBatchedShadersTwice;
 	const unsigned long vboSize = LuaUtils::retrieveField<uint64_t>(L, -1, LuaNames::AppConfiguration::vboSize);
 	appCfg.vboSize = vboSize;
 	const unsigned long iboSize = LuaUtils::retrieveField<uint64_t>(L, -1, LuaNames::AppConfiguration::iboSize);

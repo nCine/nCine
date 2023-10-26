@@ -39,8 +39,10 @@ class GLShader
 	bool loadFromStringAndFile(const char *string, const char *filename);
 	/// Loads a shader by concatenating the given strings in order
 	bool loadFromStrings(const char **strings);
-	/// Loads a shader by concatenating the given strings in order, then appending the specified file
+	/// Loads a shader by concatenating the given strings in order, then appending the specified file (hash is calculated)
 	bool loadFromStringsAndFile(const char **strings, const char *filename);
+	/// Loads a shader by concatenating the given strings in order, then appending the specified file (hash is given as an argument)
+	bool loadFromStringsAndFile(const char **strings, const char *filename, uint64_t sourceHash);
 	/// Loads a shader from the specified file
 	bool loadFromFile(const char *filename);
 
