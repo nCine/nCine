@@ -47,13 +47,12 @@ float Timer::total() const
 	           : static_cast<float>(accumulatedTime_) / clock().frequency();
 }
 
-void Timer::sleep(float seconds)
+void Timer::sleep(unsigned int milliseconds)
 {
 #if defined(_WIN32)
-	const unsigned int milliseconds = static_cast<unsigned int>(seconds) * 1000;
 	SleepEx(milliseconds, FALSE);
 #else
-	const unsigned int microseconds = static_cast<unsigned int>(seconds) * 1000000;
+	const unsigned int microseconds = static_cast<unsigned int>(milliseconds) * 1000;
 	usleep(microseconds);
 #endif
 }

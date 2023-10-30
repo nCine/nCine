@@ -1,5 +1,6 @@
 set(SOURCES
 	${NCINE_ROOT}/src/base/Random.cpp
+	${NCINE_ROOT}/src/base/Hash64.cpp
 	${NCINE_ROOT}/src/base/Object.cpp
 	${NCINE_ROOT}/src/base/HashFunctions.cpp
 	${NCINE_ROOT}/src/base/CString.cpp

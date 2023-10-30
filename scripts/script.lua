@@ -7,7 +7,7 @@ end
 
 nc = ncine
 
-function ncine.on_pre_init(cfg)
+function nc.on_pre_init(cfg)
 	cfg.resolution = {x = 1280, y = 720}
 	cfg.window_title = "nCine Lua test"
 
@@ -16,7 +16,7 @@ function ncine.on_pre_init(cfg)
 	return cfg
 end
 
-function ncine.on_init()
+function nc.on_init()
 	if nc.ANDROID then
 		font_tex_file = "DroidSans32_256_ETC2.ktx"
 		texture_file = "texture2_ETC2.ktx"
@@ -140,7 +140,7 @@ void main()
 	nc.log.info("on_init() Lua function terminated")
 end
 
-function ncine.on_frame_start()
+function nc.on_frame_start()
 	nc.particle_system.set_particles_update_enabled(particlesys_, not pause_)
 	if pause_ then
 		return
@@ -159,14 +159,14 @@ function ncine.on_frame_start()
 	nc.particle_system.emit_particles(particlesys_, initParticles)
 end
 
-function ncine.on_draw_viewport(viewport)
+function nc.on_draw_viewport(viewport)
 	if viewport == ping_viewport_ then
 		nc.shaderstate.set_uniform_float_value2(vp_pingshaderstate_, "", "uDirection", 1.0, 0.0)
 		nc.shaderstate.set_uniform_float_value2(vp_pongshaderstate_, "", "uDirection", 0.0, 1.0)
 	end
 end
 
-function ncine.on_resize_window(width, height)
+function nc.on_resize_window(width, height)
 	nc.texture.init(vp_texture0_, "Ping texture", nc.tex_format.RGB8, 1, width, height)
 	nc.texture.init(vp_texture1_, "Pong texture", nc.tex_format.RGB8, 1, width, height)
 
@@ -187,7 +187,7 @@ function ncine.on_resize_window(width, height)
 	nc.shaderstate.set_uniform_float_value2(vp_pongshaderstate_, "", "uResolution", width, height)
 end
 
-function ncine.on_shutdown()
+function nc.on_shutdown()
 	-- For a fast reload to work correctly, every object should be set to `nil` after deletion
 	nc.audiobuffer_player.delete(player_)
 	player_ = nil
@@ -237,7 +237,7 @@ function ncine.on_shutdown()
 	font_ = nil
 end
 
-function ncine.on_key_released(event)
+function nc.on_key_released(event)
 	if event.sym == nc.keysym.LEFT then
 		pos_.x = pos_.x - 20
 	elseif event.sym == nc.keysym.RIGHT then
@@ -267,7 +267,7 @@ function ncine.on_key_released(event)
 	end
 end
 
-function ncine.on_touch_down(event)
+function nc.on_touch_down(event)
 	pos_.x = event[0].x
 	pos_.y = event[0].y
 
@@ -275,11 +275,11 @@ function ncine.on_touch_down(event)
 	nc.audiobuffer_player.play(player_)
 end
 
-function ncine.on_touch_move(event)
+function nc.on_touch_move(event)
 	nc.particle_system.set_position(particlesys_, event[0].x, event[0].y)
 end
 
-function ncine.on_mouse_button_released(event)
+function nc.on_mouse_button_released(event)
 	if event.button == nc.mouse_button.LEFT then
 		pos_ = {x = event.x, y = event.y}
 		nc.particle_system.set_position(particlesys_, event.x, event.y)
@@ -291,17 +291,17 @@ function ncine.on_mouse_button_released(event)
 	nc.audiobuffer_player.play(player_)
 end
 
-function ncine.on_mouse_moved(state)
+function nc.on_mouse_moved(state)
 	if state.left_pressed then
 		nc.particle_system.set_position(particlesys_, state.x, state.y)
 	end
 end
 
-function ncine.on_scroll_input(event)
+function nc.on_scroll_input(event)
 	pos_.y = pos_.y + event.y * 5
 end
 
-function ncine.on_joymapped_button_released(event)
+function nc.on_joymapped_button_released(event)
 	if event.button == nc.joy_button.A then
 		with_viewport_ = not with_viewport_
 		setup_viewport()
@@ -329,5 +329,5 @@ function setup_viewport()
 end
 
 if needs_start then
-	ncine.start()
+	nc.start()
 end

@@ -353,9 +353,14 @@ uint32_t LuaUtils::retrieve<uint32_t>(lua_State *L, int index)
 template <>
 const char *LuaUtils::retrieve<const char *>(lua_State *L, int index)
 {
+	return retrieve(L, index, nullptr);
+}
+
+const char *LuaUtils::retrieve(lua_State *L, int index, size_t *length)
+{
 	if (lua_isstring(L, index) == false)
 		LOGW_X("Expecting a string at index %d", index);
-	return static_cast<const char *>(lua_tostring(L, index));
+	return static_cast<const char *>(lua_tolstring(L, index, length));
 }
 
 template <>
@@ -657,6 +662,11 @@ bool LuaUtils::tryRetrieveField<uint32_t>(lua_State *L, int index, const char *n
 
 bool LuaUtils::tryRetrieveField(lua_State *L, int index, const char *name, const char *value)
 {
+	return tryRetrieveField(L, index, name, value, nullptr);
+}
+
+bool LuaUtils::tryRetrieveField(lua_State *L, int index, const char *name, const char *value, size_t *length)
+{
 	ASSERT(value);
 
 	if (lua_istable(L, index) == false)
@@ -665,7 +675,7 @@ bool LuaUtils::tryRetrieveField(lua_State *L, int index, const char *name, const
 	lua_getfield(L, index, name);
 	if (lua_isstring(L, -1))
 	{
-		value = lua_tostring(L, -1);
+		value = lua_tolstring(L, -1, length);
 		lua_pop(L, 1);
 		return true;
 	}
@@ -991,12 +1001,17 @@ bool LuaUtils::tryRetrieveGlobal<uint32_t>(lua_State *L, const char *name, uint3
 
 bool LuaUtils::tryRetrieveGlobal(lua_State *L, const char *name, const char *value)
 {
+	return tryRetrieveGlobal(L, name, value, nullptr);
+}
+
+bool LuaUtils::tryRetrieveGlobal(lua_State *L, const char *name, const char *value, size_t *length)
+{
 	ASSERT(value);
 
 	lua_getglobal(L, name);
 	if (lua_isstring(L, -1))
 	{
-		value = lua_tostring(L, -1);
+		value = lua_tolstring(L, -1, length);
 		lua_pop(L, 1);
 		return true;
 	}
@@ -1084,6 +1099,12 @@ void LuaUtils::push(lua_State *L, const char *string)
 	lua_pushstring(L, string);
 }
 
+void LuaUtils::push(lua_State *L, const char *string, size_t length)
+{
+	ASSERT(length > 0);
+	lua_pushlstring(L, string, length);
+}
+
 void LuaUtils::push(lua_State *L, int (*func)(lua_State *L))
 {
 	lua_pushcfunction(L, func);
@@ -1157,6 +1178,13 @@ void LuaUtils::pushField(lua_State *L, const char *name, const char *string)
 	lua_setfield(L, -2, name);
 }
 
+void LuaUtils::pushField(lua_State *L, const char *name, const char *string, size_t length)
+{
+	ASSERT(length > 0);
+	lua_pushlstring(L, string, length);
+	lua_setfield(L, -2, name);
+}
+
 void LuaUtils::pushField(lua_State *L, const char *name, int (*func)(lua_State *L))
 {
 	lua_pushcfunction(L, func);
@@ -1218,6 +1246,13 @@ void LuaUtils::setGlobal(lua_State *L, const char *name, uint32_t integer)
 void LuaUtils::setGlobal(lua_State *L, const char *name, const char *string)
 {
 	lua_pushstring(L, string);
+	lua_setglobal(L, name);
+}
+
+void LuaUtils::setGlobal(lua_State *L, const char *name, const char *string, size_t length)
+{
+	ASSERT(length > 0);
+	lua_pushlstring(L, string, length);
 	lua_setglobal(L, name);
 }
 

@@ -1,6 +1,7 @@
 #ifndef CLASS_NCTL_HASHMAP
 #define CLASS_NCTL_HASHMAP
 
+#include <new>
 #include <ncine/common_macros.h>
 #include "HashFunctions.h"
 #include "ReverseIterator.h"

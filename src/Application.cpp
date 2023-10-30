@@ -339,7 +339,7 @@ void Application::step()
 	{
 		const float frameTimeDuration = 1.0f / static_cast<float>(appCfg_.frameLimit);
 		while (frameTimer_->currentFrameDuration() < frameTimeDuration)
-			Timer::sleep(0.0f);
+			Timer::sleep(0);
 	}
 }
 

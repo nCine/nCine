@@ -10,43 +10,56 @@ namespace ncine {
 namespace {
 
 #if !defined PTW32_VERSION && !defined __WINPTHREADS_VERSION
+	extern "C" typedef HRESULT(WINAPI *t_SetThreadDescription)(HANDLE, PCWSTR);
 	const unsigned int MaxThreadNameLength = 256;
+
+	#if !defined(__MINGW32__)
+
+	#pragma pack(push, 8)
+	struct THREADNAME_INFO
+	{
+		DWORD dwType;
+		LPCSTR szName;
+		DWORD dwThreadID;
+		DWORD dwFlags;
+	};
+	#pragma pack(pop)
+
+	void ThreadNameMsvcMagic(const THREADNAME_INFO &info)
+	{
+		__try
+		{
+			RaiseException(0x406D1388, 0, sizeof(info) / sizeof(ULONG_PTR), (ULONG_PTR *)&info);
+		}
+		__except(EXCEPTION_EXECUTE_HANDLER)
+		{
+		}
+	}
+	#endif
 
 	void setThreadName(HANDLE handle, const char *name)
 	{
 		if (handle == 0)
 			return;
-	#if defined(NTDDI_WIN10_RS2) && NTDDI_VERSION >= NTDDI_WIN10_RS2
-		wchar_t buffer[MaxThreadNameLength];
-		mbstowcs(buffer, name, MaxThreadNameLength);
-		const HANDLE threadHandle = (handle != reinterpret_cast<HANDLE>(-1)) ? handle : GetCurrentThread();
-		SetThreadDescription(threadHandle, buffer);
-	#elif !defined(__MINGW32__)
-		const DWORD MS_VC_EXCEPTION = 0x406D1388;
 
-		#pragma pack(push, 8)
-		struct THREADNAME_INFO
+	#if !defined(__MINGW32__)
+		static auto _SetThreadDescription = reinterpret_cast<t_SetThreadDescription>(GetProcAddress(GetModuleHandleA("kernel32.dll"), "SetThreadDescription"));
+		if (_SetThreadDescription)
 		{
-			DWORD dwType;
-			LPCSTR szName;
-			DWORD dwThreadID;
-			DWORD dwFlags;
-		};
-		#pragma pack(pop)
-
-		const DWORD threadId = (handle != reinterpret_cast<HANDLE>(-1)) ? GetThreadId(handle) : GetCurrentThreadId();
-		THREADNAME_INFO info;
-		info.dwType = 0x1000;
-		info.szName = name;
-		info.dwThreadID = threadId;
-		info.dwFlags = 0;
-
-		__try
-		{
-			RaiseException(MS_VC_EXCEPTION, 0, sizeof(info) / sizeof(ULONG_PTR), reinterpret_cast<ULONG_PTR *>(&info));
+			wchar_t buffer[MaxThreadNameLength];
+			mbstowcs(buffer, name, MaxThreadNameLength);
+			const HANDLE threadHandle = (handle != reinterpret_cast<HANDLE>(-1)) ? handle : GetCurrentThread();
+			_SetThreadDescription(threadHandle, buffer);
 		}
-		__except (EXCEPTION_EXECUTE_HANDLER)
+		else
 		{
+			const DWORD threadId = (handle != reinterpret_cast<HANDLE>(-1)) ? GetThreadId(handle) : GetCurrentThreadId();
+			THREADNAME_INFO info;
+			info.dwType = 0x1000;
+			info.szName = name;
+			info.dwThreadID = threadId;
+			info.dwFlags = 0;
+			ThreadNameMsvcMagic(info);
 		}
 	#endif
 	}
@@ -83,14 +96,14 @@ bool ThreadAffinityMask::isSet(int cpuNum)
 ///////////////////////////////////////////////////////////
 
 Thread::Thread()
-    : handle_(0)
+    : handle_(0), threadInfo_(nctl::makeUnique<ThreadInfo>())
 {
 }
 
-Thread::Thread(ThreadFunctionPtr startFunction, void *arg)
-    : handle_(0)
+Thread::Thread(ThreadFunctionPtr threadFunction, void *threadArg)
+    : Thread()
 {
-	run(startFunction, arg);
+	run(threadFunction, threadArg);
 }
 
 ///////////////////////////////////////////////////////////
@@ -108,24 +121,45 @@ unsigned int Thread::numProcessors()
 	return numProcs;
 }
 
-void Thread::run(ThreadFunctionPtr startFunction, void *arg)
+void Thread::run(ThreadFunctionPtr threadFunction, void *threadArg)
 {
 	if (handle_ == 0)
 	{
-		threadInfo_.startFunction = startFunction;
-		threadInfo_.threadArg = arg;
-		handle_ = reinterpret_cast<HANDLE>(_beginthreadex(nullptr, 0, wrapperFunction, &threadInfo_, 0, nullptr));
+		threadInfo_->threadFunction = threadFunction;
+		threadInfo_->threadArg = threadArg;
+		handle_ = reinterpret_cast<HANDLE>(_beginthreadex(nullptr, 0, wrapperFunction, threadInfo_.get(), 0, nullptr));
 		FATAL_ASSERT_MSG(handle_, "Error in _beginthreadex()");
 	}
 	else
 		LOGW_X("Thread %u is already running", handle_);
 }
 
-void *Thread::join()
+bool Thread::join()
 {
-	WaitForSingleObject(handle_, INFINITE);
-	handle_ = 0;
-	return nullptr;
+	bool success = false;
+	if (handle_ != 0)
+	{
+		DWORD retValue = WaitForSingleObject(handle_, INFINITE);
+		if (retValue != WAIT_FAILED)
+		{
+			retValue = CloseHandle(handle_);
+			success = (retValue != 0);
+			handle_ = 0;
+		}
+	}
+	return success;
+}
+
+bool Thread::detach()
+{
+	bool success = false;
+	if (handle_ != 0)
+	{
+		const BOOL retValue = CloseHandle(handle_);
+		success = (retValue != 0);
+		handle_ = 0;
+	}
+	return success;
 }
 
 void Thread::setName(const char *name)
@@ -158,10 +192,9 @@ long int Thread::self()
 	return GetCurrentThreadId();
 }
 
-[[noreturn]] void Thread::exit(void *retVal)
+[[noreturn]] void Thread::exit()
 {
 	_endthreadex(0);
-	*static_cast<unsigned int *>(retVal) = 0;
 }
 
 void Thread::yieldExecution()
@@ -169,10 +202,20 @@ void Thread::yieldExecution()
 	Sleep(0);
 }
 
-void Thread::cancel()
+bool Thread::cancel()
 {
-	TerminateThread(handle_, 0);
-	handle_ = 0;
+	bool success = false;
+	if (handle_ != 0)
+	{
+		BOOL retValue = TerminateThread(handle_, 0);
+		if (retValue != 0)
+		{
+			retValue = CloseHandle(handle_);
+			success = (retValue != 0);
+			handle_ = 0;
+		}
+	}
+	return success;
 }
 
 ThreadAffinityMask Thread::affinityMask() const
@@ -182,7 +225,7 @@ ThreadAffinityMask Thread::affinityMask() const
 	if (handle_ != 0)
 	{
 		// A neutral value for the temporary mask
-		DWORD_PTR allCpus = ~(allCpus & 0);
+		const DWORD_PTR allCpus = ~(allCpus & 0);
 
 		affinityMask.affinityMask_ = SetThreadAffinityMask(handle_, allCpus);
 		SetThreadAffinityMask(handle_, affinityMask.affinityMask_);
@@ -208,7 +251,7 @@ void Thread::setAffinityMask(ThreadAffinityMask affinityMask)
 unsigned int Thread::wrapperFunction(void *arg)
 {
 	ThreadInfo *threadInfo = static_cast<ThreadInfo *>(arg);
-	threadInfo->startFunction(threadInfo->threadArg);
+	threadInfo->threadFunction(threadInfo->threadArg);
 
 	return 0;
 }
