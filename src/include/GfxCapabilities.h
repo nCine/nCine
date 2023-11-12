@@ -14,6 +14,7 @@ class GfxCapabilities : public IGfxCapabilities
 	int glVersion(GLVersion version) const override;
 	inline const GlInfoStrings &glInfoStrings() const override { return glInfoStrings_; }
 	int value(GLIntValues::Enum valueName) const override;
+	int arrayValue(GLArrayIntValues::Enum arrayValueName, unsigned int index) const override;
 	bool hasExtension(GLExtensions::Enum extensionName) const override;
 
   private:
@@ -28,6 +29,9 @@ class GfxCapabilities : public IGfxCapabilities
 	int glIntValues_[IGfxCapabilities::GLIntValues::COUNT];
 	/// Array of OpenGL extension availability flags
 	bool glExtensions_[IGfxCapabilities::GLExtensions::COUNT];
+
+	static const int MaxProgramBinaryFormats = 4;
+	int programBinaryFormats_[MaxProgramBinaryFormats];
 
 	/// Queries the device about its runtime graphics capabilities
 	void init();

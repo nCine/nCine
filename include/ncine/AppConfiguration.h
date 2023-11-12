@@ -58,8 +58,18 @@ class DLL_PUBLIC AppConfiguration
 	bool deferShaderQueries;
 	/// Fixed size of render commands to be collected for batching on Emscripten and ANGLE
 	/*! \note Increasing this value too much might negatively affect batching shaders compilation time.
-	A value of zero restores the default behavior of non fixed size for batches. */
+	A value of zero restores the default behavior of non fixed size for batches.
+	\warning If this value is changed, the binary shader cache needs to be manually cleared. */
 	unsigned int fixedBatchSize;
+	/// The flag is `true` if the shader cache is enabled to load and save binary shader programs
+	/*! \note Even if the flag is `true` the functionality might still not be supported by the OpenGL context */
+	bool useBinaryShaderCache;
+	/// The directory name (not the complete path) for the binary shaders cache
+	nctl::String shaderCacheDirname;
+	/// The flag is `true` if, on devices with UBOs smaller than 64 KB, batched shaders will be compiled twice to identify their maximum batch size
+	/*! \note When enabled, compatibility with such devices will increase because shaders with standard batch size will not compile */
+	bool compileBatchedShadersTwice;
+
 	/// The maximum size in bytes for each VBO collecting geometry data
 	unsigned long vboSize;
 	/// The maximum size in bytes for each IBO collecting index data

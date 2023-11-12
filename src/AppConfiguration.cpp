@@ -32,7 +32,20 @@ AppConfiguration::AppConfiguration()
       windowIconFilename(128),
       useBufferMapping(false),
       deferShaderQueries(true),
+#if defined(__EMSCRIPTEN__)
       fixedBatchSize(10),
+#elif defined(WITH_ANGLE)
+      fixedBatchSize(64),
+#else
+      fixedBatchSize(0),
+#endif
+#if defined(WITH_ANGLE) || defined(__ANDROID__)
+      useBinaryShaderCache(true),
+#else
+      useBinaryShaderCache(false),
+#endif
+      shaderCacheDirname(64),
+      compileBatchedShadersTwice(true),
 #if defined(WITH_IMGUI) || defined(WITH_NUKLEAR)
       vboSize(512 * 1024),
       iboSize(128 * 1024),
@@ -67,6 +80,7 @@ AppConfiguration::AppConfiguration()
 	logFile = "ncine_log.txt";
 	windowTitle = "nCine";
 	windowIconFilename = "icons/icon48.png";
+	shaderCacheDirname = "nCineShaderCache";
 
 #if defined(__ANDROID__)
 	dataPath() = "asset::";
@@ -74,6 +88,8 @@ AppConfiguration::AppConfiguration()
 	dataPath() = "/";
 	// Always disable mapping on Emscripten as it is not supported by WebGL 2
 	useBufferMapping = false;
+	// Accessing binary representations of compiled shader programs is not supported by WebGL 2
+	useBinaryShaderCache = false;
 #endif
 
 #if defined(__linux__) && defined(WITH_SDL)

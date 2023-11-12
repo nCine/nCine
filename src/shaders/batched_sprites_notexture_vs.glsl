@@ -10,11 +10,10 @@ struct Instance
 
 layout (std140) uniform InstancesBlock
 {
-#ifdef WITH_FIXED_BATCH_SIZE
-	Instance[BATCH_SIZE] instances;
-#else
-	Instance[682] instances;
+#ifndef BATCH_SIZE
+	#define BATCH_SIZE (682) // 64 Kb / 96 b
 #endif
+	Instance[BATCH_SIZE] instances;
 } block;
 
 out vec4 vColor;

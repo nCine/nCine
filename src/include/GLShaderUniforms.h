@@ -34,7 +34,7 @@ class GLShaderUniforms
 	GLShaderProgram *shaderProgram_;
 	UniformHashMapType uniformCaches_;
 
-	/// Imports the uniforms with the option of including only some or excluing others
+	/// Imports the uniforms with the option of including only some or excluding others
 	void importUniforms(const char *includeOnly, const char *exclude);
 };
 

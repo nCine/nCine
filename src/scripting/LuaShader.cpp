@@ -32,12 +32,12 @@ namespace Shader {
 	//static const char *SPRITE_NOTEXTURE = "SPRITE_NOTEXTURE";
 	static const char *TEXTNODE_ALPHA = "TEXTNODE_ALPHA";
 	static const char *TEXTNODE_RED = "TEXTNODE_RED";
-	static const char *TEXTNODE_SPRITE = "TEXTNODE_SPRITE";
 	static const char *DefaultFragment = "shader_default_fragment";
 
 	static const char *loadFromMemory = "load_from_memory";
 	static const char *loadFromMemoryDefaultVertex = "load_from_memory_default_vertex";
 	static const char *loadFromMemoryDefaultFragment = "load_from_memory_default_fragment";
+	static const char *loadFromMemoryWithHashes = "load_from_memory_with_hashes";
 
 	static const char *loadFromFile = "load_from_file";
 	static const char *loadFromFileDefaultVertex = "load_from_file_default_vertex";
@@ -56,6 +56,9 @@ namespace Shader {
 	static const char *setGLShaderProgramLabel = "set_glshaderprogram_label";
 
 	static const char *registerBatchedShader = "register_batched_shader";
+
+	static const char *isBinaryCacheEnabled = "is_binary_cache_enabled";
+	static const char *setBinaryCacheEnabled = "set_binary_cache_enabled";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -87,14 +90,13 @@ void LuaShader::exposeConstants(lua_State *L)
 
 	lua_setfield(L, -2, LuaNames::Shader::DefaultVertex);
 
-	lua_createtable(L, 0, 6);
+	lua_createtable(L, 0, 5);
 
 	LuaUtils::pushField(L, LuaNames::Shader::SPRITE, static_cast<int64_t>(Shader::DefaultFragment::SPRITE));
 	LuaUtils::pushField(L, LuaNames::Shader::SPRITE_GRAY, static_cast<int64_t>(Shader::DefaultFragment::SPRITE_GRAY));
 	LuaUtils::pushField(L, LuaNames::Shader::SPRITE_NOTEXTURE, static_cast<int64_t>(Shader::DefaultFragment::SPRITE_NOTEXTURE));
 	LuaUtils::pushField(L, LuaNames::Shader::TEXTNODE_ALPHA, static_cast<int64_t>(Shader::DefaultFragment::TEXTNODE_ALPHA));
 	LuaUtils::pushField(L, LuaNames::Shader::TEXTNODE_RED, static_cast<int64_t>(Shader::DefaultFragment::TEXTNODE_RED));
-	LuaUtils::pushField(L, LuaNames::Shader::TEXTNODE_SPRITE, static_cast<int64_t>(Shader::DefaultFragment::TEXTNODE_SPRITE));
 
 	lua_setfield(L, -2, LuaNames::Shader::DefaultFragment);
 }
@@ -102,7 +104,7 @@ void LuaShader::exposeConstants(lua_State *L)
 void LuaShader::expose(LuaStateManager *stateManager)
 {
 	lua_State *L = stateManager->state();
-	lua_createtable(L, 0, 12);
+	lua_createtable(L, 0, 18);
 
 	if (stateManager->apiType() == LuaStateManager::ApiType::FULL)
 	{
@@ -113,6 +115,7 @@ void LuaShader::expose(LuaStateManager *stateManager)
 	LuaUtils::addFunction(L, LuaNames::Shader::loadFromMemory, loadFromMemory);
 	LuaUtils::addFunction(L, LuaNames::Shader::loadFromMemoryDefaultVertex, loadFromMemoryDefaultVertex);
 	LuaUtils::addFunction(L, LuaNames::Shader::loadFromMemoryDefaultFragment, loadFromMemoryDefaultFragment);
+	LuaUtils::addFunction(L, LuaNames::Shader::loadFromMemoryWithHashes, loadFromMemoryWithHashes);
 
 	LuaUtils::addFunction(L, LuaNames::Shader::loadFromFile, loadFromFile);
 	LuaUtils::addFunction(L, LuaNames::Shader::loadFromFileDefaultVertex, loadFromFileDefaultVertex);
@@ -131,6 +134,9 @@ void LuaShader::expose(LuaStateManager *stateManager)
 	LuaUtils::addFunction(L, LuaNames::Shader::setGLShaderProgramLabel, setGLShaderProgramLabel);
 
 	LuaUtils::addFunction(L, LuaNames::Shader::registerBatchedShader, registerBatchedShader);
+
+	LuaUtils::addFunction(L, LuaNames::Shader::isBinaryCacheEnabled, isBinaryCacheEnabled);
+	LuaUtils::addFunction(L, LuaNames::Shader::setBinaryCacheEnabled, setBinaryCacheEnabled);
 
 	lua_setfield(L, -2, LuaNames::Shader::Shader);
 }
@@ -190,6 +196,22 @@ int LuaShader::loadFromMemoryDefaultFragment(lua_State *L)
 
 	if (shader)
 		shader->loadFromMemory(shaderName, introspection, vertex, fragment);
+
+	return 0;
+}
+
+int LuaShader::loadFromMemoryWithHashes(lua_State *L)
+{
+	Shader *shader = LuaUntrackedUserData<Shader>::retrieve(L, -7);
+	const char *shaderName = LuaUtils::retrieve<const char *>(L, -6);
+	const Shader::Introspection introspection = static_cast<Shader::Introspection>(LuaUtils::retrieve<int64_t>(L, -5));
+	const char *vertex = LuaUtils::retrieve<const char *>(L, -4);
+	const char *fragment = LuaUtils::retrieve<const char *>(L, -3);
+	const uint64_t vertexHash = LuaUtils::retrieve<uint64_t>(L, -2);
+	const uint64_t fragmentHash = LuaUtils::retrieve<uint64_t>(L, -1);
+
+	if (shader)
+		shader->loadFromMemory(shaderName, introspection, vertex, fragment, vertexHash, fragmentHash);
 
 	return 0;
 }
@@ -328,6 +350,22 @@ int LuaShader::registerBatchedShader(lua_State *L)
 
 	if (shader)
 		shader->registerBatchedShader(*batchedShader);
+
+	return 0;
+}
+
+int LuaShader::isBinaryCacheEnabled(lua_State *L)
+{
+	LuaUtils::push(L, Shader::isBinaryCacheEnabled());
+
+	return 1;
+}
+
+int LuaShader::setBinaryCacheEnabled(lua_State *L)
+{
+	const bool enable = LuaUtils::retrieve<bool>(L, -1);
+
+	Shader::setBinaryCacheEnabled(enable);
 
 	return 0;
 }

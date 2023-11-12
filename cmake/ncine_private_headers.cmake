@@ -54,4 +54,5 @@ set(PRIVATE_HEADERS
 	${NCINE_ROOT}/src/include/RenderVaoPool.h
 	${NCINE_ROOT}/src/include/RenderCommandPool.h
 	${NCINE_ROOT}/src/include/ScreenViewport.h
+	${NCINE_ROOT}/src/include/BinaryShaderCache.h
 )

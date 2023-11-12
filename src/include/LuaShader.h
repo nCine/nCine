@@ -21,6 +21,7 @@ class LuaShader
 	static int loadFromMemory(lua_State *L);
 	static int loadFromMemoryDefaultVertex(lua_State *L);
 	static int loadFromMemoryDefaultFragment(lua_State *L);
+	static int loadFromMemoryWithHashes(lua_State *L);
 
 	static int loadFromFile(lua_State *L);
 	static int loadFromFileDefaultVertex(lua_State *L);
@@ -39,6 +40,9 @@ class LuaShader
 	static int setGLShaderProgramLabel(lua_State *L);
 
 	static int registerBatchedShader(lua_State *L);
+
+	static int isBinaryCacheEnabled(lua_State *L);
+	static int setBinaryCacheEnabled(lua_State *L);
 };
 
 }

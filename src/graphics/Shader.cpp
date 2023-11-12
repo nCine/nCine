@@ -5,6 +5,8 @@
 #include "Shader.h"
 #include "GLShaderProgram.h"
 #include "RenderResources.h"
+#include "BinaryShaderCache.h"
+#include "Hash64.h"
 #include "tracy.h"
 
 #ifdef WITH_EMBEDDED_SHADERS
@@ -31,9 +33,9 @@ namespace {
 		return GLShaderProgram::Introspection::ENABLED;
 	}
 
-	bool isBatchedVertex(Shader::DefaultVertex vertex)
+	bool isBatchedVertex(Shader::DefaultVertex defaultVertex)
 	{
-		switch (vertex)
+		switch (defaultVertex)
 		{
 			case Shader::DefaultVertex::BATCHED_SPRITES:
 			case Shader::DefaultVertex::BATCHED_SPRITES_NOTEXTURE:
@@ -44,6 +46,37 @@ namespace {
 			default:
 				return false;
 		}
+	}
+
+	RenderResources::DefaultVertexShader shaderToRenderResourcesDefaultVertex(Shader::DefaultVertex defaultVertex)
+	{
+		switch (defaultVertex)
+		{
+			case Shader::DefaultVertex::SPRITE: return RenderResources::DefaultVertexShader::SPRITE;
+			case Shader::DefaultVertex::SPRITE_NOTEXTURE: return RenderResources::DefaultVertexShader::SPRITE_NOTEXTURE;
+			case Shader::DefaultVertex::MESHSPRITE: return RenderResources::DefaultVertexShader::MESHSPRITE;
+			case Shader::DefaultVertex::MESHSPRITE_NOTEXTURE: return RenderResources::DefaultVertexShader::MESHSPRITE_NOTEXTURE;
+			case Shader::DefaultVertex::TEXTNODE: return RenderResources::DefaultVertexShader::TEXTNODE;
+			case Shader::DefaultVertex::BATCHED_SPRITES: return RenderResources::DefaultVertexShader::BATCHED_SPRITES;
+			case Shader::DefaultVertex::BATCHED_SPRITES_NOTEXTURE: return RenderResources::DefaultVertexShader::BATCHED_SPRITES_NOTEXTURE;
+			case Shader::DefaultVertex::BATCHED_MESHSPRITES: return RenderResources::DefaultVertexShader::BATCHED_MESHSPRITES;
+			case Shader::DefaultVertex::BATCHED_MESHSPRITES_NOTEXTURE: return RenderResources::DefaultVertexShader::BATCHED_MESHSPRITES_NOTEXTURE;
+			case Shader::DefaultVertex::BATCHED_TEXTNODES: return RenderResources::DefaultVertexShader::BATCHED_TEXTNODES;
+		}
+		return RenderResources::DefaultVertexShader::SPRITE;
+	}
+
+	RenderResources::DefaultFragmentShader shaderToRenderResourcesDefaultFragment(Shader::DefaultFragment defaultFragment)
+	{
+		switch (defaultFragment)
+		{
+			case Shader::DefaultFragment::SPRITE: return RenderResources::DefaultFragmentShader::SPRITE;
+			case Shader::DefaultFragment::SPRITE_GRAY: return RenderResources::DefaultFragmentShader::SPRITE_GRAY;
+			case Shader::DefaultFragment::SPRITE_NOTEXTURE: return RenderResources::DefaultFragmentShader::SPRITE_NOTEXTURE;
+			case Shader::DefaultFragment::TEXTNODE_ALPHA: return RenderResources::DefaultFragmentShader::TEXTNODE_ALPHA;
+			case Shader::DefaultFragment::TEXTNODE_RED: return RenderResources::DefaultFragmentShader::TEXTNODE_RED;
+		}
+		return RenderResources::DefaultFragmentShader::SPRITE;
 	}
 
 }
@@ -58,15 +91,20 @@ Shader::Shader()
 {
 }
 
-Shader::Shader(const char *shaderName, LoadMode loadMode, Introspection introspection, const char *vertex, const char *fragment)
+Shader::Shader(const char *shaderName, LoadMode loadMode, Introspection introspection, const char *vertex, const char *fragment, uint64_t vertexHash, uint64_t fragmentHash)
     : Shader()
 {
 	const bool hasLoaded = (loadMode == LoadMode::STRING)
-	                           ? loadFromMemory(shaderName, introspection, vertex, fragment)
+	                           ? loadFromMemory(shaderName, introspection, vertex, fragment, vertexHash, fragmentHash)
 	                           : loadFromFile(shaderName, introspection, vertex, fragment);
 
 	if (hasLoaded == false)
 		LOGE_X("Shader \"%s\" cannot be loaded", shaderName);
+}
+
+Shader::Shader(const char *shaderName, LoadMode loadMode, Introspection introspection, const char *vertex, const char *fragment)
+    : Shader(shaderName, loadMode, introspection, vertex, fragment, 0, 0)
+{
 }
 
 Shader::Shader(const char *shaderName, LoadMode loadMode, const char *vertex, const char *fragment)
@@ -85,62 +123,73 @@ Shader::Shader(LoadMode loadMode, const char *vertex, const char *fragment)
 {
 }
 
-Shader::Shader(const char *shaderName, LoadMode loadMode, Introspection introspection, DefaultVertex vertex, const char *fragment)
+Shader::Shader(const char *shaderName, LoadMode loadMode, Introspection introspection, DefaultVertex defaultVertex, const char *fragment, uint64_t fragmentHash)
     : Shader()
 {
 	const bool hasLoaded = (loadMode == LoadMode::STRING)
-	                           ? loadFromMemory(shaderName, introspection, vertex, fragment)
-	                           : loadFromFile(shaderName, introspection, vertex, fragment);
+	                           ? loadFromMemory(shaderName, introspection, defaultVertex, fragment, fragmentHash)
+	                           : loadFromFile(shaderName, introspection, defaultVertex, fragment);
 
 	if (hasLoaded == false)
 		LOGE_X("Shader \"%s\" cannot be loaded", shaderName);
 }
 
-Shader::Shader(const char *shaderName, LoadMode loadMode, DefaultVertex vertex, const char *fragment)
+Shader::Shader(const char *shaderName, LoadMode loadMode, Introspection introspection, DefaultVertex defaultVertex, const char *fragment)
+    : Shader(shaderName, loadMode, introspection, defaultVertex, fragment, 0)
+{
+}
+
+Shader::Shader(const char *shaderName, LoadMode loadMode, DefaultVertex defaultVertex, const char *fragment)
     : Shader()
 {
 	const bool hasLoaded = (loadMode == LoadMode::STRING)
-	                           ? loadFromMemory(shaderName, vertex, fragment)
-	                           : loadFromFile(shaderName, vertex, fragment);
+	                           ? loadFromMemory(shaderName, defaultVertex, fragment)
+	                           : loadFromFile(shaderName, defaultVertex, fragment);
 
 	if (hasLoaded == false)
 		LOGE_X("Shader \"%s\" cannot be loaded", shaderName);
 }
 
-Shader::Shader(LoadMode loadMode, DefaultVertex vertex, const char *fragment)
-    : Shader(nullptr, loadMode, vertex, fragment)
+Shader::Shader(LoadMode loadMode, DefaultVertex defaultVertex, const char *fragment)
+    : Shader(nullptr, loadMode, defaultVertex, fragment)
 {
 }
 
-Shader::Shader(const char *shaderName, LoadMode loadMode, Introspection introspection, const char *vertex, DefaultFragment fragment)
+Shader::Shader(const char *shaderName, LoadMode loadMode, Introspection introspection, const char *vertex, DefaultFragment defaultFragment, uint64_t vertexHash)
     : Shader()
 {
 	const bool hasLoaded = (loadMode == LoadMode::STRING)
-	                           ? loadFromMemory(shaderName, introspection, vertex, fragment)
-	                           : loadFromFile(shaderName, introspection, vertex, fragment);
+	                           ? loadFromMemory(shaderName, introspection, vertex, defaultFragment, vertexHash)
+	                           : loadFromFile(shaderName, introspection, vertex, defaultFragment);
 
 	if (hasLoaded == false)
 		LOGE_X("Shader \"%s\" cannot be loaded", shaderName);
 }
 
-Shader::Shader(const char *shaderName, LoadMode loadMode, const char *vertex, DefaultFragment fragment)
+Shader::Shader(const char *shaderName, LoadMode loadMode, Introspection introspection, const char *vertex, DefaultFragment defaultFragment)
+    : Shader(shaderName, loadMode, introspection, vertex, defaultFragment, 0)
+{
+}
+
+Shader::Shader(const char *shaderName, LoadMode loadMode, const char *vertex, DefaultFragment defaultFragment)
     : Shader()
 {
 	const bool hasLoaded = (loadMode == LoadMode::STRING)
-	                           ? loadFromMemory(shaderName, vertex, fragment)
-	                           : loadFromFile(shaderName, vertex, fragment);
+	                           ? loadFromMemory(shaderName, vertex, defaultFragment)
+	                           : loadFromFile(shaderName, vertex, defaultFragment);
 
 	if (hasLoaded == false)
 		LOGE_X("Shader \"%s\" cannot be loaded", shaderName);
 }
 
-Shader::Shader(LoadMode loadMode, const char *vertex, DefaultFragment fragment)
-    : Shader(nullptr, loadMode, vertex, fragment)
+Shader::Shader(LoadMode loadMode, const char *vertex, DefaultFragment defaultFragment)
+    : Shader(nullptr, loadMode, vertex, defaultFragment)
 {
 }
 
 Shader::~Shader()
 {
+	// In case there is a batched version of this shader
 	RenderResources::unregisterBatchedShader(glShaderProgram_.get());
 }
 
@@ -148,180 +197,113 @@ Shader::~Shader()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+bool Shader::loadFromMemory(const char *shaderName, Introspection introspection, const char *vertex, const char *fragment, uint64_t vertexHash, uint64_t fragmentHash)
+{
+	return load(LoadMode::STRING, shaderName, introspection, vertex, fragment, DefaultVertex::SPRITE, DefaultFragment::SPRITE, vertexHash, fragmentHash);
+}
+
 bool Shader::loadFromMemory(const char *shaderName, Introspection introspection, const char *vertex, const char *fragment)
 {
-	ZoneScoped;
-	if (shaderName)
-	{
-		// When Tracy is disabled the statement body is empty and braces are needed
-		ZoneText(shaderName, nctl::strnlen(shaderName, nctl::String::MaxCStringLength));
-	}
-
-	glShaderProgram_->reset(); // reset before attaching new shaders
-	setName(shaderName);
-	glShaderProgram_->setObjectLabel(shaderName);
-	glShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, vertex);
-	glShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, fragment);
-	glShaderProgram_->link(shaderToShaderProgramIntrospection(introspection));
-
-	return isLinked();
+	return load(LoadMode::STRING, shaderName, introspection, vertex, fragment, DefaultVertex::SPRITE, DefaultFragment::SPRITE, 0, 0);
 }
 
 bool Shader::loadFromMemory(const char *shaderName, const char *vertex, const char *fragment)
 {
-	return loadFromMemory(shaderName, Introspection::ENABLED, vertex, fragment);
+	return load(LoadMode::STRING, shaderName, Introspection::ENABLED, vertex, fragment, DefaultVertex::SPRITE, DefaultFragment::SPRITE, 0, 0);
 }
 
 bool Shader::loadFromMemory(const char *vertex, const char *fragment)
 {
-	return loadFromMemory(nullptr, vertex, fragment);
+	return load(LoadMode::STRING, nullptr, Introspection::ENABLED, vertex, fragment, DefaultVertex::SPRITE, DefaultFragment::SPRITE, 0, 0);
 }
 
-bool Shader::loadFromMemory(const char *shaderName, Introspection introspection, DefaultVertex vertex, const char *fragment)
+bool Shader::loadFromMemory(const char *shaderName, Introspection introspection, DefaultVertex defaultVertex, const char *fragment, uint64_t fragmentHash)
 {
-	ZoneScoped;
-	if (shaderName)
-	{
-		// When Tracy is disabled the statement body is empty and braces are needed
-		ZoneText(shaderName, nctl::strnlen(shaderName, nctl::String::MaxCStringLength));
-	}
-
-	glShaderProgram_->reset(); // reset before attaching new shaders
-	setName(shaderName);
-	glShaderProgram_->setObjectLabel(shaderName);
-	loadDefaultShader(vertex);
-	glShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, fragment);
-	glShaderProgram_->link(shaderToShaderProgramIntrospection(introspection));
-
-	return isLinked();
+	return load(LoadMode::STRING, shaderName, introspection, nullptr, fragment, defaultVertex, DefaultFragment::SPRITE, 0, fragmentHash);
 }
 
-bool Shader::loadFromMemory(const char *shaderName, DefaultVertex vertex, const char *fragment)
+bool Shader::loadFromMemory(const char *shaderName, Introspection introspection, DefaultVertex defaultVertex, const char *fragment)
 {
-	const Introspection introspection = isBatchedVertex(vertex) ? Introspection::NO_UNIFORMS_IN_BLOCKS : Introspection::ENABLED;
-	return loadFromMemory(shaderName, introspection, vertex, fragment);
+	return load(LoadMode::STRING, shaderName, introspection, nullptr, fragment, defaultVertex, DefaultFragment::SPRITE, 0, 0);
 }
 
-bool Shader::loadFromMemory(DefaultVertex vertex, const char *fragment)
+bool Shader::loadFromMemory(const char *shaderName, DefaultVertex defaultVertex, const char *fragment)
 {
-	return loadFromMemory(nullptr, vertex, fragment);
+	const Introspection introspection = isBatchedVertex(defaultVertex) ? Introspection::NO_UNIFORMS_IN_BLOCKS : Introspection::ENABLED;
+	return load(LoadMode::STRING, shaderName, introspection, nullptr, fragment, defaultVertex, DefaultFragment::SPRITE, 0, 0);
 }
 
-bool Shader::loadFromMemory(const char *shaderName, Introspection introspection, const char *vertex, DefaultFragment fragment)
+bool Shader::loadFromMemory(DefaultVertex defaultVertex, const char *fragment)
 {
-	ZoneScoped;
-	if (shaderName)
-	{
-		// When Tracy is disabled the statement body is empty and braces are needed
-		ZoneText(shaderName, nctl::strnlen(shaderName, nctl::String::MaxCStringLength));
-	}
-
-	glShaderProgram_->reset(); // reset before attaching new shaders
-	setName(shaderName);
-	glShaderProgram_->setObjectLabel(shaderName);
-	glShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, vertex);
-	loadDefaultShader(fragment);
-	glShaderProgram_->link(shaderToShaderProgramIntrospection(introspection));
-
-	return isLinked();
+	const Introspection introspection = isBatchedVertex(defaultVertex) ? Introspection::NO_UNIFORMS_IN_BLOCKS : Introspection::ENABLED;
+	return load(LoadMode::STRING, nullptr, introspection, nullptr, fragment, defaultVertex, DefaultFragment::SPRITE, 0, 0);
 }
 
-bool Shader::loadFromMemory(const char *shaderName, const char *vertex, DefaultFragment fragment)
+bool Shader::loadFromMemory(const char *shaderName, Introspection introspection, const char *vertex, DefaultFragment defaultFragment, uint64_t vertexHash)
 {
-	return loadFromMemory(shaderName, Introspection::ENABLED, vertex, fragment);
+	return load(LoadMode::STRING, shaderName, introspection, vertex, nullptr, DefaultVertex::SPRITE, defaultFragment, vertexHash, 0);
 }
 
-bool Shader::loadFromMemory(const char *vertex, DefaultFragment fragment)
+bool Shader::loadFromMemory(const char *shaderName, Introspection introspection, const char *vertex, DefaultFragment defaultFragment)
 {
-	return loadFromMemory(nullptr, vertex, fragment);
+	return load(LoadMode::STRING, shaderName, introspection, vertex, nullptr, DefaultVertex::SPRITE, defaultFragment, 0, 0);
+}
+
+bool Shader::loadFromMemory(const char *shaderName, const char *vertex, DefaultFragment defaultFragment)
+{
+	return load(LoadMode::STRING, shaderName, Introspection::ENABLED, vertex, nullptr, DefaultVertex::SPRITE, defaultFragment, 0, 0);
+}
+
+bool Shader::loadFromMemory(const char *vertex, DefaultFragment defaultFragment)
+{
+	return load(LoadMode::STRING, nullptr, Introspection::ENABLED, vertex, nullptr, DefaultVertex::SPRITE, defaultFragment, 0, 0);
 }
 
 bool Shader::loadFromFile(const char *shaderName, Introspection introspection, const char *vertex, const char *fragment)
 {
-	ZoneScoped;
-	if (shaderName)
-	{
-		// When Tracy is disabled the statement body is empty and braces are needed
-		ZoneText(shaderName, nctl::strnlen(shaderName, nctl::String::MaxCStringLength));
-	}
-
-	glShaderProgram_->reset(); // reset before attaching new shaders
-	setName(shaderName);
-	glShaderProgram_->setObjectLabel(shaderName);
-	glShaderProgram_->attachShader(GL_VERTEX_SHADER, vertex);
-	glShaderProgram_->attachShader(GL_FRAGMENT_SHADER, fragment);
-	glShaderProgram_->link(shaderToShaderProgramIntrospection(introspection));
-
-	return isLinked();
+	return load(LoadMode::FILE, shaderName, introspection, vertex, fragment, DefaultVertex::SPRITE, DefaultFragment::SPRITE, 0, 0);
 }
 
 bool Shader::loadFromFile(const char *shaderName, const char *vertex, const char *fragment)
 {
-	return loadFromFile(shaderName, Introspection::ENABLED, vertex, fragment);
+	return load(LoadMode::FILE, shaderName, Introspection::ENABLED, vertex, fragment, DefaultVertex::SPRITE, DefaultFragment::SPRITE, 0, 0);
 }
 
 bool Shader::loadFromFile(const char *vertex, const char *fragment)
 {
-	return loadFromFile(nullptr, vertex, fragment);
+	return load(LoadMode::FILE, nullptr, Introspection::ENABLED, vertex, fragment, DefaultVertex::SPRITE, DefaultFragment::SPRITE, 0, 0);
 }
 
-bool Shader::loadFromFile(const char *shaderName, Introspection introspection, DefaultVertex vertex, const char *fragment)
+bool Shader::loadFromFile(const char *shaderName, Introspection introspection, DefaultVertex defaultVertex, const char *fragment)
 {
-	ZoneScoped;
-	if (shaderName)
-	{
-		// When Tracy is disabled the statement body is empty and braces are needed
-		ZoneText(shaderName, nctl::strnlen(shaderName, nctl::String::MaxCStringLength));
-	}
-
-	glShaderProgram_->reset(); // reset before attaching new shaders
-	setName(shaderName);
-	glShaderProgram_->setObjectLabel(shaderName);
-	loadDefaultShader(vertex);
-	glShaderProgram_->attachShader(GL_FRAGMENT_SHADER, fragment);
-	glShaderProgram_->link(shaderToShaderProgramIntrospection(introspection));
-
-	return isLinked();
+	return load(LoadMode::FILE, shaderName, introspection, nullptr, fragment, defaultVertex, DefaultFragment::SPRITE, 0, 0);
 }
 
-bool Shader::loadFromFile(const char *shaderName, DefaultVertex vertex, const char *fragment)
+bool Shader::loadFromFile(const char *shaderName, DefaultVertex defaultVertex, const char *fragment)
 {
-	const Introspection introspection = isBatchedVertex(vertex) ? Introspection::NO_UNIFORMS_IN_BLOCKS : Introspection::ENABLED;
-	return loadFromFile(shaderName, introspection, vertex, fragment);
+	const Introspection introspection = isBatchedVertex(defaultVertex) ? Introspection::NO_UNIFORMS_IN_BLOCKS : Introspection::ENABLED;
+	return load(LoadMode::FILE, shaderName, introspection, nullptr, fragment, defaultVertex, DefaultFragment::SPRITE, 0, 0);
 }
 
-bool Shader::loadFromFile(DefaultVertex vertex, const char *fragment)
+bool Shader::loadFromFile(DefaultVertex defaultVertex, const char *fragment)
 {
-	return loadFromFile(nullptr, vertex, fragment);
+	const Introspection introspection = isBatchedVertex(defaultVertex) ? Introspection::NO_UNIFORMS_IN_BLOCKS : Introspection::ENABLED;
+	return load(LoadMode::FILE, nullptr, introspection, nullptr, fragment, defaultVertex, DefaultFragment::SPRITE, 0, 0);
 }
 
-bool Shader::loadFromFile(const char *shaderName, Introspection introspection, const char *vertex, DefaultFragment fragment)
+bool Shader::loadFromFile(const char *shaderName, Introspection introspection, const char *vertex, DefaultFragment defaultFragment)
 {
-	ZoneScoped;
-	if (shaderName)
-	{
-		// When Tracy is disabled the statement body is empty and braces are needed
-		ZoneText(shaderName, nctl::strnlen(shaderName, nctl::String::MaxCStringLength));
-	}
-
-	glShaderProgram_->reset(); // reset before attaching new shaders
-	setName(shaderName);
-	glShaderProgram_->setObjectLabel(shaderName);
-	glShaderProgram_->attachShader(GL_VERTEX_SHADER, vertex);
-	loadDefaultShader(fragment);
-	glShaderProgram_->link(shaderToShaderProgramIntrospection(introspection));
-
-	return isLinked();
+	return load(LoadMode::FILE, shaderName, introspection, vertex, nullptr, DefaultVertex::SPRITE, defaultFragment, 0, 0);
 }
 
-bool Shader::loadFromFile(const char *shaderName, const char *vertex, DefaultFragment fragment)
+bool Shader::loadFromFile(const char *shaderName, const char *vertex, DefaultFragment defaultFragment)
 {
-	return loadFromFile(shaderName, Introspection::ENABLED, vertex, fragment);
+	return load(LoadMode::FILE, shaderName, Introspection::ENABLED, vertex, nullptr, DefaultVertex::SPRITE, defaultFragment, 0, 0);
 }
 
-bool Shader::loadFromFile(const char *vertex, DefaultFragment fragment)
+bool Shader::loadFromFile(const char *vertex, DefaultFragment defaultFragment)
 {
-	return loadFromFile(nullptr, vertex, fragment);
+	return load(LoadMode::FILE, nullptr, Introspection::ENABLED, vertex, nullptr, DefaultVertex::SPRITE, defaultFragment, 0, 0);
 }
 
 bool Shader::setAttribute(const char *name, int stride, unsigned long int pointer)
@@ -368,140 +350,105 @@ void Shader::registerBatchedShader(Shader &batchedShader)
 	RenderResources::registerBatchedShader(glShaderProgram_.get(), batchedShader.glShaderProgram_.get());
 }
 
+bool Shader::isBinaryCacheEnabled()
+{
+	return RenderResources::binaryShaderCache().isEnabled();
+}
+
+void Shader::setBinaryCacheEnabled(bool enable)
+{
+	RenderResources::binaryShaderCache().setEnabled(enable);
+}
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-bool Shader::loadDefaultShader(DefaultVertex vertex)
+bool Shader::load(LoadMode loadMode, const char *shaderName, Introspection introspection, const char *vertex, const char *fragment,
+                  DefaultVertex defaultVertex, DefaultFragment defaultFragment, uint64_t vertexHash, uint64_t fragmentHash)
 {
-	const char *vertexShader = nullptr;
-#ifndef WITH_EMBEDDED_SHADERS
-	switch (vertex)
+	ZoneScoped;
+	if (shaderName)
 	{
-		case DefaultVertex::SPRITE:
-			vertexShader = "sprite_vs.glsl";
-			break;
-		case DefaultVertex::SPRITE_NOTEXTURE:
-			vertexShader = "sprite_notexture_vs.glsl";
-			break;
-		case DefaultVertex::MESHSPRITE:
-			vertexShader = "meshsprite_vs.glsl";
-			break;
-		case DefaultVertex::MESHSPRITE_NOTEXTURE:
-			vertexShader = "meshsprite_notexture_vs.glsl";
-			break;
-		case DefaultVertex::TEXTNODE:
-			vertexShader = "textnode_vs.glsl";
-			break;
-		case DefaultVertex::BATCHED_SPRITES:
-			vertexShader = "batched_sprites_vs.glsl";
-			break;
-		case DefaultVertex::BATCHED_SPRITES_NOTEXTURE:
-			vertexShader = "batched_sprites_notexture_vs.glsl";
-			break;
-		case DefaultVertex::BATCHED_MESHSPRITES:
-			vertexShader = "batched_meshsprites_vs.glsl";
-			break;
-		case DefaultVertex::BATCHED_MESHSPRITES_NOTEXTURE:
-			vertexShader = "batched_meshsprites_notexture_vs.glsl";
-			break;
-		case DefaultVertex::BATCHED_TEXTNODES:
-			vertexShader = "batched_textnodes_vs.glsl";
-			break;
+		// When Tracy is disabled the statement body is empty and braces are needed
+		ZoneText(shaderName, nctl::strnlen(shaderName, nctl::String::MaxCStringLength));
 	}
-	const bool hasCompiled = glShaderProgram_->attachShader(GL_VERTEX_SHADER, (fs::dataPath() + "shaders/" + vertexShader).data());
-#else
-	// Skipping the initial new line character of the raw string literal
-	switch (vertex)
-	{
-		case DefaultVertex::SPRITE:
-			vertexShader = ShaderStrings::sprite_vs + 1;
-			break;
-		case DefaultVertex::SPRITE_NOTEXTURE:
-			vertexShader = ShaderStrings::sprite_notexture_vs + 1;
-			break;
-		case DefaultVertex::MESHSPRITE:
-			vertexShader = ShaderStrings::meshsprite_vs + 1;
-			break;
-		case DefaultVertex::MESHSPRITE_NOTEXTURE:
-			vertexShader = ShaderStrings::meshsprite_notexture_vs + 1;
-			break;
-		case DefaultVertex::TEXTNODE:
-			vertexShader = ShaderStrings::textnode_vs + 1;
-			break;
-		case DefaultVertex::BATCHED_SPRITES:
-			vertexShader = ShaderStrings::batched_sprites_vs + 1;
-			break;
-		case DefaultVertex::BATCHED_SPRITES_NOTEXTURE:
-			vertexShader = ShaderStrings::batched_sprites_notexture_vs + 1;
-			break;
-		case DefaultVertex::BATCHED_MESHSPRITES:
-			vertexShader = ShaderStrings::batched_meshsprites_vs + 1;
-			break;
-		case DefaultVertex::BATCHED_MESHSPRITES_NOTEXTURE:
-			vertexShader = ShaderStrings::batched_meshsprites_notexture_vs + 1;
-			break;
-		case DefaultVertex::BATCHED_TEXTNODES:
-			vertexShader = ShaderStrings::batched_textnodes_vs + 1;
-			break;
-	}
-	const bool hasCompiled = glShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, vertexShader);
-#endif
-	return hasCompiled;
-}
 
-bool Shader::loadDefaultShader(DefaultFragment fragment)
-{
-	const char *fragmentShader = nullptr;
+	// Do not provide a hash if loading a default shader
+	ASSERT(vertex || (vertex == nullptr && vertexHash == 0));
+	ASSERT(fragment || (fragment == nullptr && fragmentHash == 0));
+
+	if (loadMode == LoadMode::FILE)
+	{
+		// Do not provide a hash if loading from files
+		ASSERT(vertexHash == 0 && fragmentHash == 0);
+	}
+
+	// If the binary shader cache is available, then a hash needs to be calculated for shader strings
+	BinaryShaderCache &bsc = RenderResources::binaryShaderCache();
+	const bool withHash = (bsc.isEnabled() && loadMode == LoadMode::STRING);
+
+	RenderResources::ShaderProgramCompileInfo shaderProgramInfo(glShaderProgram_, shaderToShaderProgramIntrospection(introspection), shaderName);
+
 #ifndef WITH_EMBEDDED_SHADERS
-	switch (fragment)
-	{
-		case DefaultFragment::SPRITE:
-			fragmentShader = "sprite_fs.glsl";
-			break;
-		case DefaultFragment::SPRITE_GRAY:
-			fragmentShader = "sprite_gray_fs.glsl";
-			break;
-		case DefaultFragment::SPRITE_NOTEXTURE:
-			fragmentShader = "sprite_notexture_fs.glsl";
-			break;
-		case DefaultFragment::TEXTNODE_ALPHA:
-			fragmentShader = "textnode_alpha_fs.glsl";
-			break;
-		case DefaultFragment::TEXTNODE_RED:
-			fragmentShader = "textnode_red_fs.glsl";
-			break;
-		case DefaultFragment::TEXTNODE_SPRITE:
-			fragmentShader = "sprite_fs.glsl";
-			break;
-	}
-	const bool hasCompiled = glShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (fs::dataPath() + "shaders/" + fragmentShader).data());
-#else
-	// Skipping the initial new line character of the raw string literal
-	switch (fragment)
-	{
-		case DefaultFragment::SPRITE:
-			fragmentShader = ShaderStrings::sprite_fs + 1;
-			break;
-		case DefaultFragment::SPRITE_GRAY:
-			fragmentShader = ShaderStrings::sprite_gray_fs + 1;
-			break;
-		case DefaultFragment::SPRITE_NOTEXTURE:
-			fragmentShader = ShaderStrings::sprite_notexture_fs + 1;
-			break;
-		case DefaultFragment::TEXTNODE_ALPHA:
-			fragmentShader = ShaderStrings::textnode_alpha_fs + 1;
-			break;
-		case DefaultFragment::TEXTNODE_RED:
-			fragmentShader = ShaderStrings::textnode_red_fs + 1;
-			break;
-		case DefaultFragment::TEXTNODE_SPRITE:
-			fragmentShader = ShaderStrings::sprite_fs + 1;
-			break;
-	}
-	const bool hasCompiled = glShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, fragmentShader);
+	nctl::String vertexShaderPath(256);
+	nctl::String fragmentShaderPath(256);
 #endif
-	return hasCompiled;
+
+	// Requesting a default vertex shader
+	if (vertex == nullptr)
+	{
+		// If default shaders are embedded, then the default shader info structure point to sources from `ShaderStrings`
+		shaderProgramInfo.vertexInfo = RenderResources::defaultVertexShaderInfo(shaderToRenderResourcesDefaultVertex(defaultVertex));
+#ifndef WITH_EMBEDDED_SHADERS
+		// Prepending the shaders path to the shader filename
+		vertexShaderPath = fs::dataPath() + RenderResources::ShadersDir + "/" + shaderProgramInfo.vertexInfo.shaderFile;
+		shaderProgramInfo.vertexInfo.shaderFile = vertexShaderPath.data();
+#endif
+	}
+	else
+	{
+		shaderProgramInfo.vertexInfo.hash = vertexHash; // assign the provided hash first
+		if (loadMode == LoadMode::STRING)
+		{
+			shaderProgramInfo.vertexInfo.shaderString = vertex;
+			// If the hash is not provided, it is calculated from the source string
+			if (vertexHash == 0 && withHash)
+				shaderProgramInfo.vertexInfo.hash = RenderResources::hash64().hashString(vertex, strlen(vertex));
+		}
+		else
+			shaderProgramInfo.vertexInfo.shaderFile = vertex;
+	}
+
+	// Requesting a default fragment shader
+	if (fragment == nullptr)
+	{
+		// If default shaders are embedded, then the default shader info structures point to sources from `ShaderStrings`
+		shaderProgramInfo.fragmentInfo = RenderResources::defaultFragmentShaderInfo(shaderToRenderResourcesDefaultFragment(defaultFragment));
+#ifndef WITH_EMBEDDED_SHADERS
+		// Prepending the shaders path to the shader filename
+		fragmentShaderPath = fs::dataPath() + RenderResources::ShadersDir + "/" + shaderProgramInfo.fragmentInfo.shaderFile;
+		shaderProgramInfo.fragmentInfo.shaderFile = fragmentShaderPath.data();
+#endif
+	}
+	else
+	{
+		shaderProgramInfo.fragmentInfo.hash = fragmentHash; // assign the provided hash first
+		if (loadMode == LoadMode::STRING)
+		{
+			shaderProgramInfo.fragmentInfo.shaderString = fragment;
+			// If the hash is not provided, it is calculated from the source string
+			if (fragmentHash == 0 && withHash)
+				shaderProgramInfo.fragmentInfo.hash = RenderResources::hash64().hashString(fragment, strlen(fragment));
+		}
+		else
+			shaderProgramInfo.fragmentInfo.shaderFile = fragment;
+	}
+
+	RenderResources::compileShader(shaderProgramInfo);
+	// The shader info hashmap with the custom shader hashes will be saved at application shutdown
+
+	return isLinked();
 }
 
 }

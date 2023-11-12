@@ -320,11 +320,11 @@ TEST_F(FileSystemTest, SetCurrentDir)
 	ASSERT_TRUE(dirChanged);
 }
 
-TEST_F(FileSystemTest, HomeDir)
+TEST_F(FileSystemTest, HomePath)
 {
-	nctl::String homeDir = nc::fs::homeDir();
-	printf("Home directory is \"%s\"\n", homeDir.data());
-	ASSERT_TRUE(nc::fs::isDirectory(homeDir.data()));
+	nctl::String homePath = nc::fs::homePath();
+	printf("Home directory is \"%s\"\n", homePath.data());
+	ASSERT_TRUE(nc::fs::isDirectory(homePath.data()));
 }
 
 TEST_F(FileSystemTest, Hidden)

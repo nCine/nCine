@@ -129,6 +129,7 @@ void Application::initCommon()
 
 	LOGI_X("Data path: \"%s\"", fs::dataPath().data());
 	LOGI_X("Save path: \"%s\"", fs::savePath().data());
+	LOGI_X("Cache path: \"%s\"", fs::cachePath().data());
 
 #ifdef WITH_RENDERDOC
 	RenderDocCapture::init();
@@ -140,6 +141,9 @@ void Application::initCommon()
 	TracyGpuCollect;
 
 	frameTimer_ = nctl::makeUnique<FrameTimer>(appCfg_.profileTextUpdateTime(), appCfg_.frameTimerLogInterval);
+
+	// Create a minimal set of render resources before compiling the first shader
+	RenderResources::createMinimal(); // they are required for rendering even without a scenegraph
 
 #ifdef WITH_IMGUI
 	imguiDrawing_ = nctl::makeUnique<ImGuiDrawing>(appCfg_.withScenegraph);
@@ -156,8 +160,6 @@ void Application::initCommon()
 		screenViewport_ = nctl::makeUnique<ScreenViewport>();
 		screenViewport_->setRootNode(rootNode_.get());
 	}
-	else
-		RenderResources::createMinimal(); // some resources are still required for rendering
 
 #ifdef WITH_IMGUI
 	// Debug overlay is available even when scenegraph is not

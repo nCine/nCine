@@ -15,8 +15,10 @@
 
 #ifdef WITH_EMBEDDED_SHADERS
 	#include "shader_strings.h"
+	#include "Hash64.h"
 #else
 	#include "FileSystem.h" // for dataPath()
+	#include "RenderResources.h" // for `ShadersDir`
 #endif
 
 namespace {
@@ -111,11 +113,11 @@ void MyEventHandler::onInit()
 {
 	colorProgram_ = nctl::makeUnique<nc::GLShaderProgram>(nc::GLShaderProgram::QueryPhase::DEFERRED);
 #ifndef WITH_EMBEDDED_SHADERS
-	colorProgram_->attachShader(GL_VERTEX_SHADER, (nc::fs::dataPath() + "shaders/vcolor_vs.glsl").data());
-	colorProgram_->attachShader(GL_FRAGMENT_SHADER, (nc::fs::dataPath() + "shaders/vcolor_fs.glsl").data());
+	colorProgram_->attachShaderFromFile(GL_VERTEX_SHADER, (nc::fs::dataPath() + nc::RenderResources::ShadersDir + "/vcolor_vs.glsl").data());
+	colorProgram_->attachShaderFromFile(GL_FRAGMENT_SHADER, (nc::fs::dataPath() + nc::RenderResources::ShadersDir + "/vcolor_fs.glsl").data());
 #else
-	colorProgram_->attachShaderFromString(GL_VERTEX_SHADER, nc::ShaderStrings::vcolor_vs);
-	colorProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, nc::ShaderStrings::vcolor_fs);
+	colorProgram_->attachShaderFromString(GL_VERTEX_SHADER, nc::ShaderStrings::vcolor_vs, nc::hash64().scanHashString(nc::ShaderHashes::vcolor_vs));
+	colorProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, nc::ShaderStrings::vcolor_fs, nc::hash64().scanHashString(nc::ShaderHashes::vcolor_fs));
 #endif
 	colorProgram_->link(nc::GLShaderProgram::Introspection::ENABLED);
 	colorUniforms_ = nctl::makeUnique<nc::GLShaderUniforms>(colorProgram_.get());
@@ -123,11 +125,11 @@ void MyEventHandler::onInit()
 
 	texProgram_ = nctl::makeUnique<nc::GLShaderProgram>(nc::GLShaderProgram::QueryPhase::DEFERRED);
 #ifndef WITH_EMBEDDED_SHADERS
-	texProgram_->attachShader(GL_VERTEX_SHADER, (nc::IFile::fs() + "shaders/texture_vs.glsl").data());
-	texProgram_->attachShader(GL_FRAGMENT_SHADER, (nc::IFile::fs() + "shaders/texture_fs.glsl").data());
+	texProgram_->attachShaderFromFile(GL_VERTEX_SHADER, (nc::fs::dataPath() + nc::RenderResources::ShadersDir + "/texture_vs.glsl").data());
+	texProgram_->attachShaderFromFile(GL_FRAGMENT_SHADER, (nc::fs::dataPath() + nc::RenderResources::ShadersDir + "/texture_fs.glsl").data());
 #else
-	texProgram_->attachShaderFromString(GL_VERTEX_SHADER, nc::ShaderStrings::texture_vs);
-	texProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, nc::ShaderStrings::texture_fs);
+	texProgram_->attachShaderFromString(GL_VERTEX_SHADER, nc::ShaderStrings::texture_vs, nc::hash64().scanHashString(nc::ShaderHashes::texture_vs));
+	texProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, nc::ShaderStrings::texture_fs, nc::hash64().scanHashString(nc::ShaderHashes::texture_fs));
 #endif
 	texProgram_->link(nc::GLShaderProgram::Introspection::ENABLED);
 	texUniforms_ = nctl::makeUnique<nc::GLShaderUniforms>(texProgram_.get());

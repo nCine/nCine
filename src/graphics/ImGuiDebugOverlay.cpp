@@ -1,3 +1,5 @@
+#include <nctl/HashMapIterator.h>
+
 #include "imgui.h"
 #include "ImGuiDebugOverlay.h"
 #include "Application.h"
@@ -18,6 +20,10 @@
 
 #include "IFrameTimer.h"
 #include "RenderStatistics.h"
+#include "RenderResources.h"
+#include "BinaryShaderCache.h"
+#include "Hash64.h"
+
 #ifdef WITH_LUA
 	#include "LuaStatistics.h"
 #endif
@@ -289,6 +295,7 @@ void ImGuiDebugOverlay::guiWindow()
 	guiWindowSettings();
 	guiAudioPlayers();
 	guiInputState();
+	guiBinaryShaderCache();
 	guiRenderDoc();
 	guiAllocators();
 	if (appCfg.withScenegraph)
@@ -624,7 +631,13 @@ void ImGuiDebugOverlay::guiGraphicsCapabilities()
 		ImGui::Separator();
 		ImGui::Text("GL_MAX_TEXTURE_SIZE: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_TEXTURE_SIZE));
 		ImGui::Text("GL_MAX_TEXTURE_IMAGE_UNITS: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_TEXTURE_IMAGE_UNITS));
-		ImGui::Text("GL_MAX_UNIFORM_BLOCK_SIZE: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_UNIFORM_BLOCK_SIZE));
+
+		const int UNCLAMPED_MAX_UNIFORM_BLOCK_SIZE = gfxCaps.value(IGfxCapabilities::GLIntValues::UNCLAMPED_MAX_UNIFORM_BLOCK_SIZE);
+		const int MAX_UNIFORM_BLOCK_SIZE = gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_UNIFORM_BLOCK_SIZE);
+		if (UNCLAMPED_MAX_UNIFORM_BLOCK_SIZE != MAX_UNIFORM_BLOCK_SIZE)
+			ImGui::Text("Unclamped GL_MAX_UNIFORM_BLOCK_SIZE: %d", UNCLAMPED_MAX_UNIFORM_BLOCK_SIZE);
+		ImGui::Text("GL_MAX_UNIFORM_BLOCK_SIZE: %d", MAX_UNIFORM_BLOCK_SIZE);
+
 		ImGui::Text("GL_MAX_UNIFORM_BUFFER_BINDINGS: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_UNIFORM_BUFFER_BINDINGS));
 		ImGui::Text("GL_MAX_VERTEX_UNIFORM_BLOCKS: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_VERTEX_UNIFORM_BLOCKS));
 		ImGui::Text("GL_MAX_FRAGMENT_UNIFORM_BLOCKS: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_FRAGMENT_UNIFORM_BLOCKS));
@@ -633,10 +646,17 @@ void ImGuiDebugOverlay::guiGraphicsCapabilities()
 		ImGui::Text("GL_MAX_VERTEX_ATTRIB_STRIDE: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_VERTEX_ATTRIB_STRIDE));
 #endif
 		ImGui::Text("GL_MAX_COLOR_ATTACHMENTS: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_COLOR_ATTACHMENTS));
+		ImGui::Text("GL_NUM_PROGRAM_BINARY_FORMATS: %d", gfxCaps.value(IGfxCapabilities::GLIntValues::NUM_PROGRAM_BINARY_FORMATS));
 
+#if defined(__ANDROID__) || defined(WITH_ANGLE)
+		const char *getProgramBinaryExtString = "GL_OES_get_program_binary";
+#else
+		const char *getProgramBinaryExtString = "GL_ARB_get_program_binary";
+#endif
 		ImGui::Separator();
 		ImGui::Text("GL_KHR_debug: %d", gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::KHR_DEBUG));
 		ImGui::Text("GL_ARB_texture_storage: %d", gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::ARB_TEXTURE_STORAGE));
+		ImGui::Text("%s: %d", getProgramBinaryExtString, gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::ARB_GET_PROGRAM_BINARY));
 		ImGui::Text("GL_EXT_texture_compression_s3tc: %d", gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::EXT_TEXTURE_COMPRESSION_S3TC));
 		ImGui::Text("GL_OES_compressed_ETC1_RGB8_texture: %d", gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::OES_COMPRESSED_ETC1_RGB8_TEXTURE));
 		ImGui::Text("GL_AMD_compressed_ATC_texture: %d", gfxCaps.hasExtension(IGfxCapabilities::GLExtensions::AMD_COMPRESSED_ATC_TEXTURE));
@@ -691,6 +711,9 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 #if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
 		ImGui::Text("Fixed batch size: %u", appCfg.fixedBatchSize);
 #endif
+		ImGui::Text("Binary shader cache: %s", appCfg.useBinaryShaderCache ? "true" : "false");
+		ImGui::Text("Shader cache directory name: \"%s\"", appCfg.shaderCacheDirname.data());
+		ImGui::Text("Compile batched shaders twice: %s", appCfg.compileBatchedShadersTwice ? "true" : "false");
 		ImGui::Text("VBO size: %lu", appCfg.vboSize);
 		ImGui::Text("IBO size: %lu", appCfg.iboSize);
 		ImGui::Text("Vao pool size: %u", appCfg.vaoPoolSize);
@@ -712,16 +735,25 @@ void ImGuiDebugOverlay::guiRenderingSettings()
 	if (ImGui::CollapsingHeader("Rendering Settings"))
 	{
 		Application::RenderingSettings &settings = theApplication().renderingSettings();
-		int minBatchSize = settings.minBatchSize;
-		int maxBatchSize = settings.maxBatchSize;
 
 		ImGui::Checkbox("Batching", &settings.batchingEnabled);
 		ImGui::SameLine();
 		ImGui::Checkbox("Batching with indices", &settings.batchingWithIndices);
 		ImGui::SameLine();
 		ImGui::Checkbox("Culling", &settings.cullingEnabled);
-		ImGui::DragIntRange2("Batch size", &minBatchSize, &maxBatchSize, 1.0f, 0, 512);
 
+		int minBatchSize = settings.minBatchSize;
+		int maxBatchSize = settings.maxBatchSize;
+#if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
+		const unsigned int fixedBatchSize = theApplication().appConfiguration().fixedBatchSize;
+		const int maxBatchSizeRange = fixedBatchSize;
+#else
+		const int maxBatchSizeRange = 512;
+#endif
+		ImGui::DragIntRange2("Batch size", &minBatchSize, &maxBatchSize, 1.0f, 0, maxBatchSizeRange);
+#if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
+		ImGui::Text("Fixed batch size: %u", fixedBatchSize);
+#endif
 		settings.minBatchSize = minBatchSize;
 		settings.maxBatchSize = maxBatchSize;
 	}
@@ -1031,6 +1063,132 @@ void ImGuiDebugOverlay::guiInputState()
 		}
 		else
 			ImGui::TextUnformatted("No joysticks connected");
+	}
+}
+
+void ImGuiDebugOverlay::guiBinaryShaderCache()
+{
+	if (ImGui::CollapsingHeader("Binary Shader Cache"))
+	{
+		BinaryShaderCache &cache = RenderResources::binaryShaderCache();
+		const BinaryShaderCache::Statistics &stats = cache.statistics();
+
+		const bool isAvailable = cache.isAvailable();
+		const bool isEnabled = cache.isEnabled();
+		const bool canBePruned = (stats.TotalFilesCount > stats.PlatformFilesCount);
+		const bool canBeCleared = (stats.TotalFilesCount > 0);
+
+		ImGui::TextUnformatted("Available:");
+		ImGui::SameLine();
+		if (isAvailable)
+			ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "true");
+		else
+			ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "false");
+
+		if (isAvailable)
+		{
+			ImGui::SameLine();
+			if (ImGui::Button(isEnabled ? "Disable" : "Enable"))
+				cache.setEnabled(!isEnabled);
+		}
+		ImGui::Text("Shader source directory name: \"%s\"", RenderResources::ShadersDir);
+
+		if (isAvailable)
+		{
+			ImGui::BeginDisabled(isEnabled == false);
+
+			ImGui::Text("Directory: %s", cache.directory().data());
+			// Reporting statistics for shaders hashing
+			const Hash64::Statistics &hash64Stats = RenderResources::hash64().statistics();
+			ImGui::Text("Hashed: %u sources (%u strings, %u characters), %u files, %u scanned",
+						hash64Stats.HashStringCalls, hash64Stats.HashedStrings, hash64Stats.HashedCharacters, hash64Stats.HashedFiles, hash64Stats.ScannedHashStrings);
+			ImGui::Text("Requests: %u loaded, %u saved", stats.LoadedShaders, stats.SavedShaders);
+			ImGui::Text("Count: %u (total: %u)", stats.PlatformFilesCount, stats.TotalFilesCount);
+			ImGui::Text("Size: %u Kb (total: %u Kb)", stats.PlatformBytesCount / 1024, stats.TotalBytesCount / 1024);
+
+			const unsigned int numDefaultVertexShaders = static_cast<unsigned int>(RenderResources::DefaultVertexShader::COUNT);
+			widgetName_.format("Default vertex shaders (%u)", numDefaultVertexShaders);
+			if (ImGui::TreeNode(widgetName_.data()))
+			{
+				for (unsigned int i = 0; i < numDefaultVertexShaders; i++)
+				{
+					const RenderResources::ShaderProgramCompileInfo::ShaderCompileInfo &vertexInfo = RenderResources::defaultVertexShaderInfo(i);
+					if (ImGui::TreeNode(&vertexInfo, "#%u", i))
+					{
+#ifndef WITH_EMBEDDED_SHADERS
+						ImGui::Text("Filename: %s", vertexInfo.shaderFile);
+#else
+						ImGui::TextUnformatted("Source:");
+						ImGui::Separator();
+						ImGui::Text("%s", vertexInfo.shaderString);
+						ImGui::Separator();
+#endif
+						if (vertexInfo.hash != 0)
+							ImGui::Text("Hash: 0x%016llx", vertexInfo.hash);
+						if (vertexInfo.hashString)
+							ImGui::Text("Hash string: 0x%s", vertexInfo.hashString);
+						ImGui::TreePop();
+					}
+				}
+				ImGui::TreePop();
+			}
+
+			const unsigned int numDefaultFragmentShaders = static_cast<unsigned int>(RenderResources::DefaultFragmentShader::COUNT);
+			widgetName_.format("Default fragment shaders (%u)", numDefaultFragmentShaders);
+			if (ImGui::TreeNode(widgetName_.data()))
+			{
+				for (unsigned int i = 0; i < numDefaultFragmentShaders; i++)
+				{
+					const RenderResources::ShaderProgramCompileInfo::ShaderCompileInfo &fragmentInfo = RenderResources::defaultFragmentShaderInfo(i);
+					if (ImGui::TreeNode(&fragmentInfo, "#%u", i))
+					{
+#ifndef WITH_EMBEDDED_SHADERS
+						ImGui::Text("Filename: %s", fragmentInfo.shaderFile);
+#else
+						ImGui::TextUnformatted("Source:");
+						ImGui::Separator();
+						ImGui::Text("%s", fragmentInfo.shaderString);
+						ImGui::Separator();
+#endif
+						if (fragmentInfo.hash != 0)
+							ImGui::Text("Hash: 0x%016llx", fragmentInfo.hash);
+						if (fragmentInfo.hashString)
+							ImGui::Text("Hash string: 0x%s", fragmentInfo.hashString);
+						ImGui::TreePop();
+					}
+				}
+				ImGui::TreePop();
+			}
+
+			widgetName_.format("Shader Info Hashmap (%u)", cache.shaderInfoHashMap().size());
+			if (ImGui::TreeNode(widgetName_.data()))
+			{
+				for (BinaryShaderCache::ShaderInfoHashMapType::ConstIterator i = cache.shaderInfoHashMap().begin(); i != cache.shaderInfoHashMap().end(); ++i)
+				{
+					const BinaryShaderCache::ShaderInfo &shaderInfo = i.value();
+					if (ImGui::TreeNode(&shaderInfo, "%s", shaderInfo.objectLabel.data()))
+					{
+						ImGui::Text("Binary file: %s", shaderInfo.binaryFilename.data());
+						ImGui::Text("Batch size: %u", shaderInfo.batchSize);
+						ImGui::TreePop();
+					}
+				}
+				ImGui::TreePop();
+			}
+
+			ImGui::BeginDisabled(canBePruned == false);
+			if (ImGui::Button("Prune"))
+				cache.prune();
+			ImGui::EndDisabled();
+
+			ImGui::SameLine();
+			ImGui::BeginDisabled(canBeCleared == false);
+			if (ImGui::Button("Clear"))
+				cache.clear();
+			ImGui::EndDisabled();
+
+			ImGui::EndDisabled();
+		}
 	}
 }
 
@@ -1513,6 +1671,7 @@ void ImGuiDebugOverlay::guiTopLeft()
 	const RenderStatistics::Buffers &vboBuffers = RenderStatistics::buffers(RenderBuffersManager::BufferTypes::ARRAY);
 	const RenderStatistics::Buffers &iboBuffers = RenderStatistics::buffers(RenderBuffersManager::BufferTypes::ELEMENT_ARRAY);
 	const RenderStatistics::Buffers &uboBuffers = RenderStatistics::buffers(RenderBuffersManager::BufferTypes::UNIFORM);
+	const BinaryShaderCache::Statistics &shaderCacheStats = RenderResources::binaryShaderCache().statistics();
 
 	const ImVec2 windowPos = ImVec2(Margin, Margin);
 	const ImVec2 windowPosPivot = ImVec2(0.0f, 0.0f);
@@ -1558,6 +1717,8 @@ void ImGuiDebugOverlay::guiTopLeft()
 			ImGui::PlotLines("", plotValues_[ValuesType::UBO_USED].get(), numValues_, 0, nullptr, 0.0f, uboBuffers.size / 1024.0f);
 		}
 
+		if (RenderResources::binaryShaderCache().isAvailable())
+			ImGui::Text("Binary Shaders: %u Kb in %u file(s)", shaderCacheStats.TotalBytesCount / 1024, shaderCacheStats.TotalFilesCount);
 		ImGui::Text("Viewport chain length: %u", Viewport::chain().size());
 
 		ImGui::End();

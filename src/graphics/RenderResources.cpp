@@ -1,12 +1,16 @@
 #include <cstddef> // for `offsetof()`
 #include <nctl/HashMapIterator.h>
+#include <nctl/StaticString.h>
 #include "RenderResources.h"
+#include "BinaryShaderCache.h"
 #include "RenderBuffersManager.h"
 #include "RenderVaoPool.h"
 #include "RenderCommandPool.h"
 #include "RenderBatcher.h"
 #include "Camera.h"
 #include "Application.h"
+#include "Hash64.h"
+#include "tracy.h"
 
 #ifdef WITH_EMBEDDED_SHADERS
 	#include "shader_strings.h"
@@ -16,15 +20,25 @@
 
 namespace ncine {
 
+namespace {
+	char const * const BatchSizeFormatString = "#ifndef BATCH_SIZE\n\t#define BATCH_SIZE (%d)\n#endif\n#line 0\n";
+}
+
 ///////////////////////////////////////////////////////////
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
+char const * const RenderResources::ShadersDir = "shaders";
+
+nctl::UniquePtr<BinaryShaderCache> RenderResources::binaryShaderCache_;
 nctl::UniquePtr<RenderBuffersManager> RenderResources::buffersManager_;
 nctl::UniquePtr<RenderVaoPool> RenderResources::vaoPool_;
+nctl::UniquePtr<Hash64> RenderResources::hash64_;
 nctl::UniquePtr<RenderCommandPool> RenderResources::renderCommandPool_;
 nctl::UniquePtr<RenderBatcher> RenderResources::renderBatcher_;
 
+RenderResources::ShaderProgramCompileInfo::ShaderCompileInfo RenderResources::defaultVertexShaderInfos_[NumDefaultVertexShaders];
+RenderResources::ShaderProgramCompileInfo::ShaderCompileInfo RenderResources::defaultFragmentShaderInfos_[NumDefaultFragmentShaders];
 nctl::UniquePtr<GLShaderProgram> RenderResources::defaultShaderPrograms_[NumDefaultShaderPrograms];
 nctl::HashMap<const GLShaderProgram *, GLShaderProgram *> RenderResources::batchedShaders_(32);
 
@@ -45,6 +59,203 @@ GLShaderProgram *RenderResources::shaderProgram(Material::ShaderProgramType shad
 		return defaultShaderPrograms_[static_cast<int>(shaderProgramType)].get();
 	else
 		return nullptr;
+}
+
+const RenderResources::ShaderProgramCompileInfo::ShaderCompileInfo &RenderResources::defaultVertexShaderInfo(DefaultVertexShader shader)
+{
+	const unsigned int index = static_cast<unsigned int>(shader);
+	FATAL_ASSERT(index < NumDefaultVertexShaders);
+	return defaultVertexShaderInfos_[index];
+}
+
+const RenderResources::ShaderProgramCompileInfo::ShaderCompileInfo &RenderResources::defaultFragmentShaderInfo(DefaultFragmentShader shader)
+{
+	const unsigned int index = static_cast<unsigned int>(shader);
+	FATAL_ASSERT(index < NumDefaultFragmentShaders);
+	return defaultFragmentShaderInfos_[index];
+}
+
+const RenderResources::ShaderProgramCompileInfo::ShaderCompileInfo &RenderResources::defaultVertexShaderInfo(unsigned int index)
+{
+	FATAL_ASSERT(index < NumDefaultVertexShaders);
+	return defaultVertexShaderInfos_[index];
+}
+
+const RenderResources::ShaderProgramCompileInfo::ShaderCompileInfo &RenderResources::defaultFragmentShaderInfo(unsigned int index)
+{
+	FATAL_ASSERT(index < NumDefaultFragmentShaders);
+	return defaultFragmentShaderInfos_[index];
+}
+
+/*! \note If not initially provided, the new computed hashes will be written back in the `ShaderCompileInfo` structures */
+void RenderResources::compileShader(ShaderProgramCompileInfo &shaderToCompile)
+{
+	ZoneScoped;
+	if (shaderToCompile.objectLabel)
+	{
+		// When Tracy is disabled the statement body is empty and braces are needed
+		ZoneText(shaderToCompile.objectLabel, nctl::strnlen(shaderToCompile.objectLabel, nctl::String::MaxCStringLength));
+	}
+
+	if (binaryShaderCache_->isEnabled())
+	{
+		// Either there is a shader string or a shader file, never together
+		FATAL_ASSERT((shaderToCompile.vertexInfo.shaderString != nullptr && shaderToCompile.vertexInfo.shaderFile == nullptr) ||
+		             (shaderToCompile.vertexInfo.shaderString == nullptr && shaderToCompile.vertexInfo.shaderFile != nullptr));
+		FATAL_ASSERT((shaderToCompile.fragmentInfo.shaderString != nullptr && shaderToCompile.fragmentInfo.shaderFile == nullptr) ||
+		             (shaderToCompile.fragmentInfo.shaderString == nullptr && shaderToCompile.fragmentInfo.shaderFile != nullptr));
+		// Either the shader is loaded from a file or a hash is provided
+		FATAL_ASSERT(shaderToCompile.vertexInfo.shaderFile != nullptr || (shaderToCompile.vertexInfo.hash != 0 || shaderToCompile.vertexInfo.hashString != nullptr));
+		FATAL_ASSERT(shaderToCompile.fragmentInfo.shaderFile != nullptr || (shaderToCompile.fragmentInfo.hash != 0 || shaderToCompile.fragmentInfo.hashString != nullptr));
+
+		// Calculating a hash only if it has not been provided
+		if (shaderToCompile.vertexInfo.hash == 0)
+		{
+			if (shaderToCompile.vertexInfo.shaderFile)
+				shaderToCompile.vertexInfo.hash = hash64_->hashFileStat(shaderToCompile.vertexInfo.shaderFile);
+			else if (shaderToCompile.vertexInfo.shaderString && shaderToCompile.vertexInfo.hashString)
+				shaderToCompile.vertexInfo.hash = hash64_->scanHashString(shaderToCompile.vertexInfo.hashString);
+		}
+
+		// Calculating a hash only if it has not been provided
+		if (shaderToCompile.fragmentInfo.hash == 0)
+		{
+			if (shaderToCompile.fragmentInfo.shaderFile)
+				shaderToCompile.fragmentInfo.hash = hash64_->hashFileStat(shaderToCompile.fragmentInfo.shaderFile);
+			else if (shaderToCompile.fragmentInfo.shaderString && shaderToCompile.fragmentInfo.hashString)
+				shaderToCompile.fragmentInfo.hash = hash64_->scanHashString(shaderToCompile.fragmentInfo.hashString);
+		}
+	}
+
+	// A similar sum is performd in `GLShaderProgram::link()` for attached shaders
+	const uint64_t shaderHashSum = binaryShaderCache_->isEnabled() ? shaderToCompile.vertexInfo.hash + shaderToCompile.fragmentInfo.hash : 0;
+
+	const AppConfiguration &appCfg = theApplication().appConfiguration();
+	const GLShaderProgram::QueryPhase cfgQueryPhase = appCfg.deferShaderQueries ? GLShaderProgram::QueryPhase::DEFERRED : GLShaderProgram::QueryPhase::IMMEDIATE;
+
+	BinaryShaderCache::ShaderInfo shaderInfo;
+	const bool isCached = binaryShaderCache_->retrieveShaderInfo(shaderHashSum, shaderInfo);
+	if (isCached)
+	{
+		shaderToCompile.shaderProgram->reset(cfgQueryPhase);
+		const bool hasLoaded = shaderToCompile.shaderProgram->initFromBinary(shaderInfo.binaryFilename.data(), shaderToCompile.introspection);
+		ASSERT(hasLoaded);
+		shaderToCompile.shaderProgram->setObjectLabel(shaderInfo.objectLabel.data());
+		return;
+	}
+
+	// ----------------------------------------------------------------------------------------------
+	// ------- The code executes beyond this point only if the shader has not been cached yet -------
+	// ----------------------------------------------------------------------------------------------
+
+	const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
+	// Clamped between 16 KB and 64 KB
+	const int maxUniformBlockSize = gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_UNIFORM_BLOCK_SIZE);
+
+	// If the UBO is smaller than 64 KB, then batched shaders need to be compiled twice. The first time determines the `BATCH_SIZE` define value.
+	const bool compileTwice = (maxUniformBlockSize < 64 * 1024 &&
+	                           shaderToCompile.introspection == GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS &&
+#if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
+	                           theApplication().appConfiguration().fixedBatchSize == 0 &&
+#endif
+	                           theApplication().appConfiguration().compileBatchedShadersTwice);
+
+	// The first compilation of a batched shader that needs a double compilation should be queried immediately
+	const GLShaderProgram::QueryPhase queryPhase = compileTwice ? GLShaderProgram::QueryPhase::IMMEDIATE : cfgQueryPhase;
+	shaderToCompile.shaderProgram->reset(queryPhase);
+
+	nctl::StaticString<64> sourceString;
+	const char *vertexStrings[3] = { nullptr, nullptr, nullptr };
+	if (compileTwice)
+	{
+		// The first compilation of a batched shader needs a `BATCH_SIZE` defined as 1
+		sourceString.format(BatchSizeFormatString, 1);
+		vertexStrings[0] = sourceString.data();
+	}
+
+	bool vertexHasLoaded = false;
+	bool fragmentHasLoaded = false;
+
+	// Overriding all hash calculation performed in the `GLShader` class by the `attachShader*` wrapper methods
+	if (shaderToCompile.vertexInfo.shaderString)
+	{
+		// The vertex shader source string can be either the first one or the second one, if the first defines the `BATCH_SIZE`
+		vertexStrings[compileTwice ? 1 : 0] = shaderToCompile.vertexInfo.shaderString;
+		vertexHasLoaded = shaderToCompile.shaderProgram->attachShaderFromStrings(GL_VERTEX_SHADER, vertexStrings, shaderToCompile.vertexInfo.hash);
+	}
+	else if (shaderToCompile.vertexInfo.shaderFile)
+		vertexHasLoaded = shaderToCompile.shaderProgram->attachShaderFromStringsAndFile(GL_VERTEX_SHADER, vertexStrings, shaderToCompile.vertexInfo.shaderFile, shaderToCompile.vertexInfo.hash);
+
+	if (shaderToCompile.fragmentInfo.shaderString)
+		fragmentHasLoaded = shaderToCompile.shaderProgram->attachShaderFromString(GL_FRAGMENT_SHADER, shaderToCompile.fragmentInfo.shaderString, shaderToCompile.fragmentInfo.hash);
+	else if (shaderToCompile.fragmentInfo.shaderFile)
+		fragmentHasLoaded = shaderToCompile.shaderProgram->attachShaderFromFile(GL_FRAGMENT_SHADER, shaderToCompile.fragmentInfo.shaderFile, shaderToCompile.fragmentInfo.hash);
+
+	ASSERT(vertexHasLoaded == true);
+	ASSERT(fragmentHasLoaded == true);
+
+	shaderToCompile.shaderProgram->setObjectLabel(shaderToCompile.objectLabel);
+	// The first compilation of a batched shader does not need to be saved as a binary because
+	// the `shaderInfo.txt` file will save the max batch value for the next application run
+	const bool cacheWasEnabled = binaryShaderCache_->isEnabled();
+	binaryShaderCache_->setEnabled(cacheWasEnabled && !compileTwice);
+	// The first compilation of a batched shader needs the introspection
+	const bool programHasLinked = shaderToCompile.shaderProgram->link(compileTwice ? GLShaderProgram::Introspection::ENABLED : shaderToCompile.introspection);
+	FATAL_ASSERT_MSG_X(programHasLinked, "Failed to compile shader program \"%s\"", shaderToCompile.objectLabel);
+	binaryShaderCache_->setEnabled(cacheWasEnabled);
+
+	unsigned int maxBatchSize = 0; // default value for non batched shaders
+	if (compileTwice)
+	{
+		ZoneScopedN("compileTwice");
+
+		GLShaderUniformBlocks blocks(shaderToCompile.shaderProgram.get(), Material::InstancesBlockName, nullptr);
+		GLUniformBlockCache *block = blocks.uniformBlock(Material::InstancesBlockName);
+		ASSERT(block != nullptr);
+		if (block)
+		{
+			// The align amount should not be subtracted from the block total size
+			maxBatchSize = maxUniformBlockSize / block->size();
+			LOGD_X("Shader \"%s\" - block size: %d bytes (%d align), max batch size: %u", shaderToCompile.objectLabel, block->size(), block->alignAmount(), maxBatchSize);
+
+			shaderToCompile.shaderProgram->reset(cfgQueryPhase);
+			sourceString.format(BatchSizeFormatString, maxBatchSize);
+
+			// Overriding all hash calculation performed in the `GLShader` class by the `attachShader*` wrapper methods.
+			// Even if its source is going to be patched, shader hash will not change and it will be correctly loaded as binary on the next run.
+			bool finalVertexHasLoaded = false;
+			bool finalFragmentHasLoaded = false;
+			if (shaderToCompile.vertexInfo.shaderString)
+				finalVertexHasLoaded = shaderToCompile.shaderProgram->attachShaderFromStrings(GL_VERTEX_SHADER, vertexStrings, shaderToCompile.vertexInfo.hash);
+			else if (shaderToCompile.vertexInfo.shaderFile)
+				finalVertexHasLoaded = shaderToCompile.shaderProgram->attachShaderFromStringsAndFile(GL_VERTEX_SHADER, vertexStrings, shaderToCompile.vertexInfo.shaderFile, shaderToCompile.vertexInfo.hash);
+
+			if (shaderToCompile.fragmentInfo.shaderString)
+				finalFragmentHasLoaded = shaderToCompile.shaderProgram->attachShaderFromString(GL_FRAGMENT_SHADER, shaderToCompile.fragmentInfo.shaderString, shaderToCompile.fragmentInfo.hash);
+			else if (shaderToCompile.fragmentInfo.shaderFile)
+				finalFragmentHasLoaded = shaderToCompile.shaderProgram->attachShaderFromFile(GL_FRAGMENT_SHADER, shaderToCompile.fragmentInfo.shaderFile, shaderToCompile.fragmentInfo.hash);
+
+			ASSERT(finalVertexHasLoaded == true);
+			ASSERT(finalFragmentHasLoaded == true);
+
+			// If link is sucessful, the binary shader is saved in the cache
+			const bool finalProgramHasLinked = shaderToCompile.shaderProgram->link(shaderToCompile.introspection);
+			FATAL_ASSERT_MSG_X(finalProgramHasLinked, "Failed to compile shader program \"%s\"", shaderToCompile.objectLabel);
+		}
+	}
+
+#if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
+	if (shaderToCompile.introspection == GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS &&
+	    theApplication().appConfiguration().fixedBatchSize != 0)
+	{
+		// If the batch size is fixed then it is also the maximum value
+		maxBatchSize = theApplication().appConfiguration().fixedBatchSize;
+	}
+#endif
+
+	const uint64_t shaderHashName = shaderToCompile.shaderProgram->hashName();
+	ASSERT(shaderHashName == shaderHashSum); // The two hash sums should match
+	binaryShaderCache_->registerShaderInfo(shaderHashName, shaderToCompile.objectLabel, maxBatchSize);
 }
 
 GLShaderProgram *RenderResources::batchedShader(const GLShaderProgram *shader)
@@ -151,19 +362,6 @@ void RenderResources::setDefaultAttributesParameters(GLShaderProgram &shaderProg
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-namespace {
-
-	struct ShaderLoad
-	{
-		nctl::UniquePtr<GLShaderProgram> &shaderProgram;
-		const char *vertexShader;
-		const char *fragmentShader;
-		GLShaderProgram::Introspection introspection;
-		const char *objectLabel;
-	};
-
-}
-
 void RenderResources::setCurrentCamera(Camera *camera)
 {
 	if (camera != nullptr)
@@ -203,79 +401,127 @@ void RenderResources::setCurrentViewport(Viewport *viewport)
 	currentViewport_ = viewport;
 }
 
-void RenderResources::create()
+void RenderResources::createMinimal()
 {
-	LOGI("Creating rendering resources...");
+	ZoneScoped;
+	LOGI("Creating a minimal set of rendering resources...");
+
+	// `createMinimal()` cannot be called after `create()`
+	ASSERT(binaryShaderCache_ == nullptr);
+	ASSERT(buffersManager_ == nullptr);
+	ASSERT(vaoPool_ == nullptr);
+	ASSERT(hash64_ == nullptr);
 
 	const AppConfiguration &appCfg = theApplication().appConfiguration();
+	binaryShaderCache_ = nctl::makeUnique<BinaryShaderCache>(appCfg.useBinaryShaderCache, appCfg.shaderCacheDirname.data());
 	buffersManager_ = nctl::makeUnique<RenderBuffersManager>(appCfg.useBufferMapping, appCfg.vboSize, appCfg.iboSize);
 	vaoPool_ = nctl::makeUnique<RenderVaoPool>(appCfg.vaoPoolSize);
+	hash64_ = nctl::makeUnique<Hash64>();
+
+	LOGI("Minimal rendering resources created");
+}
+
+void RenderResources::create()
+{
+	ZoneScoped;
+	LOGI("Creating rendering resources...");
+
+	// `create()` can be called after `createMinimal()`
+
+	const AppConfiguration &appCfg = theApplication().appConfiguration();
+	if (binaryShaderCache_ == nullptr)
+		binaryShaderCache_ = nctl::makeUnique<BinaryShaderCache>(appCfg.useBinaryShaderCache, appCfg.shaderCacheDirname.data());
+	if (buffersManager_ == nullptr)
+		buffersManager_ = nctl::makeUnique<RenderBuffersManager>(appCfg.useBufferMapping, appCfg.vboSize, appCfg.iboSize);
+	if (vaoPool_ == nullptr)
+		vaoPool_ = nctl::makeUnique<RenderVaoPool>(appCfg.vaoPoolSize);
+	if (hash64_ == nullptr)
+		hash64_ = nctl::makeUnique<Hash64>();
 	renderCommandPool_ = nctl::makeUnique<RenderCommandPool>(appCfg.vaoPoolSize);
 	renderBatcher_ = nctl::makeUnique<RenderBatcher>();
 	defaultCamera_ = nctl::makeUnique<Camera>();
 	currentCamera_ = defaultCamera_.get();
 
-	ShaderLoad shadersToLoad[] = {
-#ifndef WITH_EMBEDDED_SHADERS
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::SPRITE)], "sprite_vs.glsl", "sprite_fs.glsl", GLShaderProgram::Introspection::ENABLED, "Sprite" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::SPRITE_GRAY)], "sprite_vs.glsl", "sprite_gray_fs.glsl", GLShaderProgram::Introspection::ENABLED, "Sprite_Gray" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::SPRITE_NO_TEXTURE)], "sprite_notexture_vs.glsl", "sprite_notexture_fs.glsl", GLShaderProgram::Introspection::ENABLED, "Sprite_NoTexture" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::MESH_SPRITE)], "meshsprite_vs.glsl", "sprite_fs.glsl", GLShaderProgram::Introspection::ENABLED, "MeshSprite" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::MESH_SPRITE_GRAY)], "meshsprite_vs.glsl", "sprite_gray_fs.glsl", GLShaderProgram::Introspection::ENABLED, "MeshSprite_Gray" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::MESH_SPRITE_NO_TEXTURE)], "meshsprite_notexture_vs.glsl", "sprite_notexture_fs.glsl", GLShaderProgram::Introspection::ENABLED, "MeshSprite_NoTexture" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::TEXTNODE_ALPHA)], "textnode_vs.glsl", "textnode_alpha_fs.glsl", GLShaderProgram::Introspection::ENABLED, "TextNode_Alpha" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::TEXTNODE_RED)], "textnode_vs.glsl", "textnode_red_fs.glsl", GLShaderProgram::Introspection::ENABLED, "TextNode_Red" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::TEXTNODE_SPRITE)], "textnode_vs.glsl", "sprite_fs.glsl", GLShaderProgram::Introspection::ENABLED, "TextNode_Sprite" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_SPRITES)], "batched_sprites_vs.glsl", "sprite_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_Sprites" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_SPRITES_GRAY)], "batched_sprites_vs.glsl", "sprite_gray_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_Sprites_Gray" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_SPRITES_NO_TEXTURE)], "batched_sprites_notexture_vs.glsl", "sprite_notexture_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_Sprites_NoTexture" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_MESH_SPRITES)], "batched_meshsprites_vs.glsl", "sprite_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_MeshSprites" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_MESH_SPRITES_GRAY)], "batched_meshsprites_vs.glsl", "sprite_gray_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_MeshSprites_Gray" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_MESH_SPRITES_NO_TEXTURE)], "batched_meshsprites_notexture_vs.glsl", "sprite_notexture_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_MeshSprites_NoTexture" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_TEXTNODES_ALPHA)], "batched_textnodes_vs.glsl", "textnode_alpha_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_TextNodes_Alpha" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_TEXTNODES_RED)], "batched_textnodes_vs.glsl", "textnode_red_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_TextNodes_Red" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_TEXTNODES_SPRITE)], "batched_textnodes_vs.glsl", "sprite_fs.glsl", GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_TextNodes_Sprite" }
-#else
-		// Skipping the initial new line character of the raw string literal
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::SPRITE)], ShaderStrings::sprite_vs + 1, ShaderStrings::sprite_fs + 1, GLShaderProgram::Introspection::ENABLED, "Sprite" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::SPRITE_GRAY)], ShaderStrings::sprite_vs + 1, ShaderStrings::sprite_gray_fs + 1, GLShaderProgram::Introspection::ENABLED, "Sprite_Gray" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::SPRITE_NO_TEXTURE)], ShaderStrings::sprite_notexture_vs + 1, ShaderStrings::sprite_notexture_fs + 1, GLShaderProgram::Introspection::ENABLED, "Sprite_NoTexture" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::MESH_SPRITE)], ShaderStrings::meshsprite_vs + 1, ShaderStrings::sprite_fs + 1, GLShaderProgram::Introspection::ENABLED, "MeshSprite" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::MESH_SPRITE_GRAY)], ShaderStrings::meshsprite_vs + 1, ShaderStrings::sprite_gray_fs + 1, GLShaderProgram::Introspection::ENABLED, "MeshSprite_Gray" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::MESH_SPRITE_NO_TEXTURE)], ShaderStrings::meshsprite_notexture_vs + 1, ShaderStrings::sprite_notexture_fs + 1, GLShaderProgram::Introspection::ENABLED, "MeshSprite_NoTexture" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::TEXTNODE_ALPHA)], ShaderStrings::textnode_vs + 1, ShaderStrings::textnode_alpha_fs + 1, GLShaderProgram::Introspection::ENABLED, "TextNode_Alpha" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::TEXTNODE_RED)], ShaderStrings::textnode_vs + 1, ShaderStrings::textnode_red_fs + 1, GLShaderProgram::Introspection::ENABLED, "TextNode_Red" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::TEXTNODE_SPRITE)], ShaderStrings::textnode_vs + 1, ShaderStrings::sprite_fs + 1, GLShaderProgram::Introspection::ENABLED, "TextNode_Sprite" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_SPRITES)], ShaderStrings::batched_sprites_vs + 1, ShaderStrings::sprite_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_Sprites" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_SPRITES_GRAY)], ShaderStrings::batched_sprites_vs + 1, ShaderStrings::sprite_gray_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_Sprites_Gray" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_SPRITES_NO_TEXTURE)], ShaderStrings::batched_sprites_notexture_vs + 1, ShaderStrings::sprite_notexture_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_Sprites_NoTexture" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_MESH_SPRITES)], ShaderStrings::batched_meshsprites_vs + 1, ShaderStrings::sprite_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_MeshSprites" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_MESH_SPRITES_GRAY)], ShaderStrings::batched_meshsprites_vs + 1, ShaderStrings::sprite_gray_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_MeshSprites_Gray" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_MESH_SPRITES_NO_TEXTURE)], ShaderStrings::batched_meshsprites_notexture_vs + 1, ShaderStrings::sprite_notexture_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_MeshSprites_NoTexture" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_TEXTNODES_ALPHA)], ShaderStrings::batched_textnodes_vs + 1, ShaderStrings::textnode_alpha_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_TextNodes_Alpha" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_TEXTNODES_RED)], ShaderStrings::batched_textnodes_vs + 1, ShaderStrings::textnode_red_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_TextNodes_Red" },
-		{ RenderResources::defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_TEXTNODES_SPRITE)], ShaderStrings::batched_textnodes_vs + 1, ShaderStrings::sprite_fs + 1, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_TextNodes_Sprite" }
-#endif
+	fillDefaultShaderInfos();
+
+	// Define some references to shorten shader program names
+	nctl::UniquePtr<GLShaderProgram> &spriteProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::SPRITE)];
+	nctl::UniquePtr<GLShaderProgram> &spriteGrayProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::SPRITE_GRAY)];
+	nctl::UniquePtr<GLShaderProgram> &spriteNoTextureProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::SPRITE_NO_TEXTURE)];
+	nctl::UniquePtr<GLShaderProgram> &meshSpriteProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::MESH_SPRITE)];
+	nctl::UniquePtr<GLShaderProgram> &meshSpriteGrayProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::MESH_SPRITE_GRAY)];
+	nctl::UniquePtr<GLShaderProgram> &meshSpriteNoTextureProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::MESH_SPRITE_NO_TEXTURE)];
+	nctl::UniquePtr<GLShaderProgram> &textnodeAlphaProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::TEXTNODE_ALPHA)];
+	nctl::UniquePtr<GLShaderProgram> &textnodeRedProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::TEXTNODE_RED)];
+	nctl::UniquePtr<GLShaderProgram> &textnodeSpriteProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::TEXTNODE_SPRITE)];
+	nctl::UniquePtr<GLShaderProgram> &batchedSpritesProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_SPRITES)];
+	nctl::UniquePtr<GLShaderProgram> &batchedSpritesGrayProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_SPRITES_GRAY)];
+	nctl::UniquePtr<GLShaderProgram> &batchedSpritesNoTextureProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_SPRITES_NO_TEXTURE)];
+	nctl::UniquePtr<GLShaderProgram> &batchedMeshSpritesProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_MESH_SPRITES)];
+	nctl::UniquePtr<GLShaderProgram> &batchedMeshSpritesGrayProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_MESH_SPRITES_GRAY)];
+	nctl::UniquePtr<GLShaderProgram> &batchedMeshSpritesNoTextureProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_MESH_SPRITES_NO_TEXTURE)];
+	nctl::UniquePtr<GLShaderProgram> &batchedTextnodesAlphaProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_TEXTNODES_ALPHA)];
+	nctl::UniquePtr<GLShaderProgram> &batchedTextnodesRedProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_TEXTNODES_RED)];
+	nctl::UniquePtr<GLShaderProgram> &batchedTextnodesSpriteProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::BATCHED_TEXTNODES_SPRITE)];
+	// Define some references to shorten default vertex shader names
+	ShaderProgramCompileInfo::ShaderCompileInfo &spriteVs = defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::SPRITE)];
+	ShaderProgramCompileInfo::ShaderCompileInfo &spriteNoTextureVs = defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::SPRITE_NOTEXTURE)];
+	ShaderProgramCompileInfo::ShaderCompileInfo &meshSpriteVs = defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::MESHSPRITE)];
+	ShaderProgramCompileInfo::ShaderCompileInfo &meshSpriteNoTextureVs = defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::MESHSPRITE_NOTEXTURE)];
+	ShaderProgramCompileInfo::ShaderCompileInfo &textnodeVs = defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::TEXTNODE)];
+	ShaderProgramCompileInfo::ShaderCompileInfo &batchedSpritesVs = defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::BATCHED_SPRITES)];
+	ShaderProgramCompileInfo::ShaderCompileInfo &batchedSpritesNoTextureVs = defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::BATCHED_SPRITES_NOTEXTURE)];
+	ShaderProgramCompileInfo::ShaderCompileInfo &batchedMeshSpritesVs = defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::BATCHED_MESHSPRITES)];
+	ShaderProgramCompileInfo::ShaderCompileInfo &batchedMeshSpritesNoTextureVs = defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::BATCHED_MESHSPRITES_NOTEXTURE)];
+	ShaderProgramCompileInfo::ShaderCompileInfo &batchedTextnodesVs = defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::BATCHED_TEXTNODES)];
+	// Define some references to shorten default fragment shader names
+	ShaderProgramCompileInfo::ShaderCompileInfo &spriteFs = defaultFragmentShaderInfos_[static_cast<int>(DefaultFragmentShader::SPRITE)];
+	ShaderProgramCompileInfo::ShaderCompileInfo &spriteGrayFs = defaultFragmentShaderInfos_[static_cast<int>(DefaultFragmentShader::SPRITE_GRAY)];
+	ShaderProgramCompileInfo::ShaderCompileInfo &spriteNoTextureFs = defaultFragmentShaderInfos_[static_cast<int>(DefaultFragmentShader::SPRITE_NOTEXTURE)];
+	ShaderProgramCompileInfo::ShaderCompileInfo &textnodeAlphaFs = defaultFragmentShaderInfos_[static_cast<int>(DefaultFragmentShader::TEXTNODE_ALPHA)];
+	ShaderProgramCompileInfo::ShaderCompileInfo &textnodeRedFs = defaultFragmentShaderInfos_[static_cast<int>(DefaultFragmentShader::TEXTNODE_RED)];
+
+	ShaderProgramCompileInfo shadersToCompile[] = {
+		{ spriteProg, spriteVs, spriteFs, GLShaderProgram::Introspection::ENABLED, "Sprite" },
+		{ spriteGrayProg, spriteVs, spriteGrayFs, GLShaderProgram::Introspection::ENABLED, "Sprite_Gray" },
+		{ spriteNoTextureProg, spriteNoTextureVs, spriteNoTextureFs, GLShaderProgram::Introspection::ENABLED, "Sprite_NoTexture" },
+		{ meshSpriteProg, meshSpriteVs, spriteFs, GLShaderProgram::Introspection::ENABLED, "MeshSprite" },
+		{ meshSpriteGrayProg, meshSpriteVs, spriteGrayFs, GLShaderProgram::Introspection::ENABLED, "MeshSprite_Gray" },
+		{ meshSpriteNoTextureProg, meshSpriteNoTextureVs, spriteNoTextureFs, GLShaderProgram::Introspection::ENABLED, "MeshSprite_NoTexture" },
+		{ textnodeAlphaProg, textnodeVs, textnodeAlphaFs, GLShaderProgram::Introspection::ENABLED, "TextNode_Alpha" },
+		{ textnodeRedProg, textnodeVs, textnodeRedFs, GLShaderProgram::Introspection::ENABLED, "TextNode_Red" },
+		{ textnodeSpriteProg, textnodeVs, spriteFs, GLShaderProgram::Introspection::ENABLED, "TextNode_Sprite" },
+		{ batchedSpritesProg, batchedSpritesVs, spriteFs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_Sprites" },
+		{ batchedSpritesGrayProg, batchedSpritesVs, spriteGrayFs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_Sprites_Gray" },
+		{ batchedSpritesNoTextureProg, batchedSpritesNoTextureVs, spriteNoTextureFs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_Sprites_NoTexture" },
+		{ batchedMeshSpritesProg, batchedMeshSpritesVs, spriteFs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_MeshSprites" },
+		{ batchedMeshSpritesGrayProg, batchedMeshSpritesVs, spriteGrayFs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_MeshSprites_Gray" },
+		{ batchedMeshSpritesNoTextureProg, batchedMeshSpritesNoTextureVs, spriteNoTextureFs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_MeshSprites_NoTexture" },
+		{ batchedTextnodesAlphaProg, batchedTextnodesVs, textnodeAlphaFs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_TextNodes_Alpha" },
+		{ batchedTextnodesRedProg, batchedTextnodesVs, textnodeRedFs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_TextNodes_Red" },
+		{ batchedTextnodesSpriteProg, batchedTextnodesVs, spriteFs, GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS, "Batched_TextNodes_Sprite" }
 	};
 
-	const GLShaderProgram::QueryPhase queryPhase = appCfg.deferShaderQueries ? GLShaderProgram::QueryPhase::DEFERRED : GLShaderProgram::QueryPhase::IMMEDIATE;
-	const unsigned int numShaderToLoad = (sizeof(shadersToLoad) / sizeof(*shadersToLoad));
-	FATAL_ASSERT(numShaderToLoad <= NumDefaultShaderPrograms);
-	for (unsigned int i = 0; i < numShaderToLoad; i++)
+	const unsigned int numShaderToCompile = (sizeof(shadersToCompile) / sizeof(*shadersToCompile));
+	FATAL_ASSERT(numShaderToCompile <= NumDefaultShaderPrograms);
+	for (unsigned int i = 0; i < numShaderToCompile; i++)
 	{
-		const ShaderLoad &shaderToLoad = shadersToLoad[i];
-
-		shaderToLoad.shaderProgram = nctl::makeUnique<GLShaderProgram>(queryPhase);
+		ShaderProgramCompileInfo &shaderToCompile = shadersToCompile[i];
+		shaderToCompile.shaderProgram = nctl::makeUnique<GLShaderProgram>();
 #ifndef WITH_EMBEDDED_SHADERS
-		shaderToLoad.shaderProgram->attachShader(GL_VERTEX_SHADER, (fs::dataPath() + "shaders/" + shaderToLoad.vertexShader).data());
-		shaderToLoad.shaderProgram->attachShader(GL_FRAGMENT_SHADER, (fs::dataPath() + "shaders/" + shaderToLoad.fragmentShader).data());
-#else
-		shaderToLoad.shaderProgram->attachShaderFromString(GL_VERTEX_SHADER, shaderToLoad.vertexShader);
-		shaderToLoad.shaderProgram->attachShaderFromString(GL_FRAGMENT_SHADER, shaderToLoad.fragmentShader);
+		const char *vertexFilename = shaderToCompile.vertexInfo.shaderFile;
+		const char *fragmentFilename = shaderToCompile.fragmentInfo.shaderFile;
+		const nctl::String vertexShaderPath = fs::dataPath() + ShadersDir + "/" + shaderToCompile.vertexInfo.shaderFile;
+		const nctl::String fragmentShaderPath = fs::dataPath() + ShadersDir + "/" + shaderToCompile.fragmentInfo.shaderFile;
+		shaderToCompile.vertexInfo.shaderFile = vertexShaderPath.data();
+		shaderToCompile.fragmentInfo.shaderFile = fragmentShaderPath.data();
 #endif
-		shaderToLoad.shaderProgram->setObjectLabel(shaderToLoad.objectLabel);
-		const bool hasLinked = shaderToLoad.shaderProgram->link(shaderToLoad.introspection);
-		FATAL_ASSERT(hasLinked == true);
+		compileShader(shaderToCompile);
+#ifndef WITH_EMBEDDED_SHADERS
+		// Restore the original shader filename without the data path (the path strings will go out of scope soon)
+		shaderToCompile.vertexInfo.shaderFile = vertexFilename;
+		shaderToCompile.fragmentInfo.shaderFile = fragmentFilename;
+#endif
 	}
 
 	registerDefaultBatchedShaders();
@@ -288,17 +534,6 @@ void RenderResources::create()
 	LOGI("Rendering resources created");
 }
 
-void RenderResources::createMinimal()
-{
-	LOGI("Creating a minimal set of rendering resources...");
-
-	const AppConfiguration &appCfg = theApplication().appConfiguration();
-	buffersManager_ = nctl::makeUnique<RenderBuffersManager>(appCfg.useBufferMapping, appCfg.vboSize, appCfg.iboSize);
-	vaoPool_ = nctl::makeUnique<RenderVaoPool>(appCfg.vaoPoolSize);
-
-	LOGI("Minimal rendering resources created");
-}
-
 void RenderResources::dispose()
 {
 	for (nctl::UniquePtr<GLShaderProgram> &shaderProgram : defaultShaderPrograms_)
@@ -309,10 +544,52 @@ void RenderResources::dispose()
 	defaultCamera_.reset(nullptr);
 	renderBatcher_.reset(nullptr);
 	renderCommandPool_.reset(nullptr);
+	hash64_.reset(nullptr);
 	vaoPool_.reset(nullptr);
 	buffersManager_.reset(nullptr);
+	binaryShaderCache_.reset(nullptr);
 
 	LOGI("Rendering resources disposed");
+}
+
+void RenderResources::fillDefaultShaderInfos()
+{
+#ifdef WITH_EMBEDDED_SHADERS
+	// Skipping the initial new line character of the raw string literal
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::SPRITE)] = ShaderProgramCompileInfo::ShaderCompileInfo(ShaderStrings::sprite_vs + 1, ShaderHashes::sprite_vs);
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::SPRITE_NOTEXTURE)] = ShaderProgramCompileInfo::ShaderCompileInfo(ShaderStrings::sprite_notexture_vs + 1, ShaderHashes::sprite_notexture_vs);
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::MESHSPRITE)] = ShaderProgramCompileInfo::ShaderCompileInfo(ShaderStrings::meshsprite_vs + 1, ShaderHashes::meshsprite_vs);
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::MESHSPRITE_NOTEXTURE)] = ShaderProgramCompileInfo::ShaderCompileInfo(ShaderStrings::meshsprite_notexture_vs + 1, ShaderHashes::meshsprite_notexture_vs);
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::TEXTNODE)] = ShaderProgramCompileInfo::ShaderCompileInfo(ShaderStrings::textnode_vs + 1, ShaderHashes::textnode_vs);
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::BATCHED_SPRITES)] = ShaderProgramCompileInfo::ShaderCompileInfo(ShaderStrings::batched_sprites_vs + 1, ShaderHashes::batched_sprites_vs);
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::BATCHED_SPRITES_NOTEXTURE)] = ShaderProgramCompileInfo::ShaderCompileInfo(ShaderStrings::batched_sprites_notexture_vs + 1, ShaderHashes::batched_sprites_notexture_vs);
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::BATCHED_MESHSPRITES)] = ShaderProgramCompileInfo::ShaderCompileInfo(ShaderStrings::batched_meshsprites_vs + 1, ShaderHashes::batched_meshsprites_vs);
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::BATCHED_MESHSPRITES_NOTEXTURE)] = ShaderProgramCompileInfo::ShaderCompileInfo(ShaderStrings::batched_meshsprites_notexture_vs + 1, ShaderHashes::batched_meshsprites_notexture_vs);
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::BATCHED_TEXTNODES)] = ShaderProgramCompileInfo::ShaderCompileInfo(ShaderStrings::batched_textnodes_vs + 1, ShaderHashes::batched_textnodes_vs);
+
+	defaultFragmentShaderInfos_[static_cast<int>(DefaultFragmentShader::SPRITE)] = ShaderProgramCompileInfo::ShaderCompileInfo(ShaderStrings::sprite_fs + 1, ShaderHashes::sprite_fs);
+	defaultFragmentShaderInfos_[static_cast<int>(DefaultFragmentShader::SPRITE_GRAY)] = ShaderProgramCompileInfo::ShaderCompileInfo(ShaderStrings::sprite_gray_fs + 1, ShaderHashes::sprite_gray_fs);
+	defaultFragmentShaderInfos_[static_cast<int>(DefaultFragmentShader::SPRITE_NOTEXTURE)] = ShaderProgramCompileInfo::ShaderCompileInfo(ShaderStrings::sprite_notexture_fs + 1, ShaderHashes::sprite_notexture_fs);
+	defaultFragmentShaderInfos_[static_cast<int>(DefaultFragmentShader::TEXTNODE_ALPHA)] = ShaderProgramCompileInfo::ShaderCompileInfo(ShaderStrings::textnode_alpha_fs + 1, ShaderHashes::textnode_alpha_fs);
+	defaultFragmentShaderInfos_[static_cast<int>(DefaultFragmentShader::TEXTNODE_RED)] = ShaderProgramCompileInfo::ShaderCompileInfo(ShaderStrings::textnode_red_fs + 1, ShaderHashes::textnode_red_fs);
+#else
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::SPRITE)] = ShaderProgramCompileInfo::ShaderCompileInfo("sprite_vs.glsl");
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::SPRITE_NOTEXTURE)] = ShaderProgramCompileInfo::ShaderCompileInfo("sprite_notexture_vs.glsl");
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::MESHSPRITE)] = ShaderProgramCompileInfo::ShaderCompileInfo("meshsprite_vs.glsl");
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::MESHSPRITE_NOTEXTURE)] = ShaderProgramCompileInfo::ShaderCompileInfo("meshsprite_notexture_vs.glsl");
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::TEXTNODE)] = ShaderProgramCompileInfo::ShaderCompileInfo("textnode_vs.glsl");
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::BATCHED_SPRITES)] = ShaderProgramCompileInfo::ShaderCompileInfo("batched_sprites_vs.glsl");
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::BATCHED_SPRITES_NOTEXTURE)] = ShaderProgramCompileInfo::ShaderCompileInfo("batched_sprites_notexture_vs.glsl");
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::BATCHED_MESHSPRITES)] = ShaderProgramCompileInfo::ShaderCompileInfo("batched_meshsprites_vs.glsl");
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::BATCHED_MESHSPRITES_NOTEXTURE)] = ShaderProgramCompileInfo::ShaderCompileInfo("batched_meshsprites_notexture_vs.glsl");
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::BATCHED_TEXTNODES)] = ShaderProgramCompileInfo::ShaderCompileInfo("batched_textnodes_vs.glsl");
+
+	defaultFragmentShaderInfos_[static_cast<int>(DefaultFragmentShader::SPRITE)] = ShaderProgramCompileInfo::ShaderCompileInfo("sprite_fs.glsl");
+	defaultFragmentShaderInfos_[static_cast<int>(DefaultFragmentShader::SPRITE_GRAY)] = ShaderProgramCompileInfo::ShaderCompileInfo("sprite_gray_fs.glsl");
+	defaultFragmentShaderInfos_[static_cast<int>(DefaultFragmentShader::SPRITE_NOTEXTURE)] = ShaderProgramCompileInfo::ShaderCompileInfo("sprite_notexture_fs.glsl");
+	defaultFragmentShaderInfos_[static_cast<int>(DefaultFragmentShader::TEXTNODE_ALPHA)] = ShaderProgramCompileInfo::ShaderCompileInfo("textnode_alpha_fs.glsl");
+	defaultFragmentShaderInfos_[static_cast<int>(DefaultFragmentShader::TEXTNODE_RED)] = ShaderProgramCompileInfo::ShaderCompileInfo("textnode_red_fs.glsl");
+#endif
 }
 
 void RenderResources::registerDefaultBatchedShaders()

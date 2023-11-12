@@ -61,15 +61,21 @@ ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
 	const GLShaderProgram::QueryPhase queryPhase = appCfg.deferShaderQueries ? GLShaderProgram::QueryPhase::DEFERRED : GLShaderProgram::QueryPhase::IMMEDIATE;
 
 	imguiShaderProgram_ = nctl::makeUnique<GLShaderProgram>(queryPhase);
+
+	RenderResources::ShaderProgramCompileInfo shaderProgramInfo(imguiShaderProgram_, GLShaderProgram::Introspection::ENABLED, "ImGui");
 #ifndef WITH_EMBEDDED_SHADERS
-	imguiShaderProgram_->attachShader(GL_VERTEX_SHADER, (fs::dataPath() + "shaders/imgui_vs.glsl").data());
-	imguiShaderProgram_->attachShader(GL_FRAGMENT_SHADER, (fs::dataPath() + "shaders/imgui_fs.glsl").data());
+	const nctl::String vertexShaderPath = fs::dataPath() + RenderResources::ShadersDir + "/imgui_vs.glsl";
+	const nctl::String fragmentShaderPath = fs::dataPath() + RenderResources::ShadersDir + "/imgui_fs.glsl";
+	shaderProgramInfo.vertexInfo.shaderFile = vertexShaderPath.data();
+	shaderProgramInfo.fragmentInfo.shaderFile = fragmentShaderPath.data();
 #else
-	imguiShaderProgram_->attachShaderFromString(GL_VERTEX_SHADER, ShaderStrings::imgui_vs);
-	imguiShaderProgram_->attachShaderFromString(GL_FRAGMENT_SHADER, ShaderStrings::imgui_fs);
+	// Skipping the initial new line character of the raw string literal
+	shaderProgramInfo.vertexInfo.shaderString = ShaderStrings::imgui_vs + 1;
+	shaderProgramInfo.fragmentInfo.shaderString = ShaderStrings::imgui_fs + 1;
+	shaderProgramInfo.vertexInfo.hashString = ShaderHashes::imgui_vs;
+	shaderProgramInfo.fragmentInfo.hashString = ShaderHashes::imgui_fs;
 #endif
-	imguiShaderProgram_->link(GLShaderProgram::Introspection::ENABLED);
-	FATAL_ASSERT(imguiShaderProgram_->status() != GLShaderProgram::Status::LINKING_FAILED);
+	RenderResources::compileShader(shaderProgramInfo);
 
 	if (withSceneGraph == false)
 		setupBuffersAndShader();

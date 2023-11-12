@@ -57,7 +57,8 @@ void GLShaderUniformBlocks::setProgram(GLShaderProgram *shaderProgram, const cha
 
 	shaderProgram_ = shaderProgram;
 	shaderProgram_->deferredQueries();
-	uniformBlockCaches_.clear();
+	if (uniformBlockCaches_.isEmpty() == false)
+		uniformBlockCaches_.clear();
 
 	if (shaderProgram->status() == GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)
 		importUniformBlocks(includeOnly, exclude);

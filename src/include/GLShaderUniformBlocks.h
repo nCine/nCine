@@ -43,7 +43,7 @@ class GLShaderUniformBlocks
 
 	UniformHashMapType uniformBlockCaches_;
 
-	/// Imports the uniform blocks with the option of including only some or excluing others
+	/// Imports the uniform blocks with the option of including only some or excluding others
 	void importUniformBlocks(const char *includeOnly, const char *exclude);
 };
 

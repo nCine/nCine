@@ -23,10 +23,8 @@ RenderBatcher::RenderBatcher()
     : buffers_(1)
 {
 	const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
-	const unsigned int maxUniformBlockSize = static_cast<unsigned int>(gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_UNIFORM_BLOCK_SIZE));
-
-	// Clamping the value as some drivers report a maximum size similar to SSBO one
-	UboMaxSize = maxUniformBlockSize <= 64 * 1024 ? maxUniformBlockSize : 64 * 1024;
+	// Clamped between 16 KB and 64 KB
+	UboMaxSize = static_cast<unsigned int>(gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_UNIFORM_BLOCK_SIZE));
 
 	// Create the first buffer right away
 	createBuffer(UboMaxSize);
@@ -38,19 +36,26 @@ RenderBatcher::RenderBatcher()
 
 void RenderBatcher::createBatches(const nctl::Array<RenderCommand *> &srcQueue, nctl::Array<RenderCommand *> &destQueue)
 {
+	unsigned int &maxBatchSize = theApplication().renderingSettings().maxBatchSize;
+	unsigned int &minBatchSize = theApplication().renderingSettings().minBatchSize;
+
 #if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
 	const unsigned int fixedBatchSize = theApplication().appConfiguration().fixedBatchSize;
-	const unsigned int minBatchSize = (fixedBatchSize > 0) ? fixedBatchSize : theApplication().renderingSettings().minBatchSize;
-	const unsigned int maxBatchSize = (fixedBatchSize > 0) ? fixedBatchSize : theApplication().renderingSettings().maxBatchSize;
-#else
-	const unsigned int minBatchSize = theApplication().renderingSettings().minBatchSize;
-	const unsigned int maxBatchSize = theApplication().renderingSettings().maxBatchSize;
+	if (fixedBatchSize > 0)
+		maxBatchSize = fixedBatchSize;
 #endif
-	ASSERT(minBatchSize > 1);
-	ASSERT(maxBatchSize >= minBatchSize);
+
+#if defined(__EMSCRIPTEN__)
+	// On Emscripten (but not on ANGLE), batch size needs to be fixed: min and max must be the same
+	minBatchSize = maxBatchSize;
+#endif
+
+	// Validating batch size values
+	maxBatchSize = (maxBatchSize == 0) ? 1 : maxBatchSize;
+	minBatchSize = (minBatchSize == 0) ? 1 : minBatchSize;
+	minBatchSize = (minBatchSize > maxBatchSize) ? maxBatchSize : minBatchSize;
 
 	unsigned int lastSplit = 0;
-
 	for (unsigned int i = 1; i < srcQueue.size(); i++)
 	{
 		const RenderCommand *command = srcQueue[i];
@@ -149,7 +154,7 @@ RenderCommand *RenderBatcher::collectCommands(
 	if (commandAdded)
 		batchCommand->setType(refCommand->type());
 	instancesBlock = batchCommand->material().uniformBlock(Material::InstancesBlockName);
-	FATAL_ASSERT_MSG_X(instancesBlock != nullptr, "Batched shader does not have an %s uniform block", Material::InstancesBlockName);
+	FATAL_ASSERT_MSG_X(instancesBlock != nullptr, "Batched shader does not have an \"%s\" uniform block", Material::InstancesBlockName);
 
 	const unsigned long nonBlockUniformsSize = batchCommand->material().shaderProgram()->uniformsSize();
 	nctl::StaticString<GLUniformBlock::MaxNameLength> uniformBlockName;
@@ -177,9 +182,9 @@ RenderCommand *RenderBatcher::collectCommands(
 		if ((*it)->geometry().numIndices() > 0)
 			batchingWithIndices = true;
 
-		// Don't request more bytes than a UBO can hold
+		// Don't request more bytes than an instances block or an UBO can hold (also protects against big `RenderingSettings::maxBatchSize` values)
 		const unsigned long currentSize = nonBlockUniformsSize + nonInstancesBlocksSize + instancesBlockSize;
-		if (currentSize + singleInstanceBlockSize > UboMaxSize)
+		if (instancesBlockSize + singleInstanceBlockSize > instancesBlock->size() || currentSize + singleInstanceBlockSize > UboMaxSize)
 			break;
 		else
 			instancesBlockSize += singleInstanceBlockSize;
@@ -358,6 +363,7 @@ RenderCommand *RenderBatcher::collectCommands(
 
 		++it;
 	}
+	instancesBlock->setUsedSize(instancesBlockOffset);
 
 	if (batchedShaderHasAttributes)
 	{
@@ -371,7 +377,6 @@ RenderCommand *RenderBatcher::collectCommands(
 	batchCommand->material().setBlendingEnabled(refCommand->material().isBlendingEnabled());
 	batchCommand->material().setBlendingFactors(refCommand->material().srcBlendingFactor(), refCommand->material().destBlendingFactor());
 	batchCommand->setBatchSize(nextStart - start);
-	batchCommand->material().uniformBlock(Material::InstancesBlockName)->setUsedSize(instancesBlockOffset);
 	batchCommand->setLayer(refCommand->layer());
 	batchCommand->setVisitOrder(refCommand->visitOrder());
 

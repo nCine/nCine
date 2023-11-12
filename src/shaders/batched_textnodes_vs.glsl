@@ -9,11 +9,10 @@ struct Instance
 
 layout (std140) uniform InstancesBlock
 {
-#ifdef WITH_FIXED_BATCH_SIZE
-	Instance[BATCH_SIZE] instances;
-#else
-	Instance[819] instances;
+#ifndef BATCH_SIZE
+	#define BATCH_SIZE (819) // 64 Kb / 80 b
 #endif
+	Instance[BATCH_SIZE] instances;
 } block;
 
 in vec2 aPosition;

@@ -35,11 +35,9 @@ RenderBuffersManager::RenderBuffersManager(bool useBufferMapping, unsigned long 
 	iboSpecs.alignment = sizeof(GLushort);
 
 	const IGfxCapabilities &gfxCaps = theServiceLocator().gfxCapabilities();
-	const int maxUniformBlockSize = gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_UNIFORM_BLOCK_SIZE);
+	// Clamped between 16 KB and 64 KB
+	const int uboMaxSize = gfxCaps.value(IGfxCapabilities::GLIntValues::MAX_UNIFORM_BLOCK_SIZE);
 	const int offsetAlignment = gfxCaps.value(IGfxCapabilities::GLIntValues::UNIFORM_BUFFER_OFFSET_ALIGNMENT);
-
-	// Clamping the value as some drivers report a maximum size similar to SSBO one
-	const int uboMaxSize = maxUniformBlockSize <= 64 * 1024 ? maxUniformBlockSize : 64 * 1024;
 
 	BufferSpecifications &uboSpecs = specs_[BufferTypes::UNIFORM];
 	uboSpecs.type = BufferTypes::UNIFORM;
