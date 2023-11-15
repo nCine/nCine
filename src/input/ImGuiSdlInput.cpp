@@ -149,6 +149,20 @@ namespace {
 			case SDLK_F10: return ImGuiKey_F10;
 			case SDLK_F11: return ImGuiKey_F11;
 			case SDLK_F12: return ImGuiKey_F12;
+			case SDLK_F13: return ImGuiKey_F13;
+			case SDLK_F14: return ImGuiKey_F14;
+			case SDLK_F15: return ImGuiKey_F15;
+			case SDLK_F16: return ImGuiKey_F16;
+			case SDLK_F17: return ImGuiKey_F17;
+			case SDLK_F18: return ImGuiKey_F18;
+			case SDLK_F19: return ImGuiKey_F19;
+			case SDLK_F20: return ImGuiKey_F20;
+			case SDLK_F21: return ImGuiKey_F21;
+			case SDLK_F22: return ImGuiKey_F22;
+			case SDLK_F23: return ImGuiKey_F23;
+			case SDLK_F24: return ImGuiKey_F24;
+			case SDLK_AC_BACK: return ImGuiKey_AppBack;
+			case SDLK_AC_FORWARD: return ImGuiKey_AppForward;
 		}
 		return ImGuiKey_None;
 	}

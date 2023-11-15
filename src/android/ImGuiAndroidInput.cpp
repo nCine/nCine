@@ -145,6 +145,7 @@ namespace {
 			case AKEYCODE_F10:                  return ImGuiKey_F10;
 			case AKEYCODE_F11:                  return ImGuiKey_F11;
 			case AKEYCODE_F12:                  return ImGuiKey_F12;
+			case AKEYCODE_BACK:                 return ImGuiKey_AppBack;
 			default:                            return ImGuiKey_None;
 		}
 		// clang-format on

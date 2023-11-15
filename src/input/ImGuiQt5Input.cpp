@@ -158,6 +158,20 @@ namespace {
 			case Qt::Key_F10: return ImGuiKey_F10;
 			case Qt::Key_F11: return ImGuiKey_F11;
 			case Qt::Key_F12: return ImGuiKey_F12;
+			case Qt::Key_F13: return ImGuiKey_F13;
+			case Qt::Key_F14: return ImGuiKey_F14;
+			case Qt::Key_F15: return ImGuiKey_F15;
+			case Qt::Key_F16: return ImGuiKey_F16;
+			case Qt::Key_F17: return ImGuiKey_F17;
+			case Qt::Key_F18: return ImGuiKey_F18;
+			case Qt::Key_F19: return ImGuiKey_F19;
+			case Qt::Key_F20: return ImGuiKey_F20;
+			case Qt::Key_F21: return ImGuiKey_F21;
+			case Qt::Key_F22: return ImGuiKey_F22;
+			case Qt::Key_F23: return ImGuiKey_F23;
+			case Qt::Key_F24: return ImGuiKey_F24;
+			case Qt::Key_Back: return ImGuiKey_AppBack;
+			case Qt::Key_Forward: return ImGuiKey_AppForward;
 			default: return ImGuiKey_None;
 		}
 	}

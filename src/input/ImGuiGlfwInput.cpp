@@ -168,6 +168,18 @@ namespace {
 			case GLFW_KEY_F10: return ImGuiKey_F10;
 			case GLFW_KEY_F11: return ImGuiKey_F11;
 			case GLFW_KEY_F12: return ImGuiKey_F12;
+			case GLFW_KEY_F13: return ImGuiKey_F13;
+			case GLFW_KEY_F14: return ImGuiKey_F14;
+			case GLFW_KEY_F15: return ImGuiKey_F15;
+			case GLFW_KEY_F16: return ImGuiKey_F16;
+			case GLFW_KEY_F17: return ImGuiKey_F17;
+			case GLFW_KEY_F18: return ImGuiKey_F18;
+			case GLFW_KEY_F19: return ImGuiKey_F19;
+			case GLFW_KEY_F20: return ImGuiKey_F20;
+			case GLFW_KEY_F21: return ImGuiKey_F21;
+			case GLFW_KEY_F22: return ImGuiKey_F22;
+			case GLFW_KEY_F23: return ImGuiKey_F23;
+			case GLFW_KEY_F24: return ImGuiKey_F24;
 			default: return ImGuiKey_None;
 		}
 	}
@@ -371,6 +383,10 @@ void ImGuiGlfwInput::shutdown()
 
 	if (installedCallbacks_)
 		restoreCallbacks(window_);
+
+#ifdef __EMSCRIPTEN__
+	emscripten_set_wheel_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT, nullptr, false, nullptr);
+#endif
 
 	for (ImGuiMouseCursor i = 0; i < ImGuiMouseCursor_COUNT; i++)
 		glfwDestroyCursor(mouseCursors_[i]);
