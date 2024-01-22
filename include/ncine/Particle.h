@@ -8,7 +8,11 @@ namespace ncine {
 
 class Texture;
 
-/// The class for a single particle data
+/// The class holding all the relevant data for a single particle
+/*!
+ * \warning Particle objects should only be constructed and manipulated by a `ParticleSystem` and particle affectors, never by the user.
+ * \note The header is public only because the particle array inside the `ParticleSystem` cannot properly work with forward declaration.
+ */
 class Particle : public Sprite
 {
   public:

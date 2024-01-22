@@ -6,12 +6,12 @@
 #include "Rect.h"
 #include "SceneNode.h"
 #include "ParticleAffectors.h"
+#include "Particle.h"
 #include "DrawableNode.h"
 
 namespace ncine {
 
 class Texture;
-class Particle;
 struct ParticleInitializer;
 
 /// The class representing a particle system

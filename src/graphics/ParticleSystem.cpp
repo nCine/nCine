@@ -1,7 +1,6 @@
 #include "ParticleSystem.h"
 #include "Random.h"
 #include "Vector2.h"
-#include "Particle.h"
 #include "ParticleInitializer.h"
 #include "Texture.h"
 #include "Application.h"

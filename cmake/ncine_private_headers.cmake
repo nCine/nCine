@@ -17,7 +17,6 @@ set(PRIVATE_HEADERS
 	${NCINE_ROOT}/src/include/RenderQueue.h
 	${NCINE_ROOT}/src/include/Material.h
 	${NCINE_ROOT}/src/include/Geometry.h
-	${NCINE_ROOT}/src/include/Particle.h
 	${NCINE_ROOT}/src/include/TextureFormat.h
 	${NCINE_ROOT}/src/include/ITextureLoader.h
 	${NCINE_ROOT}/src/include/TextureLoaderRaw.h

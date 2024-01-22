@@ -236,7 +236,7 @@ bool ImGuiAndroidInput::processEvent(const AInputEvent *event)
 				case AKEY_EVENT_ACTION_UP:
 				{
 					const ImGuiKey key = keyCodeToImGuiKey(eventKeyCode);
-					if (key != ImGuiKey_None && (eventAction == AKEY_EVENT_ACTION_DOWN || eventAction == AKEY_EVENT_ACTION_UP))
+					if (key != ImGuiKey_None)
 					{
 						io.AddKeyEvent(key, eventAction == AKEY_EVENT_ACTION_DOWN);
 						io.SetKeyEventNativeData(key, eventKeyCode, eventScanCode);
@@ -300,16 +300,18 @@ bool ImGuiAndroidInput::processEvent(const AInputEvent *event)
 			{
 				case AMOTION_EVENT_ACTION_DOWN:
 				case AMOTION_EVENT_ACTION_UP:
+				{
 					// Physical mouse buttons (and probably other physical devices) also invoke the actions AMOTION_EVENT_ACTION_DOWN/_UP,
 					// but we have to process them separately to identify the actual button pressed. This is done below via
 					// AMOTION_EVENT_ACTION_BUTTON_PRESS/_RELEASE. Here, we only process "FINGER" input (and "UNKNOWN", as a fallback).
-					if ((AMotionEvent_getToolType(event, eventPointerIndex) == AMOTION_EVENT_TOOL_TYPE_FINGER) ||
-					    (AMotionEvent_getToolType(event, eventPointerIndex) == AMOTION_EVENT_TOOL_TYPE_UNKNOWN))
+					const int toolType = AMotionEvent_getToolType(event, eventPointerIndex);
+					if (toolType == AMOTION_EVENT_TOOL_TYPE_FINGER || toolType == AMOTION_EVENT_TOOL_TYPE_UNKNOWN)
 					{
 						io.AddMousePosEvent(AMotionEvent_getX(event, eventPointerIndex), AMotionEvent_getY(event, eventPointerIndex));
 						io.AddMouseButtonEvent(0, eventAction == AMOTION_EVENT_ACTION_DOWN);
 					}
 					break;
+				}
 				case AMOTION_EVENT_ACTION_BUTTON_PRESS:
 				case AMOTION_EVENT_ACTION_BUTTON_RELEASE:
 				{
@@ -317,8 +319,8 @@ bool ImGuiAndroidInput::processEvent(const AInputEvent *event)
 					io.AddMouseButtonEvent(0, (buttonState & AMOTION_EVENT_BUTTON_PRIMARY) != 0);
 					io.AddMouseButtonEvent(1, (buttonState & AMOTION_EVENT_BUTTON_SECONDARY) != 0);
 					io.AddMouseButtonEvent(2, (buttonState & AMOTION_EVENT_BUTTON_TERTIARY) != 0);
+					break;
 				}
-				break;
 				case AMOTION_EVENT_ACTION_HOVER_MOVE: // Hovering: Tool moves while NOT pressed (such as a physical mouse)
 				case AMOTION_EVENT_ACTION_MOVE: // Touch pointer moves while DOWN
 					io.AddMousePosEvent(AMotionEvent_getX(event, eventPointerIndex), AMotionEvent_getY(event, eventPointerIndex));
