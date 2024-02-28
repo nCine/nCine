@@ -7,6 +7,8 @@
 	#include <emscripten/html5.h>
 #endif
 
+#define GLFW_VERSION_COMBINED (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 + GLFW_VERSION_REVISION)
+
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
@@ -175,7 +177,7 @@ void GlfwGfxDevice::setWindowIcon(const char *windowIconFilename)
 
 void GlfwGfxDevice::flashWindow() const
 {
-#if (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3300)
+#if GLFW_VERSION_COMBINED >= 3300
 	glfwRequestWindowAttention(windowHandle_);
 #endif
 }
@@ -263,7 +265,7 @@ bool GlfwGfxDevice::setVideoMode(unsigned int modeIndex)
 
 void GlfwGfxDevice::initGraphics()
 {
-#if (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3300) && !defined(__EMSCRIPTEN__)
+#if GLFW_VERSION_COMBINED >= 3300 && !defined(__EMSCRIPTEN__)
 	glfwInitHint(GLFW_JOYSTICK_HAT_BUTTONS, GLFW_FALSE);
 #endif
 	glfwSetErrorCallback(errorCallback);
@@ -318,9 +320,19 @@ void GlfwGfxDevice::initDevice(const WindowMode &windowMode)
 	glfwWindowHint(GLFW_OPENGL_PROFILE, glContextInfo_.coreProfile ? GLFW_OPENGL_CORE_PROFILE : GLFW_OPENGL_COMPAT_PROFILE);
 #endif
 
+#if GLFW_VERSION_COMBINED >= 3400
+	const int windowPosX = (windowMode.windowPositionX != AppConfiguration::WindowPositionIgnore && windowPositionIsValid)
+	                           ? windowMode.windowPositionX : GLFW_ANY_POSITION;
+	const int windowPosY = (windowMode.windowPositionY != AppConfiguration::WindowPositionIgnore && windowPositionIsValid)
+	                           ? windowMode.windowPositionY : GLFW_ANY_POSITION;
+	glfwWindowHint(GLFW_POSITION_X, windowPosX);
+	glfwWindowHint(GLFW_POSITION_Y, windowPosY);
+#endif
+
 	windowHandle_ = glfwCreateWindow(width_, height_, "", monitor, nullptr);
 	FATAL_ASSERT_MSG(windowHandle_, "glfwCreateWindow() failed");
 
+#if GLFW_VERSION_COMBINED < 3400
 	const bool ignoreBothWindowPosition = (windowMode.windowPositionX == AppConfiguration::WindowPositionIgnore &&
 	                                       windowMode.windowPositionY == AppConfiguration::WindowPositionIgnore);
 	if (isFullScreen_ == false && windowPositionIsValid && ignoreBothWindowPosition == false)
@@ -333,6 +345,7 @@ void GlfwGfxDevice::initDevice(const WindowMode &windowMode)
 			windowPos.y = windowMode.windowPositionY;
 		glfwSetWindowPos(windowHandle_, windowPos.x, windowPos.y);
 	}
+#endif
 
 	glfwGetFramebufferSize(windowHandle_, &drawableWidth_, &drawableHeight_);
 	initGLViewport();
@@ -366,7 +379,7 @@ void GlfwGfxDevice::updateMonitors()
 		monitors_[i].name = glfwGetMonitorName(monitor);
 		ASSERT(monitors_[i].name != nullptr);
 		glfwGetMonitorPos(monitor, &monitors_[i].position.x, &monitors_[i].position.y);
-#if (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3300)
+#if GLFW_VERSION_COMBINED >= 3300
 		glfwGetMonitorContentScale(monitor, &monitors_[i].scale.x, &monitors_[i].scale.y);
 #elif defined(__EMSCRIPTEN__)
 		monitors_[i].scale.x = emscripten_get_device_pixel_ratio();
@@ -408,7 +421,7 @@ void GlfwGfxDevice::updateMonitorScaling(unsigned int monitorIndex)
 	{
 		IGfxDevice::Monitor &monitor = monitors_[monitorIndex];
 
-#if (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3300)
+#if GLFW_VERSION_COMBINED >= 3300
 		glfwGetMonitorContentScale(monitors[monitorIndex], &monitor.scale.x, &monitor.scale.y);
 #elif defined(__EMSCRIPTEN__)
 		monitor.scale.x = emscripten_get_device_pixel_ratio();

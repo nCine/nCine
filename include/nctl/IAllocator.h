@@ -38,11 +38,13 @@ class DLL_PUBLIC IAllocator
 	inline bool recordAllocations() const { return recordAllocations_; }
 	inline void setRecordAllocations(bool recordAllocations) { recordAllocations_ = recordAllocations; }
 
-	inline const Entry &entry(unsigned int index) const { return entries_[index]; }
-	inline const size_t numEntries() const { return numEntries_; }
+	inline const Entry &entry(size_t index) const { return entries_[index]; }
+	inline size_t numEntries() const { return numEntries_; }
 
-	int findAllocation(void *ptr);
-	unsigned int findDeallocation(unsigned int index);
+	static const size_t InvalidEntryIndex = static_cast<size_t>(~0);
+	size_t findAllocation(void *ptr);
+	size_t findAllocationBeforeIndex(void *ptr, size_t index);
+	size_t findDeallocation(size_t index);
 	void printEntriesCSV();
 	void countNotFreed();
 	void printPointerCounters();
@@ -103,7 +105,7 @@ class DLL_PUBLIC IAllocator
 	size_t numAllocations_;
 	bool copyOnReallocation_;
 
-#if defined(RECORD_ALLOCATIONS) || defined(WITH_TRACY) || 1
+#if defined(RECORD_ALLOCATIONS) || defined(WITH_TRACY)
 	AllocateFunction realAllocateFunc_;
 	ReallocateFunction realReallocateFunc_;
 	DeallocateFunction realDeallocateFunc_;
@@ -115,7 +117,7 @@ class DLL_PUBLIC IAllocator
 
 #ifdef RECORD_ALLOCATIONS
 	bool recordAllocations_;
-	static const unsigned int MaxEntries = 100 * 1000;
+	static const size_t MaxEntries = 128 * 1024;
 	Entry entries_[MaxEntries];
 	size_t numEntries_;
 #endif

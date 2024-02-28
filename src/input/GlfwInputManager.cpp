@@ -15,6 +15,8 @@
 	#include "NuklearGlfwInput.h"
 #endif
 
+#define GLFW_VERSION_COMBINED (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 + GLFW_VERSION_REVISION)
+
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
@@ -56,7 +58,7 @@ GlfwInputManager::GlfwInputManager()
 
 	glfwSetMonitorCallback(monitorCallback);
 	glfwSetWindowCloseCallback(GlfwGfxDevice::windowHandle(), windowCloseCallback);
-#if (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3300)
+#if GLFW_VERSION_COMBINED >= 3300
 	glfwSetWindowContentScaleCallback(GlfwGfxDevice::windowHandle(), windowContentScaleCallback);
 #endif
 	glfwSetWindowSizeCallback(GlfwGfxDevice::windowHandle(), windowSizeCallback);
@@ -145,7 +147,7 @@ void GlfwInputManager::updateJoystickStates()
 		if (glfwJoystickPresent(GLFW_JOYSTICK_1 + joyId))
 		{
 			joystickStates_[joyId].buttons_ = glfwGetJoystickButtons(joyId, &joystickStates_[joyId].numButtons_);
-#if GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 3
+#if GLFW_VERSION_COKMBINED >= 3300
 			joystickStates_[joyId].hats_ = glfwGetJoystickHats(joyId, &joystickStates_[joyId].numHats_);
 #else
 			joystickStates_[joyId].hats_ = 0;
@@ -179,7 +181,7 @@ const char *GlfwInputManager::joyGuid(int joyId) const
 {
 #ifdef __EMSCRIPTEN__
 	return "default";
-#elif GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 3
+#elif GLFW_VERSION_COMBINED >= 3300
 	if (isJoyPresent(joyId))
 		return glfwGetJoystickGUID(joyId);
 	else
@@ -204,7 +206,7 @@ int GlfwInputManager::joyNumHats(int joyId) const
 	int numHats = -1;
 
 	if (isJoyPresent(joyId))
-#if GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 3
+#if GLFW_VERSION_COMBINED >= 3300
 		glfwGetJoystickHats(GLFW_JOYSTICK_1 + joyId, &numHats);
 #else
 		numHats = 0;
@@ -242,7 +244,7 @@ void GlfwInputManager::setMouseCursorMode(MouseCursorMode mode)
 			case MouseCursorMode::DISABLED: glfwSetInputMode(GlfwGfxDevice::windowHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED); break;
 		}
 
-#if GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 3
+#if GLFW_VERSION_COMBINED >= 3300
 		// Enable raw mouse motion (if supported) when disabling the cursor
 		const bool enableRawMouseMotion = (mode == MouseCursorMode::DISABLED && glfwRawMouseMotionSupported() == GLFW_TRUE);
 		glfwSetInputMode(GlfwGfxDevice::windowHandle(), GLFW_RAW_MOUSE_MOTION, enableRawMouseMotion ? GLFW_TRUE : GLFW_FALSE);
@@ -392,7 +394,7 @@ void GlfwInputManager::joystickCallback(int joy, int event)
 #ifdef __EMSCRIPTEN__
 		numHats = 0;
 		const char *guid = "default";
-#elif GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 3
+#elif GLFW_VERSION_COMBINED >= 3300
 		glfwGetJoystickHats(joy, &numHats);
 		const char *guid = glfwGetJoystickGUID(joy);
 #else

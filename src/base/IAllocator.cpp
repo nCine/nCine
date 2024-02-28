@@ -38,29 +38,46 @@ IAllocator::IAllocator(const char *name, AllocateFunction allocFunc, ReallocateF
 
 #ifdef RECORD_ALLOCATIONS
 
-int IAllocator::findAllocation(void *ptr)
+size_t IAllocator::findAllocation(void *ptr)
 {
-	int index = -1;
+	size_t allocationIndex = InvalidEntryIndex;
 	for (size_t i = 0; i < numEntries_; i++)
 	{
 		const IAllocator::Entry &e = entries_[i];
 		if (e.alignment > 0 && e.ptr == ptr)
 		{
-			index = static_cast<int>(i);
+			allocationIndex = i;
 			break;
 		}
 	}
 
-	return index;
+	return allocationIndex;
 }
 
-unsigned int IAllocator::findDeallocation(unsigned int index)
+/** \note Might be faster than `findAllocation()` if the allocation entry is close to the provided deallocation index. */
+size_t IAllocator::findAllocationBeforeIndex(void *ptr, size_t index)
 {
-	if (entries_[index].alignment == 0)
-		return 0;
+	size_t allocationIndex = InvalidEntryIndex;
+	// Iterating in reverse order up to -1 (~0UL)
+	// The initial value of `i` and the loop end condition work also when `index` is zero
+	for (size_t i = index - 1; i < ~0UL; i--)
+	{
+		const IAllocator::Entry &e = entries_[i];
+		if (e.alignment > 0 && e.ptr == ptr)
+		{
+			allocationIndex = i;
+			break;
+		}
+	}
 
-	// Entry zero cannot be a deallocation
-	unsigned int deallocationIndex = 0;
+	return allocationIndex;
+}
+
+size_t IAllocator::findDeallocation(size_t index)
+{
+	size_t deallocationIndex = InvalidEntryIndex;
+	if (entries_[index].alignment == 0)
+		return deallocationIndex;
 
 	const void *ptr = entries_[index].ptr;
 	for (size_t i = index + 1; i < numEntries_; i++)
@@ -87,7 +104,7 @@ void IAllocator::printEntriesCSV()
 
 void IAllocator::countNotFreed()
 {
-	unsigned int notFreed = 0;
+	size_t notFreed = 0;
 	for (size_t i = 0; i < numEntries_; i++)
 	{
 		const IAllocator::Entry &e = entries_[i];
@@ -95,9 +112,9 @@ void IAllocator::countNotFreed()
 		{
 			printf("- #%lu 0x%lx, %lu bytes, %u align", i, uintptr_t(e.ptr), e.bytes, e.alignment);
 
-			const unsigned int deallocateEntry = findDeallocation(i);
-			if (deallocateEntry > 0)
-				printf(" - freed #%u\n", deallocateEntry);
+			const size_t deallocationIndex = findDeallocation(i);
+			if (deallocationIndex != InvalidEntryIndex)
+				printf(" - freed #%lu\n", deallocationIndex);
 			else
 			{
 				printf(" - NOT FREED\n");

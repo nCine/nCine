@@ -34,10 +34,10 @@ bool imGuiJoyMappedInput()
 		MAP_ANALOG(ImGuiKey_GamepadR2,              AxisName::RTRIGGER, 0.0f, 32767);
 		MAP_BUTTON(ImGuiKey_GamepadL3,              ButtonName::LSTICK);
 		MAP_BUTTON(ImGuiKey_GamepadR3,              ButtonName::RSTICK);
-		MAP_ANALOG(ImGuiKey_GamepadLStickLeft,      AxisName::LX,  -thumbDeadZone, -32768);
-		MAP_ANALOG(ImGuiKey_GamepadLStickRight,     AxisName::LX,  +thumbDeadZone, +32767);
-		MAP_ANALOG(ImGuiKey_GamepadLStickUp,        AxisName::LY,  -thumbDeadZone, -32768);
-		MAP_ANALOG(ImGuiKey_GamepadLStickDown,      AxisName::LY,  +thumbDeadZone, +32767);
+		MAP_ANALOG(ImGuiKey_GamepadLStickLeft,      AxisName::LX, -thumbDeadZone, -32768);
+		MAP_ANALOG(ImGuiKey_GamepadLStickRight,     AxisName::LX, +thumbDeadZone, +32767);
+		MAP_ANALOG(ImGuiKey_GamepadLStickUp,        AxisName::LY, -thumbDeadZone, -32768);
+		MAP_ANALOG(ImGuiKey_GamepadLStickDown,      AxisName::LY, +thumbDeadZone, +32767);
 		MAP_ANALOG(ImGuiKey_GamepadRStickLeft,      AxisName::RX, -thumbDeadZone, -32768);
 		MAP_ANALOG(ImGuiKey_GamepadRStickRight,     AxisName::RX, +thumbDeadZone, +32767);
 		MAP_ANALOG(ImGuiKey_GamepadRStickUp,        AxisName::RY, -thumbDeadZone, -32768);

@@ -43,6 +43,7 @@ extern DLL_PUBLIC IAllocator &theStringAllocator();
 extern DLL_PUBLIC IAllocator &theImGuiAllocator();
 extern DLL_PUBLIC IAllocator &theNuklearAllocator();
 extern DLL_PUBLIC IAllocator &theLuaAllocator();
+extern DLL_PUBLIC IAllocator &theGlfwAllocator();
 
 }
 

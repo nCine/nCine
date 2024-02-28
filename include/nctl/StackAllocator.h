@@ -1,7 +1,7 @@
 #ifndef CLASS_NCTL_STACKALLOCATOR
 #define CLASS_NCTL_STACKALLOCATOR
 
-#define STACK_DEBUG (1)
+#define STACK_DEBUG (0)
 #include <nctl/IAllocator.h>
 
 namespace nctl {

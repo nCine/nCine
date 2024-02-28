@@ -9,8 +9,13 @@
 	#include "imgui.h"
 #endif
 
+#ifdef WITH_GLFW
+	#include <GLFW/glfw3.h>
+	#define GLFW_VERSION_COMBINED (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 + GLFW_VERSION_REVISION)
+#endif
+
 #ifdef _MSC_VER
-	#pragma warning(disable : 4075)
+	#pragma warning(disable: 4075)
 	#pragma init_seg(".CRT$XCT")
 #endif
 
@@ -49,6 +54,11 @@ static ProxyAllocator &nuklearAllocator = reinterpret_cast<ProxyAllocator &>(nuk
 #ifdef WITH_LUA
 alignas(IAllocator::DefaultAlignment) static uint8_t luaAllocatorBuffer[sizeof(ProxyAllocator)];
 static ProxyAllocator &luaAllocator = reinterpret_cast<ProxyAllocator &>(luaAllocatorBuffer);
+#endif
+
+#if defined(WITH_GLFW) && GLFW_VERSION_COMBINED >= 3400
+alignas(IAllocator::DefaultAlignment) static uint8_t glfwAllocatorBuffer[sizeof(ProxyAllocator)];
+static ProxyAllocator &glfwAllocator = reinterpret_cast<ProxyAllocator &>(glfwAllocatorBuffer);
 #endif
 
 AllocManager &theAllocManager()
@@ -93,6 +103,15 @@ IAllocator &theLuaAllocator()
 #endif
 }
 
+IAllocator &theGlfwAllocator()
+{
+#if defined(WITH_GLFW) && GLFW_VERSION_COMBINED >= 3400
+	return glfwAllocator;
+#else
+	return *mainAllocator;
+#endif
+}
+
 namespace {
 
 #ifdef WITH_IMGUI
@@ -107,6 +126,22 @@ namespace {
 	}
 #endif
 
+#if defined(WITH_GLFW) && GLFW_VERSION_COMBINED >= 3400
+	void *glfwAllocate(size_t size, void *user)
+	{
+		return nctl::theGlfwAllocator().allocate(size);
+	}
+
+	void *glfwReallocate(void *block, size_t size, void *user)
+	{
+		return nctl::theGlfwAllocator().reallocate(block, size);
+	}
+
+	void glfwDeallocate(void *block, void *user)
+	{
+		return nctl::theGlfwAllocator().deallocate(block);
+	}
+#endif
 }
 
 ///////////////////////////////////////////////////////////
@@ -137,10 +172,23 @@ AllocManager::AllocManager()
 #ifdef WITH_LUA
 	new (&luaAllocator) ProxyAllocator("Lua", *mainAllocator);
 #endif
+#if defined(WITH_GLFW) && GLFW_VERSION_COMBINED >= 3400
+	new (&glfwAllocator) ProxyAllocator("GLFW", *mainAllocator);
+	GLFWallocator allocator;
+	allocator.allocate = glfwAllocate;
+	allocator.reallocate = glfwReallocate;
+	allocator.deallocate = glfwDeallocate;
+	allocator.user = nullptr;
+
+	glfwInitAllocator(&allocator);
+#endif
 }
 
 AllocManager::~AllocManager()
 {
+#if defined(WITH_GLFW) && GLFW_VERSION_COMBINED >= 3400
+	(&glfwAllocator)->~ProxyAllocator();
+#endif
 #ifdef WITH_LUA
 	(&luaAllocator)->~ProxyAllocator();
 #endif

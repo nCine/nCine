@@ -1280,7 +1280,10 @@ void guiAllocator(nctl::IAllocator &alloc)
 {
 	ImGui::Text("Allocations - Recorded: %lu, Active: %lu, Used Memory: %lu",
 	            alloc.numEntries(), alloc.numAllocations(), alloc.usedMemory());
-	ImGui::NewLine();
+
+	enum FilterState { ALL, ACTIVE, NOT_ACTIVE, FREE };
+	static int selectedFilter = 0;
+	ImGui::Combo("Filter", &selectedFilter, "All\0Active\0Not Active\0Free\0");
 
 	const int tableNumRows = alloc.numEntries() > 32 ? 32 : alloc.numEntries();
 	if (ImGui::BeginTable("allocatorEntries", 6, ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders |
@@ -1295,10 +1298,24 @@ void guiAllocator(nctl::IAllocator &alloc)
 		ImGui::TableSetupColumn("State");
 		ImGui::TableHeadersRow();
 
-		for (unsigned int i = 0; i < alloc.numEntries(); i++)
+		for (size_t i = 0; i < alloc.numEntries(); i++)
 		{
 			const nctl::IAllocator::Entry &e = alloc.entry(i);
-			const unsigned int deallocationIndex = alloc.findDeallocation(i);
+			const size_t deallocationIndex = alloc.findDeallocation(i);
+
+			if (selectedFilter != FilterState::ALL)
+			{
+				const bool entryIsActive = (e.alignment > 0 && deallocationIndex == nctl::IAllocator::InvalidEntryIndex);
+				const bool entryIsNotActive = (e.alignment > 0 && deallocationIndex != nctl::IAllocator::InvalidEntryIndex);
+				const bool entryIsFree = (e.alignment == 0);
+
+				if ((entryIsActive && selectedFilter != FilterState::ACTIVE) ||
+				    (entryIsNotActive && selectedFilter != FilterState::NOT_ACTIVE) ||
+				    (entryIsFree && selectedFilter != FilterState::FREE))
+				{
+					continue;
+				}
+			}
 
 			ImGui::TableNextRow();
 			ImGui::TableNextColumn();
@@ -1312,13 +1329,27 @@ void guiAllocator(nctl::IAllocator &alloc)
 			ImGui::TableNextColumn();
 			ImGui::Text("%u", e.alignment);
 			ImGui::TableNextColumn();
-			if (deallocationIndex > 0)
+			if (deallocationIndex != nctl::IAllocator::InvalidEntryIndex)
 			{
 				const TimeStamp diffStamp = alloc.entry(deallocationIndex).timestamp - e.timestamp;
-				ImGui::Text("Freed by #%u after %f s", deallocationIndex, diffStamp.seconds());
+				ImGui::Text("Freed by #%lu after %f s", deallocationIndex, diffStamp.seconds());
 			}
 			else
-				ImGui::TextUnformatted("Active");
+			{
+				if (e.alignment > 0)
+					ImGui::TextUnformatted("Active");
+				else
+				{
+					const size_t allocationIndex = alloc.findAllocationBeforeIndex(e.ptr, i);
+					if (allocationIndex != nctl::IAllocator::InvalidEntryIndex)
+					{
+						const TimeStamp diffStamp = e.timestamp - alloc.entry(allocationIndex).timestamp;
+						ImGui::Text("Free for #%lu after %f s", allocationIndex, diffStamp.seconds());
+					}
+					else
+						ImGui::TextUnformatted("Free");
+				}
+			}
 		}
 
 		ImGui::EndTable();
@@ -1329,98 +1360,54 @@ void guiAllocator(nctl::IAllocator &alloc)
 void ImGuiDebugOverlay::guiAllocators()
 {
 #ifdef WITH_ALLOCATORS
+	const unsigned int NumAllocators = 6;
+	const char *allocatorNames[NumAllocators] = { "Default", "String", "ImGui", "Nuklear", "Lua", "GLFW" };
+	nctl::IAllocator *allocators[NumAllocators] = { &nctl::theDefaultAllocator(), &nctl::theStringAllocator(),
+	                                                nullptr, nullptr, nullptr, nullptr };
+
+	#ifdef WITH_IMGUI
+	allocators[2] = &nctl::theImGuiAllocator();
+	#endif
+	#ifdef WITH_NUKLEAR
+	allocators[3] = &nctl::theNuklearAllocator();
+	#endif
+	#ifdef WITH_LUA
+	allocators[4] = &nctl::theLuaAllocator();
+	#endif
+	#ifdef WITH_GLFW
+	allocators[5] = &nctl::theGlfwAllocator();
+	#endif
+
 	if (ImGui::CollapsingHeader("Memory Allocators"))
 	{
-		widgetName_.format("Default Allocator \"%s\" (%d allocations, %lu bytes)",
-		                   nctl::theDefaultAllocator().name(), nctl::theDefaultAllocator().numAllocations(), nctl::theDefaultAllocator().usedMemory());
-	#ifndef RECORD_ALLOCATIONS
-		ImGui::BulletText("%s", widgetName_.data());
-	#else
-		widgetName_.append("###DefaultAllocator");
-		if (ImGui::TreeNode(widgetName_.data()))
+		for (unsigned int i = 0; i < NumAllocators; i++)
 		{
-			guiAllocator(nctl::theDefaultAllocator());
-			ImGui::TreePop();
-		}
-	#endif
+			if (allocators[i] == nullptr)
+				continue;
 
-		if (&nctl::theStringAllocator() != &nctl::theDefaultAllocator())
-		{
-			widgetName_.format("String Allocator \"%s\" (%d allocations, %lu bytes)",
-			                   nctl::theStringAllocator().name(), nctl::theStringAllocator().numAllocations(), nctl::theStringAllocator().usedMemory());
-	#ifndef RECORD_ALLOCATIONS
-			ImGui::BulletText("%s", widgetName_.data());
-	#else
-			widgetName_.append("###StringAllocator");
-			if (ImGui::TreeNode(widgetName_.data()))
+			if (i == 0 || allocators[i] != &nctl::theDefaultAllocator())
 			{
-				guiAllocator(nctl::theStringAllocator());
-				ImGui::TreePop();
-			}
-	#endif
-		}
-		else
-			ImGui::TextUnformatted("The string allocator is the default one");
+				widgetName_.format("%s Allocator \"%s\" (%d allocations, %lu bytes)",
+				                   allocatorNames[i], allocators[i]->name(), allocators[i]->numAllocations(), allocators[i]->usedMemory());
 
-		if (&nctl::theImGuiAllocator() != &nctl::theDefaultAllocator())
-		{
-			widgetName_.format("ImGui Allocator \"%s\" (%d allocations, %lu bytes)",
-			                   nctl::theImGuiAllocator().name(), nctl::theImGuiAllocator().numAllocations(), nctl::theImGuiAllocator().usedMemory());
-	#ifndef RECORD_ALLOCATIONS
-			ImGui::BulletText("%s", widgetName_.data());
-	#else
-			widgetName_.append("###ImGuiAllocator");
-			if (ImGui::TreeNode(widgetName_.data()))
-			{
-				guiAllocator(nctl::theImGuiAllocator());
-				ImGui::TreePop();
-			}
+	#ifdef RECORD_ALLOCATIONS
+				if (allocators[i]->numEntries() > 0)
+				{
+					widgetName_.formatAppend("###%sAllocator", allocatorNames[i]);
+					if (ImGui::TreeNode(widgetName_.data()))
+					{
+						guiAllocator(*allocators[i]);
+						ImGui::TreePop();
+					}
+				}
+				else
 	#endif
-		}
-		else
-			ImGui::TextUnformatted("The ImGui allocator is the default one");
-
-	#ifdef WITH_NUKLEAR
-		if (&nctl::theNuklearAllocator() != &nctl::theDefaultAllocator())
-		{
-			widgetName_.format("Nuklear Allocator \"%s\" (%d allocations, %lu bytes)",
-			                   nctl::theNuklearAllocator().name(), nctl::theNuklearAllocator().numAllocations(), nctl::theNuklearAllocator().usedMemory());
-		#ifndef RECORD_ALLOCATIONS
-			ImGui::BulletText("%s", widgetName_.data());
-		#else
-			widgetName_.append("###NuklearAllocator");
-			if (ImGui::TreeNode(widgetName_.data()))
-			{
-				guiAllocator(nctl::theNuklearAllocator());
-				ImGui::TreePop();
+					ImGui::BulletText("%s", widgetName_.data());
 			}
-		#endif
+			else
+				ImGui::Text("The %s allocator is the default one", allocatorNames[i]);
 		}
-		else
-			ImGui::TextUnformatted("The Nuklear allocator is the default one");
-	#endif
-
-	#ifdef WITH_LUA
-		if (&nctl::theLuaAllocator() != &nctl::theDefaultAllocator())
-		{
-			widgetName_.format("Lua Allocator \"%s\" (%d allocations, %lu bytes)",
-			                   nctl::theLuaAllocator().name(), nctl::theLuaAllocator().numAllocations(), nctl::theLuaAllocator().usedMemory());
-		#ifndef RECORD_ALLOCATIONS
-			ImGui::BulletText("%s", widgetName_.data());
-		#else
-			widgetName_.append("###LuaAllocator");
-			if (ImGui::TreeNode(widgetName_.data()))
-			{
-				guiAllocator(nctl::theLuaAllocator());
-				ImGui::TreePop();
-			}
-		#endif
-		}
-		else
-			ImGui::TextUnformatted("The Lua allocator is the default one");
-	#endif
 	}
-
 #endif
 }
 
