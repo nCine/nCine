@@ -53,7 +53,7 @@ jobs:
 
     steps:
     - name: 'Checkout Code'
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: 'Update MSYS2'
       run: |
@@ -66,7 +66,7 @@ jobs:
       run: |
         $env:MSYSTEM = "MINGW64"
 
-        C:\msys64\usr\bin\bash -lc 'pacman --needed --noconfirm -S mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-SDL2 mingw-w64-x86_64-openal mingw-w64-x86_64-libvorbis mingw-w64-x86_64-libwebp mingw-w64-x86_64-lua cmake'
+        C:\msys64\usr\bin\bash -lc 'pacman --needed --noconfirm -S mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-SDL2 mingw-w64-x86_64-openal mingw-w64-x86_64-libvorbis mingw-w64-x86_64-libwebp mingw-w64-x86_64-lua mingw-w64-x86_64-cmake'
 
         if ("${{ matrix.CC }}" -eq "gcc") { C:\msys64\usr\bin\bash -lc 'pacman --needed --noconfirm -S mingw-w64-x86_64-gcc' }
         else { C:\msys64\usr\bin\bash -lc 'pacman --needed --noconfirm -S mingw-w64-x86_64-clang' }
@@ -127,7 +127,7 @@ jobs:
         $env:CXX = "${{ matrix.CXX }}"
         $env:MSYSTEM = "MINGW64"
 
-        C:\msys64\usr\bin\bash.exe -lc 'cmake -G \"MSYS Makefiles\" -B ../nCine-buildtests-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=UnitTests'
+        C:\msys64\usr\bin\bash.exe -lc "cmake -G 'MSYS Makefiles' -B ../nCine-buildtests-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=UnitTests"
         C:\msys64\usr\bin\bash.exe -lc 'make -j $NUM_THREADS -C ../nCine-buildtests-${{ matrix.BuildType }}'
         cd ..\nCine-buildtests-${{ matrix.BuildType }}
         C:\msys64\usr\bin\bash.exe -lc 'ctest -j $NUM_THREADS --build-config ${{ matrix.BuildType }}'
@@ -145,9 +145,9 @@ jobs:
           { $EnableTracy = 'OFF' }
 
         if ("${{ matrix.BuildType }}" -eq "DevDist" -Or "${{ matrix.BuildType }}" -eq "LuaDist")
-          { C:\msys64\usr\bin\bash.exe -lc 'cmake -G \"MSYS Makefiles\" -B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=Release -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }} -D NDK_DIR=$(cygpath -m $ANDROID_NDK_LATEST_HOME)' }
+          { C:\msys64\usr\bin\bash.exe -lc "cmake -G 'MSYS Makefiles' -B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=Release -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }} -D NDK_DIR=$(cygpath -m $ANDROID_NDK_LATEST_HOME)" }
         else
-          { C:\msys64\usr\bin\bash.exe -lc 'cmake -G \"MSYS Makefiles\" -B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_BENCHMARKS=ON -D NCINE_WITH_TRACY=$EnableTracy -D NCINE_WITH_RENDERDOC=ON -D RENDERDOC_DIR=$PWD/../RenderDoc' }
+          { C:\msys64\usr\bin\bash.exe -lc "cmake -G 'MSYS Makefiles' -B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_BENCHMARKS=ON -D NCINE_WITH_TRACY=$EnableTracy -D NCINE_WITH_RENDERDOC=ON -D RENDERDOC_DIR=$(cygpath -m $PWD/../RenderDoc)" }
 
     - name: 'Make'
       env:

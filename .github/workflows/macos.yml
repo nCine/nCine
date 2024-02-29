@@ -18,11 +18,11 @@ jobs:
       matrix:
         BuildType: [Debug, Release, DevDist, LuaDist]
 
-    runs-on: 'macOS-11'
+    runs-on: 'macOS-12'
 
     steps:
     - name: 'Checkout Code'
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: 'Unshallow Git Repository for Versioning'
       if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'

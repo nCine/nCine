@@ -103,8 +103,13 @@ else() # GCC and LLVM
 			target_compile_options(ncine PUBLIC $<$<CONFIG:Debug>:-O1 -g -fsanitize=address>) # Needs "ALLOW_MEMORY_GROWTH" which is already passed to the linker
 			target_link_options(ncine PUBLIC $<$<CONFIG:Debug>:-fsanitize=address>)
 		elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
-			target_compile_options(ncine PUBLIC $<$<CONFIG:Debug>:-O1 -g -fsanitize=address -fsanitize-address-use-after-scope -fno-optimize-sibling-calls -fno-common -fno-omit-frame-pointer -rdynamic>)
+			target_compile_options(ncine PUBLIC $<$<CONFIG:Debug>:-O1 -g -fsanitize=address -fsanitize-address-use-after-scope -fno-optimize-sibling-calls -fno-common -fno-omit-frame-pointer>)
 			target_link_options(ncine PUBLIC $<$<CONFIG:Debug>:-fsanitize=address>)
+
+			# Don't add `-rdynamic` on GCC/MinGW
+			if(NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND (MINGW OR MSYS)))
+				target_compile_options(ncine PUBLIC $<$<CONFIG:Debug>:-rdynamic>)
+			endif()
 		endif()
 	endif()
 
@@ -128,7 +133,12 @@ else() # GCC and LLVM
 	endif()
 
 	if(NCINE_WITH_TRACY)
-		target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-g -fno-omit-frame-pointer -rdynamic>)
+		target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-g -fno-omit-frame-pointer>)
+		# Don't add `-rdynamic` on GCC/MinGW
+		if(NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND (MINGW OR MSYS)))
+			target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-rdynamic>)
+		endif()
+
 		if(MINGW OR MSYS)
 			target_link_libraries(ncine PRIVATE ws2_32 dbghelp)
 		elseif(NOT ANDROID AND NOT APPLE)

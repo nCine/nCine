@@ -18,11 +18,11 @@ jobs:
       matrix:
         BuildType: [Debug, Release, DevDist, LuaDist]
 
-    runs-on: 'ubuntu-20.04'
+    runs-on: 'ubuntu-22.04'
 
     steps:
     - name: 'Checkout Code'
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: 'Install Emscripten SDK'
       run: |
