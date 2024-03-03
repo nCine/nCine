@@ -17,8 +17,9 @@ jobs:
       fail-fast: false
       matrix:
         BuildType: [Debug, Release, DevDist, LuaDist]
+        os: [macOS-12, macOS-14]
 
-    runs-on: 'macOS-12'
+    runs-on: ${{ matrix.os }}
 
     steps:
     - name: 'Checkout Code'
@@ -31,7 +32,11 @@ jobs:
 
     - name: 'Download nCine-libraries Artifacts and nCine-data'
       run: |
-        export OS=darwin
+        if [[ "${{ matrix.os }}" == "macOS-14" ]]; then
+          export OS=macos14
+        else
+          export OS=macos12
+        fi
         export CC=appleclang
 
         export LIBRARIES_BRANCH=`echo $LIBRARIES_BRANCH | sed 's/OS/'"$OS"'/'`
@@ -95,7 +100,11 @@ jobs:
         export BRANCH_NAME=$(git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git rev-parse --short HEAD)
         export DEPLOY_MESSAGE=`sed 's/BRANCH_NAME/'"$BRANCH_NAME"'/' <<< "$DEPLOY_MESSAGE"`
 
-        export OS=darwin
+        if [[ "${{ matrix.os }}" == "macOS-14" ]]; then
+          export OS=macos14
+        else
+          export OS=macos12
+        fi
         export CC=appleclang
         export PACKAGE_EXT=dmg
 

@@ -301,16 +301,16 @@ elseif(MSVC)
 	endif()
 
 	if(NCINE_WITH_WEBP AND
-	    EXISTS ${MSVC_LIBDIR}/libwebp_dll.lib AND EXISTS ${MSVC_BINDIR}/libwebp.dll)
+	    EXISTS ${MSVC_LIBDIR}/libwebp.lib AND EXISTS ${MSVC_BINDIR}/libwebp.dll)
 		add_library(WebP::WebP SHARED IMPORTED)
 		set_target_properties(WebP::WebP PROPERTIES
-			IMPORTED_IMPLIB ${MSVC_LIBDIR}/libwebp_dll.lib
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/libwebp.lib
 			IMPORTED_LOCATION ${MSVC_BINDIR}/libwebp.dll
 			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include")
-		if (EXISTS ${MSVC_LIBDIR}/libsharpyuv_dll.lib AND EXISTS ${MSVC_BINDIR}/libsharpyuv.dll)
+		if (EXISTS ${MSVC_LIBDIR}/libsharpyuv.lib AND EXISTS ${MSVC_BINDIR}/libsharpyuv.dll)
 			add_library(WebP::SharpYUV SHARED IMPORTED)
 			set_target_properties(WebP::SharpYUV PROPERTIES
-			IMPORTED_IMPLIB ${MSVC_LIBDIR}/libsharpyuv_dll.lib
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/libsharpyuv.lib
 			IMPORTED_LOCATION ${MSVC_BINDIR}/libsharpyuv.dll)
 			set_target_properties(WebP::WebP PROPERTIES INTERFACE_LINK_LIBRARIES WebP::SharpYUV)
 		endif()
@@ -326,23 +326,23 @@ elseif(MSVC)
 		set(OPENAL_FOUND 1)
 
 		if(NCINE_WITH_VORBIS AND
-		    EXISTS ${MSVC_LIBDIR}/libogg.lib AND EXISTS ${MSVC_LIBDIR}/libvorbis.lib AND EXISTS ${MSVC_LIBDIR}/libvorbisfile.lib AND
-		    EXISTS ${MSVC_BINDIR}/libogg.dll AND EXISTS ${MSVC_BINDIR}/libvorbis.dll AND EXISTS ${MSVC_BINDIR}/libvorbisfile.dll)
+		    EXISTS ${MSVC_LIBDIR}/ogg.lib AND EXISTS ${MSVC_LIBDIR}/vorbis.lib AND EXISTS ${MSVC_LIBDIR}/vorbisfile.lib AND
+		    EXISTS ${MSVC_BINDIR}/ogg.dll AND EXISTS ${MSVC_BINDIR}/vorbis.dll AND EXISTS ${MSVC_BINDIR}/vorbisfile.dll)
 			add_library(Ogg::Ogg SHARED IMPORTED)
 			set_target_properties(Ogg::Ogg PROPERTIES
-				IMPORTED_IMPLIB ${MSVC_LIBDIR}/libogg.lib
-				IMPORTED_LOCATION ${MSVC_BINDIR}/libogg.dll)
+				IMPORTED_IMPLIB ${MSVC_LIBDIR}/ogg.lib
+				IMPORTED_LOCATION ${MSVC_BINDIR}/ogg.dll)
 
 			add_library(Vorbis::Vorbis SHARED IMPORTED)
 			set_target_properties(Vorbis::Vorbis PROPERTIES
-				IMPORTED_IMPLIB ${MSVC_LIBDIR}/libvorbis.lib
-				IMPORTED_LOCATION ${MSVC_BINDIR}/libvorbis.dll
+				IMPORTED_IMPLIB ${MSVC_LIBDIR}/vorbis.lib
+				IMPORTED_LOCATION ${MSVC_BINDIR}/vorbis.dll
 				INTERFACE_LINK_LIBRARIES Ogg::Ogg)
 
 			add_library(Vorbis::Vorbisfile SHARED IMPORTED)
 			set_target_properties(Vorbis::Vorbisfile PROPERTIES
-				IMPORTED_IMPLIB ${MSVC_LIBDIR}/libvorbisfile.lib
-				IMPORTED_LOCATION ${MSVC_BINDIR}/libvorbisfile.dll
+				IMPORTED_IMPLIB ${MSVC_LIBDIR}/vorbisfile.lib
+				IMPORTED_LOCATION ${MSVC_BINDIR}/vorbisfile.dll
 				INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include"
 				INTERFACE_LINK_LIBRARIES Vorbis::Vorbis)
 			set(VORBIS_FOUND 1)
