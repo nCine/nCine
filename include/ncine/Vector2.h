@@ -2,7 +2,6 @@
 #define CLASS_NCINE_VECTOR2
 
 #include "common_constants.h"
-#include "common_macros.h"
 
 namespace ncine {
 
@@ -107,14 +106,14 @@ inline const T *Vector2<T>::data() const
 template <class T>
 inline T &Vector2<T>::operator[](unsigned int index)
 {
-	ASSERT(index < 2);
+	index = (index < 2) ? index : 1;
 	return (&x)[index];
 }
 
 template <class T>
 inline const T &Vector2<T>::operator[](unsigned int index) const
 {
-	ASSERT(index < 2);
+	index = (index < 2) ? index : 1;
 	return (&x)[index];
 }
 

@@ -1,6 +1,7 @@
 #ifndef CLASS_NCINE_RECT
 #define CLASS_NCINE_RECT
 
+#include <nctl/utility.h> // for `swap()`
 #include "Vector2.h"
 
 namespace ncine {

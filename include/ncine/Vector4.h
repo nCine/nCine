@@ -118,14 +118,14 @@ inline const T *Vector4<T>::data() const
 template <class T>
 inline T &Vector4<T>::operator[](unsigned int index)
 {
-	ASSERT(index < 4);
+	index = (index < 4) ? index : 3;
 	return (&x)[index];
 }
 
 template <class T>
 inline const T &Vector4<T>::operator[](unsigned int index) const
 {
-	ASSERT(index < 4);
+	index = (index < 4) ? index : 3;
 	return (&x)[index];
 }
 

@@ -437,7 +437,7 @@ void RenderResources::create()
 		vaoPool_ = nctl::makeUnique<RenderVaoPool>(appCfg.vaoPoolSize);
 	if (hash64_ == nullptr)
 		hash64_ = nctl::makeUnique<Hash64>();
-	renderCommandPool_ = nctl::makeUnique<RenderCommandPool>(appCfg.vaoPoolSize);
+	renderCommandPool_ = nctl::makeUnique<RenderCommandPool>(appCfg.renderCommandPoolSize);
 	renderBatcher_ = nctl::makeUnique<RenderBatcher>();
 	defaultCamera_ = nctl::makeUnique<Camera>();
 	currentCamera_ = defaultCamera_.get();

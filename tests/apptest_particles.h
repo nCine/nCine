@@ -5,6 +5,7 @@
 #include <ncine/IInputEventHandler.h>
 #include <ncine/Vector2.h>
 #include <ncine/TimeStamp.h>
+#include <nctl/UniquePtr.h>
 
 namespace ncine {
 

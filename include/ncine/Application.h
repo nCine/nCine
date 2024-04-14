@@ -28,7 +28,7 @@ class DLL_PUBLIC Application
 	{
 		RenderingSettings()
 		    : batchingEnabled(true), batchingWithIndices(false),
-		      cullingEnabled(true), minBatchSize(4), maxBatchSize(500) {}
+		      cullingEnabled(true), minBatchSize(4), maxBatchSize(512) {}
 
 		/// True if batching is enabled
 		bool batchingEnabled;

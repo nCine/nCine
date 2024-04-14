@@ -2,7 +2,6 @@
 #include "Random.h"
 #include "IAppEventHandler.h"
 #include "FileSystem.h"
-#include "IFile.h"
 #include "ArrayIndexer.h"
 #include "GfxCapabilities.h"
 #include "RenderResources.h"
@@ -14,7 +13,6 @@
 #include "SceneNode.h"
 #include <nctl/StaticString.h>
 #include "IInputManager.h"
-#include "JoyMapping.h"
 
 #ifdef WITH_AUDIO
 	#include "ALAudioDevice.h"

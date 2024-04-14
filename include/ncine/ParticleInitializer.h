@@ -1,6 +1,7 @@
 #ifndef CLASS_NCINE_PARTICLEINITIALIZER
 #define CLASS_NCINE_PARTICLEINITIALIZER
 
+#include "common_defines.h"
 #include "Vector2.h"
 
 namespace ncine {

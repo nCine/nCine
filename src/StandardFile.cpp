@@ -150,6 +150,9 @@ void StandardFile::openFD(unsigned char mode)
 #if !(defined(_WIN32) && !defined(__MINGW32__))
 	int openFlag = -1;
 
+	// Ignore the binary mode when using a file descriptor
+	mode &= ~OpenMode::BINARY;
+
 	switch (mode)
 	{
 		case (OpenMode::FD | OpenMode::READ):

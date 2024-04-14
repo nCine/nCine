@@ -4,6 +4,7 @@
 #include <ncine/IAppEventHandler.h>
 #include <ncine/IInputEventHandler.h>
 #include <ncine/Vector2.h>
+#include <nctl/UniquePtr.h>
 
 namespace nctl {
 

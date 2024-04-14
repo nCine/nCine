@@ -136,11 +136,22 @@ void PCApplication::processEvents()
 {
 	ZoneScoped;
 
+	SDL_Event event;
+	#ifndef __EMSCRIPTEN__
+	if (shouldSuspend())
+	{
+		SDL_WaitEvent(&event);
+		SDL_PushEvent(&event);
+		// Don't lose any events when resuming
+		while (SDL_PollEvent(&event))
+			SDL_PushEvent(&event);
+	}
+	#endif
+
 	#ifdef WITH_NUKLEAR
 	NuklearSdlInput::inputBegin();
 	#endif
 
-	SDL_Event event;
 	while (SDL_PollEvent(&event))
 	{
 		switch (event.type)
@@ -186,16 +197,6 @@ void PCApplication::processEvents()
 				SdlInputManager::parseEvent(event);
 				break;
 		}
-	#ifndef __EMSCRIPTEN__
-		if (shouldSuspend())
-		{
-			SDL_WaitEvent(&event);
-			SDL_PushEvent(&event);
-			// Don't lose any events when resuming
-			while (SDL_PollEvent(&event))
-				SDL_PushEvent(&event);
-		}
-	#endif
 	}
 
 	#ifdef WITH_NUKLEAR

@@ -4,6 +4,7 @@
 #include "IAppEventHandler.h"
 #include "IInputEventHandler.h"
 #include "Matrix4x4.h"
+#include <nctl/UniquePtr.h>
 
 namespace ncine {
 
