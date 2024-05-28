@@ -1,3 +1,5 @@
+#include "openal_proto.h"
+
 #include "common_macros.h"
 #include "ALAudioDevice.h"
 #include "AudioBufferPlayer.h"
@@ -6,6 +8,20 @@
 #include <nctl/HashSetIterator.h>
 
 namespace ncine {
+
+const char *ExtensionNames[IAudioDevice::ALExtensions::COUNT] = {
+	ALC_EXT_EFX_NAME,
+	"ALC_SOFT_pause_device",
+	"AL_SOFT_deferred_updates",
+	"AL_SOFT_source_spatialize"
+};
+
+bool hasEfxExtension_ = false;
+
+bool hasEfxExtension()
+{
+	return hasEfxExtension_;
+}
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -41,6 +57,9 @@ ALAudioDevice::ALAudioDevice(const AppConfiguration &appCfg)
 	}
 
 	retrieveAttributes();
+	for (unsigned int i = 0; i < ALExtensions::COUNT; i++)
+		alExtensions_[i] = false;
+	retrieveExtensions();
 
 	const unsigned int MaxAvailableSources = unsigned(attributes_.numMonoSources + attributes_.numStereoSources);
 	unsigned int sourcePoolSize = appCfg.monoAudioSources + appCfg.stereoAudioSources;
@@ -61,6 +80,13 @@ ALAudioDevice::ALAudioDevice(const AppConfiguration &appCfg)
 	alListenerf(AL_GAIN, gain_);
 	alListenerfv(AL_POSITION, position_.data());
 	alListenerfv(AL_VELOCITY, velocity_.data());
+
+	// Allow spatialization for stereo sources
+	if (hasExtension(ALExtensions::SOFT_SOURCE_SPATIALIZE))
+	{
+		for (ALuint source : sources_)
+			alSourcei(source, AL_SOURCE_SPATIALIZE_SOFT, AL_TRUE);
+	}
 }
 
 ALAudioDevice::~ALAudioDevice()
@@ -79,6 +105,16 @@ ALAudioDevice::~ALAudioDevice()
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+bool ALAudioDevice::hasExtension(ALExtensions::Enum extensionName) const
+{
+	bool extensionAvailable = false;
+
+	if (extensionName >= 0 && extensionName < ALExtensions::COUNT)
+		extensionAvailable = alExtensions_[extensionName];
+
+	return extensionAvailable;
+}
 
 void ALAudioDevice::setGain(ALfloat gain)
 {
@@ -183,6 +219,22 @@ void ALAudioDevice::resumePlayers()
 	pausedPlayers_.clear();
 }
 
+void ALAudioDevice::pauseDevice()
+{
+	if (hasExtension(ALExtensions::SOFT_PAUSE_DEVICE))
+		alcDevicePauseSOFT(device_);
+	else
+		pausePlayers();
+}
+
+void ALAudioDevice::resumeDevice()
+{
+	if (hasExtension(ALExtensions::SOFT_PAUSE_DEVICE))
+		alcDeviceResumeSOFT(device_);
+	else
+		resumePlayers();
+}
+
 void ALAudioDevice::registerPlayer(IAudioPlayer *player)
 {
 	ASSERT(player);
@@ -203,7 +255,11 @@ void ALAudioDevice::registerPlayer(IAudioPlayer *player)
 
 	player->sourceId_ = sourceId;
 	players_.pushBack(player);
+
+	// Apply all source properties for a player at the same time
+	hasExtension(ALExtensions::SOFT_DEFERRED_UPDATES) ? alDeferUpdatesSOFT() : alcSuspendContext(context_);
 	player->applySourceProperties();
+	hasExtension(ALExtensions::SOFT_DEFERRED_UPDATES) ? alProcessUpdatesSOFT() : alcProcessContext(context_);
 }
 
 void ALAudioDevice::unregisterPlayer(IAudioPlayer *player)
@@ -298,6 +354,33 @@ void ALAudioDevice::retrieveAttributes()
 	}
 }
 
+void ALAudioDevice::retrieveExtensions()
+{
+	for (unsigned int i = 0; i < ALExtensions::COUNT; i++)
+	{
+		// Determining if an extension is relative to a context (ALC_) or not (AL_)
+		if (ExtensionNames[i][2] == 'C')
+			alExtensions_[i] = (alcIsExtensionPresent(device_, ExtensionNames[i]) == ALC_TRUE);
+		else
+			alExtensions_[i] = (alIsExtensionPresent(ExtensionNames[i]) == ALC_TRUE);
+	}
+	hasEfxExtension_ = alExtensions_[ALExtensions::EXT_EFX]; // cached value
+
+	if (hasExtension(ALExtensions::EXT_EFX))
+	{
+		retrieveEfxFunctions();
+		alcGetIntegerv(device_, ALC_EFX_MAJOR_VERSION, 1, &attributes_.efxMajorVersion);
+		alcGetIntegerv(device_, ALC_EFX_MINOR_VERSION, 1, &attributes_.efxMinorVersion);
+		alcGetIntegerv(device_, ALC_MAX_AUXILIARY_SENDS, 1, &attributes_.maxAuxiliarySends);
+	}
+
+	if (hasExtension(ALExtensions::SOFT_PAUSE_DEVICE))
+		retrievePauseDeviceFunctions();
+
+	if (hasExtension(ALExtensions::SOFT_DEFERRED_UPDATES))
+		retrieveDeferredUpdatesFunctions();
+}
+
 void ALAudioDevice::logALAttributes()
 {
 	LOGI("--- OpenAL attributes ---");
@@ -309,6 +392,20 @@ void ALAudioDevice::logALAttributes()
 	LOGI_X("Refresh rate: %d", attributes_.refreshRate);
 	LOGI_X("Synchronous: %s", attributes_.synchronous ? "true" : "false");
 	LOGI("--- OpenAL attributes ---");
+}
+
+void ALAudioDevice::logALExtensions()
+{
+	LOGI("--- OpenAL extensions ---");
+	for (unsigned int i = 0; i < ALExtensions::COUNT; i++)
+		LOGI_X("%s: %d", ExtensionNames[i], alExtensions_[i]);
+
+	if (hasExtension(IAudioDevice::ALExtensions::EXT_EFX))
+	{
+		LOGI_X("EFX version: %d.%d", attributes_.efxMajorVersion, attributes_.efxMinorVersion);
+		LOGI_X("Max auxiliary sends: %d", attributes_.maxAuxiliarySends);
+	}
+	LOGI("--- OpenAL extensions ---");
 }
 
 }

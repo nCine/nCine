@@ -26,6 +26,18 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	static const float DefaultConeOuterGain;
 	static const float MaxConeOuterGain;
 
+	static const float MinAirAbsorptionFactor;
+	static const float DefaultAirAbsorptionFactor;
+	static const float MaxAirAbsorptionFactor;
+
+	static const float MinRoomRolloffFactor;
+	static const float DefaultRoomRolloffFactor;
+	static const float MaxRoomRolloffFactor;
+
+	static const float MinConeOuterGainHF;
+	static const float DefaultConeOuterGainHF;
+	static const float MaxConeOuterGainHF;
+
 	/// Player state
 	enum class PlayerState
 	{
@@ -138,6 +150,21 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	/// Sets the player multiplication factor to determine the gain outside the cone
 	void setConeOuterGain(float gain);
 
+	/// Returns the player air absorption factor
+	inline float airAbsorptionFactor() const { return airAbsorptionFactor_; }
+	/// Sets the player air absorption factor
+	void setAirAbsorptionFactor(float factor);
+
+	/// Returns the player room rolloff factor
+	inline float roomRolloffFactor() const { return roomRooloffFactor_; }
+	/// Sets the player room rolloff factor
+	void setRoomRolloffFactor(float factor);
+
+	/// Returns the player cone outer gain HF value
+	inline float coneOuterGainHF() const { return coneOuterGainHF_; }
+	/// Sets the player cone outer gain HF value
+	void setConeOuterGainHF(float gain);
+
   protected:
 	/// The OpenAL source id
 	unsigned int sourceId_;
@@ -169,6 +196,13 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	float coneOuterAngle_;
 	/// Multiplication factor to determine the gain outside the cone
 	float coneOuterGain_;
+
+	/// Player air absorption factor value
+	float airAbsorptionFactor_;
+	/// Player room rolloff factor value
+	float roomRooloffFactor_;
+	/// Player cone outer gain HF value
+	float coneOuterGainHF_;
 
 	/// Updates the state of the player if the source has finished playing
 	/*! It is called every frame by the `IAudioDevice` class and it is

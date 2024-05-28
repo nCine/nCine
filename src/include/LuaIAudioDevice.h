@@ -13,6 +13,7 @@ class LuaIAudioDevice
 
   private:
 	static int name(lua_State *L);
+	static int hasEfxExtension(lua_State *L);
 
 	static int gain(lua_State *L);
 	static int setGain(lua_State *L);
@@ -32,6 +33,9 @@ class LuaIAudioDevice
 	static int pausePlayers(lua_State *L);
 	static int stopPlayers(lua_State *L);
 	static int resumePlayers(lua_State *L);
+
+	static int pauseDevice(lua_State *L);
+	static int resumeDevice(lua_State *L);
 };
 
 }

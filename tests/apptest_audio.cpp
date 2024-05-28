@@ -132,6 +132,22 @@ void sourcePropertiesGui(nc::IAudioPlayer &player)
 	ImGui::SliderFloat("Cone outer gain", &coneOuterGain, nc::IAudioPlayer::MinConeOuterGain, nc::IAudioPlayer::MaxConeOuterGain, "%.2f", ImGuiSliderFlags_AlwaysClamp);
 	player.setConeOuterGain(coneOuterGain);
 
+	if (device.hasExtension(nc::IAudioDevice::ALExtensions::EXT_EFX))
+	{
+		ImGui::NewLine();
+		float airAbsorptionFactor = player.airAbsorptionFactor();
+		ImGui::SliderFloat("Air absorption factor", &airAbsorptionFactor, nc::IAudioPlayer::MinAirAbsorptionFactor, nc::IAudioPlayer::MaxAirAbsorptionFactor, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+		player.setAirAbsorptionFactor(airAbsorptionFactor);
+
+		float roomRolloffFactor = player.roomRolloffFactor();
+		ImGui::SliderFloat("Room rolloff factor", &roomRolloffFactor, nc::IAudioPlayer::MinRoomRolloffFactor, nc::IAudioPlayer::MaxRoomRolloffFactor, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+		player.setRoomRolloffFactor(roomRolloffFactor);
+
+		float coneOuterGainHF = player.coneOuterGainHF();
+		ImGui::SliderFloat("Cone outer gain HF", &coneOuterGainHF, nc::IAudioPlayer::MinConeOuterGainHF, nc::IAudioPlayer::MaxConeOuterGainHF, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+		player.setConeOuterGainHF(coneOuterGainHF);
+	}
+
 	if (ImGui::Button("Reset"))
 	{
 		player.setGain(nc::IAudioPlayer::DefaultGain);
@@ -142,6 +158,13 @@ void sourcePropertiesGui(nc::IAudioPlayer &player)
 		player.setConeInnerAngle(nc::IAudioPlayer::DefaultConeAngle);
 		player.setConeOuterAngle(nc::IAudioPlayer::DefaultConeAngle);
 		player.setConeOuterGain(nc::IAudioPlayer::DefaultConeOuterGain);
+
+		if (device.hasExtension(nc::IAudioDevice::ALExtensions::EXT_EFX))
+		{
+			player.setAirAbsorptionFactor(nc::IAudioPlayer::DefaultAirAbsorptionFactor);
+			player.setRoomRolloffFactor(nc::IAudioPlayer::DefaultRoomRolloffFactor);
+			player.setConeOuterGainHF(nc::IAudioPlayer::DefaultConeOuterGainHF);
+		}
 	}
 }
 #endif
@@ -515,6 +538,18 @@ void MyEventHandler::onFrameStart()
 				ImGui::Text("Stereo sources: %d", properties.numStereoSources);
 				ImGui::Text("Refresh rate: %d", properties.refreshRate);
 				ImGui::Text("Synchronous context: %d", properties.synchronous);
+
+				ImGui::NewLine();
+				ImGui::TextUnformatted("OpenAL EFX extension:");
+				ImGui::SameLine();
+				if (device.hasExtension(nc::IAudioDevice::ALExtensions::EXT_EFX))
+				{
+					ImGui::TextColored(Green, "available");
+					ImGui::Text("EFX version: %d.%d", properties.efxMajorVersion, properties.efxMinorVersion);
+					ImGui::Text("Max auxiliary sends: %d", properties.maxAuxiliarySends);
+				}
+				else
+					ImGui::TextColored(Red, "not available");
 
 				ImGui::NewLine();
 				float gain = device.gain();

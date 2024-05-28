@@ -909,6 +909,19 @@ void ImGuiDebugOverlay::guiAudioCapabilities()
 		ImGui::Text("Stereo Sources: %d", audioProps.numStereoSources);
 		ImGui::Text("Refresh Rate: %d", audioProps.refreshRate);
 		ImGui::Text("Synchronous: %s", audioProps.synchronous ? "true" : "false");
+
+		ImGui::Separator();
+		ImGui::Text("ALC_EXT_EFX: %d", audioDevice.hasExtension(IAudioDevice::ALExtensions::EXT_EFX));
+		ImGui::Text("ALC_SOFT_PAUSE_DEVICE: %d", audioDevice.hasExtension(IAudioDevice::ALExtensions::SOFT_PAUSE_DEVICE));
+		ImGui::Text("AL_SOFT_DEFERRED_UPDATES: %d", audioDevice.hasExtension(IAudioDevice::ALExtensions::SOFT_DEFERRED_UPDATES));
+		ImGui::Text("AL_SOFT_SOURCE_SPATIALIZE: %d", audioDevice.hasExtension(IAudioDevice::ALExtensions::SOFT_SOURCE_SPATIALIZE));
+
+		ImGui::NewLine();
+		if (audioDevice.hasExtension(IAudioDevice::ALExtensions::EXT_EFX))
+		{
+			ImGui::Text("EFX Version: %d.%d", audioProps.efxMajorVersion, audioProps.efxMinorVersion);
+			ImGui::Text("Max Auxiliary Sends: %d", audioProps.maxAuxiliarySends);
+		}
 	}
 #endif
 }
@@ -976,6 +989,15 @@ void ImGuiDebugOverlay::guiAudioPlayers()
 				ImGui::Text("Cone Inner Angle: %f", player->coneInnerAngle());
 				ImGui::Text("Cone Outer Angle: %f", player->coneOuterAngle());
 				ImGui::Text("Cone Outer Gain: %f", player->coneOuterGain());
+
+				if (audioDevice.hasExtension(IAudioDevice::ALExtensions::EXT_EFX))
+				{
+					ImGui::NewLine();
+					ImGui::Text("Air Absorption Factor: %f", player->airAbsorptionFactor());
+					ImGui::Text("Room Rolloff Factor: %f", player->roomRolloffFactor());
+					ImGui::Text("Cone Outer Gain HF: %f", player->coneOuterGainHF());
+				}
+				ImGui::NewLine();
 
 				ImGui::PushID(player);
 				const bool canPlay = (player->isPlaying() == false);

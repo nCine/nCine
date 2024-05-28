@@ -26,6 +26,25 @@ class DLL_PUBLIC IAudioDevice
 		int numStereoSources = 0;
 		int refreshRate = 0;
 		int synchronous = 0;
+
+		// EFX attributes
+		int efxMajorVersion = 0;
+		int efxMinorVersion = 0;
+		int maxAuxiliarySends = 0;
+	};
+
+	/// OpenAL queryable extensions
+	struct ALExtensions
+	{
+		enum Enum
+		{
+			EXT_EFX = 0,
+			SOFT_PAUSE_DEVICE,
+			SOFT_DEFERRED_UPDATES,
+			SOFT_SOURCE_SPATIALIZE,
+
+			COUNT
+		};
 	};
 
 	enum class PlayerType
@@ -36,6 +55,8 @@ class DLL_PUBLIC IAudioDevice
 
 	virtual const Attributes &attributes() const = 0;
 	virtual const char *name() const = 0;
+	/// Returns true if the specified OpenAL extension is available
+	virtual bool hasExtension(ALExtensions::Enum extensionName) const = 0;
 
 	virtual ~IAudioDevice() = 0;
 	/// Returns the listener gain value
@@ -81,6 +102,13 @@ class DLL_PUBLIC IAudioDevice
 	/// Resumes all and only the players that were paused by a `pausePlayers()` call
 	virtual void resumePlayers() = 0;
 
+	/// Pauses all audio device activities using an OpenAL-soft extension (if available)
+	/*! \note If the extension is not available, all players are paused */
+	virtual void pauseDevice() = 0;
+	/// Resumes all audio device activities using an OpenAL-soft extension (if available)
+	/// /*! \note If the extension is not available, all paused players resume playing */
+	virtual void resumeDevice() = 0;
+
 	/// Registers a new stream player for buffer update
 	virtual void registerPlayer(IAudioPlayer *player) = 0;
 	/// Remove a stream player from the array of active players
@@ -97,6 +125,7 @@ class DLL_PUBLIC NullAudioDevice : public IAudioDevice
   public:
 	const Attributes &attributes() const override { return properties_; }
 	const char *name() const override { return "NullAudioDevice"; }
+	bool hasExtension(ALExtensions::Enum extensionName) const override { return false; }
 
 	float gain() const override { return 1.0f; }
 	void setGain(float gain) override {}
@@ -121,6 +150,9 @@ class DLL_PUBLIC NullAudioDevice : public IAudioDevice
 	void pausePlayers(PlayerType playerType) override {}
 	void stopPlayers(PlayerType playerType) override {}
 	void resumePlayers() override {}
+
+	void pauseDevice() override {}
+	void resumeDevice() override {}
 
 	void registerPlayer(IAudioPlayer *player) override {}
 	void unregisterPlayer(IAudioPlayer *player) override {}

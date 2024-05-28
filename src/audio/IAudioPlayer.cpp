@@ -1,6 +1,8 @@
 #define NCINE_INCLUDE_OPENAL
+#define NCINE_INCLUDE_OPENAL_EFX
 #include "common_headers.h"
 #include <nctl/algorithms.h>
+#include "ALAudioDevice.h" // for `hasEfxExtension()`
 #include "IAudioPlayer.h"
 #include "Vector3.h"
 
@@ -26,6 +28,18 @@ const float IAudioPlayer::MinConeOuterGain = 0.0f;
 const float IAudioPlayer::DefaultConeOuterGain = 0.0f;
 const float IAudioPlayer::MaxConeOuterGain = 1.0f;
 
+const float IAudioPlayer::MinAirAbsorptionFactor = 0.0f;
+const float IAudioPlayer::DefaultAirAbsorptionFactor = 0.0f;
+const float IAudioPlayer::MaxAirAbsorptionFactor = 10.0f;
+
+const float IAudioPlayer::MinRoomRolloffFactor = 0.0f;
+const float IAudioPlayer::DefaultRoomRolloffFactor = 0.0f;
+const float IAudioPlayer::MaxRoomRolloffFactor = 10.0f;
+
+const float IAudioPlayer::MinConeOuterGainHF = 0.0f;
+const float IAudioPlayer::DefaultConeOuterGainHF = 0.0f;
+const float IAudioPlayer::MaxConeOuterGainHF = 1.0f;
+
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
@@ -35,7 +49,9 @@ IAudioPlayer::IAudioPlayer(ObjectType type, const char *name)
       sourceLocked_(false), state_(PlayerState::STOPPED), isLooping_(false),
       gain_(DefaultGain), pitch_(DefaultPitch),
       position_(0.0f, 0.0f, 0.0f), velocity_(0.0f, 0.0f, 0.0f), direction_(0.0f, 0.0f, 0.0f),
-      coneInnerAngle_(DefaultConeAngle), coneOuterAngle_(DefaultConeAngle), coneOuterGain_(DefaultConeOuterGain)
+      coneInnerAngle_(DefaultConeAngle), coneOuterAngle_(DefaultConeAngle), coneOuterGain_(DefaultConeOuterGain),
+      airAbsorptionFactor_(DefaultAirAbsorptionFactor), roomRooloffFactor_(DefaultRoomRolloffFactor),
+      coneOuterGainHF_(DefaultConeOuterGainHF)
 {
 }
 
@@ -168,6 +184,27 @@ void IAudioPlayer::setConeOuterGain(float gain)
 		alSourcef(sourceId_, AL_CONE_OUTER_GAIN, coneOuterGain_);
 }
 
+void IAudioPlayer::setAirAbsorptionFactor(float factor)
+{
+	airAbsorptionFactor_ = nctl::clamp(factor, AL_MIN_AIR_ABSORPTION_FACTOR, AL_MAX_AIR_ABSORPTION_FACTOR);
+	if (hasEfxExtension() && hasSource())
+		alSourcef(sourceId_, AL_AIR_ABSORPTION_FACTOR, airAbsorptionFactor_);
+}
+
+void IAudioPlayer::setRoomRolloffFactor(float factor)
+{
+	roomRooloffFactor_ = nctl::clamp(factor, AL_MIN_ROOM_ROLLOFF_FACTOR, AL_MAX_ROOM_ROLLOFF_FACTOR);
+	if (hasEfxExtension() && hasSource())
+		alSourcef(sourceId_, AL_ROOM_ROLLOFF_FACTOR, roomRooloffFactor_);
+}
+
+void IAudioPlayer::setConeOuterGainHF(float gain)
+{
+	coneOuterGainHF_ = nctl::clamp(gain, AL_MIN_CONE_OUTER_GAINHF, AL_MAX_CONE_OUTER_GAINHF);
+	if (hasEfxExtension() && hasSource())
+		alSourcef(sourceId_, AL_CONE_OUTER_GAINHF, coneOuterGainHF_);
+}
+
 ///////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -186,6 +223,13 @@ void IAudioPlayer::applySourceProperties()
 		alSourcef(sourceId_, AL_CONE_INNER_ANGLE, coneInnerAngle_);
 		alSourcef(sourceId_, AL_CONE_OUTER_ANGLE, coneOuterAngle_);
 		alSourcef(sourceId_, AL_CONE_OUTER_GAIN, coneOuterGain_);
+
+		if (hasEfxExtension())
+		{
+			alSourcef(sourceId_, AL_AIR_ABSORPTION_FACTOR, airAbsorptionFactor_);
+			alSourcef(sourceId_, AL_ROOM_ROLLOFF_FACTOR, roomRooloffFactor_);
+			alSourcef(sourceId_, AL_CONE_OUTER_GAINHF, coneOuterGainHF_);
+		}
 
 		const ALenum error = alGetError(); // Checking the error only once, after setting all properties
 		ASSERT_MSG_X(error == AL_NO_ERROR, "Error while applying OpenAL source properties: 0x%x", error);

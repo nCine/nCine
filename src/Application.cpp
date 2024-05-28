@@ -394,6 +394,7 @@ void Application::setFocus(bool hasFocus)
 void Application::suspend()
 {
 	ZoneScopedN("onSuspend");
+	theServiceLocator().audioDevice().pauseDevice();
 	frameTimer_->suspend();
 	if (appEventHandler_)
 		appEventHandler_->onSuspend();
@@ -405,6 +406,7 @@ void Application::resume()
 	ZoneScopedN("onResume");
 	if (appEventHandler_)
 		appEventHandler_->onResume();
+	theServiceLocator().audioDevice().resumeDevice();
 	const TimeStamp suspensionDuration = frameTimer_->resume();
 	LOGV_X("Suspended for %.3f seconds", suspensionDuration.seconds());
 	profileStartTime_ += suspensionDuration;

@@ -13,6 +13,7 @@ namespace IAudioDevice {
 	static const char *IAudioDevice = "audio_device";
 
 	static const char *name = "name";
+	static const char *hasEfxExtension = "has_efx_extension";
 
 	static const char *gain = "get_gain";
 	static const char *setGain = "set_gain";
@@ -32,6 +33,9 @@ namespace IAudioDevice {
 	static const char *pausePlayers = "pause_players";
 	static const char *stopPlayers = "stop_players";
 	static const char *resumePlayers = "resume_players";
+
+	static const char *pauseDevice = "pause_device";
+	static const char *resumeDevice = "resume_device";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -40,9 +44,10 @@ namespace IAudioDevice {
 
 void LuaIAudioDevice::expose(lua_State *L)
 {
-	lua_createtable(L, 0, 14);
+	lua_createtable(L, 0, 17);
 
 	LuaUtils::addFunction(L, LuaNames::IAudioDevice::name, name);
+	LuaUtils::addFunction(L, LuaNames::IAudioDevice::hasEfxExtension, hasEfxExtension);
 
 	LuaUtils::addFunction(L, LuaNames::IAudioDevice::gain, gain);
 	LuaUtils::addFunction(L, LuaNames::IAudioDevice::setGain, setGain);
@@ -63,6 +68,9 @@ void LuaIAudioDevice::expose(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::IAudioDevice::stopPlayers, stopPlayers);
 	LuaUtils::addFunction(L, LuaNames::IAudioDevice::resumePlayers, resumePlayers);
 
+	LuaUtils::addFunction(L, LuaNames::IAudioDevice::pauseDevice, pauseDevice);
+	LuaUtils::addFunction(L, LuaNames::IAudioDevice::resumeDevice, resumeDevice);
+
 	lua_setfield(L, -2, LuaNames::IAudioDevice::IAudioDevice);
 }
 
@@ -70,6 +78,14 @@ int LuaIAudioDevice::name(lua_State *L)
 {
 	const char *name = theServiceLocator().audioDevice().name();
 	LuaUtils::push(L, name);
+
+	return 1;
+}
+
+int LuaIAudioDevice::hasEfxExtension(lua_State *L)
+{
+	const bool withEfx = theServiceLocator().audioDevice().hasExtension(IAudioDevice::ALExtensions::EXT_EFX);
+	LuaUtils::push(L, withEfx);
 
 	return 1;
 }
@@ -172,6 +188,18 @@ int LuaIAudioDevice::stopPlayers(lua_State *L)
 int LuaIAudioDevice::resumePlayers(lua_State *L)
 {
 	theServiceLocator().audioDevice().resumePlayers();
+	return 0;
+}
+
+int LuaIAudioDevice::pauseDevice(lua_State *L)
+{
+	theServiceLocator().audioDevice().pauseDevice();
+	return 0;
+}
+
+int LuaIAudioDevice::resumeDevice(lua_State *L)
+{
+	theServiceLocator().audioDevice().resumeDevice();
 	return 0;
 }
 

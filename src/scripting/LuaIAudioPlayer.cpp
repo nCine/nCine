@@ -56,6 +56,15 @@ namespace IAudioPlayer {
 	static const char *setConeOuterAngle = "set_cone_outer_angle";
 	static const char *coneOuterGain = "get_cone_outer_gain";
 	static const char *setConeOuterGain = "set_cone_outer_gain";
+
+	static const char *airAbsorptionFactor = "get_air_absorption_factor";
+	static const char *setAirAbsorptionFactor = "set_air_absorption_factor";
+
+	static const char *roomRolloffFactor = "get_room_rolloff_factor";
+	static const char *setRoomRolloffFactor = "set_room_rolloff_factor";
+
+	static const char *coneOuterGainHF = "get_cone_outer_gain_hf";
+	static const char *setConeOuterGainHF = "set_cone_outer_gain_hf";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -112,6 +121,15 @@ void LuaIAudioPlayer::exposeFunctions(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setConeOuterAngle, setConeOuterAngle);
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::coneOuterGain, coneOuterGain);
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setConeOuterGain, setConeOuterGain);
+
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::airAbsorptionFactor, airAbsorptionFactor);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setAirAbsorptionFactor, setAirAbsorptionFactor);
+
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::roomRolloffFactor, roomRolloffFactor);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setRoomRolloffFactor, setRoomRolloffFactor);
+
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::coneOuterGainHF, coneOuterGainHF);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setConeOuterGainHF, setConeOuterGainHF);
 }
 
 int LuaIAudioPlayer::hasSource(lua_State *L)
@@ -540,6 +558,75 @@ int LuaIAudioPlayer::setConeOuterGain(lua_State *L)
 
 	if (audioPlayer)
 		audioPlayer->setConeOuterGain(coneOuterGain);
+
+	return 0;
+}
+
+int LuaIAudioPlayer::airAbsorptionFactor(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
+
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->airAbsorptionFactor());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaIAudioPlayer::setAirAbsorptionFactor(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -2);
+	const float airAbsorptionFactor = LuaUtils::retrieve<float>(L, -1);
+
+	if (audioPlayer)
+		audioPlayer->setAirAbsorptionFactor(airAbsorptionFactor);
+
+	return 0;
+}
+
+int LuaIAudioPlayer::roomRolloffFactor(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
+
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->roomRolloffFactor());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaIAudioPlayer::setRoomRolloffFactor(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -2);
+	const float roomRolloffFactor = LuaUtils::retrieve<float>(L, -1);
+
+	if (audioPlayer)
+		audioPlayer->setRoomRolloffFactor(roomRolloffFactor);
+
+	return 0;
+}
+
+int LuaIAudioPlayer::coneOuterGainHF(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
+
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->coneOuterGainHF());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaIAudioPlayer::setConeOuterGainHF(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -2);
+	const float coneOuterGainHF = LuaUtils::retrieve<float>(L, -1);
+
+	if (audioPlayer)
+		audioPlayer->setConeOuterGainHF(coneOuterGainHF);
 
 	return 0;
 }

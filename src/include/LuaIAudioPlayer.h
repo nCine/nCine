@@ -60,6 +60,15 @@ class LuaIAudioPlayer
 	static int coneOuterGain(lua_State *L);
 	static int setConeOuterGain(lua_State *L);
 
+	static int airAbsorptionFactor(lua_State *L);
+	static int setAirAbsorptionFactor(lua_State *L);
+
+	static int roomRolloffFactor(lua_State *L);
+	static int setRoomRolloffFactor(lua_State *L);
+
+	static int coneOuterGainHF(lua_State *L);
+	static int setConeOuterGainHF(lua_State *L);
+
 	friend class LuaAudioBufferPlayer;
 	friend class LuaAudioStreamPlayer;
 };

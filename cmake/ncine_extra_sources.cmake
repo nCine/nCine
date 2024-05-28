@@ -108,6 +108,7 @@ if(OPENAL_FOUND)
 	)
 
 	list(APPEND PRIVATE_HEADERS
+		${NCINE_ROOT}/src/include/openal_proto.h
 		${NCINE_ROOT}/src/include/ALAudioDevice.h
 		${NCINE_ROOT}/src/include/IAudioLoader.h
 		${NCINE_ROOT}/src/include/AudioLoaderWav.h

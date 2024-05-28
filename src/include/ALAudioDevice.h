@@ -21,6 +21,7 @@ class ALAudioDevice : public IAudioDevice
 
 	inline const Attributes &attributes() const override { return attributes_; }
 	inline const char *name() const override { return attributes_.deviceName; }
+	bool hasExtension(ALExtensions::Enum extensionName) const override;
 
 	float gain() const override { return gain_; }
 	void setGain(float gain) override;
@@ -45,6 +46,9 @@ class ALAudioDevice : public IAudioDevice
 	void pausePlayers(PlayerType playerType) override;
 	void stopPlayers(PlayerType playerType) override;
 	void resumePlayers() override;
+
+	void pauseDevice() override;
+	void resumeDevice() override;
 
 	void registerPlayer(IAudioPlayer *player) override;
 	void unregisterPlayer(IAudioPlayer *player) override;
@@ -74,14 +78,22 @@ class ALAudioDevice : public IAudioDevice
 	/*! \note A separate container is required as to not resume players that were already in the paused state */
 	nctl::HashSet<IAudioPlayer *> pausedPlayers_;
 
+	/// Array of OpenAL extension availability flags
+	bool alExtensions_[IAudioDevice::ALExtensions::COUNT];
+
 	void retrieveAttributes();
+	void retrieveExtensions();
 	void logALAttributes();
+	void logALExtensions();
 
 	/// Deleted copy constructor
 	ALAudioDevice(const ALAudioDevice &) = delete;
 	/// Deleted assignment operator
 	ALAudioDevice &operator=(const ALAudioDevice &) = delete;
 };
+
+/// Returns a cached value for the EFX extension availability flag
+extern bool hasEfxExtension();
 
 }
 
