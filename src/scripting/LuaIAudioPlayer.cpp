@@ -8,6 +8,7 @@ namespace ncine {
 
 namespace LuaNames {
 namespace IAudioPlayer {
+	static const char *hasSource = "has_source";
 	static const char *sourceId = "source_id";
 	static const char *bufferId = "buffer_id";
 
@@ -22,6 +23,9 @@ namespace IAudioPlayer {
 
 	static const char *sampleOffset = "get_sample_offset";
 	static const char *setSampleOffset = "set_sample_offset";
+
+	static const char *isSourceLocked = "is_source_locked";
+	static const char *setSourceLocked = "set_source_locked";
 
 	static const char *play = "play";
 	static const char *pause = "pause";
@@ -38,8 +42,20 @@ namespace IAudioPlayer {
 	static const char *setGain = "set_gain";
 	static const char *pitch = "get_pitch";
 	static const char *setPitch = "set_pitch";
+
 	static const char *position = "get_position";
 	static const char *setPosition = "set_position";
+	static const char *velocity = "get_velocity";
+	static const char *setVelocity = "set_velocity";
+	static const char *direction = "get_direction";
+	static const char *setDirection = "set_direction";
+
+	static const char *coneInnerAngle = "get_cone_inner_angle";
+	static const char *setConeInnerAngle = "set_cone_inner_angle";
+	static const char *coneOuterAngle = "get_cone_outer_angle";
+	static const char *setConeOuterAngle = "set_cone_outer_angle";
+	static const char *coneOuterGain = "get_cone_outer_gain";
+	static const char *setConeOuterGain = "set_cone_outer_gain";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -48,6 +64,7 @@ namespace IAudioPlayer {
 
 void LuaIAudioPlayer::exposeFunctions(lua_State *L)
 {
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::hasSource, hasSource);
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::sourceId, sourceId);
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::bufferId, bufferId);
 
@@ -62,6 +79,9 @@ void LuaIAudioPlayer::exposeFunctions(lua_State *L)
 
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::sampleOffset, sampleOffset);
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setSampleOffset, setSampleOffset);
+
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::isSourceLocked, isSourceLocked);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setSourceLocked, setSourceLocked);
 
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::play, play);
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::pause, pause);
@@ -78,8 +98,32 @@ void LuaIAudioPlayer::exposeFunctions(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setGain, setGain);
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::pitch, pitch);
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setPitch, setPitch);
+
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::position, position);
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setPosition, setPosition);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::velocity, velocity);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setVelocity, setVelocity);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::direction, direction);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setDirection, setDirection);
+
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::coneInnerAngle, coneInnerAngle);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setConeInnerAngle, setConeInnerAngle);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::coneOuterAngle, coneOuterAngle);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setConeOuterAngle, setConeOuterAngle);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::coneOuterGain, coneOuterGain);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setConeOuterGain, setConeOuterGain);
+}
+
+int LuaIAudioPlayer::hasSource(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
+
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->hasSource());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
 }
 
 int LuaIAudioPlayer::sourceId(lua_State *L)
@@ -197,6 +241,29 @@ int LuaIAudioPlayer::setSampleOffset(lua_State *L)
 
 	if (audioPlayer)
 		audioPlayer->setSampleOffset(sampleOffset);
+
+	return 0;
+}
+
+int LuaIAudioPlayer::isSourceLocked(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
+
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->isSourceLocked());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaIAudioPlayer::setSourceLocked(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -2);
+	const bool sourceLocked = LuaUtils::retrieve<bool>(L, -1);
+
+	if (audioPlayer)
+		audioPlayer->setSourceLocked(sourceLocked);
 
 	return 0;
 }
@@ -356,6 +423,123 @@ int LuaIAudioPlayer::setPosition(lua_State *L)
 
 	if (audioPlayer)
 		audioPlayer->setPosition(pos);
+
+	return 0;
+}
+
+int LuaIAudioPlayer::velocity(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
+
+	if (audioPlayer)
+		LuaVector3fUtils::push(L, audioPlayer->velocity());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaIAudioPlayer::setVelocity(lua_State *L)
+{
+	int vectorIndex = 0;
+	const Vector3f vel = LuaVector3fUtils::retrieve(L, -1, vectorIndex);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, vectorIndex - 1);
+
+	if (audioPlayer)
+		audioPlayer->setVelocity(vel);
+
+	return 0;
+}
+
+int LuaIAudioPlayer::direction(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
+
+	if (audioPlayer)
+		LuaVector3fUtils::push(L, audioPlayer->direction());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaIAudioPlayer::setDirection(lua_State *L)
+{
+	int vectorIndex = 0;
+	const Vector3f dir = LuaVector3fUtils::retrieve(L, -1, vectorIndex);
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, vectorIndex - 1);
+
+	if (audioPlayer)
+		audioPlayer->setDirection(dir);
+
+	return 0;
+}
+
+int LuaIAudioPlayer::coneInnerAngle(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
+
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->coneInnerAngle());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaIAudioPlayer::setConeInnerAngle(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -2);
+	const float coneInnerAngle = LuaUtils::retrieve<float>(L, -1);
+
+	if (audioPlayer)
+		audioPlayer->setConeInnerAngle(coneInnerAngle);
+
+	return 0;
+}
+
+int LuaIAudioPlayer::coneOuterAngle(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
+
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->coneOuterAngle());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaIAudioPlayer::setConeOuterAngle(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -2);
+	const float coneOuterAngle = LuaUtils::retrieve<float>(L, -1);
+
+	if (audioPlayer)
+		audioPlayer->setConeOuterAngle(coneOuterAngle);
+
+	return 0;
+}
+
+int LuaIAudioPlayer::coneOuterGain(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
+
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->coneOuterGain());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaIAudioPlayer::setConeOuterGain(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -2);
+	const float coneOuterGain = LuaUtils::retrieve<float>(L, -1);
+
+	if (audioPlayer)
+		audioPlayer->setConeOuterGain(coneOuterGain);
 
 	return 0;
 }

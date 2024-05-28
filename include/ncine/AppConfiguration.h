@@ -79,6 +79,16 @@ class DLL_PUBLIC AppConfiguration
 	/// The initial size for the pool of render commands
 	unsigned int renderCommandPoolSize;
 
+	/// The output frequency of the audio system
+	/*! \note Set this value to zero for the default output frequency of the device. */
+	unsigned int outputAudioFrequency;
+	/// The number of mono audio sources
+	/*! \note Set this value to zero to request the default number of mono audio sources. */
+	unsigned int monoAudioSources;
+	/// The number of stereo audio sources
+	/*! \note Set this value to zero to request the default number of stereo audio sources. */
+	unsigned int stereoAudioSources;
+
 	/// The flag is `true` if the debug overlay is enabled
 	bool withDebugOverlay;
 	/// The flag is `true` if the audio subsystem is enabled

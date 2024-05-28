@@ -33,6 +33,7 @@ class MyEventHandler :
 	void onPreInit(nc::AppConfiguration &config) override;
 	void onInit() override;
 	void onFrameStart() override;
+	void onShutdown() override;
 
 #ifdef __ANDROID__
 	void onTouchUp(const nc::TouchEvent &event) override;
@@ -44,14 +45,6 @@ class MyEventHandler :
 	void onJoyDisconnected(const nc::JoyConnectionEvent &event) override;
 
   private:
-	const int MaxStringLength = 384;
-
-	float gain_;
-	float pitch_;
-	float xPos_;
-	bool soundIsLooping_;
-	bool musicIsLooping_;
-
 	nctl::UniquePtr<nc::AudioBuffer> audioBuffer_;
 	nctl::UniquePtr<nc::IAudioPlayer> soundPlayer_;
 	nctl::UniquePtr<nc::IAudioPlayer> musicPlayer_;

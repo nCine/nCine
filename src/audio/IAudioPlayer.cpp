@@ -1,25 +1,51 @@
 #define NCINE_INCLUDE_OPENAL
 #include "common_headers.h"
+#include <nctl/algorithms.h>
 #include "IAudioPlayer.h"
 #include "Vector3.h"
 
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
+// STATIC DEFINITIONS
+///////////////////////////////////////////////////////////
+
+const float IAudioPlayer::MinGain = 0.0f;
+const float IAudioPlayer::DefaultGain = 1.0f;
+const float IAudioPlayer::MaxGain = 1.0f;
+
+const float IAudioPlayer::MinPitch = 0.5f;
+const float IAudioPlayer::DefaultPitch = 1.0f;
+const float IAudioPlayer::MaxPitch = 2.0f;
+
+const float IAudioPlayer::MinConeAngle = 0.0f;
+const float IAudioPlayer::DefaultConeAngle = 360.0f;
+const float IAudioPlayer::MaxConeAngle = 360.0f;
+
+const float IAudioPlayer::MinConeOuterGain = 0.0f;
+const float IAudioPlayer::DefaultConeOuterGain = 0.0f;
+const float IAudioPlayer::MaxConeOuterGain = 1.0f;
+
+///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
 IAudioPlayer::IAudioPlayer(ObjectType type, const char *name)
-    : Object(type, name), sourceId_(IAudioDevice::UnavailableSource),
-      state_(PlayerState::STOPPED), isLooping_(false),
-      gain_(1.0f), pitch_(1.0f), position_(0.0f, 0.0f, 0.0f)
+    : Object(type, name), sourceId_(IAudioDevice::InvalidSource),
+      sourceLocked_(false), state_(PlayerState::STOPPED), isLooping_(false),
+      gain_(DefaultGain), pitch_(DefaultPitch),
+      position_(0.0f, 0.0f, 0.0f), velocity_(0.0f, 0.0f, 0.0f), direction_(0.0f, 0.0f, 0.0f),
+      coneInnerAngle_(DefaultConeAngle), coneOuterAngle_(DefaultConeAngle), coneOuterGain_(DefaultConeOuterGain)
 {
 }
 
 IAudioPlayer::IAudioPlayer(ObjectType type)
-    : Object(type), sourceId_(IAudioDevice::UnavailableSource),
-      state_(PlayerState::STOPPED), isLooping_(false),
-      gain_(1.0f), pitch_(1.0f), position_(0.0f, 0.0f, 0.0f)
+    : IAudioPlayer(type, "")
+{
+}
+
+/* \note Defined here to fix a `no out-of-line virtual method definitions` warning */
+IAudioPlayer::~IAudioPlayer()
 {
 }
 
@@ -27,48 +53,143 @@ IAudioPlayer::IAudioPlayer(ObjectType type)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+bool IAudioPlayer::hasSource() const
+{
+	// `alIsSource()` is not needed, sources belong to a pool and are never deleted
+	return (sourceId_ != IAudioDevice::InvalidSource);
+}
+
 int IAudioPlayer::sampleOffset() const
 {
 	int byteOffset = 0;
-	alGetSourcei(sourceId_, AL_SAMPLE_OFFSET, &byteOffset);
+	if (hasSource())
+		alGetSourcei(sourceId_, AL_SAMPLE_OFFSET, &byteOffset);
 	return byteOffset;
 }
 
 void IAudioPlayer::setSampleOffset(int byteOffset)
 {
-	alSourcei(sourceId_, AL_SAMPLE_OFFSET, byteOffset);
+	if (hasSource())
+		alSourcei(sourceId_, AL_SAMPLE_OFFSET, byteOffset);
 }
 
-/*! The change is applied to the OpenAL source only when playing. */
+/*! \note Locking an OpenAL source can be useful to retain source properties */
+void IAudioPlayer::setSourceLocked(bool sourceLocked)
+{
+	if (sourceLocked_ != sourceLocked)
+	{
+		IAudioDevice &device = theServiceLocator().audioDevice();
+		if (sourceLocked && hasSource() == false && device.numAvailableSources() > 0)
+			device.registerPlayer(this);
+		else if (sourceLocked == false && hasSource() && isPlaying() == false && isPaused() == false)
+			device.unregisterPlayer(this);
+
+		// Set the flag to `true` only if a source was obtained
+		sourceLocked_ = hasSource();
+	}
+}
+
 void IAudioPlayer::setGain(float gain)
 {
-	gain_ = gain;
-	if (state_ == PlayerState::PLAYING)
+	gain_ = nctl::clamp(gain, MinGain, MaxGain);
+	if (hasSource())
 		alSourcef(sourceId_, AL_GAIN, gain_);
 }
 
-/*! The change is applied to the OpenAL source only when playing. */
 void IAudioPlayer::setPitch(float pitch)
 {
-	pitch_ = pitch;
-	if (state_ == PlayerState::PLAYING)
+	pitch_ = nctl::clamp(pitch, MinPitch, MaxPitch);
+	if (hasSource())
 		alSourcef(sourceId_, AL_PITCH, pitch_);
 }
 
-/*! The change is applied to the OpenAL source only when playing. */
 void IAudioPlayer::setPosition(const Vector3f &position)
 {
 	position_ = position;
-	if (state_ == PlayerState::PLAYING)
+	if (hasSource())
 		alSourcefv(sourceId_, AL_POSITION, position_.data());
 }
 
-/*! The change is applied to the OpenAL source only when playing. */
 void IAudioPlayer::setPosition(float x, float y, float z)
 {
 	position_.set(x, y, z);
-	if (state_ == PlayerState::PLAYING)
+	if (hasSource())
 		alSourcefv(sourceId_, AL_POSITION, position_.data());
+}
+
+void IAudioPlayer::setVelocity(const Vector3f &velocity)
+{
+	velocity_ = velocity;
+	if (hasSource())
+		alSourcefv(sourceId_, AL_VELOCITY, velocity_.data());
+}
+
+void IAudioPlayer::setVelocity(float x, float y, float z)
+{
+	velocity_.set(x, y, z);
+	if (hasSource())
+		alSourcefv(sourceId_, AL_VELOCITY, velocity_.data());
+}
+
+/*! \note Setting all components to zero will make the player omnidirectional */
+void IAudioPlayer::setDirection(const Vector3f &direction)
+{
+	direction_ = direction;
+	if (hasSource())
+		alSourcefv(sourceId_, AL_DIRECTION, direction_.data());
+}
+
+/*! \note Setting all components to zero will make the player omnidirectional */
+void IAudioPlayer::setDirection(float x, float y, float z)
+{
+	direction_.set(x, y, z);
+	if (hasSource())
+		alSourcefv(sourceId_, AL_DIRECTION, direction_.data());
+}
+
+void IAudioPlayer::setConeInnerAngle(float coneAngle)
+{
+	coneInnerAngle_ = nctl::clamp(coneAngle, MinConeAngle, MaxConeAngle);
+	if (hasSource())
+		alSourcef(sourceId_, AL_CONE_INNER_ANGLE, coneInnerAngle_);
+}
+
+void IAudioPlayer::setConeOuterAngle(float coneAngle)
+{
+	coneOuterAngle_ = nctl::clamp(coneAngle, MinConeAngle, MaxConeAngle);
+	if (hasSource())
+		alSourcef(sourceId_, AL_CONE_OUTER_ANGLE, coneOuterAngle_);
+}
+
+void IAudioPlayer::setConeOuterGain(float gain)
+{
+	coneOuterGain_ = nctl::clamp(gain, MinConeOuterGain, MaxConeOuterGain);
+	if (hasSource())
+		alSourcef(sourceId_, AL_CONE_OUTER_GAIN, coneOuterGain_);
+}
+
+///////////////////////////////////////////////////////////
+// PROTECTED FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void IAudioPlayer::applySourceProperties()
+{
+	if (hasSource())
+	{
+		alGetError();
+
+		alSourcef(sourceId_, AL_GAIN, gain_);
+		alSourcef(sourceId_, AL_PITCH, pitch_);
+		alSourcefv(sourceId_, AL_POSITION, position_.data());
+		alSourcefv(sourceId_, AL_VELOCITY, velocity_.data());
+		alSourcefv(sourceId_, AL_DIRECTION, direction_.data());
+		alSourcef(sourceId_, AL_CONE_INNER_ANGLE, coneInnerAngle_);
+		alSourcef(sourceId_, AL_CONE_OUTER_ANGLE, coneOuterAngle_);
+		alSourcef(sourceId_, AL_CONE_OUTER_GAIN, coneOuterGain_);
+
+		const ALenum error = alGetError(); // Checking the error only once, after setting all properties
+		ASSERT_MSG_X(error == AL_NO_ERROR, "Error while applying OpenAL source properties: 0x%x", error);
+	}
 }
 
 }

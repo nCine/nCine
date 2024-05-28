@@ -116,7 +116,7 @@ void Application::initCommon()
 	theServiceLocator().registerIndexer(nctl::makeUnique<ArrayIndexer>());
 #ifdef WITH_AUDIO
 	if (appCfg_.withAudio)
-		theServiceLocator().registerAudioDevice(nctl::makeUnique<ALAudioDevice>());
+		theServiceLocator().registerAudioDevice(nctl::makeUnique<ALAudioDevice>(appCfg_));
 #endif
 #ifdef WITH_THREADS
 	if (appCfg_.withThreads)

@@ -37,6 +37,8 @@ AudioBuffer::AudioBuffer()
 	alGenBuffers(1, &bufferId_);
 	const ALenum error = alGetError();
 	FATAL_ASSERT_MSG_X(error == AL_NO_ERROR, "alGenBuffers failed: 0x%x", error);
+
+	ASSERT(alIsBuffer(bufferId_) == AL_TRUE);
 }
 
 AudioBuffer::AudioBuffer(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)

@@ -55,6 +55,9 @@ AppConfiguration::AppConfiguration()
 #endif
       vaoPoolSize(16),
       renderCommandPoolSize(32),
+      outputAudioFrequency(0),
+      monoAudioSources(31),
+      stereoAudioSources(1),
       withDebugOverlay(false),
       withAudio(true),
       withThreads(false),

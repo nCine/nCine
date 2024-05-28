@@ -4,6 +4,7 @@
 #include "LuaIAudioDevice.h"
 #include "LuaUtils.h"
 #include "LuaUntrackedUserData.h"
+#include "LuaVector3Utils.h"
 
 namespace ncine {
 
@@ -16,15 +17,21 @@ namespace IAudioDevice {
 	static const char *gain = "get_gain";
 	static const char *setGain = "set_gain";
 
-	static const char *maxNumPlayers = "get_max_num_players";
+	static const char *position = "get_position";
+	static const char *setPosition = "set_position";
+
+	static const char *velocity = "get_velocity";
+	static const char *setVelocity = "set_velocity";
+
+	static const char *maxNumSources = "get_max_num_sources";
+	static const char *numAvailableSources = "get_num_available_sources";
+
 	static const char *numPlayers = "get_num_players";
 	static const char *player = "get_player";
 
 	static const char *pausePlayers = "pause_players";
 	static const char *stopPlayers = "stop_players";
-
-	static const char *freezePlayers = "freeze_players";
-	static const char *unfreezePlayers = "unfreeze_players";
+	static const char *resumePlayers = "resume_players";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -33,22 +40,28 @@ namespace IAudioDevice {
 
 void LuaIAudioDevice::expose(lua_State *L)
 {
-	lua_createtable(L, 0, 9);
+	lua_createtable(L, 0, 14);
 
 	LuaUtils::addFunction(L, LuaNames::IAudioDevice::name, name);
 
 	LuaUtils::addFunction(L, LuaNames::IAudioDevice::gain, gain);
 	LuaUtils::addFunction(L, LuaNames::IAudioDevice::setGain, setGain);
 
-	LuaUtils::addFunction(L, LuaNames::IAudioDevice::maxNumPlayers, maxNumPlayers);
+	LuaUtils::addFunction(L, LuaNames::IAudioDevice::position, position);
+	LuaUtils::addFunction(L, LuaNames::IAudioDevice::setPosition, setPosition);
+
+	LuaUtils::addFunction(L, LuaNames::IAudioDevice::velocity, velocity);
+	LuaUtils::addFunction(L, LuaNames::IAudioDevice::setVelocity, setVelocity);
+
+	LuaUtils::addFunction(L, LuaNames::IAudioDevice::maxNumSources, maxNumSources);
+	LuaUtils::addFunction(L, LuaNames::IAudioDevice::numAvailableSources, numAvailableSources);
+
 	LuaUtils::addFunction(L, LuaNames::IAudioDevice::numPlayers, numPlayers);
 	LuaUtils::addFunction(L, LuaNames::IAudioDevice::player, player);
 
 	LuaUtils::addFunction(L, LuaNames::IAudioDevice::pausePlayers, pausePlayers);
 	LuaUtils::addFunction(L, LuaNames::IAudioDevice::stopPlayers, stopPlayers);
-
-	LuaUtils::addFunction(L, LuaNames::IAudioDevice::freezePlayers, freezePlayers);
-	LuaUtils::addFunction(L, LuaNames::IAudioDevice::unfreezePlayers, unfreezePlayers);
+	LuaUtils::addFunction(L, LuaNames::IAudioDevice::resumePlayers, resumePlayers);
 
 	lua_setfield(L, -2, LuaNames::IAudioDevice::IAudioDevice);
 }
@@ -77,10 +90,52 @@ int LuaIAudioDevice::setGain(lua_State *L)
 	return 0;
 }
 
-int LuaIAudioDevice::maxNumPlayers(lua_State *L)
+int LuaIAudioDevice::position(lua_State *L)
 {
-	const unsigned int maxNumPlayers = theServiceLocator().audioDevice().maxNumPlayers();
-	LuaUtils::push(L, maxNumPlayers);
+	const Vector3f pos = theServiceLocator().audioDevice().position();
+	LuaVector3fUtils::push(L, pos);
+
+	return 1;
+}
+
+int LuaIAudioDevice::setPosition(lua_State *L)
+{
+	int vectorIndex = 0;
+	const Vector3f pos = LuaVector3fUtils::retrieve(L, -1, vectorIndex);
+	theServiceLocator().audioDevice().setPosition(pos);
+
+	return 0;
+}
+
+int LuaIAudioDevice::velocity(lua_State *L)
+{
+	const Vector3f vel = theServiceLocator().audioDevice().velocity();
+	LuaVector3fUtils::push(L, vel);
+
+	return 1;
+}
+
+int LuaIAudioDevice::setVelocity(lua_State *L)
+{
+	int vectorIndex = 0;
+	const Vector3f vel = LuaVector3fUtils::retrieve(L, -1, vectorIndex);
+	theServiceLocator().audioDevice().setVelocity(vel);
+
+	return 0;
+}
+
+int LuaIAudioDevice::maxNumSources(lua_State *L)
+{
+	const unsigned int maxNumSources = theServiceLocator().audioDevice().maxNumSources();
+	LuaUtils::push(L, maxNumSources);
+
+	return 1;
+}
+
+int LuaIAudioDevice::numAvailableSources(lua_State *L)
+{
+	const unsigned int numAvailableSources = theServiceLocator().audioDevice().numAvailableSources();
+	LuaUtils::push(L, numAvailableSources);
 
 	return 1;
 }
@@ -114,15 +169,9 @@ int LuaIAudioDevice::stopPlayers(lua_State *L)
 	return 0;
 }
 
-int LuaIAudioDevice::freezePlayers(lua_State *L)
+int LuaIAudioDevice::resumePlayers(lua_State *L)
 {
-	theServiceLocator().audioDevice().freezePlayers();
-	return 0;
-}
-
-int LuaIAudioDevice::unfreezePlayers(lua_State *L)
-{
-	theServiceLocator().audioDevice().unfreezePlayers();
+	theServiceLocator().audioDevice().resumePlayers();
 	return 0;
 }
 
