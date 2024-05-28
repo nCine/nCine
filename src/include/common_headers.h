@@ -53,6 +53,17 @@
 	#endif
 #endif
 
+#if defined(NCINE_INCLUDE_OPENAL_EFX_PRESETS)
+	#define AL_ALEXT_PROTOTYPES
+	#ifdef __APPLE__
+		#include <efx.h>
+		#include <efx-presets.h>
+	#else
+		#include <AL/efx.h>
+		#include <AL/efx-presets.h>
+	#endif
+#endif
+
 #if defined(NCINE_INCLUDE_LUA)
 extern "C"
 {

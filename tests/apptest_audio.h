@@ -16,6 +16,9 @@ namespace ncine {
 class AppConfiguration;
 class AudioBuffer;
 class IAudioPlayer;
+class AudioEffect;
+class AudioEffectSlot;
+class AudioFilter;
 class SceneNode;
 class Font;
 class TextNode;
@@ -48,6 +51,9 @@ class MyEventHandler :
 	nctl::UniquePtr<nc::AudioBuffer> audioBuffer_;
 	nctl::UniquePtr<nc::IAudioPlayer> soundPlayer_;
 	nctl::UniquePtr<nc::IAudioPlayer> musicPlayer_;
+	nctl::UniquePtr<nc::AudioEffect> audioEffect_;
+	nctl::UniquePtr<nc::AudioEffectSlot> audioEffectSlot_;
+	nctl::UniquePtr<nc::AudioFilter> audioFilter_;
 	nctl::UniquePtr<nc::SceneNode> dummy_;
 	nctl::UniquePtr<nc::Font> font_;
 	nctl::UniquePtr<nc::TextNode> textNode_;

@@ -6,6 +6,9 @@
 
 namespace ncine {
 
+class AudioEffectSlot;
+class AudioFilter;
+
 /// Audio player interface class
 class DLL_PUBLIC IAudioPlayer : public Object
 {
@@ -165,6 +168,26 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	/// Sets the player cone outer gain HF value
 	void setConeOuterGainHF(float gain);
 
+	/// Returns true if a valid OpenAL effect slot is currently assigned to the player
+	bool hasEffectSlot() const;
+	/// Returns the OpenAL id of the effect slot
+	inline unsigned int effectSlotId() const { return effectSlotId_; }
+	/// Returns true if a valid OpenAL auxiliary filter is currently assigned to the player
+	bool hasAuxFilter() const;
+	/// Returns the OpenAL id of the auxiliary filter
+	inline unsigned int auxFilterId() const { return auxFilterId_; }
+	/// Returns true if a valid OpenAL direct filter is currently assigned to the player
+	bool hasDirectFilter() const;
+	/// Returns the OpenAL id of the direct filter
+	inline unsigned int directFilterId() const { return directFilterId_; }
+
+	/// Sets or removes an affect slot, with an optional auxiliary filter, to the player
+	void setEffectSlot(const AudioEffectSlot *effectSlot, const AudioFilter *filter);
+	/// Sets or removes an affect slot to the player
+	inline void setEffectSlot(const AudioEffectSlot *effectSlot) { setEffectSlot(effectSlot, nullptr); }
+	/// Sets or remove the filter parameters from a filter object to the direct signal
+	void setDirectFilter(const AudioFilter *audioFilter);
+
   protected:
 	/// The OpenAL source id
 	unsigned int sourceId_;
@@ -203,6 +226,13 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	float roomRooloffFactor_;
 	/// Player cone outer gain HF value
 	float coneOuterGainHF_;
+
+	/// The OpenAL effect slot id to use when playing
+	unsigned int effectSlotId_;
+	/// The OpenAL auxiliary filter id to use when playing
+	unsigned int auxFilterId_;
+	/// The OpenAL direct filter id to use when playing
+	unsigned int directFilterId_;
 
 	/// Updates the state of the player if the source has finished playing
 	/*! It is called every frame by the `IAudioDevice` class and it is

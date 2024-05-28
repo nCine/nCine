@@ -996,6 +996,10 @@ void ImGuiDebugOverlay::guiAudioPlayers()
 					ImGui::Text("Air Absorption Factor: %f", player->airAbsorptionFactor());
 					ImGui::Text("Room Rolloff Factor: %f", player->roomRolloffFactor());
 					ImGui::Text("Cone Outer Gain HF: %f", player->coneOuterGainHF());
+					ImGui::NewLine();
+					ImGui::Text("Effect Slot: %d", player->effectSlotId());
+					ImGui::Text("Aux Filter: %d", player->auxFilterId());
+					ImGui::Text("Direct Filter: %d", player->directFilterId());
 				}
 				ImGui::NewLine();
 

@@ -7,6 +7,9 @@
 #include <ncine/AudioBufferPlayer.h>
 #include <ncine/AudioStream.h>
 #include <ncine/AudioStreamPlayer.h>
+#include <ncine/AudioEffectProperties.h>
+#include <ncine/AudioEffectSlot.h>
+#include <ncine/AudioFilter.h>
 #include <ncine/TextNode.h>
 #include "apptest_datapath.h"
 
@@ -61,9 +64,38 @@ const char *audioPlayerStateToString(nc::IAudioPlayer::PlayerState state)
 #if NCINE_WITH_IMGUI
 const ImVec4 Green = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
 const ImVec4 Red = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+const char *EffectTypeLabels[14] = { "Null", "Reverb", "EAX Reverb", "Chorus", "Distortion", "Echo",
+                                     "Flanger", "Frequency Shifter", "Vocal Morpher", "Pitch Shifter",
+                                     "Ring Modulator", "Autowah", "Compressor", "Equalizer" };
+const char *EfxPresetLabels[nc::AudioEffectProperties::EfxReverbPresets::COUNT + 1] = {
+    "Custom", "Generic", "Padded Cell", "Room", "Bathroom", "Living Room", "Stone Room", "Auditorium", "Concert Hall", "Cave", "Arena", "Hangar", "Carpeted Hallway",
+    "Hallway", "Stone Corridor", "Alley", "Forest", "City", "Mountains", "Quarry", "Plain", "Parking Lot", "Sewer Pipe", "Underwater", "Drugged", "Dizzy", "Psychotic",
+    "Castle Small Room", "Castle Short Passage", "Castle Medium Room", "Castle Large Room", "Castle Long Passage", "Castle Hall", "Castle Cupboard", "Castle Courtyard", "Castle Alcove",
+    "Factory Small Room", "Factory Short Passage", "Factory Medium Room", "Factory Large Room", "Factory Long Passage", "Factory Hall", "Factory Cupboard", "Factory Courtyard", "Factory Alcove",
+    "Ice Palace Small Room", "Ice Palace Short Passage", "Ice Palace Medium Room", "Ice Palace Large Room", "Ice Palace Long Passage", "Ice Palace Hall", "Ice Palace Cupboard", "Ice Palace Courtyard", "Ice Palace Alcove",
+    "Space Station Small Room", "Space Station Short Passage", "Space Station Medium Room", "Space Station Large Room", "Space Station Long Passage", "Space Station Hall", "Space Station Cupboard", "Space Station Alcove",
+    "Wooden Galeon Small Room", "Wooden Galeon Short Passage", "Wooden Galeon Medium Room", "Wooden Galeon Large Room", "Wooden Galeon Long Passage", "Wooden Galeon Hall", "Wooden Galeon Cupboard", "Wooden Galeon Courtyard", "Wooden Galeon Alcove",
+    "Sport Empty Stadium", "Sport Squash Court", "Sport Small Swimming Pool", "Sport Large Swimming Pool", "Sport Gymnasium", "Sport Full Stadium", "Sport Stadium Tannoy",
+    "Prefab Workshop", "Prefab School Room", "Prefab Practise Room", "Prefab Outhouse", "Prefab Caravan",
+    "Dome Tomb", "Pipe Small", "Dome Saints Paul", "Pipe Longthin", "Pipe Large", "Pipe Resonant",
+    "Outdoors Backyard", "Outdoors Rolling Plains", "Outdoors Deep Canyon", "Outdoors Crrek", "Outdoors Valley",
+    "Mood Heaven", "Mood Hell", "Mod Memories",
+    "Driving Commentator", "Driving Pit Garage", "Driving In-car Racer", "Driving In-car Sports", "Driving In-car Luxury", "Driving Full Grandstand", "Driving Empty Grandstand", "Driving Tunnel",
+    "City Streets", "City Subway", "City Museum", "City Library", "City Underpass", "City Abandoned",
+    "Dusty Room", "Chapel", "Small Water Room"
+};
+static_assert(nc::AudioEffectProperties::EfxReverbPresets::COUNT + 1 == sizeof(EfxPresetLabels) / sizeof(EfxPresetLabels[0]), "EFX reverb presets and their name strings should match");
+const char *WaveformLabels[3] = { "Sinusoid", "Triangle", "Sawtooth" };
+const char *DirectionLabels[3] = { "Down", "Up", "Off" };
+const char *PhonemeLabels[30] = { "A", "E", "I", "O", "U", "AA", "AE", "AH", "AO", "EH", "ER", "IH", "IY", "UH",
+                                  "UW", "B", "D", "F", "G", "J", "K", "L", "M", "N", "P", "R", "S", "T", "V", "Z" };
+const char *OnOffLabels[2] = { "Off", "On" };
+const char *FilterTypeLabels[4] = { "Null", "Low-pass", "High-pass", "Band-pass" };
+nc::AudioEffectProperties effectProperties;
+nc::AudioFilter::Properties filterProperties;
 bool showImGui = true;
 
-void sourcePropertiesGui(nc::IAudioPlayer &player)
+void sourcePropertiesGui(nc::IAudioPlayer &player, nc::AudioEffectSlot &audioEffectSlot, nc::AudioFilter &directAudioFilter)
 {
 	nc::IAudioDevice &device = nc::theServiceLocator().audioDevice();
 
@@ -99,6 +131,15 @@ void sourcePropertiesGui(nc::IAudioPlayer &player)
 	bool sourceLocked = player.isSourceLocked();
 	ImGui::Checkbox("Source locked", &sourceLocked);
 	player.setSourceLocked(sourceLocked);
+
+	bool effectSlot = player.hasEffectSlot();
+	ImGui::Checkbox("Effect slot", &effectSlot);
+	player.setEffectSlot(effectSlot ? &audioEffectSlot : nullptr);
+
+	ImGui::SameLine();
+	bool directFilter = player.hasDirectFilter();
+	ImGui::Checkbox("Direct filter", &directFilter);
+	player.setDirectFilter(directFilter ? &directAudioFilter : nullptr);
 
 	float gain = player.gain();
 	ImGui::SliderFloat("Gain", &gain, nc::IAudioPlayer::MinGain, nc::IAudioPlayer::MaxGain, "%.2f", ImGuiSliderFlags_AlwaysClamp);
@@ -167,6 +208,350 @@ void sourcePropertiesGui(nc::IAudioPlayer &player)
 		}
 	}
 }
+
+bool nullEffectPropertiesGui()
+{
+	effectProperties.setType(nc::AudioEffect::Type::NULL_EFFECT);
+	return false;
+}
+
+bool reverbPropertiesGui()
+{
+	effectProperties.setType(nc::AudioEffect::Type::REVERB);
+	nc::AudioEffectProperties::ReverbProperties &props = effectProperties.reverbProperties();
+	const nc::AudioEffectProperties::ReverbProperties &min = nc::AudioEffectProperties::minReverbProperties();
+	const nc::AudioEffectProperties::ReverbProperties &max = nc::AudioEffectProperties::maxReverbProperties();
+
+	bool valueChanged = false;
+	valueChanged |= ImGui::SliderFloat("Density", &props.density, min.density, max.density, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Diffusion", &props.diffusion, min.diffusion, max.diffusion, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Gain", &props.gain, min.gain, max.gain, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Gain HF", &props.gainHF, min.gainHF, max.gainHF, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Decay time", &props.decayTime, min.decayTime, max.decayTime, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Decay HF ratio", &props.decayHFRatio, min.decayHFRatio, max.decayHFRatio, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Reflections gain", &props.reflectionsGain, min.reflectionsGain, max.reflectionsGain, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Reflections delay", &props.reflectionsDelay, min.reflectionsDelay, max.reflectionsDelay, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Late reverb gain", &props.lateReverbGain, min.lateReverbGain, max.lateReverbGain, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Late reverb delay", &props.lateReverbDelay, min.lateReverbDelay, max.lateReverbDelay, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Air absorption gain HF", &props.airAbsorptionGainHF, min.airAbsorptionGainHF, max.airAbsorptionGainHF, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Room roll-off factor", &props.roomRolloffFactor, min.roomRolloffFactor, max.roomRolloffFactor, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderInt("Decay HF limit", &props.decayHFLimit, min.decayHFLimit, max.decayHFLimit, OnOffLabels[props.decayHFLimit], ImGuiSliderFlags_AlwaysClamp);
+
+	if (ImGui::Button("Reset"))
+	{
+		props = nc::AudioEffectProperties::ReverbProperties();
+		valueChanged = true;
+	}
+
+	return valueChanged;
+}
+
+bool eaxReverbPropertiesGui()
+{
+	static int selectedEfxPreset = 0;
+
+	effectProperties.setType(nc::AudioEffect::Type::EAXREVERB);
+	nc::AudioEffectProperties::EaxReverbProperties &props = effectProperties.eaxReverbProperties();
+	const nc::AudioEffectProperties::EaxReverbProperties &min = nc::AudioEffectProperties::minEaxReverbProperties();
+	const nc::AudioEffectProperties::EaxReverbProperties &max = nc::AudioEffectProperties::maxEaxReverbProperties();
+
+	bool valueChanged = false;
+	valueChanged |= ImGui::SliderFloat("Density", &props.density, min.density, max.density, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Diffusion", &props.diffusion, min.diffusion, max.diffusion, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Gain", &props.gain, min.gain, max.gain, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Gain HF", &props.gainHF, min.gainHF, max.gainHF, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Gain LF", &props.gainLF, min.gainLF, max.gainLF, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Decay time", &props.decayTime, min.decayTime, max.decayTime, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Decay HF ratio", &props.decayHFRatio, min.decayHFRatio, max.decayHFRatio, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Decay LF ratio", &props.decayLFRatio, min.decayLFRatio, max.decayLFRatio, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Reflections gain", &props.reflectionsGain, min.reflectionsGain, max.reflectionsGain, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Reflections delay", &props.reflectionsDelay, min.reflectionsDelay, max.reflectionsDelay, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat3("Reflections pan", &props.reflectionsPan[0], min.reflectionsPan[0], max.reflectionsPan[0], "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Late reverb gain", &props.lateReverbGain, min.lateReverbGain, max.lateReverbGain, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Late reverb delay", &props.lateReverbDelay, min.lateReverbDelay, max.lateReverbDelay, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat3("Late reverb pan", &props.lateReverbPan[0], min.lateReverbPan[0], max.lateReverbPan[0], "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Echo time", &props.echoTime, min.echoTime, max.echoTime, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Echo depth", &props.echoDepth, min.echoDepth, max.echoDepth, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Modulation time", &props.modulationTime, min.modulationTime, max.modulationTime, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Modulation depth", &props.modulationDepth, min.modulationDepth, max.modulationDepth, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Air absorption gain HF", &props.airAbsorptionGainHF, min.airAbsorptionGainHF, max.airAbsorptionGainHF, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("HF reference", &props.hfReference, min.hfReference, max.hfReference, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("LF reference", &props.lfReference, min.lfReference, max.lfReference, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Room roll-off factor", &props.roomRolloffFactor, min.roomRolloffFactor, max.roomRolloffFactor, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderInt("Decay HF limit", &props.decayHFLimit, min.decayHFLimit, max.decayHFLimit, OnOffLabels[props.decayHFLimit], ImGuiSliderFlags_AlwaysClamp);
+
+	// Set the custom preset if any properties has been altered
+	if (valueChanged)
+		selectedEfxPreset = 0;
+
+	if (ImGui::Combo("EFX Preset", &selectedEfxPreset, EfxPresetLabels, IM_ARRAYSIZE(EfxPresetLabels)))
+	{
+		if (selectedEfxPreset > 0)
+		{
+			props.loadPreset(nc::AudioEffectProperties::EfxReverbPresets(selectedEfxPreset - 1));
+			valueChanged = true;
+		}
+	}
+
+	if (ImGui::Button("Reset"))
+	{
+		props = nc::AudioEffectProperties::EaxReverbProperties();
+		selectedEfxPreset = 0;
+		valueChanged = true;
+	}
+
+	return valueChanged;
+}
+
+bool chorusPropertiesGui()
+{
+	effectProperties.setType(nc::AudioEffect::Type::CHORUS);
+	nc::AudioEffectProperties::ChorusProperties &props = effectProperties.chorusProperties();
+	const nc::AudioEffectProperties::ChorusProperties &min = nc::AudioEffectProperties::minChorusProperties();
+	const nc::AudioEffectProperties::ChorusProperties &max = nc::AudioEffectProperties::maxChorusProperties();
+
+	bool valueChanged = false;
+	valueChanged |= ImGui::SliderInt("Waveform", &props.waveform, min.waveform, max.waveform, WaveformLabels[props.waveform], ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderInt("Phase", &props.phase, min.phase, max.phase, "%d", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Rate", &props.rate, min.rate, max.rate, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Depth", &props.depth, min.depth, max.depth, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Feedback", &props.feedback, min.feedback, max.feedback, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Delay", &props.delay, min.delay, max.delay, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+
+	if (ImGui::Button("Reset"))
+	{
+		props = nc::AudioEffectProperties::ChorusProperties();
+		valueChanged = true;
+	}
+
+	return valueChanged;
+}
+
+bool distortionPropertiesGui()
+{
+	effectProperties.setType(nc::AudioEffect::Type::DISTORTION);
+	nc::AudioEffectProperties::DistortionProperties &props = effectProperties.distortionProperties();
+	const nc::AudioEffectProperties::DistortionProperties &min = nc::AudioEffectProperties::minDistortionProperties();
+	const nc::AudioEffectProperties::DistortionProperties &max = nc::AudioEffectProperties::maxDistortionProperties();
+
+	bool valueChanged = false;
+	valueChanged |= ImGui::SliderFloat("Edge", &props.edge, min.edge, max.edge, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Gain", &props.gain, min.gain, max.gain, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Low-pass cutoff", &props.lowpassCutoff, min.lowpassCutoff, max.lowpassCutoff, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Eq center", &props.eqCenter, min.eqCenter, max.eqCenter, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Eq bandwidth", &props.eqBandwidth, min.eqBandwidth, max.eqBandwidth, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+
+	if (ImGui::Button("Reset"))
+	{
+		props = nc::AudioEffectProperties::DistortionProperties();
+		valueChanged = true;
+	}
+
+	return valueChanged;
+}
+
+bool echoPropertiesGui()
+{
+	effectProperties.setType(nc::AudioEffect::Type::ECHO);
+	nc::AudioEffectProperties::EchoProperties &props = effectProperties.echoProperties();
+	const nc::AudioEffectProperties::EchoProperties &min = nc::AudioEffectProperties::minEchoProperties();
+	const nc::AudioEffectProperties::EchoProperties &max = nc::AudioEffectProperties::maxEchoProperties();
+
+	bool valueChanged = false;
+	valueChanged |= ImGui::SliderFloat("Delay", &props.delay, min.delay, max.delay, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("LR delay", &props.lrDelay, min.lrDelay, max.lrDelay, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Damping", &props.damping, min.damping, max.damping, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Feedback", &props.feedback, min.feedback, max.feedback, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Spread", &props.spread, min.spread, max.spread, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+
+	if (ImGui::Button("Reset"))
+	{
+		props = nc::AudioEffectProperties::EchoProperties();
+		valueChanged = true;
+	}
+
+	return valueChanged;
+}
+
+bool flangerPropertiesGui()
+{
+	effectProperties.setType(nc::AudioEffect::Type::FLANGER);
+	nc::AudioEffectProperties::FlangerProperties &props = effectProperties.flangerProperties();
+	const nc::AudioEffectProperties::FlangerProperties &min = nc::AudioEffectProperties::minFlangerProperties();
+	const nc::AudioEffectProperties::FlangerProperties &max = nc::AudioEffectProperties::maxFlangerProperties();
+
+	bool valueChanged = false;
+	valueChanged |= ImGui::SliderInt("Waveform", &props.waveform, min.waveform, max.waveform, WaveformLabels[props.waveform], ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderInt("Phase", &props.phase, min.phase, max.phase, "%d", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Rate", &props.rate, min.rate, max.rate, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Depth", &props.depth, min.depth, max.depth, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Feedback", &props.feedback, min.feedback, max.feedback, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Delay", &props.delay, min.delay, max.delay, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+
+	if (ImGui::Button("Reset"))
+	{
+		props = nc::AudioEffectProperties::FlangerProperties();
+		valueChanged = true;
+	}
+
+	return valueChanged;
+}
+
+bool frequencyShifterPropertiesGui()
+{
+	effectProperties.setType(nc::AudioEffect::Type::FREQUENCY_SHIFTER);
+	nc::AudioEffectProperties::FrequencyShifterProperties &props = effectProperties.frequencyShifterProperties();
+	const nc::AudioEffectProperties::FrequencyShifterProperties &min = nc::AudioEffectProperties::minFrequencyShifterProperties();
+	const nc::AudioEffectProperties::FrequencyShifterProperties &max = nc::AudioEffectProperties::maxFrequencyShifterProperties();
+
+	bool valueChanged = false;
+	valueChanged |= ImGui::SliderFloat("Frequency", &props.frequency, min.frequency, max.frequency, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderInt("Left direction", &props.leftDirection, min.leftDirection, max.leftDirection, DirectionLabels[props.leftDirection], ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderInt("Right direction", &props.rightDirection, min.rightDirection, max.rightDirection, DirectionLabels[props.rightDirection], ImGuiSliderFlags_AlwaysClamp);
+
+	if (ImGui::Button("Reset"))
+	{
+		props = nc::AudioEffectProperties::FrequencyShifterProperties();
+		valueChanged = true;
+	}
+
+	return valueChanged;
+}
+
+bool vocalMorpherPropertiesGui()
+{
+	effectProperties.setType(nc::AudioEffect::Type::VOCAL_MORPHER);
+	nc::AudioEffectProperties::VocalMorpherProperties &props = effectProperties.vocalMorpherProperties();
+	const nc::AudioEffectProperties::VocalMorpherProperties &min = nc::AudioEffectProperties::minVocalMorpherProperties();
+	const nc::AudioEffectProperties::VocalMorpherProperties &max = nc::AudioEffectProperties::maxVocalMorpherProperties();
+
+	bool valueChanged = false;
+	valueChanged |= ImGui::SliderInt("Phoneme A", &props.phonemeA, min.phonemeA, max.phonemeA, PhonemeLabels[props.phonemeA], ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderInt("Phoneme A coarse tuning", &props.phonemeACoarseTuning, min.phonemeACoarseTuning, max.phonemeACoarseTuning, "%d", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderInt("Phoneme B", &props.phonemeB, min.phonemeB, max.phonemeB, PhonemeLabels[props.phonemeB], ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderInt("Phoneme B coarse tuning", &props.phonemeBCoarseTuning, min.phonemeBCoarseTuning, max.phonemeBCoarseTuning, "%d", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderInt("Waveform", &props.waveform, min.waveform, max.waveform, WaveformLabels[props.waveform], ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Rate", &props.rate, min.rate, max.rate, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+
+	if (ImGui::Button("Reset"))
+	{
+		props = nc::AudioEffectProperties::VocalMorpherProperties();
+		valueChanged = true;
+	}
+
+	return valueChanged;
+}
+
+bool pitchShifterPropertiesGui()
+{
+	effectProperties.setType(nc::AudioEffect::Type::PITCH_SHIFTER);
+	nc::AudioEffectProperties::PitchShifterProperties &props = effectProperties.pitchShifterProperties();
+	const nc::AudioEffectProperties::PitchShifterProperties &min = nc::AudioEffectProperties::minPitchShifterProperties();
+	const nc::AudioEffectProperties::PitchShifterProperties &max = nc::AudioEffectProperties::maxPitchShifterProperties();
+
+	bool valueChanged = false;
+	valueChanged |= ImGui::SliderInt("Coarse tune", &props.coarseTune, min.coarseTune, max.coarseTune, "%d", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderInt("Fine tune", &props.fineTune, min.fineTune, max.fineTune, "%d", ImGuiSliderFlags_AlwaysClamp);
+
+	if (ImGui::Button("Reset"))
+	{
+		props = nc::AudioEffectProperties::PitchShifterProperties();
+		valueChanged = true;
+	}
+
+	return valueChanged;
+}
+
+bool ringModulatorPropertiesGui()
+{
+	effectProperties.setType(nc::AudioEffect::Type::RING_MODULATOR);
+	nc::AudioEffectProperties::RingModulatorProperties &props = effectProperties.ringModulatorProperties();
+	const nc::AudioEffectProperties::RingModulatorProperties &min = nc::AudioEffectProperties::minRingModulatorProperties();
+	const nc::AudioEffectProperties::RingModulatorProperties &max = nc::AudioEffectProperties::maxRingModulatorProperties();
+
+	bool valueChanged = false;
+	valueChanged |= ImGui::SliderFloat("Rate", &props.frequency, min.frequency, max.frequency, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("High-pass cutoff", &props.highpassCutoff, min.highpassCutoff, max.highpassCutoff, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderInt("Waveform", &props.waveform, min.waveform, max.waveform, WaveformLabels[props.waveform], ImGuiSliderFlags_AlwaysClamp);
+
+	if (ImGui::Button("Reset"))
+	{
+		props = nc::AudioEffectProperties::maxRingModulatorProperties();
+		valueChanged = true;
+	}
+
+	return valueChanged;
+}
+
+bool autoWahPropertiesGui()
+{
+	effectProperties.setType(nc::AudioEffect::Type::AUTOWAH);
+	nc::AudioEffectProperties::AutoWahProperties &props = effectProperties.autoWahProperties();
+	const nc::AudioEffectProperties::AutoWahProperties &min = nc::AudioEffectProperties::minAutoWahProperties();
+	const nc::AudioEffectProperties::AutoWahProperties &max = nc::AudioEffectProperties::maxAutoWahProperties();
+
+	bool valueChanged = false;
+	valueChanged |= ImGui::SliderFloat("Attack time", &props.attackTime, min.attackTime, max.attackTime, "%.4f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Release time", &props.releaseTime, min.releaseTime, max.releaseTime, "%.4f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Resonance", &props.resonance, min.resonance, max.resonance, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Peak gain", &props.peakGain, min.peakGain, max.peakGain, "%.5f", ImGuiSliderFlags_AlwaysClamp);
+
+	if (ImGui::Button("Reset"))
+	{
+		props = nc::AudioEffectProperties::maxAutoWahProperties();
+		valueChanged = true;
+	}
+
+	return valueChanged;
+}
+
+bool compressorPropertiesGui()
+{
+	effectProperties.setType(nc::AudioEffect::Type::COMPRESSOR);
+	nc::AudioEffectProperties::CompressorProperties &props = effectProperties.compressorProperties();
+	const nc::AudioEffectProperties::CompressorProperties &min = nc::AudioEffectProperties::minCompressorProperties();
+	const nc::AudioEffectProperties::CompressorProperties &max = nc::AudioEffectProperties::maxCompressorProperties();
+
+	bool valueChanged = false;
+	valueChanged |= ImGui::SliderInt("On/Off", &props.onOff, min.onOff, max.onOff, OnOffLabels[props.onOff], ImGuiSliderFlags_AlwaysClamp);
+
+	if (ImGui::Button("Reset"))
+	{
+		props = nc::AudioEffectProperties::maxCompressorProperties();
+		valueChanged = true;
+	}
+
+	return valueChanged;
+}
+
+bool equalizerPropertiesGui()
+{
+	effectProperties.setType(nc::AudioEffect::Type::EQUALIZER);
+	nc::AudioEffectProperties::EqualizerProperties &props = effectProperties.equalizerProperties();
+	const nc::AudioEffectProperties::EqualizerProperties &min = nc::AudioEffectProperties::minEqualizerProperties();
+	const nc::AudioEffectProperties::EqualizerProperties &max = nc::AudioEffectProperties::maxEqualizerProperties();
+
+	bool valueChanged = false;
+	valueChanged |= ImGui::SliderFloat("Low gain", &props.lowGain, min.lowGain, max.lowGain, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Low cutoff", &props.lowCutoff, min.lowCutoff, max.lowCutoff, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Mid1 gain", &props.mid1Gain, min.mid1Gain, max.mid1Gain, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Mid1 center", &props.mid1Center, min.mid1Center, max.mid1Center, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Mid1 width", &props.mid1Width, min.mid1Width, max.mid1Width, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Mid2 gain", &props.mid2Gain, min.mid2Gain, max.mid2Gain, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Mid2 center", &props.mid2Center, min.mid2Center, max.mid2Center, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("Mid2 width", &props.mid2Width, min.mid2Width, max.mid2Width, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("High gain", &props.highGain, min.highGain, max.highGain, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+	valueChanged |= ImGui::SliderFloat("High cutoff", &props.highCutoff, min.highCutoff, max.highCutoff, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+
+	if (ImGui::Button("Reset"))
+	{
+		props = nc::AudioEffectProperties::EqualizerProperties();
+		valueChanged = true;
+	}
+
+	return valueChanged;
+}
+
 #endif
 
 #if WITH_STRESS_TEST
@@ -476,9 +861,17 @@ void MyEventHandler::onInit()
 	textNode_->setAlignment(nc::TextNode::Alignment::LEFT);
 	textString_ = nctl::makeUnique<nctl::String>(MaxStringLength);
 
-#if WITH_STRESS_TEST
 	nc::IAudioDevice &device = nc::theServiceLocator().audioDevice();
+	if (device.hasExtension(nc::IAudioDevice::ALExtensions::EXT_EFX))
+	{
+		audioEffect_ = nctl::makeUnique<nc::AudioEffect>();
+		audioEffectSlot_ = nctl::makeUnique<nc::AudioEffectSlot>(*audioEffect_);
+		audioFilter_ = nctl::makeUnique<nc::AudioFilter>();
+		soundPlayer_->setEffectSlot(audioEffectSlot_.get(), audioFilter_.get());
+		musicPlayer_->setEffectSlot(audioEffectSlot_.get(), audioFilter_.get());
+	}
 
+#if WITH_STRESS_TEST
 	// Load music files from disk once, then pass the memory buffers to all sources
 	unsigned long int musicFileLengths[NumMusicFiles];
 	nctl::UniquePtr<unsigned char[]> musicFileBuffers[NumMusicFiles];
@@ -606,7 +999,7 @@ void MyEventHandler::onFrameStart()
 				ImGui::ProgressBar(streamFraction, ImVec2(0.0f, 0.0f));
 				ImGui::Text("Stream samples: %ld / %ld", sampleOffsetInStream, numSamples);
 
-				sourcePropertiesGui(*musicPlayer_);
+				sourcePropertiesGui(*musicPlayer_, *audioEffectSlot_, *audioFilter_);
 
 				ImGui::TreePop();
 			}
@@ -641,9 +1034,119 @@ void MyEventHandler::onFrameStart()
 				ImGui::ProgressBar(fraction, ImVec2(0.0f, 0.0f));
 				ImGui::Text("Samples: %d / %lu", sampleOffset, numSamples);
 
-				sourcePropertiesGui(*soundPlayer_);
+				sourcePropertiesGui(*soundPlayer_, *audioEffectSlot_, *audioFilter_);
 
 				ImGui::TreePop();
+			}
+
+			if (device.hasExtension(nc::IAudioDevice::ALExtensions::EXT_EFX))
+			{
+				if (ImGui::TreeNodeEx("EFX audio effects"))
+				{
+					bool valueChanged = false;
+
+					if (ImGui::Combo("Effect", &selectedEffectType, EffectTypeLabels, IM_ARRAYSIZE(EffectTypeLabels)))
+						valueChanged = true;
+
+					switch (selectedEffectType)
+					{
+						default:
+						case static_cast<int>(nc::AudioEffect::Type::NULL_EFFECT):
+							valueChanged |= nullEffectPropertiesGui();
+							break;
+						case static_cast<int>(nc::AudioEffect::Type::REVERB):
+							valueChanged |= reverbPropertiesGui();
+							break;
+						case static_cast<int>(nc::AudioEffect::Type::EAXREVERB):
+							valueChanged |= eaxReverbPropertiesGui();
+							break;
+						case static_cast<int>(nc::AudioEffect::Type::CHORUS):
+							valueChanged |= chorusPropertiesGui();
+							break;
+						case static_cast<int>(nc::AudioEffect::Type::DISTORTION):
+							valueChanged |= distortionPropertiesGui();
+							break;
+						case static_cast<int>(nc::AudioEffect::Type::ECHO):
+							valueChanged |= echoPropertiesGui();
+							break;
+						case static_cast<int>(nc::AudioEffect::Type::FLANGER):
+							valueChanged |= flangerPropertiesGui();
+							break;
+						case static_cast<int>(nc::AudioEffect::Type::FREQUENCY_SHIFTER):
+							valueChanged |= frequencyShifterPropertiesGui();
+							break;
+						case static_cast<int>(nc::AudioEffect::Type::VOCAL_MORPHER):
+							valueChanged |= vocalMorpherPropertiesGui();
+							break;
+						case static_cast<int>(nc::AudioEffect::Type::PITCH_SHIFTER):
+							valueChanged |= pitchShifterPropertiesGui();
+							break;
+						case static_cast<int>(nc::AudioEffect::Type::RING_MODULATOR):
+							valueChanged |= ringModulatorPropertiesGui();
+							break;
+						case static_cast<int>(nc::AudioEffect::Type::AUTOWAH):
+							valueChanged |= autoWahPropertiesGui();
+							break;
+						case static_cast<int>(nc::AudioEffect::Type::COMPRESSOR):
+							valueChanged |= compressorPropertiesGui();
+							break;
+						case static_cast<int>(nc::AudioEffect::Type::EQUALIZER):
+							valueChanged |= equalizerPropertiesGui();
+							break;
+					}
+
+					if (valueChanged)
+					{
+						audioEffect_->applyProperties(effectProperties);
+						audioEffectSlot_->applyEffect(*audioEffect_);
+					}
+
+					ImGui::TreePop();
+				}
+				if (ImGui::TreeNodeEx("EFX audio filters"))
+				{
+					bool valueChanged = false;
+
+					if (ImGui::Combo("Filter", &selectedFilterType, FilterTypeLabels, IM_ARRAYSIZE(FilterTypeLabels)))
+						valueChanged = true;
+
+					switch (selectedFilterType)
+					{
+						default:
+						case static_cast<int>(nc::AudioFilter::Type::NULL_FILTER):
+							filterProperties = nc::AudioFilter::Properties();
+							break;
+						case static_cast<int>(nc::AudioFilter::Type::LOWPASS):
+							filterProperties.type = nc::AudioFilter::Type::LOWPASS;
+							valueChanged |= ImGui::SliderFloat("Gain", &filterProperties.gain, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+							valueChanged |= ImGui::SliderFloat("Gain HF", &filterProperties.gainHF, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+							break;
+						case static_cast<int>(nc::AudioFilter::Type::HIGHPASS):
+							filterProperties.type = nc::AudioFilter::Type::HIGHPASS;
+							valueChanged |= ImGui::SliderFloat("Gain", &filterProperties.gain, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+							valueChanged |= ImGui::SliderFloat("Gain LF", &filterProperties.gainLF, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+							break;
+						case static_cast<int>(nc::AudioFilter::Type::BANDPASS):
+							filterProperties.type = nc::AudioFilter::Type::BANDPASS;
+							valueChanged |= ImGui::SliderFloat("Gain", &filterProperties.gain, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+							valueChanged |= ImGui::SliderFloat("Gain LF", &filterProperties.gainLF, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+							valueChanged |= ImGui::SliderFloat("Gain HF", &filterProperties.gainHF, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+							break;
+					}
+
+					if (ImGui::Button("Reset"))
+					{
+						filterProperties.gain = 1.0f;
+						filterProperties.gainLF = 1.0f;
+						filterProperties.gainHF = 1.0f;
+						valueChanged = true;
+					}
+
+					if (valueChanged)
+						audioFilter_->applyProperties(filterProperties);
+
+					ImGui::TreePop();
+				}
 			}
 
 	#if WITH_STRESS_TEST

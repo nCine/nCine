@@ -65,6 +65,16 @@ namespace IAudioPlayer {
 
 	static const char *coneOuterGainHF = "get_cone_outer_gain_hf";
 	static const char *setConeOuterGainHF = "set_cone_outer_gain_hf";
+
+	static const char *hasEffectSlot = "has_effect_slot";
+	static const char *effectSlotId = "get_effect_slot_id";
+	static const char *hasAuxFilter = "has_aux_filter";
+	static const char *auxFilterId = "get_aux_filter_id";
+	static const char *hasDirectFilter = "has_direct_filter";
+	static const char *directFilterId = "get_direct_filter_id";
+
+	static const char *setEffectSlot = "set_effect_slot";
+	static const char *setDirectFilter = "set_direct_filter";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -130,6 +140,16 @@ void LuaIAudioPlayer::exposeFunctions(lua_State *L)
 
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::coneOuterGainHF, coneOuterGainHF);
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setConeOuterGainHF, setConeOuterGainHF);
+
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::hasEffectSlot, hasEffectSlot);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::effectSlotId, effectSlotId);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::hasAuxFilter, hasAuxFilter);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::auxFilterId, auxFilterId);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::hasDirectFilter, hasDirectFilter);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::directFilterId, directFilterId);
+
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setEffectSlot, setEffectSlot);
+	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setDirectFilter, setDirectFilter);
 }
 
 int LuaIAudioPlayer::hasSource(lua_State *L)
@@ -627,6 +647,101 @@ int LuaIAudioPlayer::setConeOuterGainHF(lua_State *L)
 
 	if (audioPlayer)
 		audioPlayer->setConeOuterGainHF(coneOuterGainHF);
+
+	return 0;
+}
+
+int LuaIAudioPlayer::hasEffectSlot(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
+
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->hasEffectSlot());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaIAudioPlayer::effectSlotId(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
+
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->effectSlotId());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaIAudioPlayer::hasAuxFilter(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
+
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->hasAuxFilter());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaIAudioPlayer::auxFilterId(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
+
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->auxFilterId());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaIAudioPlayer::hasDirectFilter(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
+
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->hasDirectFilter());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaIAudioPlayer::directFilterId(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
+
+	if (audioPlayer)
+		LuaUtils::push(L, audioPlayer->directFilterId());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaIAudioPlayer::setEffectSlot(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -3);
+	AudioEffectSlot *audioEffectslot = LuaUntrackedUserData<AudioEffectSlot>::retrieveOrNil(L, -2);
+	AudioFilter *audioFilter = LuaUntrackedUserData<AudioFilter>::retrieveOrNil(L, -1);
+
+	if (audioPlayer)
+		audioPlayer->setEffectSlot(audioEffectslot, audioFilter);
+
+	return 0;
+}
+
+int LuaIAudioPlayer::setDirectFilter(lua_State *L)
+{
+	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -2);
+	AudioFilter *audioFilter = LuaUntrackedUserData<AudioFilter>::retrieveOrNil(L, -1);
+
+	if (audioPlayer)
+		audioPlayer->setDirectFilter(audioFilter);
 
 	return 0;
 }

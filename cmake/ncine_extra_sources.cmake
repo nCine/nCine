@@ -105,6 +105,10 @@ if(OPENAL_FOUND)
 		${NCINE_ROOT}/include/ncine/IAudioPlayer.h
 		${NCINE_ROOT}/include/ncine/AudioBufferPlayer.h
 		${NCINE_ROOT}/include/ncine/AudioStreamPlayer.h
+		${NCINE_ROOT}/include/ncine/AudioEffect.h
+		${NCINE_ROOT}/include/ncine/AudioEffectProperties.h
+		${NCINE_ROOT}/include/ncine/AudioEffectSlot.h
+		${NCINE_ROOT}/include/ncine/AudioFilter.h
 	)
 
 	list(APPEND PRIVATE_HEADERS
@@ -126,6 +130,10 @@ if(OPENAL_FOUND)
 		${NCINE_ROOT}/src/audio/IAudioPlayer.cpp
 		${NCINE_ROOT}/src/audio/AudioBufferPlayer.cpp
 		${NCINE_ROOT}/src/audio/AudioStreamPlayer.cpp
+		${NCINE_ROOT}/src/audio/AudioEffect.cpp
+		${NCINE_ROOT}/src/audio/AudioEffectProperties.cpp
+		${NCINE_ROOT}/src/audio/AudioEffectSlot.cpp
+		${NCINE_ROOT}/src/audio/AudioFilter.cpp
 	)
 
 	if(VORBIS_FOUND)

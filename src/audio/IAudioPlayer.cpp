@@ -4,6 +4,8 @@
 #include <nctl/algorithms.h>
 #include "ALAudioDevice.h" // for `hasEfxExtension()`
 #include "IAudioPlayer.h"
+#include "AudioEffectSlot.h"
+#include "AudioFilter.h"
 #include "Vector3.h"
 
 namespace ncine {
@@ -51,7 +53,8 @@ IAudioPlayer::IAudioPlayer(ObjectType type, const char *name)
       position_(0.0f, 0.0f, 0.0f), velocity_(0.0f, 0.0f, 0.0f), direction_(0.0f, 0.0f, 0.0f),
       coneInnerAngle_(DefaultConeAngle), coneOuterAngle_(DefaultConeAngle), coneOuterGain_(DefaultConeOuterGain),
       airAbsorptionFactor_(DefaultAirAbsorptionFactor), roomRooloffFactor_(DefaultRoomRolloffFactor),
-      coneOuterGainHF_(DefaultConeOuterGainHF)
+      coneOuterGainHF_(DefaultConeOuterGainHF),
+      effectSlotId_(0), auxFilterId_(0), directFilterId_(0)
 {
 }
 
@@ -89,7 +92,7 @@ void IAudioPlayer::setSampleOffset(int byteOffset)
 		alSourcei(sourceId_, AL_SAMPLE_OFFSET, byteOffset);
 }
 
-/*! \note Locking an OpenAL source can be useful to retain source properties */
+/*! \note Locking an OpenAL source can be useful to retain source, effect, and filter properties */
 void IAudioPlayer::setSourceLocked(bool sourceLocked)
 {
 	if (sourceLocked_ != sourceLocked)
@@ -205,6 +208,69 @@ void IAudioPlayer::setConeOuterGainHF(float gain)
 		alSourcef(sourceId_, AL_CONE_OUTER_GAINHF, coneOuterGainHF_);
 }
 
+bool IAudioPlayer::hasEffectSlot() const
+{
+	if (hasEfxExtension() == false || effectSlotId_ == AL_EFFECTSLOT_NULL)
+		return false;
+
+	return alIsAuxiliaryEffectSlot(effectSlotId_);
+}
+
+bool IAudioPlayer::hasAuxFilter() const
+{
+	if (hasEfxExtension() == false || auxFilterId_ == AL_FILTER_NULL)
+		return false;
+
+	return alIsFilter(auxFilterId_);
+}
+
+bool IAudioPlayer::hasDirectFilter() const
+{
+	if (hasEfxExtension() == false || directFilterId_ == AL_FILTER_NULL)
+		return false;
+
+	return alIsFilter(directFilterId_);
+}
+
+void IAudioPlayer::setEffectSlot(const AudioEffectSlot *effectSlot, const AudioFilter *filter)
+{
+	if (hasEfxExtension() == false)
+		return;
+
+	// Cannot set a filter without an effect slot
+	ASSERT((effectSlot == nullptr && filter != nullptr) == false);
+	if (effectSlot == nullptr && filter != nullptr)
+		filter = nullptr;
+
+	effectSlotId_ = effectSlot ? effectSlot->effectSlotId() : AL_EFFECTSLOT_NULL;
+	auxFilterId_ = filter ? filter->filterId() : AL_FILTER_NULL;
+
+	if (hasSource())
+	{
+		alGetError();
+		const ALint auxSendNumber = 0; // Always using auxiliary send number 0
+		alSource3i(sourceId_, AL_AUXILIARY_SEND_FILTER, static_cast<ALint>(effectSlotId_), auxSendNumber, static_cast<ALint>(auxFilterId_));
+		const ALenum error = alGetError();
+		ASSERT_MSG_X(error == AL_NO_ERROR, "alSource3i failed: 0x%x", error);
+	}
+}
+
+void IAudioPlayer::setDirectFilter(const AudioFilter *filter)
+{
+	if (hasEfxExtension() == false)
+		return;
+
+	directFilterId_ = filter ? filter->filterId() : AL_FILTER_NULL;
+
+	if (hasSource())
+	{
+		alGetError();
+		alSourcei(sourceId_, AL_DIRECT_FILTER, static_cast<ALint>(directFilterId_));
+		const ALenum error = alGetError();
+		ASSERT_MSG_X(error == AL_NO_ERROR, "alSourcei failed: 0x%x", error);
+	}
+}
+
 ///////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -229,6 +295,10 @@ void IAudioPlayer::applySourceProperties()
 			alSourcef(sourceId_, AL_AIR_ABSORPTION_FACTOR, airAbsorptionFactor_);
 			alSourcef(sourceId_, AL_ROOM_ROLLOFF_FACTOR, roomRooloffFactor_);
 			alSourcef(sourceId_, AL_CONE_OUTER_GAINHF, coneOuterGainHF_);
+
+			const ALint auxSendNumber = 0; // Always using auxiliary send number 0
+			alSource3i(sourceId_, AL_AUXILIARY_SEND_FILTER, static_cast<ALint>(effectSlotId_), auxSendNumber, static_cast<ALint>(auxFilterId_));
+			alSourcei(sourceId_, AL_DIRECT_FILTER, static_cast<ALint>(directFilterId_));
 		}
 
 		const ALenum error = alGetError(); // Checking the error only once, after setting all properties

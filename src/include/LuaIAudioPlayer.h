@@ -69,6 +69,16 @@ class LuaIAudioPlayer
 	static int coneOuterGainHF(lua_State *L);
 	static int setConeOuterGainHF(lua_State *L);
 
+	static int hasEffectSlot(lua_State *L);
+	static int effectSlotId(lua_State *L);
+	static int hasAuxFilter(lua_State *L);
+	static int auxFilterId(lua_State *L);
+	static int hasDirectFilter(lua_State *L);
+	static int directFilterId(lua_State *L);
+
+	static int setEffectSlot(lua_State *L);
+	static int setDirectFilter(lua_State *L);
+
 	friend class LuaAudioBufferPlayer;
 	friend class LuaAudioStreamPlayer;
 };
