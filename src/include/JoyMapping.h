@@ -86,6 +86,8 @@ class JoyMapping
 		struct Axis
 		{
 			AxisName name;
+			ButtonName positiveButtonName = ButtonName::UNKNOWN;
+			ButtonName negativeButtonName = ButtonName::UNKNOWN;
 			float min;
 			float max;
 		};

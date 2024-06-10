@@ -11,14 +11,20 @@
 	#include <ncine/TextureSaverWebP.h>
 #endif
 #include <ncine/Sprite.h>
-#include <ncine/AudioBuffer.h>
-#include <ncine/AudioBufferPlayer.h>
-#include <ncine/AudioStreamPlayer.h>
 #include <ncine/TextNode.h>
-#include <ncine/LuaStateManager.h>
 #include <ncine/Shader.h>
 #include <ncine/IFile.h>
 #include <ncine/Colorf.h>
+
+#if NCINE_WITH_VORBIS
+	#include <ncine/AudioBuffer.h>
+	#include <ncine/AudioBufferPlayer.h>
+	#include <ncine/AudioStreamPlayer.h>
+#endif
+
+#if NCINE_WITH_LUA
+	#include <ncine/LuaStateManager.h>
+#endif
 
 #include "apptest_shaders_sources.h"
 #include "apptest_datapath.h"
@@ -97,6 +103,7 @@ int loadedShader = -1;
 
 bool showImGui = true;
 
+#if NCINE_WITH_VORBIS
 const char *audioPlayerStateToString(nc::IAudioPlayer::PlayerState state)
 {
 	switch (state)
@@ -109,6 +116,7 @@ const char *audioPlayerStateToString(nc::IAudioPlayer::PlayerState state)
 
 	return "Unknown";
 }
+#endif
 
 }
 
@@ -136,6 +144,7 @@ void MyEventHandler::onInit()
 		textureFile->close();
 	}
 
+#if NCINE_WITH_VORBIS
 	for (unsigned int i = 0; i < NumSounds; i++)
 	{
 		nctl::UniquePtr<nc::IFile> soundFile = nc::IFile::createFileHandle(prefixDataPath("sounds", SoundFiles[i]).data());
@@ -145,6 +154,7 @@ void MyEventHandler::onInit()
 		soundFile->read(soundBuffers[i].get(), soundBufferSizes[i]);
 		soundFile->close();
 	}
+#endif
 
 	for (unsigned int i = 0; i < NumFonts; i++)
 	{
@@ -156,6 +166,7 @@ void MyEventHandler::onInit()
 		fontFile->close();
 	}
 
+#if NCINE_WITH_LUA
 	for (unsigned int i = 0; i < NumScripts; i++)
 	{
 		nctl::UniquePtr<nc::IFile> scriptFile = nc::IFile::createFileHandle(prefixDataPath("scripts", ScriptFiles[i]).data());
@@ -165,46 +176,61 @@ void MyEventHandler::onInit()
 		scriptFile->read(scriptBuffers[i].get(), scriptBufferSizes[i]);
 		scriptFile->close();
 	}
+#endif
 
 	DefaultVertexShaders[5] = nc::Shader::DefaultVertex::SPRITE;
 
 #if DEFAULT_CONSTRUCTORS
 	for (unsigned int i = 0; i < NumTextures; i++)
 		textures_.pushBack(nctl::makeUnique<nc::Texture>());
+	#if NCINE_WITH_VORBIS
 	audioBuffer_ = nctl::makeUnique<nc::AudioBuffer>();
 	streamPlayer_ = nctl::makeUnique<nc::AudioStreamPlayer>();
+	#endif
 	font_ = nctl::makeUnique<nc::Font>();
 	shader_ = nctl::makeUnique<nc::Shader>();
 #else
 	for (unsigned int i = 0; i < NumTextures; i++)
 		textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", TextureFiles[i])).data()));
+	#if NCINE_WITH_VORBIS
 	audioBuffer_ = nctl::makeUnique<nc::AudioBuffer>((prefixDataPath("sounds", SoundFiles[0])).data());
 	streamPlayer_ = nctl::makeUnique<nc::AudioStreamPlayer>((prefixDataPath("sounds", SoundFiles[3])).data());
+	#endif
 	font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFiles[0])).data());
 	shader_ = nctl::makeUnique<nc::Shader>(ShaderNames[0], nc::Shader::LoadMode::STRING, nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS,
 	                                       VertexShaderStrings[0], FragmentShaderStrings[0]);
 #endif
+#if NCINE_WITH_LUA
 	luaState_ = nctl::makeUnique<nc::LuaStateManager>(nc::LuaStateManager::ApiType::EDIT_ONLY,
 	                                                  nc::LuaStateManager::StatisticsTracking::DISABLED,
 	                                                  nc::LuaStateManager::StandardLibraries::NOT_LOADED);
+#endif
 
 #if LOADING_FAILURES
 	// Loading from non-existent files
 	for (unsigned int i = 0; i < NumTextures; i++)
 		textures_[i]->loadFromFile("NonExistent.png");
+	#if NCINE_WITH_VORBIS
 	audioBuffer_->loadFromFile("NonExistent.wav");
 	streamPlayer_->loadFromFile("NonExistent.ogg");
+	#endif
 	font_->loadFromFile("NonExistent.fnt");
+	#if NCINE_WITH_LUA
 	luaState_->loadFromFile("NonExistent.lua");
+	#endif
 	shader_->loadFromFile("NonExistent_vs.glsl", "NonExistent_fs.glsl");
 
 	// Loading from uninitialized memory buffers
 	for (unsigned int i = 0; i < NumTextures; i++)
 		textures_[i]->loadFromMemory("NonExistent.png", randomBuffer, randomBufferLength);
+	#if NCINE_WITH_VORBIS
 	audioBuffer_->loadFromMemory("NonExistent.wav", randomBuffer, randomBufferLength);
 	streamPlayer_->loadFromMemory("NonExistent.ogg", randomBuffer, randomBufferLength);
+	#endif
 	font_->loadFromMemory("NonExistent.fnt", randomBuffer, randomBufferLength, "NonExistent.png");
+	#if NCINE_WITH_LUA
 	luaState_->loadFromMemory("NonExistent.lua", reinterpret_cast<const char *>(randomBuffer), randomBufferLength);
+	#endif
 	shader_->loadFromMemory("NonExistent_Shader", reinterpret_cast<const char *>(randomBuffer), reinterpret_cast<const char *>(randomBuffer));
 #endif
 
@@ -217,7 +243,9 @@ void MyEventHandler::onInit()
 		sprites_.pushBack(nctl::makeUnique<nc::Sprite>(&rootNode, texture, position));
 	}
 
+#if NCINE_WITH_VORBIS
 	bufferPlayer_ = nctl::makeUnique<nc::AudioBufferPlayer>(audioBuffer_.get());
+#endif
 	textNode_ = nctl::makeUnique<nc::TextNode>(&rootNode, font_.get());
 	textNode_->setPosition(width * 0.5f, height * 0.75f);
 	textNode_->setString("apptest_loading");
@@ -440,6 +468,7 @@ void MyEventHandler::onFrameStart()
 					ImGui::TextUnformatted("Select a texture object from the list");
 			}
 
+#if NCINE_WITH_VORBIS
 			if (ImGui::CollapsingHeader("Audio"))
 			{
 				ImGui::Text("Buffer Name: \"%s\"", audioBuffer_->name());
@@ -622,6 +651,7 @@ void MyEventHandler::onFrameStart()
 					ImGui::TreePop();
 				}
 			}
+#endif
 
 			if (ImGui::CollapsingHeader("Font"))
 			{
@@ -658,7 +688,7 @@ void MyEventHandler::onFrameStart()
 						else
 						{
 							auxString.format("Memory file \"%s\"", FontFiles[selectedFont]);
-							audioBuffer_->setName(auxString.data());
+							font_->setName(auxString.data());
 						}
 						fontHasChanged = hasLoaded;
 					}
@@ -669,6 +699,7 @@ void MyEventHandler::onFrameStart()
 					textNode_->setFont(font_.get());
 			}
 
+#if NCINE_WITH_LUA
 			if (ImGui::CollapsingHeader("Lua Script"))
 			{
 				if (loadedScript >= 0 && loadedScript < NumScripts)
@@ -714,6 +745,7 @@ void MyEventHandler::onFrameStart()
 					                                                  nc::LuaStateManager::StandardLibraries::NOT_LOADED);
 				}
 			}
+#endif
 
 			if (ImGui::CollapsingHeader("Shader"))
 			{

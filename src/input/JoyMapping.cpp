@@ -378,14 +378,37 @@ void JoyMapping::onJoyAxisMoved(const JoyAxisEvent &event)
 	{
 		const MappedJoystick::Axis &axis = mappings_[mappingIndex].axes[event.axisId];
 
-		mappedAxisEvent_.joyId = event.joyId;
-		mappedAxisEvent_.axisName = axis.name;
+		// Regular axis
 		if (mappedAxisEvent_.axisName != AxisName::UNKNOWN)
 		{
+			mappedAxisEvent_.joyId = event.joyId;
+			mappedAxisEvent_.axisName = axis.name;
 			const float value = (event.normValue + 1.0f) * 0.5f;
 			mappedAxisEvent_.value = axis.min + value * (axis.max - axis.min);
 			mappedJoyStates_[event.joyId].axesValues_[static_cast<int>(axis.name)] = mappedAxisEvent_.value;
 			inputEventHandler_->onJoyMappedAxisMoved(mappedAxisEvent_);
+		}
+
+		// Axis mapped as button
+		if (axis.positiveButtonName != ButtonName::UNKNOWN || axis.negativeButtonName != ButtonName::UNKNOWN)
+		{
+			mappedButtonEvent_.joyId = event.joyId;
+			mappedButtonEvent_.buttonName = axis.positiveButtonName;
+			const int buttonId = static_cast<int>(mappedButtonEvent_.buttonName);
+
+			const bool prevState = mappedJoyStates_[event.joyId].buttons_[buttonId];
+			const bool newState = (axis.positiveButtonName != ButtonName::UNKNOWN) ?
+			            (event.value >= IInputManager::RightStickDeadZone) :
+			            (event.value <= -IInputManager::RightStickDeadZone);
+
+			if (newState != prevState)
+			{
+				mappedJoyStates_[event.joyId].buttons_[buttonId] = newState;
+				if (newState)
+					inputEventHandler_->onJoyMappedButtonPressed(mappedButtonEvent_);
+				else
+					inputEventHandler_->onJoyMappedButtonReleased(mappedButtonEvent_);
+			}
 		}
 	}
 }
@@ -703,6 +726,36 @@ bool JoyMapping::parseMappingFromString(const char *mappingString, MappedJoystic
 						const int hatMapping = parseHatMapping(subMid + 1, subEnd);
 						if (hatMapping != -1 && hatMapping < MappedJoystick::MaxHatButtons)
 							map.hats[hatMapping] = static_cast<ButtonName>(buttonIndex);
+						else
+						{
+							const unsigned int DebugMapStringMaxLength = 8;
+							char debugMapString[DebugMapStringMaxLength];
+							const int debugMapStringLength = subEnd - (subMid + 1);
+							const int debugMapStringClampedLength = (debugMapStringLength < DebugMapStringMaxLength - 1)
+							        ? debugMapStringLength : DebugMapStringMaxLength - 1;
+							debugMapString[debugMapStringClampedLength] = '\0';
+
+							MappedJoystick::Axis axis;
+							const int axisMapping = parseAxisMapping(subMid + 1, subEnd, axis);
+							if (axisMapping != -1 && axisMapping < MappedJoystick::MaxNumAxes)
+							{
+								if (axis.max > 0.0f)
+									map.axes[axisMapping].positiveButtonName = static_cast<ButtonName>(buttonIndex);
+								else if (axis.max < 0.0f)
+									map.axes[axisMapping].negativeButtonName = static_cast<ButtonName>(buttonIndex);
+								else
+								{
+									memcpy(debugMapString, subMid + 1, debugMapStringClampedLength);
+									LOGI_X("Unsupported axis value \"%s\" for button mapping in \"%s\"", debugMapString, map.name);
+								}
+							}
+							else if (subMid + 1 < subEnd)
+							{
+								// Sometimes it is empty
+								memcpy(debugMapString, subMid + 1, debugMapStringClampedLength);
+								LOGI_X("Unsupported mapping source \"%s\" in \"%s\"", debugMapString, map.name);
+							}
+						}
 					}
 				}
 			}

@@ -1,5 +1,5 @@
 if(NCINE_BUILD_BENCHMARKS)
-	set(GBENCHMARK_VERSION_TAG "v1.8.3" CACHE STRING "The Git release, tag, branch or commit for Googlebenchmark")
+	set(GBENCHMARK_VERSION_TAG "v1.8.4" CACHE STRING "The Git release, tag, branch or commit for Googlebenchmark")
 	# Download release archive (TRUE) or Git repository (FALSE)
 	set(GBENCHMARK_DOWNLOAD_ARCHIVE TRUE)
 

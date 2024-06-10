@@ -212,7 +212,7 @@ void MyEventHandler::onTouchDown(const nc::TouchEvent &event)
 
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 {
-#ifdef NCINE_WITH_IMGUI
+#if NCINE_WITH_IMGUI
 	if (passMouseEvents == false)
 		return;
 #endif
