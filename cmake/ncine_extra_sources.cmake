@@ -317,6 +317,10 @@ if(LUA_FOUND)
 				${NCINE_ROOT}/src/include/LuaAudioStreamPlayer.h
 				${NCINE_ROOT}/src/include/LuaAudioBuffer.h
 				${NCINE_ROOT}/src/include/LuaAudioBufferPlayer.h
+				${NCINE_ROOT}/src/include/LuaAudioFilter.h
+				${NCINE_ROOT}/src/include/LuaAudioEffectSlot.h
+				${NCINE_ROOT}/src/include/LuaAudioEffect.h
+				${NCINE_ROOT}/src/include/LuaAudioEffectProperties.h
 			)
 
 			list(APPEND SOURCES
@@ -325,6 +329,10 @@ if(LUA_FOUND)
 				${NCINE_ROOT}/src/scripting/LuaAudioStreamPlayer.cpp
 				${NCINE_ROOT}/src/scripting/LuaAudioBuffer.cpp
 				${NCINE_ROOT}/src/scripting/LuaAudioBufferPlayer.cpp
+				${NCINE_ROOT}/src/scripting/LuaAudioFilter.cpp
+				${NCINE_ROOT}/src/scripting/LuaAudioEffectSlot.cpp
+				${NCINE_ROOT}/src/scripting/LuaAudioEffect.cpp
+				${NCINE_ROOT}/src/scripting/LuaAudioEffectProperties.cpp
 			)
 		endif()
 
