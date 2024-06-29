@@ -8,8 +8,7 @@
 #include "LuaStateManager.h"
 #include "LuaNames.h"
 
-#include <ncine/config.h>
-#if NCINE_WITH_ALLOCATORS
+#ifdef WITH_ALLOCATORS
 	#include <nctl/AllocManager.h>
 	#include <nctl/IAllocator.h>
 #endif
@@ -43,7 +42,7 @@ template <class T>
 template <typename... Args>
 void LuaClassTracker<T>::newObject(lua_State *L, Args &&... args)
 {
-#if !NCINE_WITH_ALLOCATORS
+#if !defined(WITH_ALLOCATORS)
 	T *ptr = new T(nctl::forward<Args>(args)...);
 #else
 	T *ptr = new (nctl::theLuaAllocator().allocate(sizeof(T))) T(nctl::forward<Args>(args)...);
@@ -76,7 +75,7 @@ int LuaClassTracker<T>::deleteObject(lua_State *L)
 		if (isTracked)
 		{
 			stateManager->trackedUserDatas().remove(pointer);
-#if !NCINE_WITH_ALLOCATORS
+#if !defined(WITH_ALLOCATORS)
 			delete object;
 #else
 			nctl::theLuaAllocator().deleteObject(object);
@@ -90,7 +89,7 @@ int LuaClassTracker<T>::deleteObject(lua_State *L)
 template <class T>
 void LuaClassTracker<T>::cloneNode(lua_State *L, const T &other)
 {
-#if !NCINE_WITH_ALLOCATORS
+#if !defined(WITH_ALLOCATORS)
 	T *ptr = new T(nctl::move(other.clone()));
 #else
 	T *ptr = new (nctl::theLuaAllocator().allocate(sizeof(T))) T(nctl::move(other.clone()));

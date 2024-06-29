@@ -60,8 +60,7 @@
 #include <cstring> // for memchr()
 #include "IFile.h"
 
-#include <ncine/config.h>
-#if NCINE_WITH_ALLOCATORS
+#ifdef WITH_ALLOCATORS
 	#include <nctl/AllocManager.h>
 	#include <nctl/IAllocator.h>
 #endif
@@ -126,7 +125,7 @@ LuaStateManager::LuaStateManager(ApiType apiType, StatisticsTracking statsTracki
 
 LuaStateManager::LuaStateManager(lua_State *L, ApiType apiType, StatisticsTracking statsTracking, StandardLibraries stdLibraries)
     : L_(L), apiType_(apiType), statsTracking_(statsTracking), stdLibraries_(stdLibraries),
-      trackedUserDatas_(apiType == ApiType::FULL ? 32 : 1), untrackedUserDatas_(32), closeOnDestruction_(false)
+      trackedUserDatas_(apiType == ApiType::FULL ? 32 : 2), untrackedUserDatas_(32), closeOnDestruction_(false)
 {
 	ASSERT(L_);
 
@@ -339,7 +338,7 @@ void *LuaStateManager::luaAllocator(void *ud, void *ptr, size_t osize, size_t ns
 {
 	if (nsize == 0)
 	{
-#if !NCINE_WITH_ALLOCATORS
+#if !defined(WITH_ALLOCATORS)
 		free(ptr);
 #else
 		nctl::theLuaAllocator().deallocate(ptr);
@@ -348,7 +347,7 @@ void *LuaStateManager::luaAllocator(void *ud, void *ptr, size_t osize, size_t ns
 	}
 	else
 	{
-#if !NCINE_WITH_ALLOCATORS
+#if !defined(WITH_ALLOCATORS)
 		return realloc(ptr, nsize);
 #else
 		return nctl::theLuaAllocator().reallocate(ptr, nsize);
@@ -361,7 +360,7 @@ void *LuaStateManager::luaAllocatorWithStatistics(void *ud, void *ptr, size_t os
 	if (nsize == 0)
 	{
 		LuaStatistics::freeMemory(osize);
-#if !NCINE_WITH_ALLOCATORS
+#if !defined(WITH_ALLOCATORS)
 		free(ptr);
 #else
 		nctl::theLuaAllocator().deallocate(ptr);
@@ -371,7 +370,7 @@ void *LuaStateManager::luaAllocatorWithStatistics(void *ud, void *ptr, size_t os
 	else
 	{
 		LuaStatistics::allocMemory(ptr != nullptr ? (nsize - osize) : nsize);
-#if !NCINE_WITH_ALLOCATORS
+#if !defined(WITH_ALLOCATORS)
 		return realloc(ptr, nsize);
 #else
 		return nctl::theLuaAllocator().reallocate(ptr, nsize);
@@ -473,6 +472,7 @@ void LuaStateManager::releaseTrackedMemory()
 				LuaShaderState::release(object);
 				break;
 			}
+
 			case LuaTypes::TEXTURE:
 			{
 				LuaTexture::release(object);
@@ -508,6 +508,7 @@ void LuaStateManager::releaseTrackedMemory()
 				LuaTextNode::release(object);
 				break;
 			}
+
 	#ifdef WITH_AUDIO
 			case LuaTypes::AUDIOBUFFER:
 			{
@@ -525,6 +526,7 @@ void LuaStateManager::releaseTrackedMemory()
 				break;
 			}
 	#endif
+
 			case LuaTypes::PARTICLE_SYSTEM:
 			{
 				LuaParticleSystem::release(object);

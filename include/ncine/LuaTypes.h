@@ -27,9 +27,11 @@ class MeshSprite;
 class AnimatedSprite;
 class Font;
 class TextNode;
+
 class AudioBuffer;
 class AudioBufferPlayer;
 class AudioStreamPlayer;
+
 class ParticleSystem;
 class ParticleAffector;
 
@@ -55,10 +57,12 @@ namespace LuaTypes {
 		ANIMATED_SPRITE,
 		FONT,
 		TEXTNODE,
+
 		AUDIOBUFFER,
 		IAUDIOPLAYER,
 		AUDIOBUFFER_PLAYER,
 		AUDIOSTREAM_PLAYER,
+
 		PARTICLE_SYSTEM,
 		PARTICLE_AFFECTOR,
 
@@ -85,10 +89,12 @@ namespace LuaTypes {
 	template <> inline LuaTypes::UserDataType classToUserDataType<AnimatedSprite>(AnimatedSprite *) { return LuaTypes::UserDataType::ANIMATED_SPRITE; }
 	template <> inline LuaTypes::UserDataType classToUserDataType<Font>(Font *) { return LuaTypes::UserDataType::FONT; }
 	template <> inline LuaTypes::UserDataType classToUserDataType<TextNode>(TextNode *) { return LuaTypes::UserDataType::TEXTNODE; }
+
 	template <> inline LuaTypes::UserDataType classToUserDataType<AudioBuffer>(AudioBuffer *) { return LuaTypes::UserDataType::AUDIOBUFFER; }
 	template <> inline LuaTypes::UserDataType classToUserDataType<IAudioPlayer>(IAudioPlayer *) { return LuaTypes::UserDataType::IAUDIOPLAYER; }
 	template <> inline LuaTypes::UserDataType classToUserDataType<AudioBufferPlayer>(AudioBufferPlayer *) { return LuaTypes::UserDataType::AUDIOBUFFER_PLAYER; }
 	template <> inline LuaTypes::UserDataType classToUserDataType<AudioStreamPlayer>(AudioStreamPlayer *) { return LuaTypes::UserDataType::AUDIOSTREAM_PLAYER; }
+
 	template <> inline LuaTypes::UserDataType classToUserDataType<ParticleSystem>(ParticleSystem *) { return LuaTypes::UserDataType::PARTICLE_SYSTEM; }
 	template <> inline LuaTypes::UserDataType classToUserDataType<ParticleAffector>(ParticleAffector *) { return LuaTypes::UserDataType::PARTICLE_AFFECTOR; }
 
@@ -100,6 +106,8 @@ namespace LuaTypes {
 
 	template <> inline const char *classToName<Viewport>(Viewport *) { return "Viewport"; }
 	template <> inline const char *classToName<Camera>(Camera *) { return "Camera"; }
+	template <> inline const char *classToName<Shader>(Shader *) { return "Shader"; }
+	template <> inline const char *classToName<ShaderState>(ShaderState *) { return "ShaderState"; }
 
 	template <> inline const char *classToName<Texture>(Texture *) { return "Texture"; }
 	template <> inline const char *classToName<SceneNode>(SceneNode *) { return "SceneNode"; }
@@ -110,10 +118,12 @@ namespace LuaTypes {
 	template <> inline const char *classToName<AnimatedSprite>(AnimatedSprite *) { return "AnimatedSprite"; }
 	template <> inline const char *classToName<Font>(Font *) { return "Font"; }
 	template <> inline const char *classToName<TextNode>(TextNode *) { return "TextNode"; }
+
 	template <> inline const char *classToName<AudioBuffer>(AudioBuffer *) { return "AudioBuffer"; }
 	template <> inline const char *classToName<IAudioPlayer>(IAudioPlayer *) { return "IAudioPlayer"; }
 	template <> inline const char *classToName<AudioBufferPlayer>(AudioBufferPlayer *) { return "AudioBufferPlayer"; }
 	template <> inline const char *classToName<AudioStreamPlayer>(AudioStreamPlayer *) { return "AudioStreamPlayer"; }
+
 	template <> inline const char *classToName<ParticleSystem>(ParticleSystem *) { return "ParticleSystem"; }
 	template <> inline const char *classToName<ParticleAffector>(ParticleAffector *) { return "ParticleAffector"; }
 
@@ -141,10 +151,12 @@ namespace LuaTypes {
 			case LuaTypes::UserDataType::ANIMATED_SPRITE: return "AnimatedSprite";
 			case LuaTypes::UserDataType::FONT: return "Font";
 			case LuaTypes::UserDataType::TEXTNODE: return "TextNode";
+
 			case LuaTypes::UserDataType::AUDIOBUFFER: return "AudioBuffer";
 			case LuaTypes::UserDataType::IAUDIOPLAYER: return "IAudioPlayer";
 			case LuaTypes::UserDataType::AUDIOBUFFER_PLAYER: return "AudioBufferPlayer";
 			case LuaTypes::UserDataType::AUDIOSTREAM_PLAYER: return "AudioStreamPlayer";
+
 			case LuaTypes::UserDataType::PARTICLE_SYSTEM: return "ParticleSystem";
 			case LuaTypes::UserDataType::PARTICLE_AFFECTOR: return "ParticleAffector";
 		}

@@ -65,7 +65,7 @@ namespace Texture {
 void LuaTexture::expose(LuaStateManager *stateManager)
 {
 	lua_State *L = stateManager->state();
-	lua_createtable(L, 0, 20);
+	lua_createtable(L, 0, 22);
 
 	if (stateManager->apiType() == LuaStateManager::ApiType::FULL)
 	{

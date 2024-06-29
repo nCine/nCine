@@ -6,6 +6,7 @@
 #include "HashFunctions.h"
 #include "ReverseIterator.h"
 #include <cstring> // for memcpy()
+#include <nctl/PointerMath.h>
 
 #include <ncine/config.h>
 #if NCINE_WITH_ALLOCATORS
@@ -125,6 +126,8 @@ class HashMap
 	void rehash(unsigned int count);
 
   private:
+	static const unsigned int AlignmentBytes = sizeof(int);
+
 	/// The template class for the node stored inside the hashmap
 	class Node
 	{
@@ -247,11 +250,12 @@ HashMap<K, T, HashFunc>::HashMap(unsigned int capacity)
 	FATAL_ASSERT_MSG(capacity > 0, "Zero is not a valid capacity");
 
 	const unsigned int bytes = capacity_ * (sizeof(uint8_t) * 2 + sizeof(hash_t));
+	const unsigned int alignedBytes = bytes + 3 * AlignmentBytes; // 3 align adjustments in `initPointers()`
 #if !NCINE_WITH_ALLOCATORS
-	buffer_ = static_cast<uint8_t *>(::operator new(bytes));
+	buffer_ = static_cast<uint8_t *>(::operator new(alignedBytes));
 	nodes_ = static_cast<Node *>(::operator new(sizeof(Node) * capacity_));
 #else
-	buffer_ = static_cast<uint8_t *>(alloc_.allocate(bytes));
+	buffer_ = static_cast<uint8_t *>(alloc_.allocate(alignedBytes));
 	nodes_ = static_cast<Node *>(alloc_.allocate(sizeof(Node) * capacity_));
 #endif
 
@@ -301,11 +305,12 @@ HashMap<K, T, HashFunc>::HashMap(const HashMap<K, T, HashFunc> &other)
       delta1_(nullptr), delta2_(nullptr), hashes_(nullptr), nodes_(nullptr)
 {
 	const unsigned int bytes = capacity_ * (sizeof(uint8_t) * 2 + sizeof(hash_t));
+	const unsigned int alignedBytes = bytes + 3 * AlignmentBytes; // 3 align adjustments in `initPointers()`
 #if !NCINE_WITH_ALLOCATORS
-	buffer_ = static_cast<uint8_t *>(::operator new(bytes));
+	buffer_ = static_cast<uint8_t *>(::operator new(alignedBytes));
 	nodes_ = static_cast<Node *>(::operator new(sizeof(Node) * capacity_));
 #else
-	buffer_ = static_cast<uint8_t *>(alloc_.allocate(bytes));
+	buffer_ = static_cast<uint8_t *>(alloc_.allocate(alignedBytes));
 	nodes_ = static_cast<Node *>(alloc_.allocate(sizeof(Node) * capacity_));
 #endif
 	memcpy(buffer_, other.buffer_, bytes);
@@ -349,11 +354,12 @@ HashMap<K, T, HashFunc> &HashMap<K, T, HashFunc>::operator=(const HashMap<K, T, 
 
 		capacity_ = other.capacity_;
 		const unsigned int bytes = capacity_ * (sizeof(uint8_t) * 2 + sizeof(hash_t));
+		const unsigned int alignedBytes = bytes + 3 * AlignmentBytes; // 3 align adjustments in `initPointers()`
 #if !NCINE_WITH_ALLOCATORS
-		buffer_ = static_cast<uint8_t *>(::operator new(bytes));
+		buffer_ = static_cast<uint8_t *>(::operator new(alignedBytes));
 		nodes_ = static_cast<Node *>(::operator new(sizeof(Node) * capacity_));
 #else
-		buffer_ = static_cast<uint8_t *>(alloc_.allocate(bytes));
+		buffer_ = static_cast<uint8_t *>(alloc_.allocate(alignedBytes));
 		nodes_ = static_cast<Node *>(alloc_.allocate(sizeof(Node) * capacity_));
 #endif
 		initPointers();
@@ -741,16 +747,23 @@ void HashMap<K, T, HashFunc>::rehash(unsigned int count)
 template <class K, class T, class HashFunc>
 void HashMap<K, T, HashFunc>::initPointers()
 {
-	uint8_t *pointer = buffer_;
+	unsigned int alignAdjustment = PointerMath::alignAdjustment(buffer_, AlignmentBytes);
+	uint8_t *pointer = reinterpret_cast<uint8_t*>(PointerMath::align(buffer_, AlignmentBytes));
 	delta1_ = pointer;
 	pointer += sizeof(uint8_t) * capacity_;
+
+	alignAdjustment += PointerMath::alignAdjustment(pointer, AlignmentBytes);
+	pointer = reinterpret_cast<uint8_t*>(PointerMath::align(pointer, AlignmentBytes));
 	delta2_ = pointer;
 	pointer += sizeof(uint8_t) * capacity_;
+
+	alignAdjustment += PointerMath::alignAdjustment(pointer, AlignmentBytes);
+	pointer = reinterpret_cast<uint8_t*>(PointerMath::align(pointer, AlignmentBytes));
 	hashes_ = reinterpret_cast<hash_t *>(pointer);
 	pointer += sizeof(hash_t) * capacity_;
 
 	const unsigned int bytes = capacity_ * (sizeof(uint8_t) * 2 + sizeof(hash_t));
-	FATAL_ASSERT(pointer == buffer_ + bytes);
+	FATAL_ASSERT(pointer == buffer_ + bytes + alignAdjustment);
 }
 
 template <class K, class T, class HashFunc>

@@ -25,7 +25,7 @@ namespace PointerMath
 
 	inline uint8_t alignAdjustment(const void *ptr, uint8_t alignment)
 	{
-		uint8_t amount = alignment - (reinterpret_cast<uintptr_t>(ptr) & (alignment - 1));
+		const uint8_t amount = alignment - (reinterpret_cast<uintptr_t>(ptr) & (alignment - 1));
 
 		if (amount == alignment)
 			return 0;

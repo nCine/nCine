@@ -130,7 +130,7 @@ QualifierAlignment: Custom
 QualifierOrder: ['friend', 'static', 'inline', 'constexpr', 'const', 'restrict', 'volatile', 'type']
 # RawStringFormats:
 ReflowComments: true
-SeparateDefinitionBlocks: Always
+SeparateDefinitionBlocks: Leave
 SortIncludes: false
 SortJavaStaticImport: Before
 SortUsingDeclarations: true
@@ -143,19 +143,15 @@ SpaceBeforeCaseColon: false
 SpaceBeforeCpp11BracedList: false
 SpaceBeforeCtorInitializerColon: true
 SpaceBeforeInheritanceColon: true
-# SpaceBeforeJsonColon: false # clang-format 17
+SpaceBeforeJsonColon: false
 SpaceBeforeParens: ControlStatements
 SpaceBeforeRangeBasedForLoopColon: true
 SpaceBeforeSquareBrackets: false
 SpaceInEmptyBlock: false
-SpaceInEmptyParentheses: false # deprecated in clang-format 17
 SpacesBeforeTrailingComments: 1
 SpacesInAngles: false
-SpacesInCStyleCastParentheses: false # deprecated in clang-format 17
-SpacesInConditionalStatement: false # deprecated in clang-format 17
 SpacesInContainerLiterals: true
-SpacesInParentheses: false # deprecated in clang-format 17
-# SpacesInParens: false # clang-format 17
+SpacesInParens: Never
 SpacesInSquareBrackets: false
 Standard: c++11
 # StatementAttributeLikeMacros:
