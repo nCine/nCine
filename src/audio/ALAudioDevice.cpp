@@ -1,4 +1,6 @@
-#include "openal_proto.h"
+#ifdef WITH_OPENAL_EXT
+	#include "openal_proto.h"
+#endif
 
 #include "common_macros.h"
 #include "ALAudioDevice.h"
@@ -10,7 +12,11 @@
 namespace ncine {
 
 const char *ExtensionNames[IAudioDevice::ALExtensions::COUNT] = {
+#ifdef WITH_OPENAL_EXT
 	ALC_EXT_EFX_NAME,
+#else
+	"ALC_EXT_EFX",
+#endif
 	"ALC_SOFT_pause_device",
 	"AL_SOFT_deferred_updates",
 	"AL_SOFT_source_spatialize"
@@ -36,9 +42,16 @@ ALAudioDevice::ALAudioDevice(const AppConfiguration &appCfg)
 	FATAL_ASSERT_MSG_X(device_ != nullptr, "alcOpenDevice failed: 0x%x", alGetError());
 
 	const ALCint attrList[7] = {
+#ifdef __EMSCRIPTEN__
+		ALC_FREQUENCY, (appCfg.outputAudioFrequency > 0) ? static_cast<ALCint>(appCfg.outputAudioFrequency) : 44100,
+		ALC_MONO_SOURCES, (appCfg.monoAudioSources > 0) ? static_cast<ALCint>(appCfg.monoAudioSources) : 15,
+		ALC_STEREO_SOURCES, (appCfg.stereoAudioSources > 0) ? static_cast<ALCint>(appCfg.stereoAudioSources) : 1,
+#else
 		ALC_FREQUENCY, static_cast<ALCint>(appCfg.outputAudioFrequency),
 		ALC_MONO_SOURCES, static_cast<ALCint>(appCfg.monoAudioSources),
 		ALC_STEREO_SOURCES, static_cast<ALCint>(appCfg.stereoAudioSources),
+#endif
+
 		0
 	};
 
@@ -81,12 +94,14 @@ ALAudioDevice::ALAudioDevice(const AppConfiguration &appCfg)
 	alListenerfv(AL_POSITION, position_.data());
 	alListenerfv(AL_VELOCITY, velocity_.data());
 
+#ifdef WITH_OPENAL_EXT
 	// Allow spatialization for stereo sources
 	if (hasExtension(ALExtensions::SOFT_SOURCE_SPATIALIZE))
 	{
 		for (ALuint source : sources_)
 			alSourcei(source, AL_SOURCE_SPATIALIZE_SOFT, AL_TRUE);
 	}
+#endif
 }
 
 ALAudioDevice::~ALAudioDevice()
@@ -221,17 +236,21 @@ void ALAudioDevice::resumePlayers()
 
 void ALAudioDevice::pauseDevice()
 {
+#ifdef WITH_OPENAL_EXT
 	if (hasExtension(ALExtensions::SOFT_PAUSE_DEVICE))
 		alcDevicePauseSOFT(device_);
 	else
+#endif
 		pausePlayers();
 }
 
 void ALAudioDevice::resumeDevice()
 {
+#ifdef WITH_OPENAL_EXT
 	if (hasExtension(ALExtensions::SOFT_PAUSE_DEVICE))
 		alcDeviceResumeSOFT(device_);
 	else
+#endif
 		resumePlayers();
 }
 
@@ -256,10 +275,14 @@ void ALAudioDevice::registerPlayer(IAudioPlayer *player)
 	player->sourceId_ = sourceId;
 	players_.pushBack(player);
 
+#ifdef WITH_OPENAL_EXT
 	// Apply all source properties for a player at the same time
 	hasExtension(ALExtensions::SOFT_DEFERRED_UPDATES) ? alDeferUpdatesSOFT() : alcSuspendContext(context_);
+#endif
 	player->applySourceProperties();
+#ifdef WITH_OPENAL_EXT
 	hasExtension(ALExtensions::SOFT_DEFERRED_UPDATES) ? alProcessUpdatesSOFT() : alcProcessContext(context_);
+#endif
 }
 
 void ALAudioDevice::unregisterPlayer(IAudioPlayer *player)
@@ -356,6 +379,7 @@ void ALAudioDevice::retrieveAttributes()
 
 void ALAudioDevice::retrieveExtensions()
 {
+#ifdef WITH_OPENAL_EXT
 	for (unsigned int i = 0; i < ALExtensions::COUNT; i++)
 	{
 		// Determining if an extension is relative to a context (ALC_) or not (AL_)
@@ -379,6 +403,7 @@ void ALAudioDevice::retrieveExtensions()
 
 	if (hasExtension(ALExtensions::SOFT_DEFERRED_UPDATES))
 		retrieveDeferredUpdatesFunctions();
+#endif
 }
 
 void ALAudioDevice::logALAttributes()

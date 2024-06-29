@@ -187,6 +187,7 @@ void IAudioPlayer::setConeOuterGain(float gain)
 		alSourcef(sourceId_, AL_CONE_OUTER_GAIN, coneOuterGain_);
 }
 
+#ifdef WITH_OPENAL_EXT
 void IAudioPlayer::setAirAbsorptionFactor(float factor)
 {
 	airAbsorptionFactor_ = nctl::clamp(factor, AL_MIN_AIR_ABSORPTION_FACTOR, AL_MAX_AIR_ABSORPTION_FACTOR);
@@ -270,6 +271,7 @@ void IAudioPlayer::setDirectFilter(const AudioFilter *filter)
 		ASSERT_MSG_X(error == AL_NO_ERROR, "alSourcei failed: 0x%x", error);
 	}
 }
+#endif
 
 ///////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
@@ -290,6 +292,7 @@ void IAudioPlayer::applySourceProperties()
 		alSourcef(sourceId_, AL_CONE_OUTER_ANGLE, coneOuterAngle_);
 		alSourcef(sourceId_, AL_CONE_OUTER_GAIN, coneOuterGain_);
 
+#ifdef WITH_OPENAL_EXT
 		if (hasEfxExtension())
 		{
 			alSourcef(sourceId_, AL_AIR_ABSORPTION_FACTOR, airAbsorptionFactor_);
@@ -300,6 +303,7 @@ void IAudioPlayer::applySourceProperties()
 			alSource3i(sourceId_, AL_AUXILIARY_SEND_FILTER, static_cast<ALint>(effectSlotId_), auxSendNumber, static_cast<ALint>(auxFilterId_));
 			alSourcei(sourceId_, AL_DIRECT_FILTER, static_cast<ALint>(directFilterId_));
 		}
+#endif
 
 		const ALenum error = alGetError(); // Checking the error only once, after setting all properties
 		ASSERT_MSG_X(error == AL_NO_ERROR, "Error while applying OpenAL source properties: 0x%x", error);

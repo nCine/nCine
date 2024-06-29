@@ -53,10 +53,12 @@
 		#include "LuaAudioBuffer.h"
 		#include "LuaAudioBufferPlayer.h"
 		#include "LuaAudioStreamPlayer.h"
-		#include "LuaAudioFilter.h"
-		#include "LuaAudioEffectSlot.h"
-		#include "LuaAudioEffect.h"
-		#include "LuaAudioEffectProperties.h"
+		#ifdef WITH_OPENAL_EXT
+			#include "LuaAudioFilter.h"
+			#include "LuaAudioEffectSlot.h"
+			#include "LuaAudioEffect.h"
+			#include "LuaAudioEffectProperties.h"
+		#endif
 	#endif
 #endif
 
@@ -529,6 +531,7 @@ void LuaStateManager::releaseTrackedMemory()
 				LuaAudioStreamPlayer::release(object);
 				break;
 			}
+		#ifdef WITH_OPENAL_EXT
 			case LuaTypes::AUDIO_FILTER:
 			{
 				LuaAudioFilter::release(object);
@@ -549,6 +552,7 @@ void LuaStateManager::releaseTrackedMemory()
 				LuaAudioEffectProperties::release(object);
 				break;
 			}
+		#endif
 	#endif
 
 			case LuaTypes::PARTICLE_SYSTEM:
@@ -635,10 +639,12 @@ void LuaStateManager::exposeApi()
 		LuaAudioBuffer::expose(this);
 		LuaAudioBufferPlayer::expose(this);
 		LuaAudioStreamPlayer::expose(this);
+		#ifdef WITH_OPENAL_EXT
 		LuaAudioFilter::expose(this);
 		LuaAudioEffectSlot::expose(this);
 		LuaAudioEffect::expose(this);
 		LuaAudioEffectProperties::expose(this);
+		#endif
 	}
 	#endif
 #endif
@@ -671,7 +677,7 @@ void LuaStateManager::exposeConstants()
 		LuaFont::exposeConstants(L_);
 		LuaTextNode::exposeConstants(L_);
 	}
-	#ifdef WITH_AUDIO
+	#ifdef WITH_OPENAL_EXT
 	if (appCfg.withAudio)
 	{
 		LuaAudioFilter::exposeConstants(L_);

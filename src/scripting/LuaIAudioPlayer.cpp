@@ -57,6 +57,7 @@ namespace IAudioPlayer {
 	static const char *coneOuterGain = "get_cone_outer_gain";
 	static const char *setConeOuterGain = "set_cone_outer_gain";
 
+#ifdef WITH_OPENAL_EXT
 	static const char *airAbsorptionFactor = "get_air_absorption_factor";
 	static const char *setAirAbsorptionFactor = "set_air_absorption_factor";
 
@@ -75,6 +76,7 @@ namespace IAudioPlayer {
 
 	static const char *setEffectSlot = "set_effect_slot";
 	static const char *setDirectFilter = "set_direct_filter";
+#endif
 }}
 
 ///////////////////////////////////////////////////////////
@@ -132,6 +134,7 @@ void LuaIAudioPlayer::exposeFunctions(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::coneOuterGain, coneOuterGain);
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setConeOuterGain, setConeOuterGain);
 
+#ifdef WITH_OPENAL_EXT
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::airAbsorptionFactor, airAbsorptionFactor);
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setAirAbsorptionFactor, setAirAbsorptionFactor);
 
@@ -150,6 +153,7 @@ void LuaIAudioPlayer::exposeFunctions(lua_State *L)
 
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setEffectSlot, setEffectSlot);
 	LuaUtils::addFunction(L, LuaNames::IAudioPlayer::setDirectFilter, setDirectFilter);
+#endif
 }
 
 int LuaIAudioPlayer::hasSource(lua_State *L)
@@ -582,6 +586,7 @@ int LuaIAudioPlayer::setConeOuterGain(lua_State *L)
 	return 0;
 }
 
+#ifdef WITH_OPENAL_EXT
 int LuaIAudioPlayer::airAbsorptionFactor(lua_State *L)
 {
 	IAudioPlayer *audioPlayer = LuaUntrackedUserData<IAudioPlayer>::retrieve(L, -1);
@@ -745,5 +750,6 @@ int LuaIAudioPlayer::setDirectFilter(lua_State *L)
 
 	return 0;
 }
+#endif
 
 }

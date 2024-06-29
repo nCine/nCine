@@ -1,6 +1,7 @@
 #ifndef CLASS_NCINE_IAUDIOPLAYER
 #define CLASS_NCINE_IAUDIOPLAYER
 
+#include <ncine/config.h>
 #include "Object.h"
 #include "Vector3.h"
 
@@ -153,6 +154,7 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	/// Sets the player multiplication factor to determine the gain outside the cone
 	void setConeOuterGain(float gain);
 
+#if NCINE_WITH_OPENAL_EXT
 	/// Returns the player air absorption factor
 	inline float airAbsorptionFactor() const { return airAbsorptionFactor_; }
 	/// Sets the player air absorption factor
@@ -187,6 +189,7 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	inline void setEffectSlot(const AudioEffectSlot *effectSlot) { setEffectSlot(effectSlot, nullptr); }
 	/// Sets or remove the filter parameters from a filter object to the direct signal
 	void setDirectFilter(const AudioFilter *audioFilter);
+#endif
 
   protected:
 	/// The OpenAL source id

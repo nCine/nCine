@@ -7,9 +7,11 @@
 #include <ncine/AudioBufferPlayer.h>
 #include <ncine/AudioStream.h>
 #include <ncine/AudioStreamPlayer.h>
-#include <ncine/AudioEffectProperties.h>
-#include <ncine/AudioEffectSlot.h>
-#include <ncine/AudioFilter.h>
+#if NCINE_WITH_OPENAL_EXT
+	#include <ncine/AudioEffectProperties.h>
+	#include <ncine/AudioEffectSlot.h>
+	#include <ncine/AudioFilter.h>
+#endif
 #include <ncine/TextNode.h>
 #include "apptest_datapath.h"
 
@@ -64,6 +66,7 @@ const char *audioPlayerStateToString(nc::IAudioPlayer::PlayerState state)
 #if NCINE_WITH_IMGUI
 const ImVec4 Green = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
 const ImVec4 Red = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+	#if NCINE_WITH_OPENAL_EXT
 const char *EffectTypeLabels[14] = { "Null", "Reverb", "EAX Reverb", "Chorus", "Distortion", "Echo",
                                      "Flanger", "Frequency Shifter", "Vocal Morpher", "Pitch Shifter",
                                      "Ring Modulator", "Autowah", "Compressor", "Equalizer" };
@@ -93,6 +96,7 @@ const char *OnOffLabels[2] = { "Off", "On" };
 const char *FilterTypeLabels[4] = { "Null", "Low-pass", "High-pass", "Band-pass" };
 nc::AudioEffectProperties effectProperties;
 nc::AudioFilter::Properties filterProperties;
+	#endif
 bool showImGui = true;
 
 void sourcePropertiesGui(nc::IAudioPlayer &player, nc::AudioEffectSlot &audioEffectSlot, nc::AudioFilter &directAudioFilter)
@@ -132,6 +136,7 @@ void sourcePropertiesGui(nc::IAudioPlayer &player, nc::AudioEffectSlot &audioEff
 	ImGui::Checkbox("Source locked", &sourceLocked);
 	player.setSourceLocked(sourceLocked);
 
+	#if NCINE_WITH_OPENAL_EXT
 	bool effectSlot = player.hasEffectSlot();
 	ImGui::Checkbox("Effect slot", &effectSlot);
 	player.setEffectSlot(effectSlot ? &audioEffectSlot : nullptr);
@@ -140,6 +145,7 @@ void sourcePropertiesGui(nc::IAudioPlayer &player, nc::AudioEffectSlot &audioEff
 	bool directFilter = player.hasDirectFilter();
 	ImGui::Checkbox("Direct filter", &directFilter);
 	player.setDirectFilter(directFilter ? &directAudioFilter : nullptr);
+	#endif
 
 	float gain = player.gain();
 	ImGui::SliderFloat("Gain", &gain, nc::IAudioPlayer::MinGain, nc::IAudioPlayer::MaxGain, "%.2f", ImGuiSliderFlags_AlwaysClamp);
@@ -173,6 +179,7 @@ void sourcePropertiesGui(nc::IAudioPlayer &player, nc::AudioEffectSlot &audioEff
 	ImGui::SliderFloat("Cone outer gain", &coneOuterGain, nc::IAudioPlayer::MinConeOuterGain, nc::IAudioPlayer::MaxConeOuterGain, "%.2f", ImGuiSliderFlags_AlwaysClamp);
 	player.setConeOuterGain(coneOuterGain);
 
+	#if NCINE_WITH_OPENAL_EXT
 	if (device.hasExtension(nc::IAudioDevice::ALExtensions::EXT_EFX))
 	{
 		ImGui::NewLine();
@@ -188,6 +195,7 @@ void sourcePropertiesGui(nc::IAudioPlayer &player, nc::AudioEffectSlot &audioEff
 		ImGui::SliderFloat("Cone outer gain HF", &coneOuterGainHF, nc::IAudioPlayer::MinConeOuterGainHF, nc::IAudioPlayer::MaxConeOuterGainHF, "%.2f", ImGuiSliderFlags_AlwaysClamp);
 		player.setConeOuterGainHF(coneOuterGainHF);
 	}
+	#endif
 
 	if (ImGui::Button("Reset"))
 	{
@@ -200,15 +208,18 @@ void sourcePropertiesGui(nc::IAudioPlayer &player, nc::AudioEffectSlot &audioEff
 		player.setConeOuterAngle(nc::IAudioPlayer::DefaultConeAngle);
 		player.setConeOuterGain(nc::IAudioPlayer::DefaultConeOuterGain);
 
+	#if NCINE_WITH_OPENAL_EXT
 		if (device.hasExtension(nc::IAudioDevice::ALExtensions::EXT_EFX))
 		{
 			player.setAirAbsorptionFactor(nc::IAudioPlayer::DefaultAirAbsorptionFactor);
 			player.setRoomRolloffFactor(nc::IAudioPlayer::DefaultRoomRolloffFactor);
 			player.setConeOuterGainHF(nc::IAudioPlayer::DefaultConeOuterGainHF);
 		}
+	#endif
 	}
 }
 
+	#if NCINE_WITH_OPENAL_EXT
 bool nullEffectPropertiesGui()
 {
 	effectProperties.setType(nc::AudioEffect::Type::NULL_EFFECT);
@@ -551,6 +562,7 @@ bool equalizerPropertiesGui()
 
 	return valueChanged;
 }
+	#endif
 
 #endif
 
@@ -862,6 +874,7 @@ void MyEventHandler::onInit()
 	textString_ = nctl::makeUnique<nctl::String>(MaxStringLength);
 
 	nc::IAudioDevice &device = nc::theServiceLocator().audioDevice();
+#if NCINE_WITH_OPENAL_EXT
 	if (device.hasExtension(nc::IAudioDevice::ALExtensions::EXT_EFX))
 	{
 		audioEffect_ = nctl::makeUnique<nc::AudioEffect>();
@@ -870,6 +883,7 @@ void MyEventHandler::onInit()
 		soundPlayer_->setEffectSlot(audioEffectSlot_.get(), audioFilter_.get());
 		musicPlayer_->setEffectSlot(audioEffectSlot_.get(), audioFilter_.get());
 	}
+#endif
 
 #if WITH_STRESS_TEST
 	// Load music files from disk once, then pass the memory buffers to all sources
@@ -1039,6 +1053,7 @@ void MyEventHandler::onFrameStart()
 				ImGui::TreePop();
 			}
 
+	#if NCINE_WITH_OPENAL_EXT
 			if (device.hasExtension(nc::IAudioDevice::ALExtensions::EXT_EFX))
 			{
 				if (ImGui::TreeNodeEx("EFX audio effects"))
@@ -1148,6 +1163,7 @@ void MyEventHandler::onFrameStart()
 					ImGui::TreePop();
 				}
 			}
+	#endif
 
 	#if WITH_STRESS_TEST
 			if (ImGui::TreeNodeEx("Stress mode"))

@@ -105,14 +105,9 @@ if(OPENAL_FOUND)
 		${NCINE_ROOT}/include/ncine/IAudioPlayer.h
 		${NCINE_ROOT}/include/ncine/AudioBufferPlayer.h
 		${NCINE_ROOT}/include/ncine/AudioStreamPlayer.h
-		${NCINE_ROOT}/include/ncine/AudioEffect.h
-		${NCINE_ROOT}/include/ncine/AudioEffectProperties.h
-		${NCINE_ROOT}/include/ncine/AudioEffectSlot.h
-		${NCINE_ROOT}/include/ncine/AudioFilter.h
 	)
 
 	list(APPEND PRIVATE_HEADERS
-		${NCINE_ROOT}/src/include/openal_proto.h
 		${NCINE_ROOT}/src/include/ALAudioDevice.h
 		${NCINE_ROOT}/src/include/IAudioLoader.h
 		${NCINE_ROOT}/src/include/AudioLoaderWav.h
@@ -130,11 +125,29 @@ if(OPENAL_FOUND)
 		${NCINE_ROOT}/src/audio/IAudioPlayer.cpp
 		${NCINE_ROOT}/src/audio/AudioBufferPlayer.cpp
 		${NCINE_ROOT}/src/audio/AudioStreamPlayer.cpp
-		${NCINE_ROOT}/src/audio/AudioEffect.cpp
-		${NCINE_ROOT}/src/audio/AudioEffectProperties.cpp
-		${NCINE_ROOT}/src/audio/AudioEffectSlot.cpp
-		${NCINE_ROOT}/src/audio/AudioFilter.cpp
 	)
+
+	if(NCINE_WITH_OPENAL_EXT)
+		target_compile_definitions(ncine PRIVATE "WITH_OPENAL_EXT")
+
+		list(APPEND HEADERS
+			${NCINE_ROOT}/include/ncine/AudioEffect.h
+			${NCINE_ROOT}/include/ncine/AudioEffectProperties.h
+			${NCINE_ROOT}/include/ncine/AudioEffectSlot.h
+			${NCINE_ROOT}/include/ncine/AudioFilter.h
+		)
+
+		list(APPEND PRIVATE_HEADERS
+			${NCINE_ROOT}/src/include/openal_proto.h
+		)
+
+		list(APPEND SOURCES
+			${NCINE_ROOT}/src/audio/AudioEffect.cpp
+			${NCINE_ROOT}/src/audio/AudioEffectProperties.cpp
+			${NCINE_ROOT}/src/audio/AudioEffectSlot.cpp
+			${NCINE_ROOT}/src/audio/AudioFilter.cpp
+		)
+	endif()
 
 	if(VORBIS_FOUND)
 		target_compile_definitions(ncine PRIVATE "WITH_VORBIS")
@@ -317,10 +330,6 @@ if(LUA_FOUND)
 				${NCINE_ROOT}/src/include/LuaAudioStreamPlayer.h
 				${NCINE_ROOT}/src/include/LuaAudioBuffer.h
 				${NCINE_ROOT}/src/include/LuaAudioBufferPlayer.h
-				${NCINE_ROOT}/src/include/LuaAudioFilter.h
-				${NCINE_ROOT}/src/include/LuaAudioEffectSlot.h
-				${NCINE_ROOT}/src/include/LuaAudioEffect.h
-				${NCINE_ROOT}/src/include/LuaAudioEffectProperties.h
 			)
 
 			list(APPEND SOURCES
@@ -329,11 +338,22 @@ if(LUA_FOUND)
 				${NCINE_ROOT}/src/scripting/LuaAudioStreamPlayer.cpp
 				${NCINE_ROOT}/src/scripting/LuaAudioBuffer.cpp
 				${NCINE_ROOT}/src/scripting/LuaAudioBufferPlayer.cpp
-				${NCINE_ROOT}/src/scripting/LuaAudioFilter.cpp
-				${NCINE_ROOT}/src/scripting/LuaAudioEffectSlot.cpp
-				${NCINE_ROOT}/src/scripting/LuaAudioEffect.cpp
-				${NCINE_ROOT}/src/scripting/LuaAudioEffectProperties.cpp
 			)
+			if(NCINE_WITH_OPENAL_EXT)
+				list(APPEND PRIVATE_HEADERS
+					${NCINE_ROOT}/src/include/LuaAudioFilter.h
+					${NCINE_ROOT}/src/include/LuaAudioEffectSlot.h
+					${NCINE_ROOT}/src/include/LuaAudioEffect.h
+					${NCINE_ROOT}/src/include/LuaAudioEffectProperties.h
+				)
+
+				list(APPEND SOURCES
+					${NCINE_ROOT}/src/scripting/LuaAudioFilter.cpp
+					${NCINE_ROOT}/src/scripting/LuaAudioEffectSlot.cpp
+					${NCINE_ROOT}/src/scripting/LuaAudioEffect.cpp
+					${NCINE_ROOT}/src/scripting/LuaAudioEffectProperties.cpp
+				)
+			endif()
 		endif()
 
 		if(NOT ANDROID)

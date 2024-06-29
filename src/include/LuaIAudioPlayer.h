@@ -60,6 +60,7 @@ class LuaIAudioPlayer
 	static int coneOuterGain(lua_State *L);
 	static int setConeOuterGain(lua_State *L);
 
+#ifdef WITH_OPENAL_EXT
 	static int airAbsorptionFactor(lua_State *L);
 	static int setAirAbsorptionFactor(lua_State *L);
 
@@ -78,6 +79,7 @@ class LuaIAudioPlayer
 
 	static int setEffectSlot(lua_State *L);
 	static int setDirectFilter(lua_State *L);
+#endif
 
 	friend class LuaAudioBufferPlayer;
 	friend class LuaAudioStreamPlayer;

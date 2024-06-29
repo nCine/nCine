@@ -990,6 +990,7 @@ void ImGuiDebugOverlay::guiAudioPlayers()
 				ImGui::Text("Cone Outer Angle: %f", player->coneOuterAngle());
 				ImGui::Text("Cone Outer Gain: %f", player->coneOuterGain());
 
+	#ifdef WITH_OPENAL_EXT
 				if (audioDevice.hasExtension(IAudioDevice::ALExtensions::EXT_EFX))
 				{
 					ImGui::NewLine();
@@ -1001,6 +1002,7 @@ void ImGuiDebugOverlay::guiAudioPlayers()
 					ImGui::Text("Aux Filter: %d", player->auxFilterId());
 					ImGui::Text("Direct Filter: %d", player->directFilterId());
 				}
+	#endif
 				ImGui::NewLine();
 
 				ImGui::PushID(player);
