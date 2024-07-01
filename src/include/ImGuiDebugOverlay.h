@@ -101,6 +101,7 @@ class ImGuiDebugOverlay : public IDebugOverlay
 	void guiApplicationConfiguration();
 	void guiRenderingSettings();
 	void guiWindowSettings();
+	void guiAudioCapabilities();
 	void guiAudioPlayers();
 	void guiInputState();
 	void guiBinaryShaderCache();

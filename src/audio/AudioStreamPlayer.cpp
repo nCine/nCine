@@ -25,8 +25,8 @@ AudioStreamPlayer::AudioStreamPlayer(const char *filename)
 
 AudioStreamPlayer::~AudioStreamPlayer()
 {
-	if (state_ != PlayerState::STOPPED)
-		audioStream_.stop(sourceId_);
+	sourceLocked_ = false; // Reset flag to unregister on stop
+	stop(); // It also unregisters the player
 }
 
 ///////////////////////////////////////////////////////////
@@ -36,7 +36,7 @@ AudioStreamPlayer::~AudioStreamPlayer()
 bool AudioStreamPlayer::loadFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
 {
 	if (state_ != PlayerState::STOPPED)
-		audioStream_.stop(sourceId_);
+		stop();
 
 	const bool hasLoaded = audioStream_.loadFromMemory(bufferName, bufferPtr, bufferSize);
 	if (hasLoaded == false)
@@ -49,7 +49,7 @@ bool AudioStreamPlayer::loadFromMemory(const char *bufferName, const unsigned ch
 bool AudioStreamPlayer::loadFromFile(const char *filename)
 {
 	if (state_ != PlayerState::STOPPED)
-		audioStream_.stop(sourceId_);
+		stop();
 
 	const bool hasLoaded = audioStream_.loadFromFile(filename);
 	if (hasLoaded == false)
@@ -66,49 +66,41 @@ unsigned long int AudioStreamPlayer::sampleOffsetInStream() const
 
 void AudioStreamPlayer::play()
 {
-	IAudioDevice &device = theServiceLocator().audioDevice();
-	const bool canRegisterPlayer = (device.numPlayers() < device.maxNumPlayers());
-
 	switch (state_)
 	{
 		case PlayerState::INITIAL:
 		case PlayerState::STOPPED:
 		{
-			if (canRegisterPlayer == false)
-				break;
-
-			const unsigned int source = device.nextAvailableSource();
-			if (source == IAudioDevice::UnavailableSource)
+			if (sourceId_ == IAudioDevice::InvalidSource)
 			{
-				LOGW("No more available audio sources for playing");
-				return;
+				IAudioDevice &device = theServiceLocator().audioDevice();
+				if (device.numAvailableSources() == 0)
+				{
+					LOGW("No more available audio sources for playing the stream");
+					return;
+				}
+
+				device.registerPlayer(this); // It also assigns `sourceId_`
+				ASSERT(sourceId_ != IAudioDevice::InvalidSource);
 			}
-			sourceId_ = source;
 
-			// Streams looping is not handled at enqueued buffer level
-			alSourcei(sourceId_, AL_LOOPING, AL_FALSE);
+			if (sourceId_ != IAudioDevice::InvalidSource)
+			{
+				// Streams looping is not handled at enqueued buffer level
+				alSourcei(sourceId_, AL_LOOPING, AL_FALSE);
 
-			alSourcef(sourceId_, AL_GAIN, gain_);
-			alSourcef(sourceId_, AL_PITCH, pitch_);
-			alSourcefv(sourceId_, AL_POSITION, position_.data());
+				alSourcePlay(sourceId_);
+				state_ = PlayerState::PLAYING;
+			}
 
-			alSourcePlay(sourceId_);
-			state_ = PlayerState::PLAYING;
-
-			device.registerPlayer(this);
 			break;
 		}
 		case PlayerState::PLAYING:
 			break;
 		case PlayerState::PAUSED:
 		{
-			if (canRegisterPlayer == false)
-				break;
-
 			alSourcePlay(sourceId_);
 			state_ = PlayerState::PLAYING;
-
-			device.registerPlayer(this);
 			break;
 		}
 	}
@@ -147,7 +139,11 @@ void AudioStreamPlayer::stop()
 			// Detach the buffer from source
 			alSourcei(sourceId_, AL_BUFFER, 0);
 
-			sourceId_ = 0;
+			if (sourceLocked_ == false)
+			{
+				IAudioDevice &device = theServiceLocator().audioDevice();
+				device.unregisterPlayer(this); // It also resets `sourceId_`
+			}
 			state_ = PlayerState::STOPPED;
 			break;
 		}
@@ -163,7 +159,6 @@ void AudioStreamPlayer::updateState()
 		{
 			// Detach the buffer from source
 			alSourcei(sourceId_, AL_BUFFER, 0);
-			sourceId_ = 0;
 			state_ = PlayerState::STOPPED;
 		}
 	}

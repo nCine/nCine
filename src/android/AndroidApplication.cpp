@@ -295,9 +295,9 @@ void AndroidApplication::setFocus(bool hasFocus)
 		hasFocus_ = hasFocus;
 		// Check if focus has been gained
 		if (hasFocus == true)
-			theServiceLocator().audioDevice().unfreezePlayers();
+			theServiceLocator().audioDevice().resumeDevice();
 		else
-			theServiceLocator().audioDevice().freezePlayers();
+			theServiceLocator().audioDevice().pauseDevice();
 	}
 }
 

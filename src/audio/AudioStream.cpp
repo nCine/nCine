@@ -24,6 +24,9 @@ AudioStream::AudioStream()
 	const ALenum error = alGetError();
 	ASSERT_MSG_X(error == AL_NO_ERROR, "alGenBuffers failed: 0x%x", error);
 	memBuffer_ = nctl::makeUnique<char[]>(BufferSize);
+
+	for (unsigned int i = 0; i < NumBuffers; i++)
+		ASSERT(alIsBuffer(buffersIds_[i]) == AL_TRUE);
 }
 
 /*! Private constructor called only by `AudioStreamPlayer`. */

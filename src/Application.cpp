@@ -116,7 +116,7 @@ void Application::initCommon()
 	theServiceLocator().registerIndexer(nctl::makeUnique<ArrayIndexer>());
 #ifdef WITH_AUDIO
 	if (appCfg_.withAudio)
-		theServiceLocator().registerAudioDevice(nctl::makeUnique<ALAudioDevice>());
+		theServiceLocator().registerAudioDevice(nctl::makeUnique<ALAudioDevice>(appCfg_));
 #endif
 #ifdef WITH_THREADS
 	if (appCfg_.withThreads)
@@ -394,6 +394,7 @@ void Application::setFocus(bool hasFocus)
 void Application::suspend()
 {
 	ZoneScopedN("onSuspend");
+	theServiceLocator().audioDevice().pauseDevice();
 	frameTimer_->suspend();
 	if (appEventHandler_)
 		appEventHandler_->onSuspend();
@@ -405,6 +406,7 @@ void Application::resume()
 	ZoneScopedN("onResume");
 	if (appEventHandler_)
 		appEventHandler_->onResume();
+	theServiceLocator().audioDevice().resumeDevice();
 	const TimeStamp suspensionDuration = frameTimer_->resume();
 	LOGV_X("Suspended for %.3f seconds", suspensionDuration.seconds());
 	profileStartTime_ += suspensionDuration;

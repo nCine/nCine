@@ -22,6 +22,17 @@ AudioReaderOgg::~AudioReaderOgg()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+const char *vorbisErrorToString(long errorCode)
+{
+	switch (errorCode)
+	{
+		case OV_HOLE: return "OV_HOLE";
+		case OV_EBADLINK: return "OV_EBADLINK";
+		case OV_EINVAL: return "OV_EINVAL";
+		default: return "unknown";
+	}
+}
+
 unsigned long int AudioReaderOgg::read(void *buffer, unsigned long int bufferSize) const
 {
 	ASSERT(buffer);
@@ -38,17 +49,14 @@ unsigned long int AudioReaderOgg::read(void *buffer, unsigned long int bufferSiz
 		bytes = ov_read(&oggFile_, static_cast<char *>(buffer) + bufferSeek, bufferSize - bufferSeek, 0, 2, 1, &bitStream);
 
 		if (bytes < 0)
-		{
-			ov_clear(&oggFile_);
-			FATAL_MSG_X("Error decoding at bitstream %d", bitStream);
-		}
+			LOGW_X("Error decoding buffer at %u bytes in bitstream %d (%s)", bufferSeek, bitStream, vorbisErrorToString(bytes));
 
 		// Reset the static variable at the end of a decoding process
 		if (bytes <= 0)
 			bitStream = 0;
-
-		bufferSeek += bytes;
-	} while (bytes > 0 && bufferSize - bufferSeek > 0);
+		else
+			bufferSeek += bytes;
+	} while ((bytes > 0 || bytes == OV_HOLE) && bufferSize - bufferSeek > 0); // In case of a dropout in audio (OV_HOLE), decoding continues.
 
 	return bufferSeek;
 }

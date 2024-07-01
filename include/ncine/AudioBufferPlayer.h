@@ -16,7 +16,7 @@ class DLL_PUBLIC AudioBufferPlayer : public IAudioPlayer
 	AudioBufferPlayer();
 	/// A constructor creating a player from a shared buffer
 	explicit AudioBufferPlayer(AudioBuffer *audioBuffer);
-	inline ~AudioBufferPlayer() override { stop(); }
+	~AudioBufferPlayer() override;
 
 	/// Default move constructor
 	AudioBufferPlayer(AudioBufferPlayer &&) = default;
@@ -43,10 +43,11 @@ class DLL_PUBLIC AudioBufferPlayer : public IAudioPlayer
 	void pause() override;
 	void stop() override;
 
+	inline static ObjectType sType() { return ObjectType::AUDIOBUFFER_PLAYER; }
+
+  protected:
 	/// Updates the player state
 	void updateState() override;
-
-	inline static ObjectType sType() { return ObjectType::AUDIOBUFFER_PLAYER; }
 
   private:
 	AudioBuffer *audioBuffer_;

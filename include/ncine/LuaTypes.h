@@ -31,6 +31,10 @@ class TextNode;
 class AudioBuffer;
 class AudioBufferPlayer;
 class AudioStreamPlayer;
+class AudioFilter;
+class AudioEffectSlot;
+class AudioEffect;
+class AudioEffectProperties;
 
 class ParticleSystem;
 class ParticleAffector;
@@ -62,6 +66,10 @@ namespace LuaTypes {
 		IAUDIOPLAYER,
 		AUDIOBUFFER_PLAYER,
 		AUDIOSTREAM_PLAYER,
+		AUDIO_FILTER,
+		AUDIO_EFFECT_SLOT,
+		AUDIO_EFFECT,
+		AUDIO_EFFECT_PROPERTIES,
 
 		PARTICLE_SYSTEM,
 		PARTICLE_AFFECTOR,
@@ -94,6 +102,10 @@ namespace LuaTypes {
 	template <> inline LuaTypes::UserDataType classToUserDataType<IAudioPlayer>(IAudioPlayer *) { return LuaTypes::UserDataType::IAUDIOPLAYER; }
 	template <> inline LuaTypes::UserDataType classToUserDataType<AudioBufferPlayer>(AudioBufferPlayer *) { return LuaTypes::UserDataType::AUDIOBUFFER_PLAYER; }
 	template <> inline LuaTypes::UserDataType classToUserDataType<AudioStreamPlayer>(AudioStreamPlayer *) { return LuaTypes::UserDataType::AUDIOSTREAM_PLAYER; }
+	template <> inline LuaTypes::UserDataType classToUserDataType<AudioFilter>(AudioFilter *) { return LuaTypes::UserDataType::AUDIO_FILTER; }
+	template <> inline LuaTypes::UserDataType classToUserDataType<AudioEffectSlot>(AudioEffectSlot *) { return LuaTypes::UserDataType::AUDIO_EFFECT_SLOT; }
+	template <> inline LuaTypes::UserDataType classToUserDataType<AudioEffect>(AudioEffect *) { return LuaTypes::UserDataType::AUDIO_EFFECT; }
+	template <> inline LuaTypes::UserDataType classToUserDataType<AudioEffectProperties>(AudioEffectProperties *) { return LuaTypes::UserDataType::AUDIO_EFFECT_PROPERTIES; }
 
 	template <> inline LuaTypes::UserDataType classToUserDataType<ParticleSystem>(ParticleSystem *) { return LuaTypes::UserDataType::PARTICLE_SYSTEM; }
 	template <> inline LuaTypes::UserDataType classToUserDataType<ParticleAffector>(ParticleAffector *) { return LuaTypes::UserDataType::PARTICLE_AFFECTOR; }
@@ -123,6 +135,10 @@ namespace LuaTypes {
 	template <> inline const char *classToName<IAudioPlayer>(IAudioPlayer *) { return "IAudioPlayer"; }
 	template <> inline const char *classToName<AudioBufferPlayer>(AudioBufferPlayer *) { return "AudioBufferPlayer"; }
 	template <> inline const char *classToName<AudioStreamPlayer>(AudioStreamPlayer *) { return "AudioStreamPlayer"; }
+	template <> inline const char *classToName<AudioFilter>(AudioFilter *) { return "AudioFilter"; }
+	template <> inline const char *classToName<AudioEffectSlot>(AudioEffectSlot *) { return "AudioEffectSlot"; }
+	template <> inline const char *classToName<AudioEffect>(AudioEffect *) { return "AudioEffect"; }
+	template <> inline const char *classToName<AudioEffectProperties>(AudioEffectProperties *) { return "AudioEffectProperties"; }
 
 	template <> inline const char *classToName<ParticleSystem>(ParticleSystem *) { return "ParticleSystem"; }
 	template <> inline const char *classToName<ParticleAffector>(ParticleAffector *) { return "ParticleAffector"; }
@@ -156,6 +172,10 @@ namespace LuaTypes {
 			case LuaTypes::UserDataType::IAUDIOPLAYER: return "IAudioPlayer";
 			case LuaTypes::UserDataType::AUDIOBUFFER_PLAYER: return "AudioBufferPlayer";
 			case LuaTypes::UserDataType::AUDIOSTREAM_PLAYER: return "AudioStreamPlayer";
+			case LuaTypes::UserDataType::AUDIO_FILTER: return "AudioFilter";
+			case LuaTypes::UserDataType::AUDIO_EFFECT_SLOT: return "AudioEffectSlot";
+			case LuaTypes::UserDataType::AUDIO_EFFECT: return "AudioEffect";
+			case LuaTypes::UserDataType::AUDIO_EFFECT_PROPERTIES: return "AudioEffectProperties";
 
 			case LuaTypes::UserDataType::PARTICLE_SYSTEM: return "ParticleSystem";
 			case LuaTypes::UserDataType::PARTICLE_AFFECTOR: return "ParticleAffector";

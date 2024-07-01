@@ -40,6 +40,10 @@ namespace AppConfiguration {
 	static const char *vaoPoolSize = "vao_pool_size";
 	static const char *renderCommandPoolSize = "rendercommand_pool_size";
 
+	static const char *outputAudioFrequency = "output_audio_frequency";
+	static const char *monoAudioSources = "mono_audio_sources";
+	static const char *stereoAudioSources = "stereo_audio_sources";
+
 	static const char *withDebugOverlay = "debug_overlay";
 	static const char *withAudio = "audio";
 	static const char *withThreads = "threads";
@@ -69,7 +73,7 @@ void LuaAppConfiguration::exposeConstants(lua_State *L)
 
 void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 {
-	lua_createtable(L, 0, 37);
+	lua_createtable(L, 0, 40);
 
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::dataPath, appCfg.dataPath().data());
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::logFile, appCfg.logFile.data());
@@ -98,6 +102,10 @@ void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::iboSize, static_cast<int64_t>(appCfg.iboSize));
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::vaoPoolSize, appCfg.vaoPoolSize);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::renderCommandPoolSize, appCfg.renderCommandPoolSize);
+
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::outputAudioFrequency, appCfg.outputAudioFrequency);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::monoAudioSources, appCfg.monoAudioSources);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::stereoAudioSources, appCfg.stereoAudioSources);
 
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::withDebugOverlay, appCfg.withDebugOverlay);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::withAudio, appCfg.withAudio);
@@ -185,6 +193,13 @@ void LuaAppConfiguration::retrieveAndSet(lua_State *L, AppConfiguration &appCfg)
 	appCfg.vaoPoolSize = vaoPoolSize;
 	const unsigned int renderCommandPoolSize = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::AppConfiguration::renderCommandPoolSize);
 	appCfg.renderCommandPoolSize = renderCommandPoolSize;
+
+	const unsigned int outputAudioFrequency = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::AppConfiguration::outputAudioFrequency);
+	appCfg.outputAudioFrequency = outputAudioFrequency;
+	const unsigned int monoAudioSources = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::AppConfiguration::monoAudioSources);
+	appCfg.monoAudioSources = monoAudioSources;
+	const unsigned int stereoAudioSources = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::AppConfiguration::stereoAudioSources);
+	appCfg.stereoAudioSources = stereoAudioSources;
 
 	const bool withDebugOverlay = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::withDebugOverlay);
 	appCfg.withDebugOverlay = withDebugOverlay;

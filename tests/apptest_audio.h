@@ -16,6 +16,9 @@ namespace ncine {
 class AppConfiguration;
 class AudioBuffer;
 class IAudioPlayer;
+class AudioEffect;
+class AudioEffectSlot;
+class AudioFilter;
 class SceneNode;
 class Font;
 class TextNode;
@@ -33,6 +36,7 @@ class MyEventHandler :
 	void onPreInit(nc::AppConfiguration &config) override;
 	void onInit() override;
 	void onFrameStart() override;
+	void onShutdown() override;
 
 #ifdef __ANDROID__
 	void onTouchUp(const nc::TouchEvent &event) override;
@@ -44,17 +48,12 @@ class MyEventHandler :
 	void onJoyDisconnected(const nc::JoyConnectionEvent &event) override;
 
   private:
-	const int MaxStringLength = 384;
-
-	float gain_;
-	float pitch_;
-	float xPos_;
-	bool soundIsLooping_;
-	bool musicIsLooping_;
-
 	nctl::UniquePtr<nc::AudioBuffer> audioBuffer_;
 	nctl::UniquePtr<nc::IAudioPlayer> soundPlayer_;
 	nctl::UniquePtr<nc::IAudioPlayer> musicPlayer_;
+	nctl::UniquePtr<nc::AudioEffect> audioEffect_;
+	nctl::UniquePtr<nc::AudioEffectSlot> audioEffectSlot_;
+	nctl::UniquePtr<nc::AudioFilter> audioFilter_;
 	nctl::UniquePtr<nc::SceneNode> dummy_;
 	nctl::UniquePtr<nc::Font> font_;
 	nctl::UniquePtr<nc::TextNode> textNode_;

@@ -12,6 +12,7 @@
 
 #cmakedefine01 NCINE_WITH_AUDIO
 #cmakedefine01 NCINE_WITH_VORBIS
+#cmakedefine01 NCINE_WITH_OPENAL_EXT
 
 #cmakedefine01 NCINE_WITH_PNG
 #cmakedefine01 NCINE_WITH_WEBP

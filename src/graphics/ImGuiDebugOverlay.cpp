@@ -293,6 +293,7 @@ void ImGuiDebugOverlay::guiWindow()
 	if (appCfg.withScenegraph)
 		guiRenderingSettings();
 	guiWindowSettings();
+	guiAudioCapabilities();
 	guiAudioPlayers();
 	guiInputState();
 	guiBinaryShaderCache();
@@ -720,6 +721,11 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 		ImGui::Text("RenderCommand pool size: %u", appCfg.renderCommandPoolSize);
 
 		ImGui::Separator();
+		ImGui::Text("Output audio frequency: %u", appCfg.outputAudioFrequency);
+		ImGui::Text("Mono audio sources: %u", appCfg.monoAudioSources);
+		ImGui::Text("Stereo audio sources: %u", appCfg.stereoAudioSources);
+
+		ImGui::Separator();
 		ImGui::Text("Debug Overlay: %s", appCfg.withDebugOverlay ? "true" : "false");
 		ImGui::Text("Audio: %s", appCfg.withAudio ? "true" : "false");
 		ImGui::Text("Threads: %s", appCfg.withThreads ? "true" : "false");
@@ -888,38 +894,85 @@ void ImGuiDebugOverlay::guiWindowSettings()
 	}
 }
 
+void ImGuiDebugOverlay::guiAudioCapabilities()
+{
+#ifdef WITH_AUDIO
+	if (ImGui::CollapsingHeader("Audio Capabilities"))
+	{
+		const IAudioDevice &audioDevice = theServiceLocator().audioDevice();
+		const IAudioDevice::Attributes &audioProps = audioDevice.attributes();
+
+		ImGui::Text("OpenAL device name: %s", audioProps.deviceName);
+		ImGui::Text("OpenAL Version: %d.%d", audioProps.majorVersion, audioProps.minorVersion);
+		ImGui::Text("Output Frequency: %d", audioProps.outputFrequency);
+		ImGui::Text("Mono Sources: %d", audioProps.numMonoSources);
+		ImGui::Text("Stereo Sources: %d", audioProps.numStereoSources);
+		ImGui::Text("Refresh Rate: %d", audioProps.refreshRate);
+		ImGui::Text("Synchronous: %s", audioProps.synchronous ? "true" : "false");
+
+		ImGui::Separator();
+		ImGui::Text("ALC_EXT_EFX: %d", audioDevice.hasExtension(IAudioDevice::ALExtensions::EXT_EFX));
+		ImGui::Text("ALC_SOFT_PAUSE_DEVICE: %d", audioDevice.hasExtension(IAudioDevice::ALExtensions::SOFT_PAUSE_DEVICE));
+		ImGui::Text("AL_SOFT_DEFERRED_UPDATES: %d", audioDevice.hasExtension(IAudioDevice::ALExtensions::SOFT_DEFERRED_UPDATES));
+		ImGui::Text("AL_SOFT_SOURCE_SPATIALIZE: %d", audioDevice.hasExtension(IAudioDevice::ALExtensions::SOFT_SOURCE_SPATIALIZE));
+
+		ImGui::NewLine();
+		if (audioDevice.hasExtension(IAudioDevice::ALExtensions::EXT_EFX))
+		{
+			ImGui::Text("EFX Version: %d.%d", audioProps.efxMajorVersion, audioProps.efxMinorVersion);
+			ImGui::Text("Max Auxiliary Sends: %d", audioProps.maxAuxiliarySends);
+		}
+	}
+#endif
+}
+
 void ImGuiDebugOverlay::guiAudioPlayers()
 {
 #ifdef WITH_AUDIO
 	if (ImGui::CollapsingHeader("Audio Players"))
 	{
-		ImGui::Text("Device Name: %s", theServiceLocator().audioDevice().name());
-		ImGui::Text("Listener Gain: %f", theServiceLocator().audioDevice().gain());
+		IAudioDevice &audioDevice = theServiceLocator().audioDevice();
 
-		unsigned int numPlayers = theServiceLocator().audioDevice().numPlayers();
-		ImGui::Text("Active Players: %d", numPlayers);
+		float gain = audioDevice.gain();
+		ImGui::SliderFloat("Gain", &gain, IAudioPlayer::MinGain, IAudioPlayer::MaxGain, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+		audioDevice.setGain(gain);
+
+		const unsigned int maxNumSources = audioDevice.maxNumSources();
+		const unsigned int numAvailableSources = audioDevice.numAvailableSources();
+		const float availableSourcesFraction = numAvailableSources / float(maxNumSources);
+		ImGui::ProgressBar(availableSourcesFraction, ImVec2(0.0f, 0.0f));
+		ImGui::Text("Available Sources: %u / %u", numAvailableSources, maxNumSources);
+
+		unsigned int numPlayers = audioDevice.numPlayers();
+		ImGui::Text("Active Players: %u", numPlayers);
 
 		if (numPlayers > 0)
 		{
-			if (ImGui::Button("Stop"))
-				theServiceLocator().audioDevice().stopPlayers();
+			if (ImGui::Button("Stop All"))
+				audioDevice.stopPlayers();
 			ImGui::SameLine();
-			if (ImGui::Button("Pause"))
-				theServiceLocator().audioDevice().pausePlayers();
+			if (ImGui::Button("Pause All"))
+				audioDevice.pausePlayers();
 		}
 
 		// Stopping or pausing players change the number of active ones
-		numPlayers = theServiceLocator().audioDevice().numPlayers();
+		numPlayers = audioDevice.numPlayers();
 		for (unsigned int i = 0; i < numPlayers; i++)
 		{
-			const IAudioPlayer *player = theServiceLocator().audioDevice().player(i);
+			IAudioPlayer *player = audioDevice.player(i);
+			// Check if the pointer is valid as a player could have been stopped
+			if (player == nullptr)
+				continue;
+
 			widgetName_.format("Player %d", i);
 			if (ImGui::TreeNode(widgetName_.data()))
 			{
-				ImGui::Text("Source Id: %u", player->sourceId());
+				ImGui::Text("Source Id: %u (locked: %s)", player->sourceId(), player->isSourceLocked() ? "true" : "false");
 				ImGui::Text("Buffer Id: %u", player->bufferId());
 				ImGui::Text("Channels: %d", player->numChannels());
 				ImGui::Text("Frequency: %d Hz", player->frequency());
+				ImGui::Text("Samples: %lu", player->numSamples());
+				ImGui::Text("Duration: %.3f s", player->duration());
 				ImGui::Text("Buffer Size: %lu bytes", player->bufferSize());
 				ImGui::NewLine();
 
@@ -929,6 +982,48 @@ void ImGuiDebugOverlay::guiAudioPlayers()
 				ImGui::Text("Pitch: %f", player->pitch());
 				const Vector3f &pos = player->position();
 				ImGui::Text("Position: <%f, %f, %f>", pos.x, pos.y, pos.z);
+				const Vector3f &vel = player->velocity();
+				ImGui::Text("Velocity: <%f, %f, %f>", vel.x, vel.y, vel.z);
+				const Vector3f &dir = player->direction();
+				ImGui::Text("Direction: <%f, %f, %f>", dir.x, dir.y, dir.z);
+				ImGui::Text("Cone Inner Angle: %f", player->coneInnerAngle());
+				ImGui::Text("Cone Outer Angle: %f", player->coneOuterAngle());
+				ImGui::Text("Cone Outer Gain: %f", player->coneOuterGain());
+
+	#ifdef WITH_OPENAL_EXT
+				if (audioDevice.hasExtension(IAudioDevice::ALExtensions::EXT_EFX))
+				{
+					ImGui::NewLine();
+					ImGui::Text("Air Absorption Factor: %f", player->airAbsorptionFactor());
+					ImGui::Text("Room Rolloff Factor: %f", player->roomRolloffFactor());
+					ImGui::Text("Cone Outer Gain HF: %f", player->coneOuterGainHF());
+					ImGui::NewLine();
+					ImGui::Text("Effect Slot: %d", player->effectSlotId());
+					ImGui::Text("Aux Filter: %d", player->auxFilterId());
+					ImGui::Text("Direct Filter: %d", player->directFilterId());
+				}
+	#endif
+				ImGui::NewLine();
+
+				ImGui::PushID(player);
+				const bool canPlay = (player->isPlaying() == false);
+				const bool canPause = (player->isPaused() == false);
+				const bool canStop = (player->isStopped() == false);
+				ImGui::BeginDisabled(canPlay == false);
+				if (ImGui::Button("Play"))
+					player->play();
+				ImGui::EndDisabled();
+				ImGui::SameLine();
+				ImGui::BeginDisabled(canPause == false);
+				if (ImGui::Button("Pause"))
+					player->pause();
+				ImGui::EndDisabled();
+				ImGui::SameLine();
+				ImGui::BeginDisabled(canStop == false);
+				if (ImGui::Button("Stop"))
+					player->stop();
+				ImGui::EndDisabled();
+				ImGui::PopID();
 
 				ImGui::TreePop();
 			}

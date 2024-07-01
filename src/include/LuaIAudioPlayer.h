@@ -11,6 +11,7 @@ class LuaIAudioPlayer
   private:
 	static void exposeFunctions(lua_State *L);
 
+	static int hasSource(lua_State *L);
 	static int sourceId(lua_State *L);
 	static int bufferId(lua_State *L);
 
@@ -25,6 +26,9 @@ class LuaIAudioPlayer
 
 	static int sampleOffset(lua_State *L);
 	static int setSampleOffset(lua_State *L);
+
+	static int isSourceLocked(lua_State *L);
+	static int setSourceLocked(lua_State *L);
 
 	static int play(lua_State *L);
 	static int pause(lua_State *L);
@@ -41,8 +45,41 @@ class LuaIAudioPlayer
 	static int setGain(lua_State *L);
 	static int pitch(lua_State *L);
 	static int setPitch(lua_State *L);
+
 	static int position(lua_State *L);
 	static int setPosition(lua_State *L);
+	static int velocity(lua_State *L);
+	static int setVelocity(lua_State *L);
+	static int direction(lua_State *L);
+	static int setDirection(lua_State *L);
+
+	static int coneInnerAngle(lua_State *L);
+	static int setConeInnerAngle(lua_State *L);
+	static int coneOuterAngle(lua_State *L);
+	static int setConeOuterAngle(lua_State *L);
+	static int coneOuterGain(lua_State *L);
+	static int setConeOuterGain(lua_State *L);
+
+#ifdef WITH_OPENAL_EXT
+	static int airAbsorptionFactor(lua_State *L);
+	static int setAirAbsorptionFactor(lua_State *L);
+
+	static int roomRolloffFactor(lua_State *L);
+	static int setRoomRolloffFactor(lua_State *L);
+
+	static int coneOuterGainHF(lua_State *L);
+	static int setConeOuterGainHF(lua_State *L);
+
+	static int hasEffectSlot(lua_State *L);
+	static int effectSlotId(lua_State *L);
+	static int hasAuxFilter(lua_State *L);
+	static int auxFilterId(lua_State *L);
+	static int hasDirectFilter(lua_State *L);
+	static int directFilterId(lua_State *L);
+
+	static int setEffectSlot(lua_State *L);
+	static int setDirectFilter(lua_State *L);
+#endif
 
 	friend class LuaAudioBufferPlayer;
 	friend class LuaAudioStreamPlayer;
