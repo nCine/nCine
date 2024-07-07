@@ -11,8 +11,10 @@ AlignOperands: true
 AlignTrailingComments: false
 AllowAllConstructorInitializersOnNextLine: true
 AllowAllParametersOfDeclarationOnNextLine: true
+AllowBreakBeforeNoexceptSpecifier: Never
 AllowShortBlocksOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
+AllowShortCompoundRequirementOnASingleLine: true
 AllowShortEnumsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: Inline
 AllowShortIfStatementsOnASingleLine: false
@@ -45,6 +47,8 @@ BraceWrapping:
   SplitEmptyFunction: false
   SplitEmptyRecord: false
   SplitEmptyNamespace: false
+BracedInitializerIndentWidth: 4
+BreakAdjacentStringLiterals: false
 BreakAfterJavaFieldAnnotations: false
 BreakArrays: false
 BreakBeforeBinaryOperators: None
@@ -130,7 +134,9 @@ QualifierAlignment: Custom
 QualifierOrder: ['friend', 'static', 'inline', 'constexpr', 'const', 'restrict', 'volatile', 'type']
 # RawStringFormats:
 ReflowComments: true
+RemoveParentheses: MultipleParentheses
 SeparateDefinitionBlocks: Leave
+SkipMacroDefinitionBody: false
 SortIncludes: false
 SortJavaStaticImport: Before
 SortUsingDeclarations: true

@@ -49,7 +49,7 @@ namespace {
 	GLFWcharfun prevUserCallbackChar = nullptr;
 	GLFWmonitorfun prevUserCallbackMonitor = nullptr;
 #ifdef _WIN32
-	WNDPROC glfwWndProc = nullptr;
+	WNDPROC prevWndProc = nullptr;
 #endif
 
 	const char *clipboardText(void *userData)
@@ -284,7 +284,7 @@ namespace {
 				ImGui::GetIO().AddMouseSourceEvent(getMouseSourceFromMessageExtraInfo());
 				break;
 		}
-		return ::CallWindowProc(glfwWndProc, hWnd, msg, wParam, lParam);
+		return ::CallWindowProc(prevWndProc, hWnd, msg, wParam, lParam);
 	}
 #endif
 
@@ -374,8 +374,8 @@ void ImGuiGlfwInput::init(GLFWwindow *window, bool withCallbacks)
 
 	// Windows: register a WndProc hook so we can intercept some messages.
 #ifdef _WIN32
-	glfwWndProc = (WNDPROC)::GetWindowLongPtr((HWND)mainViewport->PlatformHandleRaw, GWLP_WNDPROC);
-	IM_ASSERT(glfwWndProc != nullptr);
+	prevWndProc = (WNDPROC)::GetWindowLongPtr((HWND)mainViewport->PlatformHandleRaw, GWLP_WNDPROC);
+	IM_ASSERT(prevWndProc != nullptr);
 	::SetWindowLongPtr((HWND)mainViewport->PlatformHandleRaw, GWLP_WNDPROC, (LONG_PTR)ImGui_ImplGlfw_WndProc);
 #endif
 }
@@ -394,11 +394,11 @@ void ImGuiGlfwInput::shutdown()
 	for (ImGuiMouseCursor i = 0; i < ImGuiMouseCursor_COUNT; i++)
 		glfwDestroyCursor(mouseCursors_[i]);
 
-		// Windows: register a WndProc hook so we can intercept some messages.
+		// Windows: restore our WndProc hook
 #ifdef _WIN32
 	ImGuiViewport *mainViewport = ImGui::GetMainViewport();
-	::SetWindowLongPtr((HWND)mainViewport->PlatformHandleRaw, GWLP_WNDPROC, (LONG_PTR)glfwWndProc);
-	glfwWndProc = nullptr;
+	::SetWindowLongPtr((HWND)mainViewport->PlatformHandleRaw, GWLP_WNDPROC, (LONG_PTR)prevWndProc);
+	prevWndProc = nullptr;
 #endif
 
 	io.BackendPlatformName = nullptr;

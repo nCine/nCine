@@ -1,15 +1,15 @@
 #if defined(_WIN32)
-	#define SDL_JOYSTICK_XINPUT (1)
-	#define SDL_JOYSTICK_WGI (1)
-	#define SDL_JOYSTICK_DINPUT (1)
+	#define SDL_JOYSTICK_XINPUT
+	#define SDL_JOYSTICK_WGI
+	#define SDL_JOYSTICK_DINPUT
 #endif
 
 #if defined(__linux__)
-	#define SDL_JOYSTICK_LINUX (1)
+	#define SDL_JOYSTICK_LINUX
 #endif
 
 #if defined(__EMSCRIPTEN__)
-	#define SDL_JOYSTICK_EMSCRIPTEN (1)
+	#define SDL_JOYSTICK_EMSCRIPTEN
 #endif
 
 static const char *ControllerMappings[] = {
@@ -22,11 +22,11 @@ static const char *ControllerMappings[] = {
 	"03000000c82d00000160000011010000,8BitDo SN30 Pro,a:b1,b:b0,back:b10,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,leftshoulder:b6,leftstick:b13,lefttrigger:b8,leftx:a0,lefty:a1,rightshoulder:b7,rightstick:b14,righttrigger:b9,rightx:a2,righty:a3,start:b11,x:b4,y:b3",
 #endif
 
-// SDL2 mappings from `SDL2-2.30.4/src/joystick/SDL_gamecontrollerdb.h`
-#if SDL_JOYSTICK_XINPUT
+// SDL2 mappings from `SDL2-2.30.5/src/joystick/SDL_gamecontrollerdb.h`
+#ifdef SDL_JOYSTICK_XINPUT
 	"xinput,*,a:b0,b:b1,back:b6,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b10,leftshoulder:b4,leftstick:b8,lefttrigger:a2,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b9,righttrigger:a5,rightx:a3,righty:a4,start:b7,x:b2,y:b3,",
 #endif
-#if SDL_JOYSTICK_WGI
+#ifdef SDL_JOYSTICK_WGI
 	"03000000491900001904000000007700,Amazon Luna Controller,a:b0,b:b1,back:b6,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b8,leftshoulder:b4,leftstick:b10,lefttrigger:a3,leftx:a0,lefty:a1,misc1:b9,rightshoulder:b5,rightstick:b11,righttrigger:a4,rightx:a2,righty:a5,start:b7,x:b2,y:b3,",
 	"03000000d11800000094000000007700,Google Stadia Controller,a:b0,b:b1,back:b6,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b8,leftshoulder:b4,leftstick:b9,lefttrigger:a5,leftx:a0,lefty:a1,misc1:b12,rightshoulder:b5,rightstick:b10,righttrigger:a4,rightx:a2,righty:a3,start:b7,x:b2,y:b3,",
 	"030000007e0500000920000000007701,Nintendo Switch Pro Controller,a:b1,b:b0,back:b8,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b12,leftshoulder:b4,leftstick:b10,lefttrigger:b6,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b11,righttrigger:b7,rightx:a2,righty:a3,start:b9,x:b3,y:b2,hint:SDL_GAMECONTROLLER_USE_BUTTON_LABELS:=1,",
@@ -36,7 +36,7 @@ static const char *ControllerMappings[] = {
 	"0300000032150000000a000000007703,Razer Atrox Arcade Stick,a:b0,b:b1,dpdown:b12,dpleft:b13,dpright:b11,dpup:b10,leftshoulder:b4,lefttrigger:b8,rightshoulder:b5,righttrigger:b9,x:b2,y:b3,",
 	"03000000de280000ff11000000007701,Steam Virtual Gamepad,a:b0,b:b1,back:b6,dpdown:b12,dpleft:b13,dpright:b11,dpup:b10,leftshoulder:b4,leftstick:b8,lefttrigger:a4,leftx:a1,lefty:a0~,rightshoulder:b5,rightstick:b9,righttrigger:a5,rightx:a3,righty:a2~,start:b7,x:b2,y:b3,",
 #endif
-#if SDL_JOYSTICK_DINPUT
+#ifdef SDL_JOYSTICK_DINPUT
 	"03000000fa2d00000100000000000000,3DRUDDER,leftx:a0,lefty:a1,rightx:a5,righty:a2,",
 	"03000000c82d00000090000000000000,8BitDo FC30 Pro,a:b0,b:b1,back:b10,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,leftshoulder:b6,leftstick:b13,lefttrigger:b8,leftx:a0,lefty:a1,rightshoulder:b7,rightstick:b14,righttrigger:b9,rightx:a3,righty:a4,start:b11,x:b3,y:b4,hint:SDL_GAMECONTROLLER_USE_BUTTON_LABELS:=1,",
 	"03000000c82d00000090000000000000,8BitDo FC30 Pro,a:b1,b:b0,back:b10,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,leftshoulder:b6,leftstick:b13,lefttrigger:b8,leftx:a0,lefty:a1,rightshoulder:b7,rightstick:b14,righttrigger:b9,rightx:a3,righty:a4,start:b11,x:b4,y:b3,hint:!SDL_GAMECONTROLLER_USE_BUTTON_LABELS:=1,",
@@ -940,7 +940,7 @@ static const char *ControllerMappings[] = {
 	"0500000083050000602000000ffe0000,iBuffalo SNES Controller,a:b0,b:b1,back:b9,dpdown:b12,dpleft:b13,dpright:b14,dpup:b11,leftshoulder:b15,rightshoulder:b16,start:b10,x:b2,y:b3,hint:SDL_GAMECONTROLLER_USE_BUTTON_LABELS:=1,",
 	"0500000083050000602000000ffe0000,iBuffalo SNES Controller,a:b1,b:b0,back:b9,dpdown:b12,dpleft:b13,dpright:b14,dpup:b11,leftshoulder:b15,rightshoulder:b16,start:b10,x:b3,y:b2,hint:!SDL_GAMECONTROLLER_USE_BUTTON_LABELS:=1,",
 #endif
-#if SDL_JOYSTICK_MFI
+#ifdef SDL_JOYSTICK_MFI
 	"05000000ac050000010000004f066d01,*,a:b0,b:b1,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b6,leftshoulder:b4,lefttrigger:a2,leftx:a0,lefty:a1,rightshoulder:b5,righttrigger:a5,rightx:a3,righty:a4,x:b2,y:b3,",
 	"05000000ac05000001000000cf076d01,*,a:b0,b:b1,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b8,leftshoulder:b4,leftstick:b6,lefttrigger:a2,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b7,righttrigger:a5,rightx:a3,righty:a4,x:b2,y:b3,",
 	"05000000ac05000001000000df076d01,*,a:b0,b:b1,back:b8,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,leftshoulder:b4,leftstick:b6,lefttrigger:a2,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b7,righttrigger:a5,rightx:a3,righty:a4,start:b9,x:b2,y:b3,",
