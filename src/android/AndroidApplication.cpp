@@ -52,38 +52,41 @@ void AndroidApplication::start(struct android_app *state, nctl::UniquePtr<IAppEv
 
 	while (theApplication().shouldQuit() == false)
 	{
-		int ident;
-		int events;
-		struct android_poll_source *source;
-
-#ifdef WITH_NUKLEAR
-		NuklearAndroidInput::inputBegin();
-#endif
-
-		while ((ident = ALooper_pollAll(!theApplication().isSuspended() ? 0 : -1, nullptr, &events, reinterpret_cast<void **>(&source))) >= 0)
+		while (state->destroyRequested == false)
 		{
+#ifdef WITH_NUKLEAR
+			NuklearAndroidInput::inputBegin();
+#endif
+			int events;
+			struct android_poll_source *source = nullptr;
+
+			int ident = ALooper_pollOnce(!theApplication().isSuspended() ? 0 : -1, nullptr, &events, reinterpret_cast<void **>(&source));
+
+			if (ident == ALOOPER_POLL_ERROR)
+				LOGI("ALooper_pollOnce() returned an error");
+
 			if (source != nullptr)
 				source->process(state, source);
 
 			if (ident == LOOPER_ID_USER)
 				AndroidInputManager::parseAccelerometerEvent();
 
-			if (state->destroyRequested)
+#ifdef WITH_NUKLEAR
+			NuklearAndroidInput::inputEnd();
+#endif
+
+			if (theAndroidApplication().isInitialized() &&
+			    theApplication().shouldSuspend() == false)
 			{
-				LOGI("android_app->destroyRequested not equal to zero");
-				theApplication().quit();
+				AndroidInputManager::updateJoystickConnections();
+				theApplication().step();
 			}
 		}
 
-#ifdef WITH_NUKLEAR
-		NuklearAndroidInput::inputEnd();
-#endif
-
-		if (theAndroidApplication().isInitialized() &&
-		    theApplication().shouldSuspend() == false)
+		if (state->destroyRequested)
 		{
-			AndroidInputManager::updateJoystickConnections();
-			theApplication().step();
+			LOGI("android_app->destroyRequested not equal to zero");
+			theApplication().quit();
 		}
 	}
 

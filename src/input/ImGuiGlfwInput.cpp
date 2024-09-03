@@ -22,6 +22,11 @@
 #ifdef __EMSCRIPTEN__
 	#include <emscripten.h>
 	#include <emscripten/html5.h>
+	#ifdef EMSCRIPTEN_USE_PORT_CONTRIB_GLFW3
+		#include <GLFW/emscripten_glfw3.h>
+	#else
+		#define EMSCRIPTEN_USE_EMBEDDED_GLFW3
+	#endif
 #endif
 
 // We gather version tests as define in order to easily see which features are version-dependent.
@@ -200,7 +205,7 @@ namespace {
 
 	int translateUntranslatedKey(int key, int scancode)
 	{
-#if GLFW_HAS_GETKEYNAME && !defined(__EMSCRIPTEN__)
+#if GLFW_HAS_GETKEYNAME && !defined(EMSCRIPTEN_USE_EMBEDDED_GLFW3)
 		// GLFW 3.1+ attempts to "untranslate" keys, which goes the opposite of what every other framework does, making using lettered shortcuts difficult.
 		// (It had reasons to do so: namely GLFW is/was more likely to be used for WASD-type game controls rather than lettered shortcuts, but IHMO the 3.1 change could have been done differently)
 		// See https://github.com/glfw/glfw/issues/1502 for details.
@@ -211,7 +216,7 @@ namespace {
 		GLFWerrorfun prevErrorCallback = glfwSetErrorCallback(nullptr);
 		const char *keyName = glfwGetKeyName(key, scancode);
 		glfwSetErrorCallback(prevErrorCallback);
-	#if GLFW_HAS_GETERROR && !defined(__EMSCRIPTEN__) // Eat errors (see #5908)
+	#if GLFW_HAS_GETERROR && !defined(EMSCRIPTEN_USE_EMBEDDED_GLFW3) // Eat errors (see #5908)
 		(void)glfwGetError(nullptr);
 	#endif
 		if (keyName && keyName[0] != 0 && keyName[1] == 0)
@@ -239,7 +244,7 @@ namespace {
 		return (v < 0.0f) ? 0.0f : (v > 1.0f) ? 1.0f : v;
 	}
 
-#ifdef __EMSCRIPTEN__
+#ifdef EMSCRIPTEN_USE_EMBEDDED_GLFW3
 	EM_BOOL emscriptenWheelCallback(int eventType, const EmscriptenWheelEvent *wheelEvent, void *userData)
 	{
 		// Mimic emscriptenHandleWheel() in SDL.
@@ -306,6 +311,10 @@ bool ImGuiGlfwInput::installedCallbacks_ = false;
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+#ifdef __EMSCRIPTEN__
+EM_JS(void, emscriptenOpenURL, (char const *url), { url = url ? UTF8ToString(url) : null; if (url) window.open(url, '_blank'); });
+#endif
+
 void ImGuiGlfwInput::init(GLFWwindow *window, bool withCallbacks)
 {
 	IMGUI_CHECKVERSION();
@@ -324,6 +333,9 @@ void ImGuiGlfwInput::init(GLFWwindow *window, bool withCallbacks)
 	io.SetClipboardTextFn = setClipboardText;
 	io.GetClipboardTextFn = clipboardText;
 	io.ClipboardUserData = window_;
+#ifdef __EMSCRIPTEN__
+	io.PlatformOpenInShellFn = [](ImGuiContext *, const char *url) { emscriptenOpenURL(url); return true; };
+#endif
 
 	// Create mouse cursors
 	// (By design, on X11 cursors are user configurable and some cursors may be missing. When a cursor doesn't exist,
@@ -355,10 +367,7 @@ void ImGuiGlfwInput::init(GLFWwindow *window, bool withCallbacks)
 	if (withCallbacks)
 		installCallbacks(window);
 
-	// Register Emscripten Wheel callback to workaround issue in Emscripten GLFW Emulation (#6096)
-	// We intentionally do not check 'if (install_callbacks)' here, as some users may set it to false and call GLFW callback themselves.
-	// FIXME: May break chaining in case user registered their own Emscripten callback?
-#ifdef __EMSCRIPTEN__
+#ifdef EMSCRIPTEN_USE_EMBEDDED_GLFW3
 	emscripten_set_wheel_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT, NULL, false, emscriptenWheelCallback);
 #endif
 
@@ -462,7 +471,7 @@ void ImGuiGlfwInput::scrollCallback(GLFWwindow *window, double xoffset, double y
 	if (inputEnabled_ == false)
 		return;
 
-#ifdef __EMSCRIPTEN__
+#ifdef EMSCRIPTEN_USE_EMBEDDED_GLFW3
 	// Ignore GLFW events: will be processed in emscriptenWheelCallback().
 	return;
 #endif
@@ -589,7 +598,7 @@ void ImGuiGlfwInput::updateMouseData()
 
 	// (those braces are here to reduce diff with multi-viewports support in 'docking' branch)
 	{
-#ifdef __EMSCRIPTEN__
+#ifdef EMSCRIPTEN_USE_EMBEDDED_GLFW3
 		const bool isWindowFocused = true;
 #else
 		const bool isWindowFocused = glfwGetWindowAttrib(window_, GLFW_FOCUSED) != 0;
@@ -647,7 +656,7 @@ void ImGuiGlfwInput::updateGamepads()
 	if (joyMappedInput == false)
 	{
 		io.BackendFlags &= ~ImGuiBackendFlags_HasGamepad;
-#if GLFW_HAS_GAMEPAD_API && !defined(__EMSCRIPTEN__)
+#if GLFW_HAS_GAMEPAD_API && !defined(EMSCRIPTEN_USE_EMBEDDED_GLFW3)
 		GLFWgamepadstate gamepad;
 		if (!glfwGetGamepadState(GLFW_JOYSTICK_1, &gamepad))
 			return;
@@ -697,7 +706,6 @@ void ImGuiGlfwInput::updateGamepads()
 		#undef MAP_BUTTON
 		#undef MAP_ANALOG
 		// clang-format on
-
 	}
 }
 

@@ -36,14 +36,14 @@ EM_BOOL IGfxDevice::resize_callback(int eventType, const EmscriptenUiEvent *even
 		theApplication().resizeScreenViewport(width, height);
 	}
 
-	return 1;
+	return true;
 }
 
 EM_BOOL IGfxDevice::fullscreenchange_callback(int eventType, const EmscriptenFullscreenChangeEvent *event, void *userData)
 {
 	IGfxDevice *gfxDevice = reinterpret_cast<IGfxDevice *>(userData);
 	gfxDevice->setFullScreen(event->isFullscreen);
-	return 1;
+	return true;
 }
 
 EM_BOOL IGfxDevice::focus_callback(int eventType, const EmscriptenFocusEvent *event, void *userData)
@@ -52,7 +52,7 @@ EM_BOOL IGfxDevice::focus_callback(int eventType, const EmscriptenFocusEvent *ev
 		theApplication().setFocus(true);
 	else if (eventType == EMSCRIPTEN_EVENT_BLUR)
 		theApplication().setFocus(false);
-	return 1;
+	return true;
 }
 
 #endif

@@ -273,9 +273,9 @@ class DLL_PUBLIC IGfxDevice
 #endif
 
 #ifdef __EMSCRIPTEN__
-	static int resize_callback(int eventType, const EmscriptenUiEvent *event, void *userData);
-	static int fullscreenchange_callback(int eventType, const EmscriptenFullscreenChangeEvent *event, void *userData);
-	static int focus_callback(int eventType, const EmscriptenFocusEvent *event, void *userData);
+	static bool resize_callback(int eventType, const EmscriptenUiEvent *event, void *userData);
+	static bool fullscreenchange_callback(int eventType, const EmscriptenFullscreenChangeEvent *event, void *userData);
+	static bool focus_callback(int eventType, const EmscriptenFocusEvent *event, void *userData);
 #endif
 };
 
