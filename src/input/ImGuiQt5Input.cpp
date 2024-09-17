@@ -33,7 +33,7 @@ namespace {
 
 	char clipboardString[1024];
 
-	const char *clipboardText(void *userData)
+	const char *clipboardText(ImGuiContext *context)
 	{
 		QClipboard *clipboard = QApplication::clipboard();
 		const int charsToCopy = clipboard->text().length() < 1024 ? clipboard->text().length() : 1024;
@@ -43,7 +43,7 @@ namespace {
 		return clipboardString;
 	}
 
-	void setClipboardText(void *userData, const char *text)
+	void setClipboardText(ImGuiContext *context, const char *text)
 	{
 		QClipboard *clipboard = QApplication::clipboard();
 		clipboard->setText(text);
@@ -203,9 +203,10 @@ void ImGuiQt5Input::init(Qt5Widget *widget)
 	io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos; // We can honor io.WantSetMousePos requests (optional, rarely used)
 	io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
 
-	io.SetClipboardTextFn = setClipboardText;
-	io.GetClipboardTextFn = clipboardText;
-	io.ClipboardUserData = nullptr;
+	ImGuiPlatformIO& platformIo = ImGui::GetPlatformIO();
+	platformIo.Platform_SetClipboardTextFn = setClipboardText;
+	platformIo.Platform_GetClipboardTextFn = clipboardText;
+	platformIo.Platform_ClipboardUserData = nullptr;
 
 	mouseCursors_[ImGuiMouseCursor_Arrow] = QCursor(Qt::ArrowCursor);
 	mouseCursors_[ImGuiMouseCursor_TextInput] = QCursor(Qt::IBeamCursor);

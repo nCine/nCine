@@ -16,18 +16,21 @@
 	#define SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE 0
 #endif
 #define SDL_HAS_VULKAN SDL_VERSION_ATLEAST(2, 0, 6)
+#if SDL_HAS_VULKAN
+extern "C" { extern DECLSPEC void SDLCALL SDL_Vulkan_GetDrawableSize(SDL_Window *window, int *w, int *h); }
+#endif
 
 namespace ncine {
 
 namespace {
 
-	void setClipboardText(void *userData, const char *text)
+	void setClipboardText(ImGuiContext *context, const char *text)
 	{
 		SDL_SetClipboardText(text);
 	}
 
 	// Note: native IME will only display if user calls SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1") _before_ SDL_CreateWindow().
-	void setPlatformImeData(ImGuiContext *context, ImGuiPlatformImeData *data)
+	void setPlatformImeData(ImGuiContext *context, ImGuiViewport *viewport, ImGuiPlatformImeData *data)
 	{
 		if (data->WantVisible)
 		{
@@ -38,6 +41,12 @@ namespace {
 			r.h = static_cast<int>(data->InputLineHeight);
 			SDL_SetTextInputRect(&r);
 		}
+	}
+
+	ImGuiViewport *viewportForWindowId(SDL_Window *window, Uint32 windowId)
+	{
+		const Uint32 thisWindowId = SDL_GetWindowID(window);
+		return (thisWindowId == windowId) ? ImGui::GetMainViewport() : nullptr;
 	}
 
 	ImGuiKey sdlKeycodeToImGuiKey(SDL_Keycode keycode, SDL_Scancode scancode)
@@ -260,11 +269,13 @@ void ImGuiSdlInput::init(SDL_Window *window)
 
 	window_ = window;
 
-	io.SetClipboardTextFn = setClipboardText;
-	io.GetClipboardTextFn = clipboardText;
-	io.ClipboardUserData = nullptr;
+	ImGuiPlatformIO& platformIo = ImGui::GetPlatformIO();
+	platformIo.Platform_SetClipboardTextFn = setClipboardText;
+	platformIo.Platform_GetClipboardTextFn = clipboardText;
+	platformIo.Platform_ClipboardUserData = nullptr;
+	platformIo.Platform_SetImeDataFn = setPlatformImeData;
 #ifdef __EMSCRIPTEN__
-	io.PlatformOpenInShellFn = [](ImGuiContext *, const char *url) { emscriptenOpenURL(url); return true; };
+	platformIo.Platform_OpenInShellFn = [](ImGuiContext*, const char *url) { emscriptenOpenURL(url); return true; };
 #endif
 
 	// Gamepad handling
@@ -351,6 +362,11 @@ void ImGuiSdlInput::newFrame()
 	SDL_GetWindowSize(window_, &w, &h);
 	if (SDL_GetWindowFlags(window_) & SDL_WINDOW_MINIMIZED)
 		w = h = 0;
+#if SDL_HAS_VULKAN
+	else if (SDL_GetWindowFlags(window_) & SDL_WINDOW_VULKAN)
+		SDL_Vulkan_GetDrawableSize(window_, &displayW, &displayH);
+	else
+#endif
 	SDL_GL_GetDrawableSize(window_, &displayW, &displayH);
 	io.DisplaySize = ImVec2(static_cast<float>(w), static_cast<float>(h));
 	if (w > 0 && h > 0)
@@ -394,6 +410,8 @@ bool ImGuiSdlInput::processEvent(const SDL_Event *event)
 	{
 		case SDL_MOUSEMOTION:
 		{
+			if (viewportForWindowId(window_, event->motion.windowID) == nullptr)
+				return false;
 			const ImVec2 mousePos(static_cast<float>(event->motion.x), static_cast<float>(event->motion.y));
 			io.AddMouseSourceEvent(event->motion.which == SDL_TOUCH_MOUSEID ? ImGuiMouseSource_TouchScreen : ImGuiMouseSource_Mouse);
 			io.AddMousePosEvent(mousePos.x, mousePos.y);
@@ -401,6 +419,8 @@ bool ImGuiSdlInput::processEvent(const SDL_Event *event)
 		}
 		case SDL_MOUSEWHEEL:
 		{
+			if (viewportForWindowId(window_, event->motion.windowID) == nullptr)
+				return false;
 #if SDL_VERSION_ATLEAST(2, 0, 18) // If this fails to compile on Emscripten: update to latest Emscripten!
 			float wheelX = -event->wheel.preciseX;
 			const float wheelY = event->wheel.preciseY;
@@ -418,6 +438,8 @@ bool ImGuiSdlInput::processEvent(const SDL_Event *event)
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP:
 		{
+			if (viewportForWindowId(window_, event->motion.windowID) == nullptr)
+				return false;
 			int mouseButton = -1;
 			if (event->button.button == SDL_BUTTON_LEFT)
 				mouseButton = 0;
@@ -438,12 +460,16 @@ bool ImGuiSdlInput::processEvent(const SDL_Event *event)
 		}
 		case SDL_TEXTINPUT:
 		{
+			if (viewportForWindowId(window_, event->motion.windowID) == nullptr)
+				return false;
 			io.AddInputCharactersUTF8(event->text.text);
 			return true;
 		}
 		case SDL_KEYDOWN:
 		case SDL_KEYUP:
 		{
+			if (viewportForWindowId(window_, event->motion.windowID) == nullptr)
+				return false;
 			updateKeyModifiers(static_cast<SDL_Keymod>(event->key.keysym.mod));
 			const ImGuiKey key = sdlKeycodeToImGuiKey(event->key.keysym.sym, event->key.keysym.scancode);
 			io.AddKeyEvent(key, (event->type == SDL_KEYDOWN));
@@ -453,6 +479,8 @@ bool ImGuiSdlInput::processEvent(const SDL_Event *event)
 		}
 		case SDL_WINDOWEVENT:
 		{
+			if (viewportForWindowId(window_, event->motion.windowID) == nullptr)
+				return false;
 			// - When capturing mouse, SDL will send a bunch of conflicting LEAVE/ENTER event on every mouse move, but the final ENTER tends to be right.
 			// - However we won't get a correct LEAVE event for a captured window.
 			// - In some cases, when detaching a window from main viewport SDL may send SDL_WINDOWEVENT_ENTER one frame too late,
@@ -486,7 +514,7 @@ bool ImGuiSdlInput::processEvent(const SDL_Event *event)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-const char *ImGuiSdlInput::clipboardText(void *userData)
+const char *ImGuiSdlInput::clipboardText(ImGuiContext *context)
 {
 	if (clipboardTextData_)
 		SDL_free(clipboardTextData_);

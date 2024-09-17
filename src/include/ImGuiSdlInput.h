@@ -48,7 +48,7 @@ class ImGuiSdlInput
 	static GamepadMode gamepadMode_;
 	static bool wantUpdateGamepadsList_;
 
-	static const char *clipboardText(void *userData);
+	static const char *clipboardText(ImGuiContext *context);
 	static void updateMouseData();
 	static void updateMouseCursor();
 	static void closeGamepads();

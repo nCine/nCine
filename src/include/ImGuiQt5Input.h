@@ -3,6 +3,7 @@
 
 #include "imgui.h"
 #include <QCursor>
+#include <nctl/UniquePtr.h>
 
 class QEvent;
 class QGamepad;

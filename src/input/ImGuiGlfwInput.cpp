@@ -57,19 +57,10 @@ namespace {
 	WNDPROC prevWndProc = nullptr;
 #endif
 
-	const char *clipboardText(void *userData)
+	ImGuiKey glfwKeyToImGuiKey(int keycode, int scancode)
 	{
-		return glfwGetClipboardString(reinterpret_cast<GLFWwindow *>(userData));
-	}
-
-	void setClipboardText(void *userData, const char *text)
-	{
-		glfwSetClipboardString(reinterpret_cast<GLFWwindow *>(userData), text);
-	}
-
-	ImGuiKey glfwKeyToImGuiKey(int key)
-	{
-		switch (key)
+		IM_UNUSED(scancode);
+		switch (keycode)
 		{
 			case GLFW_KEY_TAB: return ImGuiKey_Tab;
 			case GLFW_KEY_LEFT: return ImGuiKey_LeftArrow;
@@ -203,6 +194,7 @@ namespace {
 		io.AddKeyEvent(ImGuiMod_Super, (glfwGetKey(window, GLFW_KEY_LEFT_SUPER) == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_RIGHT_SUPER) == GLFW_PRESS));
 	}
 
+	// FIXME: should this be baked into glfwKeyToImGuiKey()? then what about the values passed to io.SetKeyEventNativeData()?
 	int translateUntranslatedKey(int key, int scancode)
 	{
 #if GLFW_HAS_GETKEYNAME && !defined(EMSCRIPTEN_USE_EMBEDDED_GLFW3)
@@ -312,7 +304,11 @@ bool ImGuiGlfwInput::installedCallbacks_ = false;
 ///////////////////////////////////////////////////////////
 
 #ifdef __EMSCRIPTEN__
-EM_JS(void, emscriptenOpenURL, (char const *url), { url = url ? UTF8ToString(url) : null; if (url) window.open(url, '_blank'); });
+	#if EMSCRIPTEN_USE_PORT_CONTRIB_GLFW3 >= 34020240817
+void emscriptenOpenURL(const char *url) { if (url) emscripten::glfw3::OpenURL(url); }
+	#else
+EM_JS(void, emscriptenOpenURL, (const char *url), { url = url ? UTF8ToString(url) : null; if (url) window.open(url, '_blank'); });
+	#endif
 #endif
 
 void ImGuiGlfwInput::init(GLFWwindow *window, bool withCallbacks)
@@ -330,11 +326,11 @@ void ImGuiGlfwInput::init(GLFWwindow *window, bool withCallbacks)
 	window_ = window;
 	time_ = 0.0;
 
-	io.SetClipboardTextFn = setClipboardText;
-	io.GetClipboardTextFn = clipboardText;
-	io.ClipboardUserData = window_;
+	ImGuiPlatformIO& platformIo = ImGui::GetPlatformIO();
+	platformIo.Platform_SetClipboardTextFn = [](ImGuiContext *context, const char *text) { glfwSetClipboardString(nullptr, text); };
+	platformIo.Platform_GetClipboardTextFn = [](ImGuiContext *context) { return glfwGetClipboardString(nullptr); };
 #ifdef __EMSCRIPTEN__
-	io.PlatformOpenInShellFn = [](ImGuiContext *, const char *url) { emscriptenOpenURL(url); return true; };
+	platformIo.Platform_OpenInShellFn = [](ImGuiContext *context, const char *url) { emscriptenOpenURL(url); return true; };
 #endif
 
 	// Create mouse cursors
@@ -387,7 +383,26 @@ void ImGuiGlfwInput::init(GLFWwindow *window, bool withCallbacks)
 	IM_ASSERT(prevWndProc != nullptr);
 	::SetWindowLongPtr((HWND)mainViewport->PlatformHandleRaw, GWLP_WNDPROC, (LONG_PTR)ImGui_ImplGlfw_WndProc);
 #endif
+
+	// Emscripten: the same application can run on various platforms, so we detect the Apple platform at runtime
+	// to override io.ConfigMacOSXBehaviors from its default (which is always false in Emscripten).
+#ifdef __EMSCRIPTEN__
+	#if EMSCRIPTEN_USE_PORT_CONTRIB_GLFW3 >= 34020240817
+	if (emscripten::glfw3::IsRuntimePlatformApple())
+	{
+		ImGui::GetIO().ConfigMacOSXBehaviors = true;
+
+		// Due to how the browser (poorly) handles the Meta Key, this line essentially disables repeats when used.
+		// This means that Meta + V only registers a single key-press, even if the keys are held.
+		// This is a compromise for dealing with this issue in ImGui since ImGui implements key repeat itself.
+		// See https://github.com/pongasoft/emscripten-glfw/blob/v3.4.0.20240817/docs/Usage.md#the-problem-of-the-super-key
+		emscripten::glfw3::SetSuperPlusKeyTimeouts(10, 10);
+	}
+	#endif
+#endif
 }
+
+
 
 void ImGuiGlfwInput::shutdown()
 {
@@ -493,7 +508,7 @@ void ImGuiGlfwInput::keyCallback(GLFWwindow *window, int keycode, int scancode, 
 	keycode = translateUntranslatedKey(keycode, scancode);
 
 	ImGuiIO &io = ImGui::GetIO();
-	ImGuiKey imguiKey = glfwKeyToImGuiKey(keycode);
+	ImGuiKey imguiKey = glfwKeyToImGuiKey(keycode, scancode);
 	io.AddKeyEvent(imguiKey, (action == GLFW_PRESS));
 	io.SetKeyEventNativeData(imguiKey, keycode, scancode); // To support legacy indexing (<1.87 user code)
 }

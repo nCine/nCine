@@ -25,12 +25,12 @@ namespace {
 	static const int MaxClipboardLength = 256;
 	static char clipboard[MaxClipboardLength];
 
-	const char *clipboardText(void *userData)
+	const char *clipboardText(ImGuiContext *context)
 	{
 		return clipboard;
 	}
 
-	void setClipboardText(void *userData, const char *text)
+	void setClipboardText(ImGuiContext *context, const char *text)
 	{
 		strncpy(clipboard, text, MaxClipboardLength);
 	}
@@ -163,9 +163,9 @@ void ImGuiAndroidInput::init(ANativeWindow *window)
 	ImGuiIO &io = ImGui::GetIO();
 	io.BackendPlatformName = "nCine_Android";
 
-	io.SetClipboardTextFn = setClipboardText;
-	io.GetClipboardTextFn = clipboardText;
-	io.ClipboardUserData = nullptr;
+	ImGuiPlatformIO& platformIo = ImGui::GetPlatformIO();
+	platformIo.Platform_SetClipboardTextFn = setClipboardText;
+	platformIo.Platform_GetClipboardTextFn = clipboardText;
 }
 
 void ImGuiAndroidInput::shutdown()
