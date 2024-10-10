@@ -4,6 +4,42 @@
 namespace nctl {
 
 ///////////////////////////////////////////////////////////
+// AtomicFences
+///////////////////////////////////////////////////////////
+
+void AtomicFences::threadFence(MemoryModel memModel)
+{
+	switch (memModel)
+	{
+		case MemoryModel::RELAXED:
+			return std::atomic_thread_fence(std::memory_order_relaxed);
+		case MemoryModel::RELEASE:
+			return std::atomic_thread_fence(std::memory_order_release);
+		case MemoryModel::ACQUIRE:
+			return std::atomic_thread_fence(std::memory_order_acquire);
+		case MemoryModel::SEQ_CST:
+		default:
+			return std::atomic_thread_fence(std::memory_order_seq_cst);
+	}
+}
+
+void AtomicFences::signalFence(MemoryModel memModel)
+{
+	switch (memModel)
+	{
+		case MemoryModel::RELAXED:
+			return std::atomic_signal_fence(std::memory_order_relaxed);
+		case MemoryModel::RELEASE:
+			return std::atomic_signal_fence(std::memory_order_release);
+		case MemoryModel::ACQUIRE:
+			return std::atomic_signal_fence(std::memory_order_acquire);
+		case MemoryModel::SEQ_CST:
+		default:
+			return std::atomic_signal_fence(std::memory_order_seq_cst);
+	}
+}
+
+///////////////////////////////////////////////////////////
 // Atomic32
 ///////////////////////////////////////////////////////////
 

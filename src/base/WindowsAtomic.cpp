@@ -2,8 +2,53 @@
 #include <nctl/Atomic.h>
 #include <ncine/common_windefines.h>
 #include <windef.h>
+#include <intrin.h>
 
 namespace nctl {
+
+///////////////////////////////////////////////////////////
+// AtomicFences
+///////////////////////////////////////////////////////////
+
+void AtomicFences::threadFence(MemoryModel memModel)
+{
+	switch (memModel)
+	{
+		case MemoryModel::RELAXED:
+			// No fence needed
+			break;
+		case MemoryModel::ACQUIRE:
+			_ReadBarrier(); // Compiler-level acquire fence
+			break;
+		case MemoryModel::RELEASE:
+			_WriteBarrier(); // Compiler-level release fence
+			break;
+		case MemoryModel::SEQ_CST:
+		default:
+			MemoryBarrier(); // Full memory fence (hardware + compiler)
+			break;
+	}
+}
+
+void AtomicFences::signalFence(MemoryModel memModel)
+{
+	switch (memModel)
+	{
+		case MemoryModel::RELAXED:
+			// No barrier needed
+			break;
+		case MemoryModel::ACQUIRE:
+			_ReadBarrier(); // Prevent compiler reordering of reads
+			break;
+		case MemoryModel::RELEASE:
+			_WriteBarrier(); // Prevent compiler reordering of writes
+			break;
+		case MemoryModel::SEQ_CST:
+		default:
+			_ReadWriteBarrier(); // Prevent reordering of both
+			break;
+	}
+}
 
 ///////////////////////////////////////////////////////////
 // Atomic32
@@ -14,15 +59,15 @@ int32_t Atomic32::load(MemoryModel memModel)
 	switch (memModel)
 	{
 		case MemoryModel::RELAXED:
-			return ReadNoFence(reinterpret_cast<volatile long *>(&value_));
+			return ReadNoFence(reinterpret_cast<const volatile long *>(&value_));
 		case MemoryModel::ACQUIRE:
-			return ReadAcquire(reinterpret_cast<volatile long *>(&value_));
+			return ReadAcquire(reinterpret_cast<const volatile long *>(&value_));
 		case MemoryModel::RELEASE:
 			FATAL_MSG("Incompatible memory model");
 			return 0;
 		case MemoryModel::SEQ_CST:
 		default:
-			return ReadAcquire(reinterpret_cast<volatile long *>(&value_));
+			return ReadAcquire(reinterpret_cast<const volatile long *>(&value_));
 	}
 }
 
@@ -103,15 +148,15 @@ int64_t Atomic64::load(MemoryModel memModel)
 	switch (memModel)
 	{
 		case MemoryModel::RELAXED:
-			return ReadNoFence64(reinterpret_cast<volatile LONG64 *>(&value_));
+			return ReadNoFence64(reinterpret_cast<const volatile LONG64 *>(&value_));
 		case MemoryModel::ACQUIRE:
-			return ReadAcquire64(reinterpret_cast<volatile LONG64 *>(&value_));
+			return ReadAcquire64(reinterpret_cast<const volatile LONG64 *>(&value_));
 		case MemoryModel::RELEASE:
 			FATAL_MSG("Incompatible memory model");
 			return 0;
 		case MemoryModel::SEQ_CST:
 		default:
-			return ReadAcquire64(reinterpret_cast<volatile LONG64 *>(&value_));
+			return ReadAcquire64(reinterpret_cast<const volatile LONG64 *>(&value_));
 	}
 }
 

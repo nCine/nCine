@@ -4,6 +4,50 @@
 namespace nctl {
 
 ///////////////////////////////////////////////////////////
+// AtomicFences
+///////////////////////////////////////////////////////////
+
+void AtomicFences::threadFence(MemoryModel memModel)
+{
+	switch (memModel)
+	{
+		case MemoryModel::RELAXED:
+			__atomic_thread_fence(__ATOMIC_RELAXED);
+			break;
+		case MemoryModel::ACQUIRE:
+			__atomic_thread_fence(__ATOMIC_ACQUIRE);
+			break;
+		case MemoryModel::RELEASE:
+			FATAL_MSG("Incompatible memory model");
+			break;
+		case MemoryModel::SEQ_CST:
+		default:
+			__atomic_thread_fence(__ATOMIC_SEQ_CST);
+			break;
+	}
+}
+
+void AtomicFences::signalFence(MemoryModel memModel)
+{
+	switch (memModel)
+	{
+		case MemoryModel::RELAXED:
+			__atomic_signal_fence(__ATOMIC_RELAXED);
+			break;
+		case MemoryModel::ACQUIRE:
+			__atomic_signal_fence(__ATOMIC_ACQUIRE);
+			break;
+		case MemoryModel::RELEASE:
+			FATAL_MSG("Incompatible memory model");
+			break;
+		case MemoryModel::SEQ_CST:
+		default:
+			__atomic_signal_fence(__ATOMIC_SEQ_CST);
+			break;
+	}
+}
+
+///////////////////////////////////////////////////////////
 // Atomic32
 ///////////////////////////////////////////////////////////
 

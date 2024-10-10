@@ -27,6 +27,7 @@ class ThreadAffinityMask
   public:
 	ThreadAffinityMask() { zero(); }
 	ThreadAffinityMask(int cpuNum)
+	    : ThreadAffinityMask()
 	{
 		zero();
 		set(cpuNum);

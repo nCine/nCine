@@ -25,6 +25,7 @@ set(HEADERS
 	${NCINE_ROOT}/include/ncine/IAudioDevice.h
 	${NCINE_ROOT}/include/ncine/IThreadPool.h
 	${NCINE_ROOT}/include/ncine/IThreadCommand.h
+	${NCINE_ROOT}/include/ncine/IJobSystem.h
 	${NCINE_ROOT}/include/ncine/IGfxCapabilities.h
 	${NCINE_ROOT}/include/ncine/ServiceLocator.h
 	${NCINE_ROOT}/include/ncine/DisplayMode.h
