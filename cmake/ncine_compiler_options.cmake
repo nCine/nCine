@@ -12,7 +12,6 @@ if(EMSCRIPTEN)
 		"SHELL:-s WASM=1"
 		"SHELL:-s DISABLE_EXCEPTION_CATCHING=1"
 		"SHELL:-s FORCE_FILESYSTEM=1"
-		"SHELL:-s ALLOW_MEMORY_GROWTH=1"
 		"SHELL:-s STACK_SIZE=131072" # 128 Kb
 		"SHELL:--bind")
 
@@ -22,6 +21,13 @@ if(EMSCRIPTEN)
 		"SHELL:-s STACK_OVERFLOW_CHECK=2"
 		"SHELL:-s GL_ASSERTIONS=1"
 		"SHELL:--profiling-funcs")
+
+	if(NCINE_WITH_THREADS)
+		list(APPEND EMSCRIPTEN_LINKER_OPTIONS "SHELL:-s ALLOW_MEMORY_GROWTH=0")
+		list(APPEND EMSCRIPTEN_LINKER_OPTIONS "SHELL:-s INITIAL_MEMORY=134217728") # 128 Mb
+	else()
+		list(APPEND EMSCRIPTEN_LINKER_OPTIONS "SHELL:-s ALLOW_MEMORY_GROWTH=1")
+	endif()
 
 	string(FIND ${CMAKE_CXX_COMPILER} "fastcomp" EMSCRIPTEN_FASTCOMP_POS)
 	if(EMSCRIPTEN_FASTCOMP_POS GREATER -1)
@@ -129,6 +135,18 @@ else() # GCC and LLVM
 		elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
 			target_compile_options(ncine PUBLIC $<$<CONFIG:Debug>:-O1 -g -fsanitize=undefined -fno-omit-frame-pointer>)
 			target_link_options(ncine PUBLIC $<$<CONFIG:Debug>:-fsanitize=undefined>)
+		endif()
+	endif()
+
+	# Only in debug
+	if(NCINE_THREAD_SANITIZER)
+		# Add TSan options as public so that targets linking the library will also use them
+		if(EMSCRIPTEN)
+			target_compile_options(ncine PUBLIC $<$<CONFIG:Debug>:-O1 -g -fsanitize=thread>)
+			target_link_options(ncine PUBLIC $<$<CONFIG:Debug>:-fsanitize=thread>)
+		elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+			target_compile_options(ncine PUBLIC $<$<CONFIG:Debug>:-O1 -g -fno-omit-frame-pointer -fsanitize=thread>)
+			target_link_options(ncine PUBLIC $<$<CONFIG:Debug>:-fsanitize=thread>)
 		endif()
 	endif()
 
