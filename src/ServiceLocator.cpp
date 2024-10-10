@@ -15,7 +15,7 @@ ServiceLocator &theServiceLocator()
 ServiceLocator::ServiceLocator()
     : indexerService_(&nullIndexer_), loggerService_(&nullLogger_),
       audioDevice_(&nullAudioDevice_), threadPool_(&nullThreadPool_),
-      gfxCapabilities_(&nullGfxCapabilities_)
+      jobSystem_(&nullJobSystem_), gfxCapabilities_(&nullGfxCapabilities_)
 {
 }
 
@@ -71,6 +71,18 @@ void ServiceLocator::unregisterThreadPool()
 	threadPool_ = &nullThreadPool_;
 }
 
+void ServiceLocator::registerJobSystem(nctl::UniquePtr<ncine::IJobSystem> service)
+{
+	registeredJobSystem_ = nctl::move(service);
+	jobSystem_ = registeredJobSystem_.get();
+}
+
+void ServiceLocator::unregisterJobSystem()
+{
+	registeredJobSystem_.reset(nullptr);
+	jobSystem_ = &nullJobSystem_;
+}
+
 void ServiceLocator::registerGfxCapabilities(nctl::UniquePtr<ncine::IGfxCapabilities> service)
 {
 	registeredGfxCapabilities_ = nctl::move(service);
@@ -95,6 +107,9 @@ void ServiceLocator::unregisterAll()
 
 	registeredThreadPool_.reset(nullptr);
 	threadPool_ = &nullThreadPool_;
+
+	registeredJobSystem_.reset(nullptr);
+	jobSystem_ = &nullJobSystem_;
 
 	registeredGfxCapabilities_.reset(nullptr);
 	gfxCapabilities_ = &nullGfxCapabilities_;
