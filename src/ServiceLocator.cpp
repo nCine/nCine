@@ -1,4 +1,5 @@
 #include "common_macros.h"
+#include "SerialJobSystem.h"
 
 namespace ncine {
 
@@ -17,6 +18,8 @@ ServiceLocator::ServiceLocator()
       audioDevice_(&nullAudioDevice_), threadPool_(&nullThreadPool_),
       gfxCapabilities_(&nullGfxCapabilities_)
 {
+	serialJobSystem_ = nctl::makeUnique<SerialJobSystem>();
+	jobSystem_ = serialJobSystem_.get();
 }
 
 ///////////////////////////////////////////////////////////
@@ -71,6 +74,18 @@ void ServiceLocator::unregisterThreadPool()
 	threadPool_ = &nullThreadPool_;
 }
 
+void ServiceLocator::registerJobSystem(nctl::UniquePtr<ncine::IJobSystem> service)
+{
+	registeredJobSystem_ = nctl::move(service);
+	jobSystem_ = registeredJobSystem_.get();
+}
+
+void ServiceLocator::unregisterJobSystem()
+{
+	registeredJobSystem_.reset(nullptr);
+	jobSystem_ = serialJobSystem_.get();
+}
+
 void ServiceLocator::registerGfxCapabilities(nctl::UniquePtr<ncine::IGfxCapabilities> service)
 {
 	registeredGfxCapabilities_ = nctl::move(service);
@@ -95,6 +110,9 @@ void ServiceLocator::unregisterAll()
 
 	registeredThreadPool_.reset(nullptr);
 	threadPool_ = &nullThreadPool_;
+
+	registeredJobSystem_.reset(nullptr);
+	jobSystem_ = serialJobSystem_.get();
 
 	registeredGfxCapabilities_.reset(nullptr);
 	gfxCapabilities_ = &nullGfxCapabilities_;

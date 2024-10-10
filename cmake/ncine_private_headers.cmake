@@ -6,6 +6,7 @@ set(PRIVATE_HEADERS
 	${NCINE_ROOT}/src/include/FrameTimer.h
 	${NCINE_ROOT}/src/include/MemoryFile.h
 	${NCINE_ROOT}/src/include/StandardFile.h
+	${NCINE_ROOT}/src/include/SerialJobSystem.h
 	${NCINE_ROOT}/src/include/FileLogger.h
 	${NCINE_ROOT}/src/include/JoyMapping.h
 	${NCINE_ROOT}/src/input/JoyMappingDb.h

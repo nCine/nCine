@@ -20,6 +20,7 @@
 
 #ifdef WITH_THREADS
 	#include "ThreadPool.h"
+	#include "JobSystem.h"
 #endif
 
 #ifdef WITH_LUA
@@ -121,7 +122,8 @@ void Application::initCommon()
 #endif
 #ifdef WITH_THREADS
 	if (appCfg_.withThreads)
-		theServiceLocator().registerThreadPool(nctl::makeUnique<ThreadPool>());
+		//theServiceLocator().registerThreadPool(nctl::makeUnique<ThreadPool>());
+		theServiceLocator().registerJobSystem(nctl::makeUnique<JobSystem>());
 #endif
 	theServiceLocator().registerGfxCapabilities(nctl::makeUnique<GfxCapabilities>());
 	GLDebug::init(theServiceLocator().gfxCapabilities());

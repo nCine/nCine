@@ -184,7 +184,7 @@ if(WEBP_FOUND)
 		${NCINE_ROOT}/src/graphics/TextureSaverWebP.cpp)
 endif()
 
-if(Threads_FOUND)
+if(Threads_FOUND AND NCINE_WITH_THREADS)
 	target_compile_definitions(ncine PRIVATE "WITH_THREADS")
 	target_link_libraries(ncine PRIVATE Threads::Threads)
 
@@ -205,9 +205,26 @@ if(Threads_FOUND)
 		)
 	endif()
 
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/ThreadPool.h)
-	list(APPEND SOURCES ${NCINE_ROOT}/src/threading/ThreadPool.cpp)
-	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/ThreadCommands.h)
+
+	list(APPEND HEADERS
+		${NCINE_ROOT}/include/ncine/IJobSystem.h
+		${NCINE_ROOT}/include/ncine/ParallelForJob.h
+	)
+
+	list(APPEND PRIVATE_HEADERS
+		${NCINE_ROOT}/src/include/Job.h
+		${NCINE_ROOT}/src/include/JobQueue.h
+		${NCINE_ROOT}/src/include/JobSystem.h
+		${NCINE_ROOT}/src/include/ThreadPool.h
+		${NCINE_ROOT}/src/include/ThreadCommands.h
+	)
+	list(APPEND SOURCES
+		${NCINE_ROOT}/src/threading/ThreadPool.cpp
+		${NCINE_ROOT}/src/threading/JobQueue.cpp
+		${NCINE_ROOT}/src/threading/IJobSystem.cpp
+		${NCINE_ROOT}/src/threading/JobSystem.cpp
+	)
+
 endif()
 
 if(LUA_FOUND)
