@@ -2,7 +2,7 @@
 #define NCTL_ATOMIC
 
 #include <cstdint>
-#include <ncine/common_macros.h>
+#include <ncine/common_defines.h>
 
 #if defined(__APPLE__)
 	#include <atomic>
@@ -10,18 +10,28 @@
 
 namespace nctl {
 
+enum class MemoryModel
+{
+	RELAXED,
+	ACQUIRE,
+	RELEASE,
+	SEQ_CST
+};
+
+/// Atomic memory and compiler fences
+namespace AtomicFences
+{
+	DLL_PUBLIC void threadFence(MemoryModel memModel);
+	DLL_PUBLIC inline void threadFence() { threadFence(MemoryModel::SEQ_CST); }
+
+	DLL_PUBLIC void signalFence(MemoryModel memModel);
+	DLL_PUBLIC inline void signalFence() { signalFence(MemoryModel::SEQ_CST); }
+}
+
 /// An atomic `int32_t` class
 class DLL_PUBLIC Atomic32
 {
   public:
-	enum class MemoryModel
-	{
-		RELAXED,
-		ACQUIRE,
-		RELEASE,
-		SEQ_CST
-	};
-
 	Atomic32()
 	    : value_(0) {}
 	explicit Atomic32(int32_t value)
