@@ -328,7 +328,7 @@ void ImGuiQt5Input::updateMouseData()
 {
 	ImGuiIO &io = ImGui::GetIO();
 
-	// Set OS mouse position if requested (rarely used, only when ImGuiConfigFlags_NavEnableSetMousePos is enabled by user)
+	// Set OS mouse position if requested (rarely used, only when io.ConfigNavMoveSetMousePos is enabled by user)
 	if (io.WantSetMousePos && widget_->hasFocus())
 		widget_->cursor().setPos(static_cast<int>(io.MousePos.x), static_cast<int>(io.MousePos.y));
 }

@@ -1,6 +1,7 @@
 #ifndef CLASS_NCTL_SHAREDPTR
 #define CLASS_NCTL_SHAREDPTR
 
+#include "../ncine/common_macros.h"
 #include "UniquePtr.h"
 #include "Atomic.h"
 

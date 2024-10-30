@@ -88,7 +88,7 @@ ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
 ImGuiDrawing::~ImGuiDrawing()
 {
 	ImGuiIO &io = ImGui::GetIO();
-	io.Fonts->SetTexID(nullptr);
+	io.Fonts->SetTexID(static_cast<ImTextureID>(reinterpret_cast<intptr_t>(nullptr)));
 	io.BackendRendererName = nullptr;
 	io.BackendFlags &= ~ImGuiBackendFlags_RendererHasVtxOffset;
 }
@@ -210,7 +210,7 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 	unsigned int numCmd = 0;
 	for (int n = 0; n < drawData->CmdListsCount; n++)
 	{
-		const ImDrawList *imCmdList = drawData->CmdLists[n];
+		const ImDrawList *imDrawList = drawData->CmdLists[n];
 
 		RenderCommand &firstCmd = *retrieveCommandFromPool();
 		if (lastFrameWidth_ != static_cast<int>(io.DisplaySize.x) ||
@@ -222,13 +222,13 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 		}
 
 		firstCmd.geometry().shareVbo(nullptr);
-		GLfloat *vertices = firstCmd.geometry().acquireVertexPointer(imCmdList->VtxBuffer.Size * numElements, numElements);
-		memcpy(vertices, imCmdList->VtxBuffer.Data, imCmdList->VtxBuffer.Size * numElements * sizeof(GLfloat));
+		GLfloat *vertices = firstCmd.geometry().acquireVertexPointer(imDrawList->VtxBuffer.Size * numElements, numElements);
+		memcpy(vertices, imDrawList->VtxBuffer.Data, imDrawList->VtxBuffer.Size * numElements * sizeof(GLfloat));
 		firstCmd.geometry().releaseVertexPointer();
 
 		firstCmd.geometry().shareIbo(nullptr);
-		GLushort *indices = firstCmd.geometry().acquireIndexPointer(imCmdList->IdxBuffer.Size);
-		memcpy(indices, imCmdList->IdxBuffer.Data, imCmdList->IdxBuffer.Size * sizeof(GLushort));
+		GLushort *indices = firstCmd.geometry().acquireIndexPointer(imDrawList->IdxBuffer.Size);
+		memcpy(indices, imDrawList->IdxBuffer.Data, imDrawList->IdxBuffer.Size * sizeof(GLushort));
 		firstCmd.geometry().releaseIndexPointer();
 
 		if (lastLayerValue_ != theApplication().guiSettings().imguiLayer)
@@ -239,9 +239,9 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 			lastLayerValue_ = theApplication().guiSettings().imguiLayer;
 		}
 
-		for (int cmdIdx = 0; cmdIdx < imCmdList->CmdBuffer.Size; cmdIdx++)
+		for (int cmdIdx = 0; cmdIdx < imDrawList->CmdBuffer.Size; cmdIdx++)
 		{
-			const ImDrawCmd *imCmd = &imCmdList->CmdBuffer[cmdIdx];
+			const ImDrawCmd *imCmd = &imDrawList->CmdBuffer[cmdIdx];
 			RenderCommand &currCmd = (cmdIdx == 0) ? firstCmd : *retrieveCommandFromPool();
 
 			// Project scissor/clipping rectangles into framebuffer space
@@ -310,18 +310,18 @@ void ImGuiDrawing::draw()
 
 	for (int n = 0; n < drawData->CmdListsCount; n++)
 	{
-		const ImDrawList *imCmdList = drawData->CmdLists[n];
+		const ImDrawList *imDrawList = drawData->CmdLists[n];
 		const ImDrawIdx *firstIndex = nullptr;
 
 		// Always define vertex format (and bind VAO) before uploading data to buffers
 		imguiShaderProgram_->defineVertexFormat(vbo_.get(), ibo_.get());
-		vbo_->bufferData(static_cast<GLsizeiptr>(imCmdList->VtxBuffer.Size) * sizeof(ImDrawVert), static_cast<const GLvoid *>(imCmdList->VtxBuffer.Data), GL_STREAM_DRAW);
-		ibo_->bufferData(static_cast<GLsizeiptr>(imCmdList->IdxBuffer.Size) * sizeof(ImDrawIdx), static_cast<const GLvoid *>(imCmdList->IdxBuffer.Data), GL_STREAM_DRAW);
+		vbo_->bufferData(static_cast<GLsizeiptr>(imDrawList->VtxBuffer.Size) * sizeof(ImDrawVert), static_cast<const GLvoid *>(imDrawList->VtxBuffer.Data), GL_STREAM_DRAW);
+		ibo_->bufferData(static_cast<GLsizeiptr>(imDrawList->IdxBuffer.Size) * sizeof(ImDrawIdx), static_cast<const GLvoid *>(imDrawList->IdxBuffer.Data), GL_STREAM_DRAW);
 		imguiShaderProgram_->use();
 
-		for (int cmdIdx = 0; cmdIdx < imCmdList->CmdBuffer.Size; cmdIdx++)
+		for (int cmdIdx = 0; cmdIdx < imDrawList->CmdBuffer.Size; cmdIdx++)
 		{
-			const ImDrawCmd *imCmd = &imCmdList->CmdBuffer[cmdIdx];
+			const ImDrawCmd *imCmd = &imDrawList->CmdBuffer[cmdIdx];
 
 			// Project scissor/clipping rectangles into framebuffer space
 			ImVec2 clipMin((imCmd->ClipRect.x - clipOff.x) * clipScale.x, (imCmd->ClipRect.y - clipOff.y) * clipScale.y);

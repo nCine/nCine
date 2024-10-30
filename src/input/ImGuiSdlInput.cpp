@@ -538,7 +538,7 @@ void ImGuiSdlInput::updateMouseData()
 
 	if (isAppFocused)
 	{
-		// (Optional) Set OS mouse position from Dear ImGui if requested (rarely used, only when ImGuiConfigFlags_NavEnableSetMousePos is enabled by user)
+		// (Optional) Set OS mouse position from Dear ImGui if requested (rarely used, only when io.ConfigNavMoveSetMousePos is enabled by user)
 		if (io.WantSetMousePos)
 			SDL_WarpMouseInWindow(window_, static_cast<int>(io.MousePos.x), static_cast<int>(io.MousePos.y));
 

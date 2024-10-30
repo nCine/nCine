@@ -620,7 +620,7 @@ void ImGuiGlfwInput::updateMouseData()
 #endif
 		if (isWindowFocused)
 		{
-			// (Optional) Set OS mouse position from Dear ImGui if requested (rarely used, only when ImGuiConfigFlags_NavEnableSetMousePos is enabled by user)
+			// (Optional) Set OS mouse position from Dear ImGui if requested (rarely used, only when io.ConfigNavMoveSetMousePos is enabled by user)
 			if (io.WantSetMousePos)
 				glfwSetCursorPos(window_, static_cast<double>(io.MousePos.x), static_cast<double>(io.MousePos.y));
 
