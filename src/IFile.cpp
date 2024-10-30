@@ -63,6 +63,30 @@ nctl::UniquePtr<IFile> IFile::createFromMemory(const unsigned char *bufferPtr, u
 	return nctl::makeUnique<MemoryFile>(bufferPtr, bufferSize);
 }
 
+nctl::UniquePtr<IFile> IFile::createFromMemory(const char *bufferName, unsigned long int bufferSize)
+{
+	ASSERT(bufferSize > 0);
+	return nctl::makeUnique<MemoryFile>(bufferName, bufferSize);
+}
+
+nctl::UniquePtr<IFile> IFile::createFromMemory(unsigned long int bufferSize)
+{
+	ASSERT(bufferSize > 0);
+	return nctl::makeUnique<MemoryFile>(bufferSize);
+}
+
+nctl::UniquePtr<IFile> IFile::createFromMemory(const char *bufferName, nctl::UniquePtr<unsigned char []> buffer, unsigned long int bufferSize)
+{
+	ASSERT(bufferSize > 0);
+	return nctl::makeUnique<MemoryFile>(bufferName, nctl::move(buffer), bufferSize);
+}
+
+nctl::UniquePtr<IFile> IFile::createFromMemory(nctl::UniquePtr<unsigned char []> buffer, unsigned long int bufferSize)
+{
+	ASSERT(bufferSize > 0);
+	return nctl::makeUnique<MemoryFile>(nctl::move(buffer), bufferSize);
+}
+
 nctl::UniquePtr<IFile> IFile::createFileHandle(const char *filename)
 {
 	ASSERT(filename);

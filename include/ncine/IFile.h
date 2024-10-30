@@ -72,7 +72,12 @@ class DLL_PUBLIC IFile
 	/// Returns file stream pointer
 	inline FILE *ptr() const { return filePointer_; }
 	/// Returns file size in bytes
-	inline long int size() const { return fileSize_; }
+	inline unsigned long int size() const { return fileSize_; }
+
+	/// Returns the constant buffer pointer of a memory file or `nullptr` for other file types
+	virtual inline const void *bufferPtr() const { return nullptr; }
+	/// Returns the buffer pointer of a memory file or `nullptr` for other file types
+	virtual inline void *bufferPtr() { return nullptr; }
 
 	/// Reads a little endian 16 bit unsigned integer
 	inline static uint16_t int16FromLE(uint16_t number) { return number; }
@@ -106,6 +111,16 @@ class DLL_PUBLIC IFile
 	static nctl::UniquePtr<IFile> createFromMemory(unsigned char *bufferPtr, unsigned long int bufferSize);
 	/// Returns a read-only memory file
 	static nctl::UniquePtr<IFile> createFromMemory(const unsigned char *bufferPtr, unsigned long int bufferSize);
+
+	/// Returns a memory file with the specified name, that allocates a buffer of the specified size
+	static nctl::UniquePtr<IFile> createFromMemory(const char *bufferName, unsigned long int bufferSize);
+	/// Returns a memory file that allocates a buffer of the specified size
+	static nctl::UniquePtr<IFile> createFromMemory(unsigned long int bufferSize);
+
+	/// Returns a memory file with the specified name, that takes ownership of the specified buffer
+	static nctl::UniquePtr<IFile> createFromMemory(const char *bufferName, nctl::UniquePtr<unsigned char []> buffer, unsigned long int bufferSize);
+	/// Returns a memory file that takes ownership of the specified buffer
+	static nctl::UniquePtr<IFile> createFromMemory(nctl::UniquePtr<unsigned char []> buffer, unsigned long int bufferSize);
 
 	/// Returns the proper file handle according to prepended tags
 	static nctl::UniquePtr<IFile> createFileHandle(const char *filename);

@@ -9,6 +9,7 @@ namespace ncine {
 MemoryFile::MemoryFile(const char *bufferName, unsigned char *bufferPtr, unsigned long int bufferSize)
     : IFile(bufferName), bufferPtr_(bufferPtr), seekOffset_(0), isWritable_(true)
 {
+	ASSERT(bufferPtr != nullptr);
 	ASSERT(bufferSize > 0);
 	type_ = FileType::MEMORY;
 	fileSize_ = bufferSize;
@@ -20,6 +21,7 @@ MemoryFile::MemoryFile(const char *bufferName, unsigned char *bufferPtr, unsigne
 MemoryFile::MemoryFile(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize)
     : IFile(bufferName), bufferPtr_(const_cast<unsigned char *>(bufferPtr)), seekOffset_(0), isWritable_(false)
 {
+	ASSERT(bufferPtr != nullptr);
 	ASSERT(bufferSize > 0);
 	type_ = FileType::MEMORY;
 	fileSize_ = bufferSize;
@@ -35,6 +37,38 @@ MemoryFile::MemoryFile(unsigned char *bufferPtr, unsigned long int bufferSize)
 
 MemoryFile::MemoryFile(const unsigned char *bufferPtr, unsigned long int bufferSize)
     : MemoryFile("MemoryFile", bufferPtr, bufferSize)
+{
+}
+
+MemoryFile::MemoryFile(const char *bufferName, unsigned long int bufferSize)
+    : IFile(bufferName), bufferPtr_(nullptr), seekOffset_(0), isWritable_(true)
+{
+	ASSERT(bufferSize > 0);
+	type_ = FileType::MEMORY;
+	fileSize_ = bufferSize;
+
+	ownedBuffer_ = nctl::makeUnique<uint8_t[]>(bufferSize);
+	bufferPtr_ = ownedBuffer_.get();
+}
+
+MemoryFile::MemoryFile(unsigned long int bufferSize)
+    : MemoryFile("MemoryFile", bufferSize)
+{
+}
+
+MemoryFile::MemoryFile(const char *bufferName, nctl::UniquePtr<unsigned char []> buffer, unsigned long int bufferSize)
+    : IFile(bufferName), bufferPtr_(nullptr), seekOffset_(0), isWritable_(true)
+{
+	ASSERT(bufferSize > 0);
+	type_ = FileType::MEMORY;
+	fileSize_ = bufferSize;
+
+	ownedBuffer_ = nctl::move(buffer);
+	bufferPtr_ = ownedBuffer_.get();
+}
+
+MemoryFile::MemoryFile(nctl::UniquePtr<unsigned char []> buffer, unsigned long int bufferSize)
+    : MemoryFile("MemoryFile", nctl::move(buffer), bufferSize)
 {
 }
 
