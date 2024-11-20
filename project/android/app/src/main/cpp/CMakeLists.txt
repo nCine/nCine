@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.10)
 project(${NCPROJECT_NAME}-Android-${ANDROID_ABI})
 
 list(APPEND CMAKE_MODULE_PATH "${NCPROJECT_ROOT}/cmake")

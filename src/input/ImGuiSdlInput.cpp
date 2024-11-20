@@ -428,7 +428,7 @@ bool ImGuiSdlInput::processEvent(const SDL_Event *event)
 			float wheelX = static_cast<float>(-event->wheel.x);
 			const float wheelY = static_cast<float>(event->wheel.y);
 #endif
-#ifdef __EMSCRIPTEN__
+#if defined(__EMSCRIPTEN__) && !SDL_VERSION_ATLEAST(2,31,0)
 			wheelX /= 100.0f;
 #endif
 			io.AddMouseSourceEvent(event->wheel.which == SDL_TOUCH_MOUSEID ? ImGuiMouseSource_TouchScreen : ImGuiMouseSource_Mouse);
