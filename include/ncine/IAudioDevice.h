@@ -53,7 +53,9 @@ class DLL_PUBLIC IAudioDevice
 		STREAM
 	};
 
+	/// Returns the audio device attributes
 	virtual const Attributes &attributes() const = 0;
+	/// Returns the name of the audio device
 	virtual const char *name() const = 0;
 	/// Returns true if the specified OpenAL extension is available
 	virtual bool hasExtension(ALExtensions::Enum extensionName) const = 0;
@@ -85,13 +87,13 @@ class DLL_PUBLIC IAudioDevice
 
 	/// Returns the number of active players
 	virtual unsigned int numPlayers() const = 0;
-	/// Returns the specified running player object (const version)
+	/// Returns the specified active player object (const version)
 	virtual const IAudioPlayer *player(unsigned int index) const = 0;
-	/// Returns the specified running player object
+	/// Returns the specified active player object
 	virtual IAudioPlayer *player(unsigned int index) = 0;
 
 	/// Pauses every player currently playing
-	/*! \note Paused players can be resumed with `resumePlayers()` */
+	/*! \note Paused players can be resumed with `resumePlayers()`. */
 	virtual void pausePlayers() = 0;
 	/// Stops every player currently playing
 	virtual void stopPlayers() = 0;
@@ -103,10 +105,10 @@ class DLL_PUBLIC IAudioDevice
 	virtual void resumePlayers() = 0;
 
 	/// Pauses all audio device activities using an OpenAL-soft extension (if available)
-	/*! \note If the extension is not available, all players are paused */
+	/*! \note If the extension is not available, all players are paused. */
 	virtual void pauseDevice() = 0;
 	/// Resumes all audio device activities using an OpenAL-soft extension (if available)
-	/// /*! \note If the extension is not available, all paused players resume playing */
+	/// /*! \note If the extension is not available, all paused players resume playing. */
 	virtual void resumeDevice() = 0;
 
 	/// Registers a new stream player for buffer update

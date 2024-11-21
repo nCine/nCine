@@ -1,12 +1,9 @@
 #!/usr/bin/env lua
 
-if ncine == nil then
-	ncine = require "libncine"
-end
-
+require("ncine_header")
 nc = ncine
 
-filename = arg[1] and arg[1] or "nCine_Lua_API.adoc"
+filename = arg[1] and arg[1] or "nCine_Lua_API_list.adoc"
 doc_lines = {}
 
 function indent(level)
@@ -49,7 +46,7 @@ table.insert(doc_lines, [[
 :toc: left
 :toclevels: 3
 
-= nCine Lua API
+= nCine Lua API List
 ]])
 
 recursive_scan(nc, doc_lines, 2)

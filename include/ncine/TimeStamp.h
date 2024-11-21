@@ -45,6 +45,7 @@ class DLL_PUBLIC TimeStamp
 	/// Returns the time elapsed since the timestamp, as seconds in a `nanoseconds` number
 	double nanosecondsDoubleSince() const;
 
+	/// Returns the timestamp counter value (the number of ticks elapsed until now)
 	inline uint64_t ticks() const { return counter_; }
 
 	/// Returns the timestamp counter value as seconds in a `float` number

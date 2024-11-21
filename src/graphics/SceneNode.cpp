@@ -245,7 +245,7 @@ unsigned int SceneNode::childOrderIndex() const
 	return index;
 }
 
-/*!	\return True if the two nodes have been swapped  */
+/*!	\return True if the two nodes have been swapped */
 bool SceneNode::swapChildrenNodes(unsigned int firstIndex, unsigned int secondIndex)
 {
 	// Check if there are at least two children and if the indices are different and valid

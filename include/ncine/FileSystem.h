@@ -73,7 +73,7 @@ class DLL_PUBLIC FileSystem
 
 	/// Joins together two path components
 	static nctl::String joinPath(const nctl::String &first, const nctl::String &second);
-	/// Returns the aboslute path after joining together two path components
+	/// Returns the absolute path after joining together two path components
 	static nctl::String absoluteJoinPath(const nctl::String &first, const nctl::String &second);
 
 	/// Returns the path up to, but not including, the final separator
@@ -81,12 +81,12 @@ class DLL_PUBLIC FileSystem
 	/// Returns the path component after the final separator
 	static nctl::String baseName(const char *path);
 	/// Returns an absolute path from a relative one
-	/** Also resolves dot references to current and parent directory and double separators */
+	/** It also resolves dot references to current and parent directories, and double separators */
 	static nctl::String absolutePath(const char *path);
 
 	/// Returns the extension position in the string or `nullptr` if it is not found
 	static const char *extension(const char *path);
-	/// Returns true if the file at `path` as the specified extension (case-insensitive comparison)
+	/// Returns true if the path has the specified extension (case-insensitive comparison)
 	static bool hasExtension(const char *path, const char *extension);
 	/// Returns true if the path has been changed to fix the extension
 	static bool fixExtension(nctl::String &path, const char *extension);
@@ -96,7 +96,7 @@ class DLL_PUBLIC FileSystem
 	/// Returns a buffer with strings that specify valid drives in the system on Windows
 	static const char *logicalDriveStrings();
 
-	/// Returns the path of current directory
+	/// Returns the path of the current working directory
 	static nctl::String currentDir();
 	/// Sets the current working directory, the starting point for interpreting relative paths
 	static bool setCurrentDir(const char *path);
@@ -126,7 +126,7 @@ class DLL_PUBLIC FileSystem
 
 	/// Returns true if the file or directory is hidden
 	static bool isHidden(const char *path);
-	/// Makes a file or directory hidden or not
+	/// Makes a file or a directory hidden or not
 	static bool setHidden(const char *path, bool hidden);
 
 	/// Creates a new directory

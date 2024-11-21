@@ -1,10 +1,5 @@
 #!/usr/bin/env lua
-
-if ncine == nil then
-	ncine = require "libncine"
-	needs_start = true
-end
-
+require ("ncine_header")
 nc = ncine
 
 function nc.on_pre_init(cfg)
@@ -22,16 +17,17 @@ function nc.on_init()
 		texture_file = "texture2_ETC2.ktx"
 		texture2_file = "texture3_ETC2.ktx"
 		texture3_file = "smoke_256_ETC2.ktx"
+		spritesheet_file = "spritesheet.webp"
 	else
 		font_tex_file = "DroidSans32_256.png"
 		texture_file = "texture2.png"
 		texture2_file = "texture3.png"
 		texture3_file = "smoke_256.png"
+		spritesheet_file = "spritesheet.png"
 	end
 	sound_file = "coins.ogg"
 
 	local rootnode = nc.application.get_rootnode()
-
 	local resolution = nc.application.get_resolution()
 	pos_ = {x = resolution.x * 0.5, y = resolution.y * 0.5}
 	angle_ = 0
@@ -39,18 +35,19 @@ function nc.on_init()
 	font_ = nc.font.new(nc.fs.get_data_path().."fonts/DroidSans32_256.fnt",
 	                    nc.fs.get_data_path().."fonts/"..font_tex_file)
 	textnode_ = nc.textnode.new(rootnode, font_, 256)
-	nc.textnode.set_string(textnode_, "This is script.lua, press V to turn blur on and off.")
+	nc.textnode.set_string(textnode_, "This is script.lua, press V to turn blur on and off.\nhttps://ncine.github.io")
 	nc.textnode.set_layer(textnode_, 100)
-	nc.textnode.set_position(textnode_, resolution.x * 0.25, resolution.y * 0.25)
-	nc.textnode.set_color(textnode_, 1.0, 0.0, 0.0, 1.0)
+	nc.textnode.set_position(textnode_, resolution.x * 0.25, resolution.y * 0.1)
+	nc.textnode.set_color(textnode_, 0.6, 0.77, 1.0, 1.0)
 
 	local color = nc.textnode.get_color(textnode_)
-	color.b = 1.0
+	color.b = 0.24
 	nc.textnode.set_color(textnode_, color)
 
 	texture_ = nc.texture.new(nc.fs.get_data_path().."textures/"..texture_file)
 	texture2_ = nc.texture.new(nc.fs.get_data_path().."textures/"..texture2_file)
 	texture3_ = nc.texture.new(nc.fs.get_data_path().."textures/"..texture3_file)
+	spritesheet_ = nc.texture.new(nc.fs.get_data_path().."textures/"..spritesheet_file)
 
 	local resolution_int = { x = math.floor(resolution.x), y = math.floor(resolution.y) }
 	vp_texture0_ = nc.texture.new_init("Ping texture", nc.tex_format.RGB8, 1, resolution_int)
@@ -127,6 +124,16 @@ void main()
 	})
 	nc.particle_system.add_size_affector(particlesys_, 0.5, {{0.0, 0.25}, {0.45, 0.35}, {1.0, 0.75}})
 
+	animated_sprite_ = nc.animated_sprite.new(rootnode, spritesheet_, resolution.x * 0.5, resolution.y * 0.5)
+	local animation = {
+		frame_duration = 0.12,
+		loop_mode = nc.loop_mode.ENABLED,
+		rewind_mode = nc.rewind_mode.FROM_START,
+		rect_size = {x = 48, y = 48},
+		source_rect = {x = 0, y = 0, w = nc.texture.get_width(spritesheet_), h = nc.texture.get_height(spritesheet_)}
+	}
+	nc.animated_sprite.add_animation(animated_sprite_, animation)
+
 	audiobuffer_ = nc.audiobuffer.new(nc.fs.get_data_path().."sounds/"..sound_file)
 	player_ = nc.audiobuffer_player.new(audiobuffer_)
 	pause_ = false
@@ -146,17 +153,61 @@ function nc.on_frame_start()
 		return
 	end
 
-	angle_ = angle_ + 100 * nc.application.get_interval()
+	local interval = nc.application.get_interval()
+	angle_ = angle_ + 100 * interval
 
 	local newpos = {x = 0, y = 0}
 	newpos.x = pos_.x + 200 * math.sin(math.rad(angle_))
 	newpos.y = pos_.y + 100 * math.sin(math.rad(angle_ + 90))
 	nc.sprite.set_position(meshsprite_, newpos)
 
-	local initParticles = {amount = 16, life = {0.25, 0.35},
+	local init_particles = {amount = 16, life = {0.25, 0.35},
 	                       position = {{x = -5, y = -5}, {x = 5, y = 5}},
 	                       velocity = {{x = -10, y = 200}, {x = 10, y = 200}}}
-	nc.particle_system.emit_particles(particlesys_, initParticles)
+	nc.particle_system.emit_particles(particlesys_, init_particles)
+
+	local velocity = {x = 0, y = 0}
+	local keystate = nc.input.key_state()
+	if nc.input.key_down(keystate, nc.keysym.LEFT) then
+		velocity.x = -1
+	elseif nc.input.key_down(keystate, nc.keysym.RIGHT) then
+		velocity.x = 1
+	end
+	if nc.input.key_down(keystate, nc.keysym.DOWN) then
+		velocity.y = -1
+	elseif nc.input.key_down(keystate, nc.keysym.UP) then
+		velocity.y = 1
+	end
+
+	if nc.vec2.sqrlength(velocity) > 0 then
+		velocity = nc.vec2.normalized(velocity)
+		nc.animated_sprite.set_paused(animated_sprite_, false)
+	else
+		nc.animated_sprite.set_paused(animated_sprite_, true)
+		nc.animated_sprite.set_frame(animated_sprite_, 0)
+	end
+	local animated_sprite_pos = nc.animated_sprite.get_position(animated_sprite_)
+	animated_sprite_pos.x = animated_sprite_pos.x + velocity.x * 100 * interval
+	animated_sprite_pos.y = animated_sprite_pos.y + velocity.y * 100 * interval
+	nc.animated_sprite.set_position(animated_sprite_, animated_sprite_pos)
+
+	if nc.input.key_down(keystate, nc.keysym.LEFT) and nc.input.key_down(keystate, nc.keysym.DOWN) then
+		nc.animated_sprite.set_rotation(animated_sprite_, 270 + 45)
+	elseif nc.input.key_down(keystate, nc.keysym.RIGHT) and nc.input.key_down(keystate, nc.keysym.DOWN) then
+		nc.animated_sprite.set_rotation(animated_sprite_, 90 - 45)
+	elseif nc.input.key_down(keystate, nc.keysym.LEFT) and nc.input.key_down(keystate, nc.keysym.UP) then
+		nc.animated_sprite.set_rotation(animated_sprite_, 270 - 45)
+	elseif nc.input.key_down(keystate, nc.keysym.RIGHT) and nc.input.key_down(keystate, nc.keysym.UP) then
+		nc.animated_sprite.set_rotation(animated_sprite_, 90 + 45)
+	elseif nc.input.key_down(keystate, nc.keysym.LEFT) then
+		nc.animated_sprite.set_rotation(animated_sprite_, 270)
+	elseif nc.input.key_down(keystate, nc.keysym.RIGHT) then
+		nc.animated_sprite.set_rotation(animated_sprite_, 90)
+	elseif nc.input.key_down(keystate, nc.keysym.DOWN) then
+		nc.animated_sprite.set_rotation(animated_sprite_, 0)
+	elseif nc.input.key_down(keystate, nc.keysym.UP) then
+		nc.animated_sprite.set_rotation(animated_sprite_, 180)
+	end
 end
 
 function nc.on_draw_viewport(viewport)
@@ -194,9 +245,10 @@ function nc.on_shutdown()
 	nc.audiobuffer.delete(audiobuffer_)
 	audiobuffer_ = nil
 
+	nc.animated_sprite.delete(animated_sprite_)
+	animated_sprite_ = nil
 	nc.particle_system.delete(particlesys_)
 	particlesys_ = nil
-
 	nc.mesh_sprite.delete(meshsprite_)
 	meshsprite_ = nil
 	nc.sprite.delete(sprite_)
@@ -224,6 +276,8 @@ function nc.on_shutdown()
 	nc.texture.delete(vp_texture0_)
 	vp_texture0_ = nil
 
+	nc.texture.delete(spritesheet_)
+	spritesheet_ = nil
 	nc.texture.delete(texture3_)
 	texture3_ = nil
 	nc.texture.delete(texture2_)
@@ -238,11 +292,7 @@ function nc.on_shutdown()
 end
 
 function nc.on_key_released(event)
-	if event.sym == nc.keysym.LEFT then
-		pos_.x = pos_.x - 20
-	elseif event.sym == nc.keysym.RIGHT then
-		pos_.x = pos_.x + 20
-	elseif event.sym == nc.keysym.V then
+	if event.sym == nc.keysym.V then
 		with_viewport_ = not with_viewport_
 		setup_viewport()
 	elseif event.sym == nc.keysym.P then
@@ -328,6 +378,4 @@ function setup_viewport()
 	end
 end
 
-if needs_start then
-	nc.start()
-end
+require("ncine_footer")

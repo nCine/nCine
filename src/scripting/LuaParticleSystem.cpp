@@ -171,8 +171,15 @@ namespace {
 			lua_rawgeti(L, -1, 1);
 			const float age = LuaUtils::retrieve<float>(L, -1);
 			lua_pop(L, 1);
-			lua_rawgeti(L, -1, 2);
-			const float scale = LuaUtils::retrieve<float>(L, -1);
+			const int scaleType = lua_rawgeti(L, -1, 2);
+			Vector2f scale(1.0f, 1.0f);
+			if (scaleType == LUA_TTABLE)
+				scale = LuaVector2fUtils::retrieveTable(L, -1);
+			else
+			{
+				const float uniformScale = LuaUtils::retrieve<float>(L, -1);
+				scale.set(uniformScale, uniformScale);
+			}
 			lua_pop(L, 1);
 
 			lua_pop(L, 1);

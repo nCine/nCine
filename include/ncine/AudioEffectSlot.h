@@ -7,11 +7,11 @@ namespace ncine {
 
 class AudioEffect;
 
-/// A class representing an OpenAL effect
+/// A class representing an OpenAL auxilary effect slot
 class DLL_PUBLIC AudioEffectSlot
 {
   public:
-	/// Creates an OpenAL effect slot name
+	/// Creates an OpenAL auxilary effect slot name
 	AudioEffectSlot();
 	explicit AudioEffectSlot(const AudioEffect &effect);
 	~AudioEffectSlot();
@@ -21,13 +21,21 @@ class DLL_PUBLIC AudioEffectSlot
 	/// Move assignment operator
 	AudioEffectSlot &operator=(AudioEffectSlot &&other);
 
-	/// Returns the OpenAL effect slot id
+	/// Returns the OpenAL auxilary effect slot id
 	inline unsigned int effectSlotId() const { return effectSlotId_; }
 
+	/// Returns the gain output level of the auxilary effect slot
 	inline float gain() const { return gain_; }
+	/// Sets the gain output level of the auxilary effect slot
 	void setGain(float gain);
 
+	/// Returns the state of the auxilary slot send auto flag
+	/*! \note The property is used to enable or disable automatic send
+	 *  adjustments based on the physical positions of the sources and the listener. */
 	inline bool auxSendAuto() const { return auxSendAuto_; }
+	/// Sets the state of the auxilary slot send auto flag
+	/*! \note The property is used to enable or disable automatic send
+	 *  adjustments based on the physical positions of the sources and the listener. */
 	void setAuxSendAuto(bool auxSendAuto);
 
 	/// Applies the effect parameters from an effect object

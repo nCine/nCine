@@ -96,49 +96,49 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	virtual void play() = 0;
 	/// Pauses playing
 	virtual void pause() = 0;
-	/// Stops playing and rewind
+	/// Stops playing and rewinds
 	virtual void stop() = 0;
 
 	/// Returns the state of the player
 	inline PlayerState state() const { return state_; }
-	/// Queries the playing state of the player
+	/// Returns true if the player is playing
 	inline bool isPlaying() const { return state_ == PlayerState::PLAYING; }
-	/// Queries the paused state of the player
+	/// Returns true if the player is paused
 	inline bool isPaused() const { return state_ == PlayerState::PAUSED; }
-	/// Queries the stopped state of the player
+	/// Returns true if the player is stopped
 	inline bool isStopped() const { return state_ == PlayerState::STOPPED; }
 
-	/// Queries the looping property of the player
+	/// Returns the looping property of the player
 	inline bool isLooping() const { return isLooping_; }
-	/// Sets player looping property
+	/// Sets the looping property of the player
 	inline void setLooping(bool isLooping) { isLooping_ = isLooping; }
 
-	/// Returns player gain value
+	/// Returns the player gain value
 	inline float gain() const { return gain_; }
-	/// Sets player gain value
+	/// Sets the player gain value
 	void setGain(float gain);
-	/// Returns player pitch value
+	/// Returns the player pitch value
 	inline float pitch() const { return pitch_; }
-	/// Sets player pitch value
+	/// Sets the player pitch value
 	void setPitch(float pitch);
 
-	/// Returns player position vector
+	/// Returns the player position vector
 	inline Vector3f position() const { return position_; }
-	/// Sets player position vector
+	/// Sets the player position vector
 	void setPosition(const Vector3f &position);
-	/// Sets player position vector through components
+	/// Sets the player position vector through components
 	void setPosition(float x, float y, float z);
-	/// Returns player velocity vector
+	/// Returns the player velocity vector
 	inline Vector3f velocity() const { return velocity_; }
-	/// Sets player velocity vector
+	/// Sets the player velocity vector
 	void setVelocity(const Vector3f &velocity);
-	/// Sets player velocity vector through components
+	/// Sets the player velocity vector through components
 	void setVelocity(float x, float y, float z);
-	/// Returns player direction vector
+	/// Returns the player direction vector
 	inline Vector3f direction() const { return direction_; }
-	/// Sets player direction vector
+	/// Sets the player direction vector
 	void setDirection(const Vector3f &direction);
-	/// Sets player direction vector through components
+	/// Sets the player direction vector through components
 	void setDirection(float x, float y, float z);
 
 	/// Returns the player inside angle of the sound cone in degrees
@@ -187,7 +187,7 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	void setEffectSlot(const AudioEffectSlot *effectSlot, const AudioFilter *filter);
 	/// Sets or removes an affect slot to the player
 	inline void setEffectSlot(const AudioEffectSlot *effectSlot) { setEffectSlot(effectSlot, nullptr); }
-	/// Sets or remove the filter parameters from a filter object to the direct signal
+	/// Sets or removes the filter parameters from a filter object to the direct signal
 	void setDirectFilter(const AudioFilter *audioFilter);
 #endif
 

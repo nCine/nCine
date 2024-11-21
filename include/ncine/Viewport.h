@@ -143,7 +143,7 @@ class DLL_PUBLIC Viewport
 	inline const SceneNode *rootNode() const { return rootNode_; }
 	/// Returns the root node
 	inline SceneNode *rootNode() { return rootNode_; }
-	/// Sets the root node
+	/// Sets or removes the root node
 	inline void setRootNode(SceneNode *rootNode) { rootNode_ = rootNode; }
 
 	/// Returns the reverse ordered array of viewports to be drawn before the screen
@@ -154,6 +154,7 @@ class DLL_PUBLIC Viewport
 	/// Returns the camera used for rendering
 	inline Camera *camera() { return camera_; }
 	/// Sets the camera to be used for rendering
+	/*! \note The passed parameter can be a `nullptr` to use the default camera */
 	inline void setCamera(Camera *camera) { camera_ = camera; }
 
 	/// Sets the OpenGL object label for the viewport framebuffer object
