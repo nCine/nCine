@@ -54,19 +54,19 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 	/// Returns the constant array of all animations
 	inline const nctl::Array<RectAnimation> &animations() const { return anims_; }
 
-	/// Returns the index of the current animation
+	/// Returns the current animation index
 	unsigned int animationIndex() const { return currentAnimIndex_; }
-	/// Sets current animation index and its frame number
+	/// Sets the current animation index
 	void setAnimationIndex(unsigned int animIndex);
 
 	/// Returns the current animation, if any
 	RectAnimation *currentAnimation();
-	/// Returns the constant version of current animation, if any
+	/// Returns the constant version of the current animation, if any
 	const RectAnimation *currentAnimation() const;
 
-	/// Returns the number of frames of current animation
+	/// Returns the number of frames in current animation
 	unsigned int numFrames() const;
-	/// Returns the frame number of current animation
+	/// Returns the frame number in current animation
 	unsigned int frame() const;
 	/// Sets current animation to a specified frame number
 	void setFrame(unsigned int frameNum);

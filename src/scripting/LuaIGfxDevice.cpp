@@ -23,6 +23,7 @@ namespace VideoMode {
 namespace Monitor {
 	static const char *name = "name";
 	static const char *position = "position";
+	static const char *dpi = "dpi";
 	static const char *scale = "scale";
 	static const char *numVideoModes = "num_video_modes";
 	static const char *videoModes = "video_modes";
@@ -139,6 +140,7 @@ namespace {
 
 		LuaUtils::pushField(L, LuaNames::Monitor::name, monitor.name);
 		LuaVector2iUtils::pushField(L, LuaNames::Monitor::position, monitor.position);
+		LuaVector2iUtils::pushField(L, LuaNames::Monitor::dpi, monitor.dpi);
 		LuaVector2fUtils::pushField(L, LuaNames::Monitor::scale, monitor.scale);
 		LuaUtils::pushField(L, LuaNames::Monitor::numVideoModes, monitor.numVideoModes);
 

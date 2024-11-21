@@ -42,6 +42,11 @@ namespace LuaJoystickEvents {
 	static const char *DPAD_DOWN = "DPAD_DOWN";
 	static const char *DPAD_LEFT = "DPAD_LEFT";
 	static const char *DPAD_RIGHT = "DPAD_RIGHT";
+	static const char *MISC1 = "MISC1";
+	static const char *PADDLE1 = "PADDLE1";
+	static const char *PADDLE2 = "PADDLE2";
+	static const char *PADDLE3 = "PADDLE3";
+	static const char *PADDLE4 = "PADDLE4";
 	static const char *ButtonName = "joy_button";
 
 	static const char *LX = "LX";
@@ -102,7 +107,7 @@ void LuaJoystickEvents::exposeConstants(lua_State *L)
 
 	lua_setfield(L, -2, LuaNames::LuaJoystickEvents::HatState);
 
-	lua_createtable(L, 0, 16);
+	lua_createtable(L, 0, 21);
 
 	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::UNKNOWN, static_cast<int64_t>(ButtonName::UNKNOWN));
 	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::A, static_cast<int64_t>(ButtonName::A));
@@ -120,6 +125,11 @@ void LuaJoystickEvents::exposeConstants(lua_State *L)
 	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::DPAD_DOWN, static_cast<int64_t>(ButtonName::DPAD_DOWN));
 	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::DPAD_LEFT, static_cast<int64_t>(ButtonName::DPAD_LEFT));
 	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::DPAD_RIGHT, static_cast<int64_t>(ButtonName::DPAD_RIGHT));
+	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::MISC1, static_cast<int64_t>(ButtonName::MISC1));
+	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::PADDLE1, static_cast<int64_t>(ButtonName::PADDLE1));
+	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::PADDLE2, static_cast<int64_t>(ButtonName::PADDLE2));
+	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::PADDLE3, static_cast<int64_t>(ButtonName::PADDLE3));
+	LuaUtils::pushField(L, LuaNames::LuaJoystickEvents::PADDLE4, static_cast<int64_t>(ButtonName::PADDLE4));
 
 	lua_setfield(L, -2, LuaNames::LuaJoystickEvents::ButtonName);
 

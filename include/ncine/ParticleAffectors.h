@@ -34,7 +34,7 @@ class DLL_PUBLIC ParticleAffector
 	/// Affects a property of the specified particle, without calculating the normalized age
 	virtual void affect(Particle *particle, float normalizedAge) = 0;
 
-	/// Returns the object type (RTTI)
+	/// Returns the affector type
 	inline Type type() const { return type_; }
 
 	/// Returns true if the affector is enabled
@@ -164,8 +164,11 @@ class DLL_PUBLIC SizeAffector : public ParticleAffector
 	inline float baseScaleY() const { return baseScale_.y; }
 	inline void setBaseScaleY(float baseScaleY) { baseScale_.y = baseScaleY; }
 
+	/// Returns the base scale factor that will be multiplied by all steps
 	inline const Vector2f &baseScale() const { return baseScale_; }
+	/// Sets a base scale factor that will be multiplied by all steps
 	inline void setBaseScale(float baseScale) { baseScale_.set(baseScale, baseScale); }
+	/// Sets a base scale factor with a `Vector2f`, that will be multiplied by all steps
 	inline void setBaseScale(const Vector2f &baseScale) { baseScale_ = baseScale; }
 
   protected:

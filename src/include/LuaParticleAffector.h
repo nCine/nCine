@@ -29,6 +29,7 @@ class LuaParticleAffector
 	static int velocitySteps(lua_State *L);
 
 	static int addColorStep(lua_State *L);
+	static int baseScale(lua_State *L);
 	static int setBaseScale(lua_State *L);
 	static int addSizeStep(lua_State *L);
 	static int addRotationStep(lua_State *L);

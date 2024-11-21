@@ -129,7 +129,7 @@ class DLL_PUBLIC Texture : public Object
 	/// Sets texture wrap for both `s` and `t` coordinates
 	void setWrap(Wrap wrapMode);
 
-	/// Returns true is chroma key transparency will be used when loading
+	/// Returns true if chroma key transparency will be used when loading
 	inline bool isChromaKeyEnabled() const { return isChromaKeyEnabled_; }
 	/// Returns the color treated as transparent when loading a texture
 	inline Color chromaKeyColor() const { return chromaKeyColor_; }

@@ -30,6 +30,7 @@ class LuaIInputManager
 
 	static int addJoyMappingsFromFile(lua_State *L);
 	static int addJoyMappingsFromStrings(lua_State *L);
+	static int numJoyMappings(lua_State *L);
 
 	static int mouseCursorMode(lua_State *L);
 	static int setMouseCursorMode(lua_State *L);

@@ -52,7 +52,7 @@ class DLL_PUBLIC AccelerometerEvent
 };
 #endif
 
-/// Information about mouse state
+/// Information about the mouse state
 class DLL_PUBLIC MouseState
 {
   public:
@@ -94,11 +94,11 @@ class DLL_PUBLIC ScrollEvent
 	float y;
 };
 
-/// Information about keyboard state
+/// Information about the keyboard state
 class DLL_PUBLIC KeyboardState
 {
   public:
-	/// Returns 'true' if the specified key is down
+	/// Returns `true` if the specified key is down
 	virtual bool isKeyDown(KeySym key) const = 0;
 };
 
@@ -258,7 +258,7 @@ enum class AxisName : short int
 	RTRIGGER
 };
 
-/// Information about a mapped joystick state
+/// Information about the mapped joystick state
 class DLL_PUBLIC JoyMappedState
 {
   public:

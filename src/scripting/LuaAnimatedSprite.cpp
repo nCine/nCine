@@ -3,6 +3,7 @@
 #include "LuaClassTracker.h"
 #include "LuaSprite.h"
 #include "LuaRectAnimation.h"
+#include "LuaVector2Utils.h"
 #include "LuaUtils.h"
 #include "AnimatedSprite.h"
 
@@ -74,12 +75,13 @@ void LuaAnimatedSprite::release(void *object)
 
 int LuaAnimatedSprite::newObject(lua_State *L)
 {
-	SceneNode *parent = LuaUntrackedUserData<SceneNode>::retrieveOrNil(L, -4);
-	Texture *texture = LuaUntrackedUserData<Texture>::retrieveOrNil(L, -3);
-	const float x = LuaUtils::retrieve<float>(L, -2);
-	const float y = LuaUtils::retrieve<float>(L, -1);
+	int vectorIndex = 0;
+	const Vector2f &pos = LuaVector2fUtils::retrieve(L, -1, vectorIndex);
 
-	LuaClassTracker<AnimatedSprite>::newObject(L, parent, texture, x, y);
+	SceneNode *parent = LuaUntrackedUserData<SceneNode>::retrieveOrNil(L, vectorIndex - 2);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieveOrNil(L, vectorIndex - 1);
+
+	LuaClassTracker<AnimatedSprite>::newObject(L, parent, texture, pos);
 
 	return 1;
 }

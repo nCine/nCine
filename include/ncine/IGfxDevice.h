@@ -121,15 +121,15 @@ class DLL_PUBLIC IGfxDevice
 	/// Returns true if the window is resizable
 	inline bool isResizable() const { return isResizable_; }
 
-	/// Returns window horizontal position
+	/// Returns the window horizontal position
 	inline virtual int windowPositionX() const { return 0; }
-	/// Returns window vertical position
+	/// Returns the window vertical position
 	inline virtual int windowPositionY() const { return 0; }
-	/// Returns window position as a `Vector2i` object
+	/// Returns the window position as a `Vector2i` object
 	inline virtual const Vector2i windowPosition() const { return Vector2i(0, 0); }
 	/// Sets the position of the application window with two integers
 	virtual void setWindowPosition(int x, int y) = 0;
-	/// Sets the position of the application window with a `Vector2<int>` object
+	/// Sets the position of the application window with a `Vector2i` object
 	inline void setWindowPosition(Vector2i position) { setWindowPosition(position.x, position.y); }
 
 	/// Returns the window or video mode width in screen coordinates
@@ -191,7 +191,7 @@ class DLL_PUBLIC IGfxDevice
 	/// Returns the current video mode for the monitor that hosts the window
 	inline const VideoMode &currentVideoMode() const { return currentVideoMode(windowMonitorIndex()); }
 	/// Sets the video mode that will be used in full screen by the monitor that hosts the window
-	/*! \note Call this method <b>before>/b> enabling full screen */
+	/*! \note Call this method <b>before</b> enabling full screen. */
 	inline virtual bool setVideoMode(unsigned int modeIndex) { return false; }
 
 	/// Returns the scaling factor for application window

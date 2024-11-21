@@ -1,10 +1,6 @@
 #!/usr/bin/env lua
 
-if ncine == nil then
-	ncine = require "libncine"
-	needs_start = true
-end
-
+require ("ncine_header")
 nc = ncine
 
 function nc.on_pre_init(cfg)
@@ -328,6 +324,4 @@ function setup_viewport()
 	end
 end
 
-if needs_start then
-	nc.start()
-end
+require("ncine_footer")

@@ -306,6 +306,7 @@ bool Shader::loadFromFile(const char *vertex, DefaultFragment defaultFragment)
 	return load(LoadMode::FILE, nullptr, Introspection::ENABLED, vertex, nullptr, DefaultVertex::SPRITE, defaultFragment, 0, 0);
 }
 
+/*! \return True if the vertex attribute has been found */
 bool Shader::setAttribute(const char *name, int stride, unsigned long int pointer)
 {
 	GLVertexFormat::Attribute *attribute = glShaderProgram_->attribute(name);
@@ -364,6 +365,7 @@ void Shader::setBinaryCacheEnabled(bool enable)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+/*! \return True if the shader program has been successfully linked */
 bool Shader::load(LoadMode loadMode, const char *shaderName, Introspection introspection, const char *vertex, const char *fragment,
                   DefaultVertex defaultVertex, DefaultFragment defaultFragment, uint64_t vertexHash, uint64_t fragmentHash)
 {

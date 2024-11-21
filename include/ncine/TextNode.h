@@ -52,9 +52,9 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Returns the absolute height of rendered text
 	float absHeight() const override;
 
-	/// Gets the font object
+	/// Gets the font object used by the text node
 	inline const Font *font() const { return font_; }
-	/// Sets the font object
+	/// Sets the font object used by the text node
 	void setFont(Font *font);
 
 	/// Returns the render mode used to render this text node

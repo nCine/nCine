@@ -5,7 +5,6 @@
 #include "LuaUntrackedUserData.h"
 #include "LuaDrawableNode.h"
 #include "LuaRectUtils.h"
-#include "LuaVector2Utils.h"
 #include "LuaUtils.h"
 #include "BaseSprite.h"
 
@@ -21,9 +20,6 @@ namespace BaseSprite {
 
 	static const char *texRect = "get_texrect";
 	static const char *setTexRect = "set_texrect";
-
-	static const char *anchorPoint = "get_anchor_point";
-	static const char *setAnchorPoint = "set_anchor_point";
 
 	static const char *isFlippedX = "is_flipped_x";
 	static const char *setFlippedX = "set_flipped_x";
@@ -47,9 +43,6 @@ void LuaBaseSprite::exposeFunctions(lua_State *L)
 
 	LuaUtils::addFunction(L, LuaNames::BaseSprite::texRect, texRect);
 	LuaUtils::addFunction(L, LuaNames::BaseSprite::setTexRect, setTexRect);
-
-	LuaUtils::addFunction(L, LuaNames::BaseSprite::anchorPoint, anchorPoint);
-	LuaUtils::addFunction(L, LuaNames::BaseSprite::setAnchorPoint, setAnchorPoint);
 
 	LuaUtils::addFunction(L, LuaNames::BaseSprite::isFlippedX, isFlippedX);
 	LuaUtils::addFunction(L, LuaNames::BaseSprite::setFlippedX, setFlippedX);
@@ -122,30 +115,6 @@ int LuaBaseSprite::setTexRect(lua_State *L)
 
 	if (sprite)
 		sprite->setTexRect(texRect);
-
-	return 0;
-}
-
-int LuaBaseSprite::anchorPoint(lua_State *L)
-{
-	BaseSprite *sprite = LuaUntrackedUserData<BaseSprite>::retrieve(L, -1);
-
-	if (sprite)
-		LuaVector2fUtils::push(L, sprite->anchorPoint());
-	else
-		LuaUtils::pushNil(L);
-
-	return 1;
-}
-
-int LuaBaseSprite::setAnchorPoint(lua_State *L)
-{
-	int vectorIndex = 0;
-	const Vector2f anchorPoint = LuaVector2fUtils::retrieve(L, -1, vectorIndex);
-	BaseSprite *sprite = LuaUntrackedUserData<BaseSprite>::retrieve(L, vectorIndex - 1);
-
-	if (sprite)
-		sprite->setAnchorPoint(anchorPoint);
 
 	return 0;
 }

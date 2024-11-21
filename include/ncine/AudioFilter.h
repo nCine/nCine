@@ -36,12 +36,13 @@ class DLL_PUBLIC AudioFilter
 	/// Move assignment operator
 	AudioFilter &operator=(AudioFilter &&other);
 
-	/// Returns the of the filter
+	/// Returns the filter type
 	inline Type type() const { return type_; }
 
 	/// Returns the OpenAL filter id
 	inline unsigned int filterId() const { return filterId_; }
 
+	/// Sets the filter type and all of its properties
 	void applyProperties(const Properties &properties);
 
   private:
