@@ -12,8 +12,8 @@ namespace MeshSprite {
 	static const char *MeshSprite = "mesh_sprite";
 
 	static const char *bytesPerVertex = "get_bytes_per_vertex";
-	static const char *numVertices = "get_num_vertices";
-	static const char *numBytes = "get_num_bytes";
+	static const char *numVertices = "num_vertices";
+	static const char *numBytes = "num_bytes";
 	static const char *vertices = "get_vertices";
 	static const char *uniqueVertices = "are_unique_vertices";
 
@@ -22,7 +22,7 @@ namespace MeshSprite {
 	static const char *createVerticesFromTexels = "create_vertices_from_texels";
 	static const char *emplaceVertices = "emplace_vertices";
 
-	static const char *numIndices = "get_num_indices";
+	static const char *numIndices = "num_indices";
 	static const char *indices = "get_indices";
 	static const char *uniqueIndices = "are_unique_indices";
 
@@ -200,12 +200,13 @@ namespace {
 
 int LuaMeshSprite::newObject(lua_State *L)
 {
-	SceneNode *parent = LuaUntrackedUserData<SceneNode>::retrieveOrNil(L, -4);
-	Texture *texture = LuaUntrackedUserData<Texture>::retrieveOrNil(L, -3);
-	const float x = LuaUtils::retrieve<float>(L, -2);
-	const float y = LuaUtils::retrieve<float>(L, -1);
+	int vectorIndex = 0;
+	const Vector2f &pos = LuaVector2fUtils::retrieve(L, -1, vectorIndex);
 
-	LuaClassTracker<MeshSprite>::newObject(L, parent, texture, x, y);
+	SceneNode *parent = LuaUntrackedUserData<SceneNode>::retrieveOrNil(L, vectorIndex - 2);
+	Texture *texture = LuaUntrackedUserData<Texture>::retrieveOrNil(L, vectorIndex - 1);
+
+	LuaClassTracker<MeshSprite>::newObject(L, parent, texture, pos);
 
 	return 1;
 }

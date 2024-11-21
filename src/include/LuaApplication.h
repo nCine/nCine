@@ -17,16 +17,16 @@ class LuaApplication
 	static int renderingSettings(lua_State *L);
 	static int setRenderingSettings(lua_State *L);
 
-	static int debugOverlaySettings(lua_State *L);
-	static int setDebugOverlaySettings(lua_State *L);
-
 	static int guiSettings(lua_State *L);
 	static int setGuiSettings(lua_State *L);
 
+	static int debugOverlaySettings(lua_State *L);
+	static int setDebugOverlaySettings(lua_State *L);
+
 	static int rootNode(lua_State *L);
 	static int screenViewport(lua_State *L);
-	static int interval(lua_State *L);
 	static int numFrames(lua_State *L);
+	static int interval(lua_State *L);
 
 	static int width(lua_State *L);
 	static int height(lua_State *L);

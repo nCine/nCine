@@ -63,7 +63,7 @@ namespace FileSystem {
 	static const char *lastModificationTime = "last_modification_time";
 	static const char *lastAccessTime = "last_access_time";
 
-	static const char *permissions = "permissions";
+	static const char *permissions = "get_permissions";
 	static const char *changePermissions = "change_permissions";
 	static const char *addPermissions = "add_permissions";
 	static const char *removePermissions = "remove_permissions";
@@ -207,7 +207,7 @@ int LuaFileSystem::extension(lua_State *L)
 	const char *path = LuaUtils::retrieve<const char *>(L, -1);
 
 	const char *extension = fs::extension(path);
-	LuaUtils::push(L, extension);
+	LuaUtils::push(L, extension); // pushes `nil` if `extensions` is `nullptr`
 
 	return 1;
 }

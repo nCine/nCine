@@ -92,7 +92,7 @@ void AudioEffectSlot::setAuxSendAuto(bool auxSendAuto)
 	}
 }
 
-/*! \note You can modify or delete the effect object afterward without affecting the effect slot */
+/*! \note You can modify or delete the effect object afterward without affecting the auxiliary effect slot. */
 void AudioEffectSlot::applyEffect(const AudioEffect &effect)
 {
 	IAudioDevice &device = theServiceLocator().audioDevice();

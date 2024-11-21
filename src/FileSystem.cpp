@@ -470,6 +470,7 @@ nctl::String FileSystem::currentDir()
 	return (returnedPath = buffer);
 }
 
+/*! \return True if the directory has been successfully changed */
 bool FileSystem::setCurrentDir(const char *path)
 {
 #ifdef _WIN32
@@ -695,6 +696,7 @@ bool FileSystem::isHidden(const char *path)
 #endif
 }
 
+/*! \return True if the new hidden state has been successfully set */
 bool FileSystem::setHidden(const char *path, bool hidden)
 {
 	if (path == nullptr)
@@ -748,6 +750,7 @@ bool FileSystem::setHidden(const char *path, bool hidden)
 	return false;
 }
 
+/*! \return True if the new directory has been created */
 bool FileSystem::createDir(const char *path)
 {
 	if (path == nullptr)
@@ -767,6 +770,7 @@ bool FileSystem::createDir(const char *path)
 #endif
 }
 
+/*! \return True if the empty directory has been deleted */
 bool FileSystem::deleteEmptyDir(const char *path)
 {
 	if (path == nullptr)
@@ -786,6 +790,7 @@ bool FileSystem::deleteEmptyDir(const char *path)
 #endif
 }
 
+/*! \return True if the file has been deleted */
 bool FileSystem::deleteFile(const char *path)
 {
 	if (path == nullptr)
@@ -805,6 +810,7 @@ bool FileSystem::deleteFile(const char *path)
 #endif
 }
 
+/*! \return True if the file or directory has been renamed or moved */
 bool FileSystem::rename(const char *oldPath, const char *newPath)
 {
 	if (oldPath == nullptr || newPath == nullptr)
@@ -824,6 +830,7 @@ bool FileSystem::rename(const char *oldPath, const char *newPath)
 #endif
 }
 
+/*! \return True if the file has been copied */
 bool FileSystem::copy(const char *oldPath, const char *newPath)
 {
 	if (oldPath == nullptr || newPath == nullptr)
@@ -1007,6 +1014,7 @@ int FileSystem::permissions(const char *path)
 #endif
 }
 
+/*! \return True if the permission mode was changed */
 bool FileSystem::changePermissions(const char *path, int mode)
 {
 	if (path == nullptr)
@@ -1054,6 +1062,7 @@ bool FileSystem::changePermissions(const char *path, int mode)
 #endif
 }
 
+/*! \return True if the new permission mode was added */
 bool FileSystem::addPermissions(const char *path, int mode)
 {
 	if (path == nullptr)
@@ -1091,6 +1100,7 @@ bool FileSystem::addPermissions(const char *path, int mode)
 #endif
 }
 
+/*! \return True if the permission mode was removed */
 bool FileSystem::removePermissions(const char *path, int mode)
 {
 	if (path == nullptr)

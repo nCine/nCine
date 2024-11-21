@@ -1,9 +1,6 @@
 #!/usr/bin/env lua
 
-if ncine == nil then
-	ncine = require "libncine"
-end
-
+require("ncine_header")
 nc = ncine
 
 tolerance = 0.00001

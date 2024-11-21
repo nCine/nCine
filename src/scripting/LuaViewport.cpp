@@ -193,7 +193,7 @@ int LuaViewport::type(lua_State *L)
 int LuaViewport::texture(lua_State *L)
 {
 	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -2);
-	const unsigned int index = LuaUtils::retrieve<int>(L, -1);
+	const unsigned int index = LuaUtils::retrieve<unsigned int>(L, -1);
 
 	if (viewport)
 		LuaUntrackedUserData<Texture>::push(L, viewport->texture(index));
@@ -206,13 +206,15 @@ int LuaViewport::texture(lua_State *L)
 int LuaViewport::setTexture(lua_State *L)
 {
 	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -3);
-	const unsigned int index = LuaUtils::retrieve<int>(L, -2);
+	const unsigned int index = LuaUtils::retrieve<unsigned int>(L, -2);
 	Texture *texture = LuaUntrackedUserData<Texture>::retrieveOrNil(L, -1);
 
+	bool texChanged = false;
 	if (viewport)
-		viewport->setTexture(index, texture);
+		texChanged = viewport->setTexture(index, texture);
+	LuaUtils::push(L, texChanged);
 
-	return 0;
+	return 1;
 }
 
 int LuaViewport::depthStencilFormat(lua_State *L)
@@ -232,20 +234,24 @@ int LuaViewport::setDepthStencilFormat(lua_State *L)
 	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -2);
 	const Viewport::DepthStencilFormat depthStencilFormat = static_cast<Viewport::DepthStencilFormat>(LuaUtils::retrieve<int64_t>(L, -1));
 
+	bool formatChanged = false;
 	if (viewport)
-		viewport->setDepthStencilFormat(depthStencilFormat);
+		formatChanged = viewport->setDepthStencilFormat(depthStencilFormat);
+	LuaUtils::push(L, formatChanged);
 
-	return 0;
+	return 1;
 }
 
 int LuaViewport::removeAllTextures(lua_State *L)
 {
 	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -1);
 
+	bool removed = false;
 	if (viewport)
-		viewport->removeAllTextures();
+		removed = viewport->removeAllTextures();
+	LuaUtils::push(L, removed);
 
-	return 0;
+	return 1;
 }
 
 int LuaViewport::width(lua_State *L)
@@ -468,7 +474,7 @@ int LuaViewport::camera(lua_State *L)
 int LuaViewport::setCamera(lua_State *L)
 {
 	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -2);
-	Camera *camera = LuaUntrackedUserData<Camera>::retrieve(L, -1);
+	Camera *camera = LuaUntrackedUserData<Camera>::retrieveOrNil(L, -1);
 
 	if (viewport)
 		viewport->setCamera(camera);

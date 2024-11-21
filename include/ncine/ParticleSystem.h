@@ -45,9 +45,9 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 	/// Returns the constant array of particle affectors
 	inline const nctl::Array<nctl::UniquePtr<ParticleAffector>> &affectors() const { return affectors_; }
 
-	/// Returns the local space flag of the system
+	/// Returns true if particles are positioned using the particle system as their origin
 	inline bool inLocalSpace(void) const { return inLocalSpace_; }
-	/// Sets the local space flag of the system
+	/// Sets or clears the local space flag, to move particles around the particle system or freely
 	inline void setInLocalSpace(bool inLocalSpace) { inLocalSpace_ = inLocalSpace; }
 
 	/// Returns true if particles are updating
@@ -65,27 +65,27 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 	/// Returns the number of particles currently alive
 	inline unsigned int numAliveParticles() const { return particleArray_.size() - poolTop_ - 1; }
 
-	/// Sets the texture object for every particle
+	/// Sets the texture object for every particle in the system
 	void setTexture(Texture *texture);
-	/// Sets the texture source rectangle for every particle
+	/// Sets the texture source rectangle for every particle in the system
 	void setTexRect(const Recti &rect);
 
-	/// Sets the transformation anchor point for every particle
+	/// Sets the transformation anchor point for every particle in the system
 	void setAnchorPoint(float xx, float yy);
-	/// Sets the transformation anchor point for every particle with a `Vector2f`
+	/// Sets the transformation anchor point for every particle in the system with a `Vector2f`
 	void setAnchorPoint(const Vector2f &point);
 
-	/// Flips the texture rect horizontally for every particle
+	/// Flips the texture rect horizontally for every particle in the system
 	void setFlippedX(bool flippedX);
-	/// Flips the texture rect vertically for every particle
+	/// Flips the texture rect vertically for every particle in the system
 	void setFlippedY(bool flippedY);
 
-	/// Sets the blending factors preset for every particle
+	/// Sets the blending factors preset for every particle in the system
 	void setBlendingPreset(DrawableNode::BlendingPreset blendingPreset);
-	/// Sets the source and destination blending factors for every particle
+	/// Sets the source and destination blending factors for every particle in the system
 	void setBlendingFactors(DrawableNode::BlendingFactor srcBlendingFactor, DrawableNode::BlendingFactor destBlendingFactor);
 
-	/// Sets the rendering layer for every particle
+	/// Sets the rendering layer for every particle in the system
 	void setLayer(uint16_t layer);
 
 	void update(float interval) override;

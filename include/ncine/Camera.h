@@ -47,20 +47,31 @@ class DLL_PUBLIC Camera
 	/// Creates a camera with default matrices
 	Camera();
 
+	/// Returns the projection values that are used to create the projection matrix
 	inline const ProjectionValues &projectionValues() const { return projectionValues_; }
+	/// Returns the view values that are used to create the model matrix
 	inline const ViewValues &viewValues() const { return viewValues_; }
 
+	/// Returns the current projection matrix
 	inline const Matrix4x4f &projection() const { return projection_; }
+	/// Returns the current model matrix
 	inline const Matrix4x4f &view() const { return view_; }
 
+	/// Updates the projection matrix using the projection values
 	void setOrthoProjection(float left, float right, float top, float bottom);
+	/// Updates the projection matrix using the projection values from the structure
 	void setOrthoProjection(const ProjectionValues &values);
 
+	/// Updates the model matrix using the view values (with position as a `Vector2f`)
 	void setView(const Vector2f &pos, float rotation, float scale);
+	/// Updates the model matrix using the view values
 	void setView(float x, float y, float rotation, float scale);
+	/// Updates the model matrix using the view values from the structure
 	void setView(const ViewValues &values);
 
+	/// Returns the last frame when the projection matrix was changed
 	inline unsigned long int updateFrameProjectionMatrix() const { return updateFrameProjectionMatrix_; }
+	/// Returns the last frame when the model matrix was changed
 	inline unsigned long int updateFrameViewMatrix() const { return updateFrameViewMatrix_; }
 
   private:

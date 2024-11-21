@@ -46,7 +46,7 @@ class DLL_PUBLIC IInputManager
 	/// Returns current keyboard state
 	virtual const KeyboardState &keyboardState() const = 0;
 
-	/// Returns true if the specified joystick is connected
+	/// Returns `true` if the specified joystick is connected
 	virtual bool isJoyPresent(int joyId) const = 0;
 	/// Returns the name of the specified joystick
 	virtual const char *joyName(int joyId) const = 0;
@@ -65,7 +65,7 @@ class DLL_PUBLIC IInputManager
 	bool isJoyMapped(int joyId) const;
 	/// Returns the state of the mapped joystick
 	const JoyMappedState &joyMappedState(int joyId) const;
-	/// Modify the joystick axis vector to account for a dead zone
+	/// Modifies the joystick axis vector to account for a dead zone
 	void deadZoneNormalize(Vector2f &joyVector, float deadZoneValue) const;
 
 	/// Adds joystick mapping configurations from a text file

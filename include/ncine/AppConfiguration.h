@@ -18,7 +18,7 @@ class DLL_PUBLIC AppConfiguration
 
 	// User configurable compile-time variables
 
-	/// The path for the application to load data from
+	/// The path for the log file
 	nctl::String logFile;
 	/// The logging level for messages printed on the console
 	ILogger::LogLevel consoleLogLevel;

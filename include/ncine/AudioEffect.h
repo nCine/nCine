@@ -40,12 +40,13 @@ class DLL_PUBLIC AudioEffect
 	/// Move assignment operator
 	AudioEffect &operator=(AudioEffect &&other);
 
-	/// Returns the of the effect
+	/// Returns the effect type
 	inline Type type() const { return type_; }
 
 	/// Returns the OpenAL effect id
 	inline unsigned int effectId() const { return effectId_; }
 
+	/// Sets an effect type with all of its properties
 	void applyProperties(const AudioEffectProperties &properties);
 
   private:

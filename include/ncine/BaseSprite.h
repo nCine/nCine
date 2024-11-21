@@ -19,9 +19,9 @@ class DLL_PUBLIC BaseSprite : public DrawableNode
 	/// Default move assignment operator
 	BaseSprite &operator=(BaseSprite &&) = default;
 
-	/// Sets sprite size
+	/// Sets the sprite size
 	void setSize(float width, float height);
-	/// Sets sprite size with a `Vector2f`
+	/// Sets the sprite size with a `Vector2f`
 	inline void setSize(const Vector2f &size) { setSize(size.x, size.y); }
 
 	/// Gets the texture object

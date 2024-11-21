@@ -11,7 +11,7 @@ class FntParser;
 class FontGlyph;
 class Texture;
 
-/// A class holding every information needed to correctly render text
+/// A class holding the font and glyphs information needed to render text
 class DLL_PUBLIC Font : public Object
 {
   public:
@@ -67,15 +67,15 @@ class DLL_PUBLIC Font : public Object
 	/// Sets a new shared texture object without modifying any glyphs or kerning data
 	bool setTexture(Texture *texture);
 
-	/// Returns font line height
+	/// Returns the font line height
 	inline unsigned int lineHeight() const { return lineHeight_; }
-	/// Returns font base
+	/// Returns the font base
 	inline unsigned int base() const { return base_; }
-	/// Returns texture atlas size
+	/// Returns the texture atlas size
 	inline Vector2i textureSize() const { return Vector2i(width_, height_); }
-	/// Returns number of glyphs
+	/// Returns the number of glyphs
 	inline unsigned int numGlyphs() const { return numGlyphs_; }
-	/// Returns number of kerning pairs
+	/// Returns the number of kerning pairs
 	inline unsigned int numKernings() const { return numKernings_; }
 	/// Returns a constant pointer to a glyph
 	const FontGlyph *glyph(unsigned int glyphId) const;

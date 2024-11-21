@@ -118,7 +118,8 @@ Viewport::~Viewport() = default;
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/*! \note Adding more textures enables the use of multiple render targets (MRTs) */
+/*! \note Adding more textures enables the use of multiple render targets (MRTs).
+ *  \return True if a texture has been added or removed successfully */
 bool Viewport::setTexture(unsigned int index, Texture *texture)
 {
 	if (type_ == Type::SCREEN)
@@ -187,7 +188,8 @@ bool Viewport::setTexture(unsigned int index, Texture *texture)
 	return result;
 }
 
-/*! \note It can remove the depth and stencil render buffer of the viewport's FBO by specifying `DepthStencilFormat::NONE` */
+/*! \note It can remove the depth and stencil render buffer of the viewport's FBO by specifying `DepthStencilFormat::NONE`.
+ *  \return True if a new depth and stencil format has been successfully set */
 bool Viewport::setDepthStencilFormat(DepthStencilFormat depthStencilFormat)
 {
 	if (depthStencilFormat_ == depthStencilFormat || type_ == Type::NO_TEXTURE)
@@ -224,6 +226,7 @@ bool Viewport::setDepthStencilFormat(DepthStencilFormat depthStencilFormat)
 	return result;
 }
 
+/*! \return True if the viewport is not the screen and all textures have been removed */
 bool Viewport::removeAllTextures()
 {
 	if (type_ == Type::SCREEN)

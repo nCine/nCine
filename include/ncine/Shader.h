@@ -110,13 +110,13 @@ class DLL_PUBLIC Shader : public Object
 	/// Returns the automatic log on errors flag
 	bool logOnErrors() const;
 	/// Sets the automatic log on errors flag
-	/*! If the flag is true the shader will automatically log compilation and linking errors. */
+	/*! If the flag is set to true, the shader will automatically log compilation and linking errors. */
 	void setLogOnErrors(bool shouldLogOnErrors);
 
 	/// Sets the OpenGL object label for the shader program
 	void setGLShaderProgramLabel(const char *label);
 
-	/// Registers a shaders to be used for batches of render commands
+	/// Registers a shader to be used for batches of render commands
 	void registerBatchedShader(Shader &batchedShader);
 
 	/// Returns true if the binary shader cache is enabled

@@ -19,16 +19,16 @@ namespace Application {
 	static const char *renderingSettings = "get_rendering_settings";
 	static const char *setRenderingSettings = "set_rendering_settings";
 
-	static const char *debugOverlaySettings = "get_debugoverlay_settings";
-	static const char *setDebugOverlaySettings = "set_debugoverlay_settings";
-
 	static const char *guiSettings = "get_gui_settings";
 	static const char *setGuiSettings = "set_gui_settings";
 
+	static const char *debugOverlaySettings = "get_debugoverlay_settings";
+	static const char *setDebugOverlaySettings = "set_debugoverlay_settings";
+
 	static const char *rootNode = "get_rootnode";
 	static const char *screenViewport = "get_screen_viewport";
-	static const char *interval = "get_interval";
 	static const char *numFrames = "get_num_frames";
+	static const char *interval = "get_interval";
 
 	static const char *width = "get_width";
 	static const char *height = "get_height";
@@ -50,17 +50,17 @@ namespace Application {
 		static const char *maxBatchSize = "max_batch_size";
 	}
 
-	namespace DebugOverlaySettings {
-		static const char *showProfilerGraphs = "profiler_graphs";
-		static const char *showInfoText = "info_text";
-		static const char *showInterface = "interface";
-	}
-
 	namespace GuiSettings {
 		static const char *imguiLayer = "imgui_layer";
 		static const char *nuklearLayer = "nuklear_layer";
 		static const char *imguiViewport = "imgui_viewport";
 		static const char *nuklearViewport = "nuklear_viewport";
+	}
+
+	namespace DebugOverlaySettings {
+		static const char *showProfilerGraphs = "profiler_graphs";
+		static const char *showInfoText = "info_text";
+		static const char *showInterface = "interface";
 	}
 }}
 
@@ -77,16 +77,16 @@ void LuaApplication::expose(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::Application::renderingSettings, renderingSettings);
 	LuaUtils::addFunction(L, LuaNames::Application::setRenderingSettings, setRenderingSettings);
 
-	LuaUtils::addFunction(L, LuaNames::Application::debugOverlaySettings, debugOverlaySettings);
-	LuaUtils::addFunction(L, LuaNames::Application::setDebugOverlaySettings, setDebugOverlaySettings);
-
 	LuaUtils::addFunction(L, LuaNames::Application::guiSettings, guiSettings);
 	LuaUtils::addFunction(L, LuaNames::Application::setGuiSettings, setGuiSettings);
 
+	LuaUtils::addFunction(L, LuaNames::Application::debugOverlaySettings, debugOverlaySettings);
+	LuaUtils::addFunction(L, LuaNames::Application::setDebugOverlaySettings, setDebugOverlaySettings);
+
 	LuaUtils::addFunction(L, LuaNames::Application::rootNode, rootNode);
 	LuaUtils::addFunction(L, LuaNames::Application::screenViewport, screenViewport);
-	LuaUtils::addFunction(L, LuaNames::Application::interval, interval);
 	LuaUtils::addFunction(L, LuaNames::Application::numFrames, numFrames);
+	LuaUtils::addFunction(L, LuaNames::Application::interval, interval);
 
 	LuaUtils::addFunction(L, LuaNames::Application::width, width);
 	LuaUtils::addFunction(L, LuaNames::Application::height, height);
@@ -149,35 +149,6 @@ int LuaApplication::setRenderingSettings(lua_State *L)
 	return 0;
 }
 
-int LuaApplication::debugOverlaySettings(lua_State *L)
-{
-	const IDebugOverlay::DisplaySettings &settings = theApplication().debugOverlaySettings();
-
-	lua_createtable(L, 0, 3);
-	LuaUtils::pushField(L, LuaNames::Application::DebugOverlaySettings::showProfilerGraphs, settings.showProfilerGraphs);
-	LuaUtils::pushField(L, LuaNames::Application::DebugOverlaySettings::showInfoText, settings.showInfoText);
-	LuaUtils::pushField(L, LuaNames::Application::DebugOverlaySettings::showInterface, settings.showInterface);
-
-	return 1;
-}
-
-int LuaApplication::setDebugOverlaySettings(lua_State *L)
-{
-	if (lua_istable(L, -1) == false)
-	{
-		LOGW("Expecting a table at index -1");
-		return 0;
-	}
-
-	IDebugOverlay::DisplaySettings &settings = theApplication().debugOverlaySettings();
-
-	settings.showProfilerGraphs = LuaUtils::retrieveField<bool>(L, -1, LuaNames::Application::DebugOverlaySettings::showProfilerGraphs);
-	settings.showInfoText = LuaUtils::retrieveField<bool>(L, -1, LuaNames::Application::DebugOverlaySettings::showInfoText);
-	settings.showInterface = LuaUtils::retrieveField<bool>(L, -1, LuaNames::Application::DebugOverlaySettings::showInterface);
-
-	return 0;
-}
-
 int LuaApplication::guiSettings(lua_State *L)
 {
 	const Application::GuiSettings &settings = theApplication().guiSettings();
@@ -209,6 +180,35 @@ int LuaApplication::setGuiSettings(lua_State *L)
 	return 0;
 }
 
+int LuaApplication::debugOverlaySettings(lua_State *L)
+{
+	const IDebugOverlay::DisplaySettings &settings = theApplication().debugOverlaySettings();
+
+	lua_createtable(L, 0, 3);
+	LuaUtils::pushField(L, LuaNames::Application::DebugOverlaySettings::showProfilerGraphs, settings.showProfilerGraphs);
+	LuaUtils::pushField(L, LuaNames::Application::DebugOverlaySettings::showInfoText, settings.showInfoText);
+	LuaUtils::pushField(L, LuaNames::Application::DebugOverlaySettings::showInterface, settings.showInterface);
+
+	return 1;
+}
+
+int LuaApplication::setDebugOverlaySettings(lua_State *L)
+{
+	if (lua_istable(L, -1) == false)
+	{
+		LOGW("Expecting a table at index -1");
+		return 0;
+	}
+
+	IDebugOverlay::DisplaySettings &settings = theApplication().debugOverlaySettings();
+
+	settings.showProfilerGraphs = LuaUtils::retrieveField<bool>(L, -1, LuaNames::Application::DebugOverlaySettings::showProfilerGraphs);
+	settings.showInfoText = LuaUtils::retrieveField<bool>(L, -1, LuaNames::Application::DebugOverlaySettings::showInfoText);
+	settings.showInterface = LuaUtils::retrieveField<bool>(L, -1, LuaNames::Application::DebugOverlaySettings::showInterface);
+
+	return 0;
+}
+
 int LuaApplication::rootNode(lua_State *L)
 {
 	LuaUntrackedUserData<SceneNode>::push(L, &theApplication().rootNode());
@@ -221,16 +221,16 @@ int LuaApplication::screenViewport(lua_State *L)
 	return 1;
 }
 
-int LuaApplication::interval(lua_State *L)
-{
-	LuaUtils::push(L, theApplication().interval());
-	return 1;
-}
-
 int LuaApplication::numFrames(lua_State *L)
 {
 	// The cast disambiguate the `push` function on Emscripten
 	LuaUtils::push(L, static_cast<uint64_t>(theApplication().numFrames()));
+	return 1;
+}
+
+int LuaApplication::interval(lua_State *L)
+{
+	LuaUtils::push(L, theApplication().interval());
 	return 1;
 }
 

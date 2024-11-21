@@ -53,6 +53,7 @@ ShaderState::~ShaderState()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+/*! \return True if the node has been changed */
 bool ShaderState::setNode(DrawableNode *node)
 {
 	bool nodeHasChanged = false;
@@ -82,6 +83,7 @@ bool ShaderState::setNode(DrawableNode *node)
 	return nodeHasChanged;
 }
 
+/*! \return True if the shader has been changed */
 bool ShaderState::setShader(Shader *shader)
 {
 	bool shaderHasChanged = false;
@@ -111,7 +113,7 @@ bool ShaderState::setShader(Shader *shader)
 	return shaderHasChanged;
 }
 
-/*! \note Use this method when the content of the currently assigned shader changes */
+/*! \note Use this method when the content of the currently assigned shader changes. */
 bool ShaderState::resetShader()
 {
 	if (shader_ != nullptr && shader_->isLinked() && node_)
@@ -124,7 +126,8 @@ bool ShaderState::resetShader()
 	return false;
 }
 
-/*! \note Contrary to uniforms, there is no need to set the texture again when you reset a shader or when you set a new one */
+/*! \note Contrary to uniforms, there is no need to set the texture again when you reset a shader or when you set a new one.
+ * \return True if the texture has been assigned */
 bool ShaderState::setTexture(unsigned int unit, const Texture *texture)
 {
 	if (node_ == nullptr)

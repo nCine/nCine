@@ -1,4 +1,4 @@
-﻿#include "apptest_luareload.h"
+#include "apptest_luareload.h"
 #include <ncine/Application.h>
 #include <ncine/Texture.h>
 #include <ncine/ParticleSystem.h>
@@ -14,6 +14,23 @@ namespace {
 
 const char *InitScriptFile = "init.lua";
 const char *ReloadScriptFile = "reload.lua";
+
+/// Prepends the specified path to the `package.path` string of the Lua package library
+/*! \note The same function is also present in `apptest_lua.cpp` */
+void prependPackagePath(lua_State *L, const char *path)
+{
+	static nctl::String packagePath(512);
+
+	nc::LuaUtils::getGlobal(L, "package");
+	nc::LuaUtils::getField(L, -1, "path");
+	const char *oldPackagePath = nc::LuaUtils::retrieve<const char *>(L, -1);
+	packagePath.format("%s;%s", nc::fs::joinPath(path, "?.lua").data(), oldPackagePath);
+
+	nc::LuaUtils::pop(L); // pop the retrieved old package path string
+	nc::LuaUtils::push(L, packagePath.data());
+	nc::LuaUtils::setField(L, -2, "path");
+	nc::LuaUtils::pop(L); // pop the package table
+}
 
 }
 
@@ -34,6 +51,7 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 {
 	setDataPath(config);
 
+	prependPackagePath(luaState_.state(), (config.dataPath() + "scripts/").data());
 	luaState_.runFromFile((config.dataPath() + "scripts/" + InitScriptFile).data(), InitScriptFile);
 	nc::LuaIAppEventHandler::onPreInit(luaState_.state(), config);
 }
@@ -130,6 +148,7 @@ bool MyEventHandler::runScript()
 
 	lua_State *L = luaState_.state();
 
+	prependPackagePath(luaState_.state(), ncine::fs::joinPath(ncine::fs::dataPath(), "scripts").data());
 	const bool canRun = luaState_.runFromFile(prefixDataPath("scripts", ReloadScriptFile).data(), ReloadScriptFile);
 	if (canRun == false)
 		return false;

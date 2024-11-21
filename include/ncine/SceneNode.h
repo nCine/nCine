@@ -127,11 +127,11 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Moves the node by an offset on the Y axis
 	void moveY(float y);
 
-	/// Gets the transformation anchor point in pixels
+	/// Gets the absolute transformation anchor point in pixels
 	inline Vector2f absAnchorPoint() const { return anchorPoint_; }
-	/// Sets the transformation anchor point in pixels
+	/// Sets the absolute transformation anchor point in pixels
 	void setAbsAnchorPoint(float x, float y);
-	/// Sets the transformation anchor point in pixels with a `Vector2f`
+	/// Sets the absolute transformation anchor point in pixels with a `Vector2f`
 	void setAbsAnchorPoint(const Vector2f &point);
 
 	/// Gets the node scale factors

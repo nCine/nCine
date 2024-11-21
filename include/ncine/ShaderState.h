@@ -16,18 +16,25 @@ class DLL_PUBLIC ShaderState
 {
   public:
 	ShaderState();
+	/// Constructs a shader state object and assigns to it a node and a shader
 	ShaderState(DrawableNode *node, Shader *shader);
 	~ShaderState();
 
+	/// Returns the drawable node affected by the shader state
 	inline const DrawableNode *node() const { return node_; }
+	/// Sets the drawable node affected by the shader state
 	bool setNode(DrawableNode *node);
 
+	/// Return the associated custom shader
 	inline const Shader *shader() const { return shader_; }
+	/// Sets the associated custom shader
 	bool setShader(Shader *shader);
 	/// Triggers a shader update without setting a new shader
 	bool resetShader();
 
+	/// Assigns a texture to the specified texture unit
 	bool setTexture(unsigned int unit, const Texture *texture);
+	/// Assigns a texture to texture unit zero
 	inline bool setTexture(const Texture *texture) { return setTexture(0, texture); }
 
 	bool setUniformInt(const char *blockName, const char *name, const int *vector);

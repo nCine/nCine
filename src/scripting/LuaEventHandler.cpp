@@ -24,6 +24,8 @@ nctl::UniquePtr<IAppEventHandler> createAppEventHandler()
 	return nctl::makeUnique<LuaEventHandler>();
 }
 
+/// Starts the application game loop
+/*! \note This function should be called after defining the required callback functions, and only if launching the script from the stand-alone `lua` interpreter. */
 int start(lua_State *L)
 {
 	int argc = 0;
@@ -76,7 +78,7 @@ extern "C"
 	DLL_PUBLIC int NCINE_LUAOPEN_NAME(lua_State *L)
 	{
 		LuaEventHandler::luaState_ = new LuaStateManager(L, LuaStateManager::ApiType::FULL,
-		                                                 LuaStateManager::StatisticsTracking::ENABLED,
+		                                                 LuaStateManager::StatisticsTracking::DISABLED,
 		                                                 LuaStateManager::StandardLibraries::LOADED);
 		lua_getglobal(L, LuaNames::ncine);
 

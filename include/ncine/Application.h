@@ -86,7 +86,7 @@ class DLL_PUBLIC Application
 	inline RenderingSettings &renderingSettings() { return renderingSettings_; }
 	/// Returns the run-time GUI settings
 	inline GuiSettings &guiSettings() { return guiSettings_; }
-	/// Returns the debug overlay object, if any
+	/// Returns the run-time debug overlay settings, if debug overlay is available
 	inline IDebugOverlay::DisplaySettings &debugOverlaySettings()
 	{
 		return (debugOverlay_) ? debugOverlay_->settings() : debugOverlayNullSettings_;
@@ -97,7 +97,7 @@ class DLL_PUBLIC Application
 
 	/// Returns the graphics device instance
 	inline IGfxDevice &gfxDevice() { return *gfxDevice_; }
-	/// Returns the root of the transformation graph
+	/// Returns the root node of the transformation graph
 	inline SceneNode &rootNode() { return *rootNode_; }
 	/// Returns the screen viewport
 	Viewport &screenViewport();
@@ -137,9 +137,9 @@ class DLL_PUBLIC Application
 	/// Sets the auto-suspension flag value
 	inline void setAutoSuspension(bool autoSuspension) { autoSuspension_ = autoSuspension; }
 
-	/// Raises the quit flag
+	/// Asks the application to quit as soon as possible (by raising the quit flag)
 	inline void quit() { shouldQuit_ = true; }
-	/// Returns the quit flag value
+	/// Returns the value of the quit flag
 	inline bool shouldQuit() const { return shouldQuit_; }
 
 	/// Returns the focus flag value

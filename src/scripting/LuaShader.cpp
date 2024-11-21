@@ -166,10 +166,12 @@ int LuaShader::loadFromMemory(lua_State *L)
 	const char *vertex = LuaUtils::retrieve<const char *>(L, -2);
 	const char *fragment = LuaUtils::retrieve<const char *>(L, -1);
 
+	bool isLinked = false;
 	if (shader)
-		shader->loadFromMemory(shaderName, introspection, vertex, fragment);
+		isLinked = shader->loadFromMemory(shaderName, introspection, vertex, fragment);
+	LuaUtils::push(L, isLinked);
 
-	return 0;
+	return 1;
 }
 
 int LuaShader::loadFromMemoryDefaultVertex(lua_State *L)
@@ -180,10 +182,12 @@ int LuaShader::loadFromMemoryDefaultVertex(lua_State *L)
 	const Shader::DefaultVertex vertex = static_cast<Shader::DefaultVertex>(LuaUtils::retrieve<int64_t>(L, -2));
 	const char *fragment = LuaUtils::retrieve<const char *>(L, -1);
 
+	bool isLinked = false;
 	if (shader)
-		shader->loadFromMemory(shaderName, introspection, vertex, fragment);
+		isLinked = shader->loadFromMemory(shaderName, introspection, vertex, fragment);
+	LuaUtils::push(L, isLinked);
 
-	return 0;
+	return 1;
 }
 
 int LuaShader::loadFromMemoryDefaultFragment(lua_State *L)
@@ -194,10 +198,12 @@ int LuaShader::loadFromMemoryDefaultFragment(lua_State *L)
 	const char *vertex = LuaUtils::retrieve<const char *>(L, -2);
 	const Shader::DefaultFragment fragment = static_cast<Shader::DefaultFragment>(LuaUtils::retrieve<int64_t>(L, -1));
 
+	bool isLinked = false;
 	if (shader)
-		shader->loadFromMemory(shaderName, introspection, vertex, fragment);
+		isLinked = shader->loadFromMemory(shaderName, introspection, vertex, fragment);
+	LuaUtils::push(L, isLinked);
 
-	return 0;
+	return 1;
 }
 
 int LuaShader::loadFromMemoryWithHashes(lua_State *L)
@@ -210,10 +216,12 @@ int LuaShader::loadFromMemoryWithHashes(lua_State *L)
 	const uint64_t vertexHash = LuaUtils::retrieve<uint64_t>(L, -2);
 	const uint64_t fragmentHash = LuaUtils::retrieve<uint64_t>(L, -1);
 
+	bool isLinked = false;
 	if (shader)
-		shader->loadFromMemory(shaderName, introspection, vertex, fragment, vertexHash, fragmentHash);
+		isLinked = shader->loadFromMemory(shaderName, introspection, vertex, fragment, vertexHash, fragmentHash);
+	LuaUtils::push(L, isLinked);
 
-	return 0;
+	return 1;
 }
 
 int LuaShader::loadFromFile(lua_State *L)
@@ -224,10 +232,12 @@ int LuaShader::loadFromFile(lua_State *L)
 	const char *vertex = LuaUtils::retrieve<const char *>(L, -2);
 	const char *fragment = LuaUtils::retrieve<const char *>(L, -1);
 
+	bool isLinked = false;
 	if (shader)
-		shader->loadFromFile(shaderName, introspection, vertex, fragment);
+		isLinked = shader->loadFromFile(shaderName, introspection, vertex, fragment);
+	LuaUtils::push(L, isLinked);
 
-	return 0;
+	return 1;
 }
 
 int LuaShader::loadFromFileDefaultVertex(lua_State *L)
@@ -238,10 +248,12 @@ int LuaShader::loadFromFileDefaultVertex(lua_State *L)
 	const Shader::DefaultVertex vertex = static_cast<Shader::DefaultVertex>(LuaUtils::retrieve<int64_t>(L, -2));
 	const char *fragment = LuaUtils::retrieve<const char *>(L, -1);
 
+	bool isLinked = false;
 	if (shader)
-		shader->loadFromFile(shaderName, introspection, vertex, fragment);
+		isLinked = shader->loadFromFile(shaderName, introspection, vertex, fragment);
+	LuaUtils::push(L, isLinked);
 
-	return 0;
+	return 1;
 }
 
 int LuaShader::loadFromFileDefaultFragment(lua_State *L)
@@ -252,23 +264,27 @@ int LuaShader::loadFromFileDefaultFragment(lua_State *L)
 	const char *vertex = LuaUtils::retrieve<const char *>(L, -2);
 	const Shader::DefaultFragment fragment = static_cast<Shader::DefaultFragment>(LuaUtils::retrieve<int64_t>(L, -1));
 
+	bool isLinked = false;
 	if (shader)
-		shader->loadFromFile(shaderName, introspection, vertex, fragment);
+		isLinked = shader->loadFromFile(shaderName, introspection, vertex, fragment);
+	LuaUtils::push(L, isLinked);
 
-	return 0;
+	return 1;
 }
 
 int LuaShader::setAttribute(lua_State *L)
 {
 	Shader *shader = LuaUntrackedUserData<Shader>::retrieve(L, -4);
-	const char *name = LuaUtils::retrieve<const char *>(L, -3);
+	const char *attribName = LuaUtils::retrieve<const char *>(L, -3);
 	const int stride = LuaUtils::retrieve<int>(L, -2);
 	const unsigned long int pointer = LuaUtils::retrieve<uint64_t>(L, -1);
 
+	bool attribFound = false;
 	if (shader)
-		shader->setAttribute(name, stride, pointer);
+		attribFound = shader->setAttribute(attribName, stride, pointer);
+	LuaUtils::push(L, attribFound);
 
-	return 0;
+	return 1;
 }
 
 int LuaShader::isLinked(lua_State *L)

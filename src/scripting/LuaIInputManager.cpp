@@ -32,6 +32,7 @@ namespace IInputManager {
 
 	static const char *addJoyMappingsFromFile = "add_joymappings_from_file";
 	static const char *addJoyMappingsFromStrings = "add_joymappings_from_strings";
+	static const char *numJoyMappings = "num_joymappings";
 
 	static const char *mouseCursorMode = "get_mouse_cursor_mode";
 	static const char *setMouseCursorMode = "set_mouse_cursor_mode";
@@ -59,7 +60,7 @@ void LuaIInputManager::expose(lua_State *L)
 	if (type == LUA_TNIL)
 	{
 		lua_pop(L, 1);
-		lua_createtable(L, 0, 16);
+		lua_createtable(L, 0, 17);
 	}
 
 	LuaUtils::addFunction(L, LuaNames::IInputManager::mouseState, mouseState);
@@ -79,6 +80,7 @@ void LuaIInputManager::expose(lua_State *L)
 
 	LuaUtils::addFunction(L, LuaNames::IInputManager::addJoyMappingsFromFile, addJoyMappingsFromFile);
 	LuaUtils::addFunction(L, LuaNames::IInputManager::addJoyMappingsFromStrings, addJoyMappingsFromStrings);
+	LuaUtils::addFunction(L, LuaNames::IInputManager::numJoyMappings, numJoyMappings);
 
 	LuaUtils::addFunction(L, LuaNames::IInputManager::mouseCursorMode, mouseCursorMode);
 	LuaUtils::addFunction(L, LuaNames::IInputManager::setMouseCursorMode, setMouseCursorMode);
@@ -260,6 +262,14 @@ int LuaIInputManager::addJoyMappingsFromStrings(lua_State *L)
 	theApplication().inputManager().addJoyMappingsFromStrings(mappingStrings.data());
 
 	return 0;
+}
+
+int LuaIInputManager::numJoyMappings(lua_State *L)
+{
+	const int numJoyMappings = theApplication().inputManager().numJoyMappings();
+	LuaUtils::push(L, numJoyMappings);
+
+	return 1;
 }
 
 int LuaIInputManager::mouseCursorMode(lua_State *L)

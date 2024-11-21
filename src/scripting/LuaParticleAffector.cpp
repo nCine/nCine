@@ -32,6 +32,7 @@ namespace ParticleAffector {
 	static const char *velocitySteps = "get_velocity_steps";
 
 	static const char *addColorStep = "add_color_step";
+	static const char *baseScale = "get_base_scale";
 	static const char *setBaseScale = "set_base_scale";
 	static const char *addSizeStep = "add_size_step";
 	static const char *addRotationStep = "add_rotation_step";
@@ -62,6 +63,7 @@ void LuaParticleAffector::expose(LuaStateManager *stateManager)
 	LuaUtils::addFunction(L, LuaNames::ParticleAffector::velocitySteps, velocitySteps);
 
 	LuaUtils::addFunction(L, LuaNames::ParticleAffector::addColorStep, addColorStep);
+	LuaUtils::addFunction(L, LuaNames::ParticleAffector::baseScale, baseScale);
 	LuaUtils::addFunction(L, LuaNames::ParticleAffector::setBaseScale, setBaseScale);
 	LuaUtils::addFunction(L, LuaNames::ParticleAffector::addSizeStep, addSizeStep);
 	LuaUtils::addFunction(L, LuaNames::ParticleAffector::addRotationStep, addRotationStep);
@@ -349,6 +351,21 @@ int LuaParticleAffector::addColorStep(lua_State *L)
 	}
 
 	return 0;
+}
+
+int LuaParticleAffector::baseScale(lua_State *L)
+{
+	ParticleAffector *affector = LuaUntrackedUserData<ParticleAffector>::retrieve(L, -1);
+
+	if (affector && affector->type() == ParticleAffector::Type::SIZE)
+	{
+		SizeAffector *sizeAffector = static_cast<SizeAffector *>(affector);
+		LuaVector2fUtils::push(L, sizeAffector->baseScale());
+	}
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
 }
 
 int LuaParticleAffector::setBaseScale(lua_State *L)

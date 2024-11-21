@@ -149,12 +149,16 @@ jobs:
         cd ../nCine-build-${{ matrix.BuildType }}
         doxygen
 
-        LD_LIBRARY_PATH=../nCine-external/lib ../nCine-external/bin/lua ../nCine/scripts/export_lua_api.lua
+        cp -p *ncine*.so ../nCine/scripts
+        cd ../nCine/scripts
+        LD_LIBRARY_PATH=../../nCine-external/lib ../../nCine-external/bin/lua export_lua_api_list.lua
+        mv nCine_Lua_API_list.adoc ../../nCine-build-${{ matrix.BuildType }}
+        cd ../../nCine-build-${{ matrix.BuildType }}
         export GEM_HOME=~/.gem
         export GEM_PATH=~/.gem
         gem install asciidoctor
         export PATH=$GEM_HOME/bin:$PATH
-        asciidoctor nCine_Lua_API.adoc
+        asciidoctor nCine_Lua_API_list.adoc
 
         cd ..
         git clone https://$PUBLIC_REPO_TOKEN@github.com/nCine/docs.git >/dev/null 2>&1
@@ -163,9 +167,9 @@ jobs:
         cp -Rp ../nCine-build-${{ matrix.BuildType }}/docs/html $BRANCH_NAME
         git add $BRANCH_NAME
 
-        git rm lua_api_${BRANCH_NAME}.html
-        cp -p ../nCine-build-${{ matrix.BuildType }}/nCine_Lua_API.html lua_api_${BRANCH_NAME}.html
-        git add lua_api_${BRANCH_NAME}.html
+        git rm lua_api_list_${BRANCH_NAME}.html || true
+        cp -p ../nCine-build-${{ matrix.BuildType }}/nCine_Lua_API_list.html lua_api_list_${BRANCH_NAME}.html
+        git add lua_api_list_${BRANCH_NAME}.html
 
         git commit --amend -m "Initial commit" || git commit -m "Initial commit"
         git push --force || git push --set-upstream origin master

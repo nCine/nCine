@@ -29,6 +29,7 @@ const char *DefaultScriptName = "script.lua";
 const float MinErrorStringScale = 0.5f;
 
 nctl::String scriptPath(512);
+nctl::String scriptDir(512);
 nctl::String scriptName(64);
 bool scriptExecuted = false;
 
@@ -86,6 +87,23 @@ int compareDates(const nc::fs::FileDate &dateA, const nc::fs::FileDate &dateB)
 	return comparison;
 }
 
+/// Prepends the specified path to the `package.path` string of the Lua package library
+/*! \note The same function is also present in `apptest_luareload.cpp` */
+void prependPackagePath(lua_State *L, const char *path)
+{
+	static nctl::String packagePath(512);
+
+	nc::LuaUtils::getGlobal(L, "package");
+	nc::LuaUtils::getField(L, -1, "path");
+	const char *oldPackagePath = nc::LuaUtils::retrieve<const char *>(L, -1);
+	packagePath.format("%s;%s", nc::fs::joinPath(path, "?.lua").data(), oldPackagePath);
+
+	nc::LuaUtils::pop(L); // pop the retrieved old package path string
+	nc::LuaUtils::push(L, packagePath.data());
+	nc::LuaUtils::setField(L, -2, "path");
+	nc::LuaUtils::pop(L); // pop the package table
+}
+
 }
 
 nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
@@ -95,7 +113,7 @@ nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 
 MyEventHandler::MyEventHandler()
     : luaState_(nc::LuaStateManager::ApiType::FULL,
-                nc::LuaStateManager::StatisticsTracking::ENABLED,
+                nc::LuaStateManager::StatisticsTracking::DISABLED,
                 nc::LuaStateManager::StandardLibraries::LOADED)
 {
 	eventHandlerPtr = this;
@@ -108,19 +126,16 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 
 	scriptPath = (config.argc() > 1) ? config.argv(1) : DefaultScriptName;
 
+	if (nc::fs::isReadableFile(scriptPath.data()) == false)
+		scriptPath = prefixDataPath("scripts", scriptPath.data());
+
 	if (nc::fs::isReadableFile(scriptPath.data()))
 	{
+		scriptDir = nc::fs::dirName(scriptPath.data());
+		prependPackagePath(luaState_.state(), scriptDir.data());
+
 		scriptName = nc::fs::baseName(scriptPath.data());
 		scriptExecuted = luaState_.runFromFile(scriptPath.data(), scriptName.data());
-	}
-	else
-	{
-		scriptPath = prefixDataPath("scripts", scriptPath.data());
-		if (nc::fs::isReadableFile(scriptPath.data()))
-		{
-			scriptName = nc::fs::baseName(scriptPath.data());
-			scriptExecuted = luaState_.runFromFile(scriptPath.data(), scriptName.data());
-		}
 	}
 
 	if (scriptExecuted)
@@ -460,6 +475,9 @@ bool MyEventHandler::loadScript(LoadMode mode)
 	{
 		luaState_.reopen();
 		expose(luaState_.state());
+
+		scriptDir = nc::fs::dirName(scriptPath.data());
+		prependPackagePath(luaState_.state(), scriptDir.data());
 	}
 
 	scriptName = nc::fs::baseName(scriptPath.data());
