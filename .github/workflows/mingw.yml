@@ -147,7 +147,8 @@ jobs:
         if ("${{ matrix.BuildType }}" -eq "DevDist" -Or "${{ matrix.BuildType }}" -eq "LuaDist")
           { C:\msys64\usr\bin\bash.exe -lc "cmake -G 'MSYS Makefiles' -B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=Release -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }} -D NDK_DIR=$(cygpath -m $ANDROID_NDK_LATEST_HOME)" }
         else
-          { C:\msys64\usr\bin\bash.exe -lc "cmake -G 'MSYS Makefiles' -B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_BENCHMARKS=ON -D NCINE_WITH_TRACY=$EnableTracy -D NCINE_WITH_RENDERDOC=ON -D RENDERDOC_DIR=$(cygpath -m $PWD/../RenderDoc)" }
+          # Disable benchmarks building to avoid "error: enumeration value 'CacheUnknown' not handled in switch [-Werror=switch]" in sysinfo.cc
+          { C:\msys64\usr\bin\bash.exe -lc "cmake -G 'MSYS Makefiles' -B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_BENCHMARKS=OFF -D NCINE_WITH_TRACY=$EnableTracy -D NCINE_WITH_RENDERDOC=ON -D RENDERDOC_DIR=$(cygpath -m $PWD/../RenderDoc)" }
 
     - name: 'Make'
       env:
