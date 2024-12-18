@@ -147,7 +147,7 @@ void GlfwInputManager::updateJoystickStates()
 		if (glfwJoystickPresent(GLFW_JOYSTICK_1 + joyId))
 		{
 			joystickStates_[joyId].buttons_ = glfwGetJoystickButtons(joyId, &joystickStates_[joyId].numButtons_);
-#if GLFW_VERSION_COKMBINED >= 3300
+#if GLFW_VERSION_COMBINED >= 3300
 			joystickStates_[joyId].hats_ = glfwGetJoystickHats(joyId, &joystickStates_[joyId].numHats_);
 #else
 			joystickStates_[joyId].hats_ = 0;

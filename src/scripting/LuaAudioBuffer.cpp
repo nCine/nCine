@@ -8,7 +8,7 @@ namespace ncine {
 
 namespace LuaNames {
 namespace AudioBuffer {
-	static const char *AudioBuffer = "audiobuffer";
+	static const char *AudioBuffer = "audio_buffer";
 
 	static const char *bufferId = "buffer_id";
 
