@@ -201,6 +201,7 @@ namespace {
 		GLuint shaderProgram;
 		uint8_t srcBlendingFactor;
 		uint8_t destBlendingFactor;
+		uint64_t padding0;
 	};
 
 }
@@ -216,8 +217,10 @@ uint32_t Material::sortKey()
 	hashData.shaderProgram = shaderProgram_->glHandle();
 	hashData.srcBlendingFactor = glBlendingFactorToInt(srcBlendingFactor_);
 	hashData.destBlendingFactor = glBlendingFactorToInt(destBlendingFactor_);
+	hashData.padding0 = 0;
 
-	return nctl::fasthash32(reinterpret_cast<const void *>(&hashData), sizeof(SortHashData), Seed);
+	// Specify a smaller hash data size so the padding can avoid a buffer overflow
+	return nctl::fasthash32(reinterpret_cast<const void *>(&hashData), sizeof(SortHashData) - sizeof(uint64_t), Seed);
 }
 
 }

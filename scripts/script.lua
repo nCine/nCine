@@ -134,8 +134,8 @@ void main()
 	}
 	nc.animated_sprite.add_animation(animated_sprite_, animation)
 
-	audiobuffer_ = nc.audiobuffer.new(nc.fs.get_data_path().."sounds/"..sound_file)
-	player_ = nc.audiobuffer_player.new(audiobuffer_)
+	audio_buffer_ = nc.audio_buffer.new(nc.fs.get_data_path().."sounds/"..sound_file)
+	player_ = nc.audio_buffer_player.new(audio_buffer_)
 	pause_ = false
 
 	local settings = nc.application.get_rendering_settings()
@@ -240,10 +240,10 @@ end
 
 function nc.on_shutdown()
 	-- For a fast reload to work correctly, every object should be set to `nil` after deletion
-	nc.audiobuffer_player.delete(player_)
+	nc.audio_buffer_player.delete(player_)
 	player_ = nil
-	nc.audiobuffer.delete(audiobuffer_)
-	audiobuffer_ = nil
+	nc.audio_buffer.delete(audio_buffer_)
+	audio_buffer_ = nil
 
 	nc.animated_sprite.delete(animated_sprite_)
 	animated_sprite_ = nil
@@ -321,8 +321,8 @@ function nc.on_touch_down(event)
 	pos_.x = event[0].x
 	pos_.y = event[0].y
 
-	nc.audiobuffer_player.stop(player_)
-	nc.audiobuffer_player.play(player_)
+	nc.audio_buffer_player.stop(player_)
+	nc.audio_buffer_player.play(player_)
 end
 
 function nc.on_touch_move(event)
@@ -337,8 +337,8 @@ function nc.on_mouse_button_released(event)
 		nc.sprite.set_position(sprite_, event.x, event.y)
 	end
 
-	nc.audiobuffer_player.stop(player_)
-	nc.audiobuffer_player.play(player_)
+	nc.audio_buffer_player.stop(player_)
+	nc.audio_buffer_player.play(player_)
 end
 
 function nc.on_mouse_moved(state)

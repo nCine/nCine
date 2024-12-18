@@ -9,10 +9,10 @@ namespace ncine {
 
 namespace LuaNames {
 namespace AudioBufferPlayer {
-	static const char *AudioBufferPlayer = "audiobuffer_player";
+	static const char *AudioBufferPlayer = "audio_buffer_player";
 
-	static const char *audioBuffer = "get_audiobuffer";
-	static const char *setAudioBuffer = "set_audiobuffer";
+	static const char *audioBuffer = "get_audio_buffer";
+	static const char *setAudioBuffer = "set_audio_buffer";
 }}
 
 ///////////////////////////////////////////////////////////

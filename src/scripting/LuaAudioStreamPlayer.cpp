@@ -9,10 +9,10 @@ namespace ncine {
 
 namespace LuaNames {
 namespace AudioStreamPlayer {
-	static const char *AudioStreamPlayer = "audiostream_player";
+	static const char *AudioStreamPlayer = "audio_stream_player";
 
-	static const char *numSamplesInStreamBuffer = "num_samples_in_streambuffer";
-	static const char *streamBufferSize = "streambuffer_size";
+	static const char *numSamplesInStreamBuffer = "num_samples_in_stream_buffer";
+	static const char *streamBufferSize = "stream_buffer_size";
 	static const char *sampleOffsetInStream = "sample_offset_in_stream";
 }}
 
