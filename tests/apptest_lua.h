@@ -5,12 +5,16 @@
 #include <ncine/IInputEventHandler.h>
 #include <ncine/LuaStateManager.h>
 
+#define SUPPRESS_ON_SCREEN_ERRORS (0)
+
+#if !SUPPRESS_ON_SCREEN_ERRORS
 namespace ncine {
 
 class Font;
 class TextNode;
 
 }
+#endif
 
 namespace nc = ncine;
 
@@ -67,8 +71,10 @@ class MyEventHandler :
 
   private:
 	nc::LuaStateManager luaState_;
+#if !SUPPRESS_ON_SCREEN_ERRORS
 	nctl::UniquePtr<nc::Font> font_;
 	nctl::UniquePtr<nc::TextNode> text_;
+#endif
 
 	enum class LoadMode
 	{
@@ -81,7 +87,7 @@ class MyEventHandler :
 	static int showGui(lua_State *L);
 	static int isGuiHidden(lua_State *L);
 
-	bool loadScript(LoadMode mode);
+	bool runScript(LoadMode mode);
 };
 
 #endif

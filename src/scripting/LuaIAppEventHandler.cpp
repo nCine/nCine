@@ -29,19 +29,29 @@ namespace LuaIAppEventHandler {
 }}
 
 namespace {
-	void callFunction(lua_State *L, const char *functionName, bool cannotFindWarning)
+	/*! \note Returns true if the callback function has been found. */
+	bool callFunction(lua_State *L, const char *functionName, bool cannotFindWarning, nctl::String *errorMsg, int *status, LuaUtils::RunInfo *runInfo)
 	{
 		lua_getglobal(L, LuaNames::ncine);
 		const int type = lua_getfield(L, -1, functionName);
 
+		bool functionFound = false;
 		if (type == LUA_TFUNCTION)
 		{
-			const int status = lua_pcall(L, 0, 0, 0);
-			if (status != LUA_OK)
+			const int callStatus = LuaUtils::pcall(L, 0, 0, runInfo);
+			if (status)
+				*status = callStatus;
+
+			if (callStatus != LUA_OK)
 			{
-				LOGE_X("Error running Lua function \"%s\" (%s):\n%s", functionName, LuaDebug::statusToString(status), lua_tostring(L, -1));
+				LOGE_X("Error running Lua function \"%s\" (%s):\n%s", functionName, LuaDebug::statusToString(callStatus), lua_tostring(L, -1));
+				if (errorMsg)
+					*errorMsg = lua_tostring(L, -1);
 				lua_pop(L, 1);
 			}
+			else if (errorMsg)
+				errorMsg->clear();
+			functionFound = true;
 		}
 		else
 		{
@@ -49,6 +59,17 @@ namespace {
 			if (cannotFindWarning)
 				LOGD_X("Cannot find the Lua function \"%s\"", functionName);
 		}
+		return functionFound;
+	}
+
+	bool callFunction(lua_State *L, const char *functionName, bool cannotFindWarning, nctl::String *errorMsg)
+	{
+		return callFunction(L, functionName, cannotFindWarning, errorMsg, nullptr, nullptr);
+	}
+
+	bool callFunction(lua_State *L, const char *functionName, bool cannotFindWarning)
+	{
+		return callFunction(L, functionName, cannotFindWarning, nullptr, nullptr, nullptr);
 	}
 }
 
@@ -56,141 +77,311 @@ namespace {
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void LuaIAppEventHandler::onPreInit(lua_State *L, AppConfiguration &config)
+bool LuaIAppEventHandler::onPreInit(lua_State *L, AppConfiguration &config, bool cannotFindWarning, nctl::String *errorMsg, int *status, LuaUtils::RunInfo *runInfo)
 {
 	ZoneScopedN("Lua onPreInit");
 	lua_getglobal(L, LuaNames::ncine);
 	const int type = lua_getfield(L, -1, LuaNames::LuaIAppEventHandler::onPreInit);
 
+	bool functionFound = false;
 	if (type == LUA_TFUNCTION)
 	{
 		LuaAppConfiguration::push(L, config);
-		const int status = lua_pcall(L, 1, 1, 0);
-		if (status != LUA_OK)
+		const int callStatus = LuaUtils::pcall(L, 1, 1, runInfo);
+		if (status)
+			*status = callStatus;
+
+		if (callStatus != LUA_OK)
 		{
-			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::LuaIAppEventHandler::onPreInit, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::LuaIAppEventHandler::onPreInit, LuaDebug::statusToString(callStatus), lua_tostring(L, -1));
+			if (errorMsg)
+				*errorMsg = lua_tostring(L, -1);
 			lua_pop(L, 1);
 		}
 		else
+		{
 			LuaAppConfiguration::retrieveAndSet(L, config);
+			if (errorMsg)
+				errorMsg->clear();
+		}
+		functionFound = true;
 	}
 	else
 	{
 		lua_pop(L, 2);
-		LOGD_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onPreInit);
+		if (cannotFindWarning)
+			LOGD_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onPreInit);
 	}
+	return functionFound;
 }
 
-void LuaIAppEventHandler::onInit(lua_State *L)
+bool LuaIAppEventHandler::onInit(lua_State *L, bool cannotFindWarning, nctl::String *errorMsg, int *status, LuaUtils::RunInfo *runInfo)
 {
 	ZoneScopedN("Lua onInit");
-	callFunction(L, LuaNames::LuaIAppEventHandler::onInit, true);
+	return callFunction(L, LuaNames::LuaIAppEventHandler::onInit, cannotFindWarning, errorMsg, status, runInfo);
 }
 
-void LuaIAppEventHandler::onFrameStart(lua_State *L)
+bool LuaIAppEventHandler::onFrameStart(lua_State *L, bool cannotFindWarning, nctl::String *errorMsg, int *status, LuaUtils::RunInfo *runInfo)
 {
 	ZoneScopedN("Lua onFrameStart");
-	callFunction(L, LuaNames::LuaIAppEventHandler::onFrameStart, false);
+	return callFunction(L, LuaNames::LuaIAppEventHandler::onFrameStart, cannotFindWarning, errorMsg, status, runInfo);
 }
 
-void LuaIAppEventHandler::onPostUpdate(lua_State *L)
+bool LuaIAppEventHandler::onPostUpdate(lua_State *L, bool cannotFindWarning, nctl::String *errorMsg, int *status, LuaUtils::RunInfo *runInfo)
 {
 	ZoneScopedN("Lua onPostUpdate");
-	callFunction(L, LuaNames::LuaIAppEventHandler::onPostUpdate, false);
+	return callFunction(L, LuaNames::LuaIAppEventHandler::onPostUpdate, cannotFindWarning, errorMsg, status, runInfo);
 }
 
-void LuaIAppEventHandler::onDrawViewport(lua_State *L, Viewport &viewport)
+bool LuaIAppEventHandler::onDrawViewport(lua_State *L, Viewport &viewport, bool cannotFindWarning, nctl::String *errorMsg, int *status, LuaUtils::RunInfo *runInfo)
 {
 	ZoneScopedN("Lua onDrawViewport");
 	lua_getglobal(L, LuaNames::ncine);
 	const int type = lua_getfield(L, -1, LuaNames::LuaIAppEventHandler::onDrawViewport);
 
+	bool functionFound = false;
 	if (type == LUA_TFUNCTION)
 	{
 		LuaUtils::push(L, static_cast<void *>(&viewport));
-		const int status = lua_pcall(L, 1, 1, 0);
-		if (status != LUA_OK)
+		const int callStatus = LuaUtils::pcall(L, 1, 1, runInfo);
+		if (status)
+			*status = callStatus;
+
+		if (callStatus != LUA_OK)
 		{
-			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::LuaIAppEventHandler::onDrawViewport, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::LuaIAppEventHandler::onDrawViewport, LuaDebug::statusToString(callStatus), lua_tostring(L, -1));
+			if (errorMsg)
+				*errorMsg = lua_tostring(L, -1);
 			lua_pop(L, 1);
 		}
+		else if (errorMsg)
+			errorMsg->clear();
+		functionFound = true;
 	}
 	else
 	{
 		lua_pop(L, 2);
-		LOGD_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onDrawViewport);
+		if (cannotFindWarning)
+			LOGD_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onDrawViewport);
 	}
+	return functionFound;
 }
 
-void LuaIAppEventHandler::onFrameEnd(lua_State *L)
+bool LuaIAppEventHandler::onFrameEnd(lua_State *L, bool cannotFindWarning, nctl::String *errorMsg, int *status, LuaUtils::RunInfo *runInfo)
 {
 	ZoneScopedN("Lua onFrameEnd");
-	callFunction(L, LuaNames::LuaIAppEventHandler::onFrameEnd, false);
+	return callFunction(L, LuaNames::LuaIAppEventHandler::onFrameEnd, cannotFindWarning, errorMsg, status, runInfo);
 }
 
-void LuaIAppEventHandler::onResizeWindow(lua_State *L, int width, int height)
+bool LuaIAppEventHandler::onResizeWindow(lua_State *L, int width, int height, bool cannotFindWarning, nctl::String *errorMsg, int *status, LuaUtils::RunInfo *runInfo)
 {
 	ZoneScopedN("Lua onResizeWindow");
 	lua_getglobal(L, LuaNames::ncine);
 	const int type = lua_getfield(L, -1, LuaNames::LuaIAppEventHandler::onResizeWindow);
 
+	bool functionFound = false;
 	if (type == LUA_TFUNCTION)
 	{
 		LuaUtils::push(L, width);
 		LuaUtils::push(L, height);
-		const int status = lua_pcall(L, 2, 1, 0);
-		if (status != LUA_OK)
+		const int callStatus = LuaUtils::pcall(L, 2, 1, runInfo);
+		if (status)
+			*status = callStatus;
+
+		if (callStatus != LUA_OK)
 		{
-			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::LuaIAppEventHandler::onResizeWindow, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::LuaIAppEventHandler::onResizeWindow, LuaDebug::statusToString(callStatus), lua_tostring(L, -1));
+			if (errorMsg)
+				*errorMsg = lua_tostring(L, -1);
 			lua_pop(L, 1);
 		}
+		else if (errorMsg)
+			errorMsg->clear();
+		functionFound = true;
 	}
 	else
 	{
 		lua_pop(L, 2);
-		LOGD_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onResizeWindow);
+		if (cannotFindWarning)
+			LOGD_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onResizeWindow);
 	}
+	return functionFound;
 }
 
-void LuaIAppEventHandler::onChangeScalingFactor(lua_State *L, float factor)
+bool LuaIAppEventHandler::onChangeScalingFactor(lua_State *L, float factor, bool cannotFindWarning, nctl::String *errorMsg, int *status, LuaUtils::RunInfo *runInfo)
 {
 	ZoneScopedN("Lua onChangeScalingFactor");
 	lua_getglobal(L, LuaNames::ncine);
 	const int type = lua_getfield(L, -1, LuaNames::LuaIAppEventHandler::onChangeScalingFactor);
 
+	bool functionFound = false;
 	if (type == LUA_TFUNCTION)
 	{
 		LuaUtils::push(L, factor);
-		const int status = lua_pcall(L, 1, 1, 0);
-		if (status != LUA_OK)
+		const int callStatus = LuaUtils::pcall(L, 1, 1, runInfo);
+		if (status)
+			*status = callStatus;
+
+		if (callStatus != LUA_OK)
 		{
-			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::LuaIAppEventHandler::onChangeScalingFactor, LuaDebug::statusToString(status), lua_tostring(L, -1));
+			LOGE_X("Error running Lua function \"%s\" (%s):\n%s", LuaNames::LuaIAppEventHandler::onChangeScalingFactor, LuaDebug::statusToString(callStatus), lua_tostring(L, -1));
+			if (errorMsg)
+				*errorMsg = lua_tostring(L, -1);
 			lua_pop(L, 1);
 		}
+		else if (errorMsg)
+			errorMsg->clear();
+		functionFound = true;
 	}
 	else
 	{
 		lua_pop(L, 2);
-		LOGI_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onChangeScalingFactor);
+		if (cannotFindWarning)
+			LOGI_X("Cannot find the Lua function \"%s\"", LuaNames::LuaIAppEventHandler::onChangeScalingFactor);
 	}
+	return functionFound;
 }
 
-void LuaIAppEventHandler::onShutdown(lua_State *L)
+bool LuaIAppEventHandler::onShutdown(lua_State *L, bool cannotFindWarning, nctl::String *errorMsg, int *status, LuaUtils::RunInfo *runInfo)
 {
 	ZoneScopedN("Lua onShutdown");
-	callFunction(L, LuaNames::LuaIAppEventHandler::onShutdown, true);
+	return callFunction(L, LuaNames::LuaIAppEventHandler::onShutdown, cannotFindWarning, errorMsg, status, runInfo);
 }
 
-void LuaIAppEventHandler::onSuspend(lua_State *L)
+bool LuaIAppEventHandler::onSuspend(lua_State *L, bool cannotFindWarning, nctl::String *errorMsg, int *status, LuaUtils::RunInfo *runInfo)
 {
 	ZoneScopedN("Lua onSuspend");
-	callFunction(L, LuaNames::LuaIAppEventHandler::onSuspend, true);
+	return callFunction(L, LuaNames::LuaIAppEventHandler::onSuspend, cannotFindWarning, errorMsg, status, runInfo);
 }
 
-void LuaIAppEventHandler::onResume(lua_State *L)
+bool LuaIAppEventHandler::onResume(lua_State *L, bool cannotFindWarning, nctl::String *errorMsg, int *status, LuaUtils::RunInfo *runInfo)
 {
 	ZoneScopedN("Lua onResume");
-	callFunction(L, LuaNames::LuaIAppEventHandler::onResume, true);
+	return callFunction(L, LuaNames::LuaIAppEventHandler::onResume, cannotFindWarning, errorMsg, status, runInfo);
+}
+
+bool LuaIAppEventHandler::onPreInit(lua_State *L, AppConfiguration &config, nctl::String *errorMsg)
+{
+	return onPreInit(L, config, true, errorMsg, nullptr, nullptr);
+}
+
+bool LuaIAppEventHandler::onInit(lua_State *L, nctl::String *errorMsg)
+{
+	ZoneScopedN("Lua onInit");
+	return callFunction(L, LuaNames::LuaIAppEventHandler::onInit, true, errorMsg);
+}
+
+bool LuaIAppEventHandler::onFrameStart(lua_State *L, nctl::String *errorMsg)
+{
+	ZoneScopedN("Lua onFrameStart");
+	return callFunction(L, LuaNames::LuaIAppEventHandler::onFrameStart, false, errorMsg);
+}
+
+bool LuaIAppEventHandler::onPostUpdate(lua_State *L, nctl::String *errorMsg)
+{
+	ZoneScopedN("Lua onPostUpdate");
+	return callFunction(L, LuaNames::LuaIAppEventHandler::onPostUpdate, false, errorMsg);
+}
+
+bool LuaIAppEventHandler::onDrawViewport(lua_State *L, Viewport &viewport, nctl::String *errorMsg)
+{
+	return onDrawViewport(L, viewport, true, errorMsg, nullptr, nullptr);
+}
+
+bool LuaIAppEventHandler::onFrameEnd(lua_State *L, nctl::String *errorMsg)
+{
+	ZoneScopedN("Lua onFrameEnd");
+	return callFunction(L, LuaNames::LuaIAppEventHandler::onFrameEnd, false, errorMsg);
+}
+
+bool LuaIAppEventHandler::onResizeWindow(lua_State *L, int width, int height, nctl::String *errorMsg)
+{
+	return onResizeWindow(L, width, height, true, errorMsg, nullptr, nullptr);
+}
+
+bool LuaIAppEventHandler::onChangeScalingFactor(lua_State *L, float factor, nctl::String *errorMsg)
+{
+	return onChangeScalingFactor(L, factor, true, errorMsg, nullptr, nullptr);
+}
+
+bool LuaIAppEventHandler::onShutdown(lua_State *L, nctl::String *errorMsg)
+{
+	ZoneScopedN("Lua onShutdown");
+	return callFunction(L, LuaNames::LuaIAppEventHandler::onShutdown, true, errorMsg);
+}
+
+bool LuaIAppEventHandler::onSuspend(lua_State *L, nctl::String *errorMsg)
+{
+	ZoneScopedN("Lua onSuspend");
+	return callFunction(L, LuaNames::LuaIAppEventHandler::onSuspend, true, errorMsg);
+}
+
+bool LuaIAppEventHandler::onResume(lua_State *L, nctl::String *errorMsg)
+{
+	ZoneScopedN("Lua onResume");
+	return callFunction(L, LuaNames::LuaIAppEventHandler::onResume, true, errorMsg);
+}
+
+bool LuaIAppEventHandler::onPreInit(lua_State *L, AppConfiguration &config)
+{
+	return onPreInit(L, config, true, nullptr, nullptr, nullptr);
+}
+
+bool LuaIAppEventHandler::onInit(lua_State *L)
+{
+	ZoneScopedN("Lua onInit");
+	return callFunction(L, LuaNames::LuaIAppEventHandler::onInit, true);
+}
+
+bool LuaIAppEventHandler::onFrameStart(lua_State *L)
+{
+	ZoneScopedN("Lua onFrameStart");
+	return callFunction(L, LuaNames::LuaIAppEventHandler::onFrameStart, false);
+}
+
+bool LuaIAppEventHandler::onPostUpdate(lua_State *L)
+{
+	ZoneScopedN("Lua onPostUpdate");
+	return callFunction(L, LuaNames::LuaIAppEventHandler::onPostUpdate, false);
+}
+
+bool LuaIAppEventHandler::onDrawViewport(lua_State *L, Viewport &viewport)
+{
+	return onDrawViewport(L, viewport, true, nullptr, nullptr, nullptr);
+}
+
+bool LuaIAppEventHandler::onFrameEnd(lua_State *L)
+{
+	ZoneScopedN("Lua onFrameEnd");
+	return callFunction(L, LuaNames::LuaIAppEventHandler::onFrameEnd, false);
+}
+
+bool LuaIAppEventHandler::onResizeWindow(lua_State *L, int width, int height)
+{
+	return onResizeWindow(L, width, height, true, nullptr, nullptr, nullptr);
+}
+
+bool LuaIAppEventHandler::onChangeScalingFactor(lua_State *L, float factor)
+{
+	return onChangeScalingFactor(L, factor, true, nullptr, nullptr, nullptr);
+}
+
+bool LuaIAppEventHandler::onShutdown(lua_State *L)
+{
+	ZoneScopedN("Lua onShutdown");
+	return callFunction(L, LuaNames::LuaIAppEventHandler::onShutdown, true);
+}
+
+bool LuaIAppEventHandler::onSuspend(lua_State *L)
+{
+	ZoneScopedN("Lua onSuspend");
+	return callFunction(L, LuaNames::LuaIAppEventHandler::onSuspend, true);
+}
+
+bool LuaIAppEventHandler::onResume(lua_State *L)
+{
+	ZoneScopedN("Lua onResume");
+	return callFunction(L, LuaNames::LuaIAppEventHandler::onResume, true);
 }
 
 }

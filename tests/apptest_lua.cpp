@@ -1,4 +1,6 @@
 #include <ncine/config.h>
+#include <ncine/version.h>
+#include <cstdio>
 
 #include "apptest_lua.h"
 #include <ncine/Application.h>
@@ -6,7 +8,9 @@
 #include <ncine/LuaIAppEventHandler.h>
 #include <ncine/LuaIInputEventHandler.h>
 #include <ncine/FileSystem.h>
-#include <ncine/TextNode.h>
+#if !SUPPRESS_ON_SCREEN_ERRORS
+	#include <ncine/TextNode.h>
+#endif
 #include "apptest_datapath.h"
 
 #if NCINE_WITH_IMGUI
@@ -28,9 +32,33 @@ const char *FontFntFile = "DroidSans32_256.fnt";
 const char *DefaultScriptName = "script.lua";
 const float MinErrorStringScale = 0.5f;
 
+enum LuaAppEventFunctions {
+	ON_PRE_INIT = 0,
+	ON_INIT,
+	ON_FRAME_START,
+	ON_POST_UPDATE,
+	ON_DRAW_VIEWPORT,
+	ON_FRAME_END,
+	ON_RESIZE_WINDOW,
+	ON_CHANGE_SCALING_FACTOR,
+	ON_SHUTDOWN,
+	ON_SUSPEND,
+	ON_RESUME,
+
+	COUNT
+};
+
 nctl::String scriptPath(512);
 nctl::String scriptDir(512);
 nctl::String scriptName(64);
+nctl::String scriptErrorMsg(512);
+nctl::String funcErrorMsg[LuaAppEventFunctions::COUNT] = {
+    nctl::String(512), nctl::String(512), nctl::String(512), nctl::String(512),
+    nctl::String(512), nctl::String(512), nctl::String(512), nctl::String(512),
+    nctl::String(512), nctl::String(512), nctl::String(512)
+};
+nctl::String errorString(512);
+bool scriptToLoadIsReadable = false;
 bool scriptExecuted = false;
 
 struct FileDateCheck
@@ -54,7 +82,21 @@ bool showImGui = false;
 nctl::String windowName(64);
 
 nctl::String scriptPathToLoad(512);
-bool scriptToLoadIsReadable = false;
+
+// Keep in sync with `LuaNames::LuaIAppEventHandler` strings
+const char *LuaAppEventFunctionNames[LuaAppEventFunctions::COUNT] {
+	"on_pre_init",
+	"on_init",
+	"on_frame_start",
+	"on_post_update",
+	"on_draw_viewport",
+	"on_frame_end",
+	"on_resize_window",
+	"on_change_scaling_factor",
+	"on_shutdown",
+	"on_suspend",
+	"on_resume",
+};
 
 int inputTextCallback(ImGuiInputTextCallbackData *data)
 {
@@ -104,6 +146,21 @@ void prependPackagePath(lua_State *L, const char *path)
 	nc::LuaUtils::pop(L); // pop the package table
 }
 
+/// Checks if any of the error strings for the callback functions contains text
+bool funcErrorMsgEmpty()
+{
+	bool areEmpty = true;
+	for (unsigned int i = 0; i < LuaAppEventFunctions::COUNT; i++)
+	{
+		if (funcErrorMsg[i].isEmpty() == false)
+		{
+			areEmpty = false;
+			break;
+		}
+	}
+	return areEmpty;
+}
+
 }
 
 nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
@@ -124,6 +181,27 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 {
 	setDataPath(config);
 
+	if (config.argc() == 2)
+	{
+		if (strncmp(config.argv(1), "-v", 2) == 0 || strncmp(config.argv(1), "--version", 9) == 0)
+		{
+			printf("%s from nCine %s (%s)\n", nc::fs::baseName(config.argv(0)).data(),
+			       nc::VersionStrings::Version, nc::VersionStrings::GitBranch);
+			config.consoleLogLevel = nc::ILogger::LogLevel::OFF;
+			nc::theApplication().quit();
+			return;
+		}
+		else if (strncmp(config.argv(1), "-h", 2) == 0 || strncmp(config.argv(1), "--help", 6) == 0)
+		{
+			printf("Usage: %s [FILE]\nExecute the specified Lua script, or the default one (\"%s\") if unspecified.\n", config.argv(0), DefaultScriptName);
+			config.consoleLogLevel = nc::ILogger::LogLevel::OFF;
+			nc::theApplication().quit();
+			return;
+		}
+	}
+	else if (config.argc() > 2)
+		LOGI_X("Additional console parameters after the first one are ignored.");
+
 	scriptPath = (config.argc() > 1) ? config.argv(1) : DefaultScriptName;
 
 	if (nc::fs::isReadableFile(scriptPath.data()) == false)
@@ -131,11 +209,12 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 
 	if (nc::fs::isReadableFile(scriptPath.data()))
 	{
+		scriptToLoadIsReadable = true;
 		scriptDir = nc::fs::dirName(scriptPath.data());
 		prependPackagePath(luaState_.state(), scriptDir.data());
 
 		scriptName = nc::fs::baseName(scriptPath.data());
-		scriptExecuted = luaState_.runFromFile(scriptPath.data(), scriptName.data());
+		scriptExecuted = luaState_.runFromFile(scriptPath.data(), scriptName.data(), &scriptErrorMsg);
 	}
 
 	if (scriptExecuted)
@@ -143,39 +222,33 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 		fileDateCheck.lastDate = nc::fs::lastModificationTime(scriptPath.data());
 		fileDateCheck.lastCheck = nc::TimeStamp::now();
 		LOGI_X("Executed Lua script \"%s\" successfully", scriptPath.data());
+	}
 
 #if NCINE_WITH_IMGUI
 		scriptPathToLoad = scriptPath;
-		scriptToLoadIsReadable = nc::fs::isReadableFile(scriptPathToLoad.data());
 #endif
-	}
 
-	nc::LuaIAppEventHandler::onPreInit(luaState_.state(), config);
+	nc::LuaIAppEventHandler::onPreInit(luaState_.state(), config, &funcErrorMsg[ON_PRE_INIT]);
 }
 
 void MyEventHandler::onInit()
 {
-	if (scriptExecuted == false)
-	{
-		nctl::String errorString;
-		errorString.format("Couldn't load or execute Lua script \"%s\"", scriptPath.data());
+#if !SUPPRESS_ON_SCREEN_ERRORS
+	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
-		nc::SceneNode &rootNode = nc::theApplication().rootNode();
+	font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFntFile)).data(),
+	                                   (prefixDataPath("fonts", FontTextureFile)).data());
+	text_ = nctl::makeUnique<nc::TextNode>(&rootNode, font_.get(), 512);
+	text_->setAlignment(nc::TextNode::Alignment::LEFT);
+#endif
 
-		font_ = nctl::makeUnique<nc::Font>((prefixDataPath("fonts", FontFntFile)).data(),
-		                                   (prefixDataPath("fonts", FontTextureFile)).data());
-		text_ = nctl::makeUnique<nc::TextNode>(&rootNode, font_.get());
-		text_->setString(errorString);
-		text_->setAlignment(nc::TextNode::Alignment::LEFT);
-		text_->setPosition(text_->width() * 0.5f, text_->height() * 0.5f);
-	}
-	else if (fileDateCheck.enabled)
+	if (fileDateCheck.enabled)
 	{
 		// Prevent suspension if hot reload is enabled (allows editing while the application is running)
 		nc::theApplication().setAutoSuspension(false);
 	}
 
-	nc::LuaIAppEventHandler::onInit(luaState_.state());
+	nc::LuaIAppEventHandler::onInit(luaState_.state(), &funcErrorMsg[ON_INIT]);
 }
 
 void MyEventHandler::onFrameStart()
@@ -192,32 +265,52 @@ void MyEventHandler::onFrameStart()
 		{
 			passKeyEvents = true;
 			const ImGuiInputTextFlags inputTextFlags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackResize;
-			if (ImGui::InputText("##Loading", scriptPathToLoad.data(), scriptPathToLoad.capacity(), inputTextFlags, inputTextCallback, &scriptPathToLoad))
-				scriptToLoadIsReadable = nc::fs::isReadableFile(scriptPathToLoad.data());
-			if (ImGui::IsItemActive())
-				passKeyEvents = false;
-			ImGui::SameLine();
-			ImGui::BeginDisabled(scriptToLoadIsReadable == false);
-			if (ImGui::Button("Load") && scriptToLoadIsReadable)
+			if (ImGui::InputText("Execute", scriptPathToLoad.data(), scriptPathToLoad.capacity(), inputTextFlags, inputTextCallback, &scriptPathToLoad))
 			{
 				scriptPath = scriptPathToLoad;
-				loadScript(LoadMode::NORMAL);
+				scriptToLoadIsReadable = nc::fs::isReadableFile(scriptPathToLoad.data());
+				scriptErrorMsg.clear();
+				if (scriptToLoadIsReadable)
+					runScript(LoadMode::NORMAL);
 			}
-			ImGui::EndDisabled();
+			if (ImGui::IsItemActive())
+				passKeyEvents = false;
 
-			ImGui::Text("Loaded: %s", scriptPath.data());
-			ImGui::TextUnformatted("Executed: ");
+			ImGui::Text("Can load \"%s\":", scriptPath.data());
+			ImGui::SameLine();
+			if (scriptToLoadIsReadable)
+				ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "yes");
+			else
+				ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "no");
+			ImGui::TextUnformatted("Executed:");
 			ImGui::SameLine();
 			if (scriptExecuted)
 				ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "yes");
 			else
 				ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "no");
 
+			if ((scriptErrorMsg.isEmpty() == false || funcErrorMsgEmpty() == false) && ImGui::TreeNode("Error messages"))
+			{
+				if (scriptErrorMsg.isEmpty() == false)
+					ImGui::InputTextMultiline("Script", scriptErrorMsg.data(), scriptErrorMsg.length() + 1, ImVec2(0, 0), ImGuiInputTextFlags_ReadOnly);
+				ImGui::Separator();
+				for (unsigned int i = 0; i < LuaAppEventFunctions::COUNT; i++)
+				{
+					if (funcErrorMsg[i].isEmpty() == false)
+					{
+						const unsigned int strLen = nctl::strnlen(funcErrorMsg[i].data(), 512);
+						ImGui::InputTextMultiline(LuaAppEventFunctionNames[i], funcErrorMsg[i].data(), funcErrorMsg[i].length() + 1, ImVec2(0, 0), ImGuiInputTextFlags_ReadOnly);
+						ImGui::Separator();
+					}
+				}
+				ImGui::TreePop();
+			}
+
 			if (ImGui::Button("Reload"))
-				loadScript(LoadMode::NORMAL);
+				runScript(LoadMode::NORMAL);
 			ImGui::SameLine();
 			if (ImGui::Button("Fast reload"))
-				loadScript(LoadMode::FAST);
+				runScript(LoadMode::FAST);
 
 			const ImGuiTreeNodeFlags treeNodeFlags = (fileDateCheck.enabled) ? ImGuiTreeNodeFlags_DefaultOpen : ImGuiTreeNodeFlags_None;
 			if (ImGui::TreeNodeEx("File date check", treeNodeFlags))
@@ -245,10 +338,39 @@ void MyEventHandler::onFrameStart()
 	}
 #endif
 
-	nc::LuaIAppEventHandler::onFrameStart(luaState_.state());
+	nc::LuaIAppEventHandler::onFrameStart(luaState_.state(), &funcErrorMsg[ON_FRAME_START]);
 
-	if (text_)
+#if !SUPPRESS_ON_SCREEN_ERRORS
+	errorString.clear();
+	if (scriptToLoadIsReadable && scriptExecuted && scriptErrorMsg.isEmpty() && funcErrorMsgEmpty())
 	{
+		text_->setString("");
+		text_->setEnabled(false);
+	}
+	else
+	{
+		if (scriptToLoadIsReadable == false || scriptExecuted == false)
+		{
+			const char *actionStr = (scriptToLoadIsReadable) == false ? "load" : "execute";
+			errorString.format("Couldn't %s Lua script: \"%s\"\n", actionStr, scriptPath.data());
+
+			for (unsigned int i = 0; i < LuaAppEventFunctions::COUNT; i++)
+				funcErrorMsg[i].clear();
+		}
+
+		if (scriptErrorMsg.isEmpty() == false)
+			errorString.formatAppend("%s\n", scriptErrorMsg.data());
+		if (funcErrorMsgEmpty() == false)
+		{
+			for (unsigned int i = 0; i < LuaAppEventFunctions::COUNT; i++)
+			{
+				if (funcErrorMsg[i].isEmpty() == false)
+					errorString.formatAppend("%s\n", funcErrorMsg[i].data());
+			}
+		}
+		text_->setString(errorString);
+		text_->setEnabled(true);
+
 		float scale = 1.0f;
 		while (text_->width() > nc::theApplication().width() && scale >= MinErrorStringScale)
 		{
@@ -257,6 +379,7 @@ void MyEventHandler::onFrameStart()
 		}
 		text_->setPosition(text_->width() * 0.5f, text_->height() * 0.5f);
 	}
+#endif
 
 	if (fileDateCheck.enabled && fileDateCheck.lastCheck.secondsSince() >= fileDateCheck.interval)
 	{
@@ -266,7 +389,7 @@ void MyEventHandler::onFrameStart()
 			const nc::fs::FileDate fileDate = nc::fs::lastModificationTime(scriptPath.data());
 			if (compareDates(fileDate, fileDateCheck.lastDate) > 0)
 			{
-				loadScript(fileDateCheck.fastReload ? LoadMode::FAST : LoadMode::NORMAL);
+				runScript(fileDateCheck.fastReload ? LoadMode::FAST : LoadMode::NORMAL);
 				fileDateCheck.lastDate = fileDate;
 			}
 		}
@@ -275,42 +398,42 @@ void MyEventHandler::onFrameStart()
 
 void MyEventHandler::onPostUpdate()
 {
-	nc::LuaIAppEventHandler::onPostUpdate(luaState_.state());
+	nc::LuaIAppEventHandler::onPostUpdate(luaState_.state(), &funcErrorMsg[ON_POST_UPDATE]);
 }
 
 void MyEventHandler::onDrawViewport(nc::Viewport &viewport)
 {
-	nc::LuaIAppEventHandler::onDrawViewport(luaState_.state(), viewport);
+	nc::LuaIAppEventHandler::onDrawViewport(luaState_.state(), viewport, &funcErrorMsg[ON_DRAW_VIEWPORT]);
 }
 
 void MyEventHandler::onFrameEnd()
 {
-	nc::LuaIAppEventHandler::onFrameEnd(luaState_.state());
+	nc::LuaIAppEventHandler::onFrameEnd(luaState_.state(), &funcErrorMsg[ON_FRAME_END]);
 }
 
 void MyEventHandler::onResizeWindow(int width, int height)
 {
-	nc::LuaIAppEventHandler::onResizeWindow(luaState_.state(), width, height);
+	nc::LuaIAppEventHandler::onResizeWindow(luaState_.state(), width, height, &funcErrorMsg[ON_RESIZE_WINDOW]);
 }
 
 void MyEventHandler::onChangeScalingFactor(float factor)
 {
-	nc::LuaIAppEventHandler::onChangeScalingFactor(luaState_.state(), factor);
+	nc::LuaIAppEventHandler::onChangeScalingFactor(luaState_.state(), factor, &funcErrorMsg[ON_CHANGE_SCALING_FACTOR]);
 }
 
 void MyEventHandler::onShutdown()
 {
-	nc::LuaIAppEventHandler::onShutdown(luaState_.state());
+	nc::LuaIAppEventHandler::onShutdown(luaState_.state(), &funcErrorMsg[ON_SHUTDOWN]);
 }
 
 void MyEventHandler::onSuspend()
 {
-	nc::LuaIAppEventHandler::onSuspend(luaState_.state());
+	nc::LuaIAppEventHandler::onSuspend(luaState_.state(), &funcErrorMsg[ON_SUSPEND]);
 }
 
 void MyEventHandler::onResume()
 {
-	nc::LuaIAppEventHandler::onResume(luaState_.state());
+	nc::LuaIAppEventHandler::onResume(luaState_.state(), &funcErrorMsg[ON_RESUME]);
 }
 
 void MyEventHandler::onKeyPressed(const nc::KeyboardEvent &event)
@@ -443,7 +566,7 @@ void MyEventHandler::expose(lua_State *L)
 int MyEventHandler::reloadScript(lua_State *L)
 {
 	// Fast relaod only: cannot destroy and recreate the state from a Lua function
-	eventHandlerPtr->loadScript(LoadMode::FAST);
+	eventHandlerPtr->runScript(LoadMode::FAST);
 	return 0;
 }
 
@@ -467,7 +590,7 @@ int MyEventHandler::isGuiHidden(lua_State *L)
 	return 1;
 }
 
-bool MyEventHandler::loadScript(LoadMode mode)
+bool MyEventHandler::runScript(LoadMode mode)
 {
 	nc::LuaIAppEventHandler::onShutdown(luaState_.state());
 
@@ -481,14 +604,14 @@ bool MyEventHandler::loadScript(LoadMode mode)
 	}
 
 	scriptName = nc::fs::baseName(scriptPath.data());
-	scriptExecuted = luaState_.runFromFile(scriptPath.data(), scriptName.data());
+	scriptExecuted = luaState_.runFromFile(scriptPath.data(), scriptName.data(), &scriptErrorMsg);
 
 	if (scriptExecuted)
 	{
 		fileDateCheck.lastDate = nc::fs::lastModificationTime(scriptPath.data());
 		fileDateCheck.lastCheck = nc::TimeStamp::now();
 		LOGI_X("Executed Lua script \"%s\" correctly", scriptPath.data());
-		nc::LuaIAppEventHandler::onInit(luaState_.state());
+		nc::LuaIAppEventHandler::onInit(luaState_.state(), &funcErrorMsg[ON_INIT]);
 	}
 
 	return scriptExecuted;
