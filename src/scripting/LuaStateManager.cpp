@@ -214,16 +214,19 @@ bool LuaStateManager::loadFromMemory(const char *bufferName, const char *bufferP
 	}
 
 	const int loadStatus = luaL_loadbufferx(L_, bufferRead, bufferSize, bufferName, "bt");
+	if (status)
+		*status = loadStatus;
+
 	if (loadStatus != LUA_OK)
 	{
 		LOGE_X("Error loading Lua script \"%s\" (%s):\n%s", bufferName, LuaDebug::statusToString(loadStatus), lua_tostring(L_, -1));
 		if (errorMsg)
 			*errorMsg = lua_tostring(L_, -1);
-		if (status)
-			*status = loadStatus;
 		LuaUtils::pop(L_);
 		return false;
 	}
+	else if (errorMsg)
+		errorMsg->clear();
 
 	return true;
 }
@@ -245,16 +248,19 @@ bool LuaStateManager::runFromFile(const char *filename, const char *chunkName, n
 		return false;
 
 	const int callStatus = LuaUtils::pcall(L_, 0, LUA_MULTRET, runInfo);
+	if (status)
+		*status = callStatus;
+
 	if (callStatus != LUA_OK)
 	{
 		LOGE_X("Error running Lua script \"%s\" (%s):\n%s", filename, LuaDebug::statusToString(callStatus), lua_tostring(L_, -1));
 		if (errorMsg)
 			*errorMsg = lua_tostring(L_, -1);
-		if (status)
-			*status = callStatus;
 		LuaUtils::pop(L_);
 		return false;
 	}
+	else if (errorMsg)
+		errorMsg->clear();
 
 	return true;
 }
@@ -281,16 +287,19 @@ bool LuaStateManager::runFromMemory(const char *bufferName, const char *bufferPt
 		return false;
 
 	const int callStatus = LuaUtils::pcall(L_, 0, LUA_MULTRET, runInfo);
+	if (status)
+		*status = callStatus;
+
 	if (callStatus != LUA_OK)
 	{
 		LOGE_X("Error running Lua script \"%s\" (%s):\n%s", bufferName, LuaDebug::statusToString(callStatus), lua_tostring(L_, -1));
 		if (errorMsg)
 			*errorMsg = lua_tostring(L_, -1);
-		if (status)
-			*status = callStatus;
 		LuaUtils::pop(L_);
 		return false;
 	}
+	else if (errorMsg)
+		errorMsg->clear();
 
 	return true;
 }

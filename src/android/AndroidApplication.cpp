@@ -245,7 +245,6 @@ void AndroidApplication::preInit()
 	// Only `onPreInit()` can modify the application configuration
 	AppConfiguration &modifiableAppCfg = const_cast<AppConfiguration &>(appCfg_);
 	appEventHandler_->onPreInit(modifiableAppCfg);
-	LOGI("IAppEventHandler::onPreInit() invoked");
 
 	// Setting log levels and filename based on application configuration
 	const nctl::String logFilePath = fs::joinPath(fs::dataPath(), appCfg_.logFile);
@@ -253,6 +252,7 @@ void AndroidApplication::preInit()
 	fileLogger.setConsoleLevel(appCfg_.consoleLogLevel);
 	fileLogger.setFileLevel(appCfg_.fileLogLevel);
 	fileLogger.openLogFile(logFilePath.data());
+	LOGI("IAppEventHandler::onPreInit() invoked"); // Logging delayed to set up the logger first
 }
 
 void AndroidApplication::init()

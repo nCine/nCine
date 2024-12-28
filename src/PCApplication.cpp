@@ -72,13 +72,18 @@ void PCApplication::init(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandl
 	modifiableAppCfg.argc_ = argc;
 	modifiableAppCfg.argv_ = argv;
 	appEventHandler_->onPreInit(modifiableAppCfg);
-	LOGI("IAppEventHandler::onPreInit() invoked");
 
 	// Setting log levels and filename based on application configuration
 	FileLogger &fileLogger = static_cast<FileLogger &>(theServiceLocator().logger());
 	fileLogger.setConsoleLevel(appCfg_.consoleLogLevel);
 	fileLogger.setFileLevel(appCfg_.fileLogLevel);
 	fileLogger.openLogFile(appCfg_.logFile.data());
+	LOGI("IAppEventHandler::onPreInit() invoked"); // Logging delayed to set up the logger first
+
+	// The application's `onPreInit()` might have requested to quit
+	if (shouldQuit_)
+		return;
+
 	// Graphics device should always be created before the input manager!
 	IGfxDevice::GLContextInfo glContextInfo(appCfg_);
 	const DisplayMode::VSync vSyncMode = appCfg_.withVSync ? DisplayMode::VSync::ENABLED : DisplayMode::VSync::DISABLED;

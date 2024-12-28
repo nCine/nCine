@@ -541,6 +541,8 @@ void RenderResources::dispose()
 
 	ASSERT(cameraUniformDataMap_.isEmpty());
 
+	const bool resourcesCreated = (hash64_ != nullptr);
+
 	defaultCamera_.reset(nullptr);
 	renderBatcher_.reset(nullptr);
 	renderCommandPool_.reset(nullptr);
@@ -549,7 +551,8 @@ void RenderResources::dispose()
 	buffersManager_.reset(nullptr);
 	binaryShaderCache_.reset(nullptr);
 
-	LOGI("Rendering resources disposed");
+	if (resourcesCreated)
+		LOGI("Rendering resources disposed");
 }
 
 void RenderResources::fillDefaultShaderInfos()
