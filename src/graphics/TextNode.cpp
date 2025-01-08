@@ -6,6 +6,8 @@
 
 namespace ncine {
 
+const unsigned int SpaceCodePoint = 0x20;
+
 Material::ShaderProgramType fontRenderModeToShaderProgram(const Font::RenderMode renderMode)
 {
 	switch (renderMode)
@@ -43,7 +45,8 @@ TextNode::TextNode(SceneNode *parent, Font *font, unsigned int maxStringLength)
       dirtyBoundaries_(true), withKerning_(true), font_(font),
       interleavedVertices_(maxStringLength * 4 + (maxStringLength - 1) * 2),
       xAdvance_(0.0f), yAdvance_(0.0f), lineLengths_(4), alignment_(Alignment::LEFT),
-      lineHeight_(font ? font->lineHeight() : 0.0f), instanceBlock_(nullptr)
+      lineHeight_(font ? font->lineHeight() : 0.0f), tabSize_(DefaultTabSize),
+      instanceBlock_(nullptr)
 {
 	ASSERT(maxStringLength > 0);
 	init();
@@ -158,6 +161,19 @@ void TextNode::setAlignment(Alignment alignment)
 	}
 }
 
+void TextNode::setTabSize(unsigned int tabSize)
+{
+	if (tabSize > MaxTabSize)
+		tabSize = MaxTabSize;
+
+	if (tabSize != tabSize_)
+	{
+		tabSize_ = tabSize;
+		dirtyDraw_ = true;
+		dirtyBoundaries_ = true;
+	}
+}
+
 void TextNode::setString(const nctl::String &string)
 {
 	if (string_ != string)
@@ -178,7 +194,7 @@ void TextNode::setString(const char *string)
 	}
 }
 
-Vector2f TextNode::calculateBoundaries(const Font &font, bool withKerning, const nctl::String &string)
+Vector2f TextNode::calculateBoundaries(const Font &font, bool withKerning, unsigned int tabSize, const nctl::String &string)
 {
 	float xAdvanceMax = 0.0f; // longest line
 	float xAdvance = 0.0f;
@@ -195,6 +211,12 @@ Vector2f TextNode::calculateBoundaries(const Font &font, bool withKerning, const
 			xAdvance = 0.0f;
 			yAdvance += lineHeight;
 			i++; // manual increment as newline character is not decoded
+		}
+		else if (string[i] == '\t')
+		{
+			const FontGlyph *glyph = font.glyph(SpaceCodePoint);
+			xAdvance += glyph->xAdvance() * tabSize;
+			i++; // manual increment as tabular character is not decoded
 		}
 		else
 		{
@@ -230,6 +252,11 @@ Vector2f TextNode::calculateBoundaries(const Font &font, bool withKerning, const
 	return Vector2f(xAdvanceMax, yAdvance);
 }
 
+Vector2f TextNode::calculateBoundaries(const Font &font, bool withKerning, const nctl::String &string)
+{
+	return calculateBoundaries(font, withKerning, DefaultTabSize, string);
+}
+
 void TextNode::transform()
 {
 	// Precalculate boundaries for horizontal alignment
@@ -261,6 +288,23 @@ bool TextNode::draw(RenderQueue &renderQueue)
 				xAdvance_ = calculateAlignment(currentLine) - width_ * 0.5f;
 				yAdvance_ += lineHeight_;
 				i++; // manual increment as newline character is not decoded
+			}
+			else if (string_[i] == '\t')
+			{
+				const FontGlyph *glyph = font_->glyph(SpaceCodePoint);
+				Degenerate degen = Degenerate::NONE;
+				if (length > 1)
+				{
+					if (i == 0)
+						degen = Degenerate::END;
+					else if (i == length - 1)
+						degen = Degenerate::START;
+					else
+						degen = Degenerate::START_END;
+				}
+				for (unsigned int j = 0; j < tabSize_; j++)
+					processGlyph(glyph, degen);
+				i++; // manual increment as tabular character is not decoded
 			}
 			else
 			{

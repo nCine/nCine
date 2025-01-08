@@ -3,7 +3,6 @@
 
 #include "DrawableNode.h"
 #include "Font.h"
-#include "Color.h"
 #include <nctl/Array.h>
 #include <nctl/String.h>
 
@@ -20,6 +19,11 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/*! This number affects both the size of the string container
 	 * and the initial size of the vertex array in host memory. */
 	static const unsigned int DefaultStringLength = 256;
+
+	/// Default size of a "tab" character in terms of whitespaces
+	static const unsigned int DefaultTabSize = 4;
+	/// Maximum size of a "tab" character in terms of whitespaces
+	static const unsigned int MaxTabSize = 16;
 
 	/// Horizontal alignment modes for text made of multiple lines
 	/*! \note It does not change the node anchor point */
@@ -78,6 +82,11 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Sets the text node line height
 	inline void setLineHeight(float lineHeight) { lineHeight_ = lineHeight; }
 
+	/// Gets the size of a "tab" character in terms of whitespaces
+	inline unsigned int tabSize() const { return tabSize_; }
+	/// Sets the size of a "tab" character in terms of whitespaces
+	void setTabSize(unsigned int tabSize);
+
 	/// Gets the constant string to render
 	inline const nctl::String &string() const { return string_; }
 	/// Gets the string to render
@@ -87,7 +96,10 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	/// Sets the string to render from a C-style string
 	void setString(const char *string);
 
-	/// Calculates the rectangle boundaries needed to render the provided string with the specified font
+	/// Calculates the rectangle boundaries needed to render the provided string with the specified font, kerning state, and tab size
+	static Vector2f calculateBoundaries(const Font &font, bool withKerning, unsigned int tabSize, const nctl::String &string);
+
+	/// Calculates the rectangle boundaries needed to render the provided string with the specified font and kerning state
 	static Vector2f calculateBoundaries(const Font &font, bool withKerning, const nctl::String &string);
 
 	void transform() override;
@@ -144,6 +156,8 @@ class DLL_PUBLIC TextNode : public DrawableNode
 	Alignment alignment_;
 	/// The line height for the text node
 	float lineHeight_;
+	/// The amount of whitespaces displayed where a "tab" character is encountered
+	unsigned int tabSize_;
 
 	GLUniformBlockCache *instanceBlock_;
 

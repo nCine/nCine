@@ -73,7 +73,7 @@ void MyEventHandler::onInit()
 	fonts_.pushBack(nctl::makeUnique<nc::Font>((prefixDataPath("fonts", Font3FntFile)).data(),
 	                                           (prefixDataPath("fonts", Font3TextureFile)).data()));
 
-	const char testString[] = "WAY.P.ATAV";
+	const char testString[] = "\tWAY.P.ATAV";
 	float textHeight = nc::theApplication().height() * 0.8f;
 	const float screenWidth = nc::theApplication().width();
 	texts_.pushBack(nctl::makeUnique<nc::TextNode>(&rootNode, fonts_[0].get()));
@@ -192,6 +192,10 @@ void MyEventHandler::onFrameStart()
 					nc::Colorf color(texts_[i]->color());
 					if (ImGui::ColorEdit4("Color", color.data()))
 						texts_[i]->setColor(color);
+
+					int tabSize = texts_[i]->tabSize();
+					if (ImGui::SliderInt("Tab size", &tabSize, 0, nc::TextNode::MaxTabSize, "%d spaces", ImGuiSliderFlags_AlwaysClamp))
+						texts_[i]->setTabSize(tabSize);
 
 					bool withKerning = texts_[i]->withKerning();
 					if (ImGui::Checkbox("Kerning", &withKerning))

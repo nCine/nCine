@@ -33,6 +33,9 @@ namespace TextNode {
 	static const char *absLineHeight = "get_abslineheight";
 	static const char *setLineHeight = "set_lineheight";
 
+	static const char *tabSize = "get_tabsize";
+	static const char *setTabSize = "set_tabsize";
+
 	static const char *string = "get_string";
 	static const char *setString = "set_string";
 
@@ -80,6 +83,9 @@ void LuaTextNode::expose(LuaStateManager *stateManager)
 	LuaUtils::addFunction(L, LuaNames::TextNode::lineHeight, lineHeight);
 	LuaUtils::addFunction(L, LuaNames::TextNode::absLineHeight, absLineHeight);
 	LuaUtils::addFunction(L, LuaNames::TextNode::setLineHeight, setLineHeight);
+
+	LuaUtils::addFunction(L, LuaNames::TextNode::tabSize, tabSize);
+	LuaUtils::addFunction(L, LuaNames::TextNode::setTabSize, setTabSize);
 
 	LuaUtils::addFunction(L, LuaNames::TextNode::string, string);
 	LuaUtils::addFunction(L, LuaNames::TextNode::setString, setString);
@@ -312,6 +318,29 @@ int LuaTextNode::setLineHeight(lua_State *L)
 	return 0;
 }
 
+int LuaTextNode::tabSize(lua_State *L)
+{
+	TextNode *textnode = LuaUntrackedUserData<TextNode>::retrieve(L, -1);
+
+	if (textnode)
+		LuaUtils::push(L, textnode->tabSize());
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaTextNode::setTabSize(lua_State *L)
+{
+	TextNode *textnode = LuaUntrackedUserData<TextNode>::retrieve(L, -2);
+	const unsigned int tabSize = LuaUtils::retrieve<unsigned int>(L, -1);
+
+	if (textnode)
+		textnode->setTabSize(tabSize);
+
+	return 0;
+}
+
 int LuaTextNode::string(lua_State *L)
 {
 	TextNode *textnode = LuaUntrackedUserData<TextNode>::retrieve(L, -1);
@@ -337,13 +366,14 @@ int LuaTextNode::setString(lua_State *L)
 
 int LuaTextNode::calculateBoundaries(lua_State *L)
 {
-	const Font *font = LuaUntrackedUserData<Font>::retrieve(L, -3);
-	const bool withKerning = LuaUtils::retrieve<bool>(L, -2);
+	const Font *font = LuaUntrackedUserData<Font>::retrieve(L, -4);
+	const bool withKerning = LuaUtils::retrieve<bool>(L, -3);
+	const unsigned int tabSize = LuaUtils::retrieve<unsigned int>(L, -2);
 	const char *string = LuaUtils::retrieve<const char *>(L, -1);
 
 	if (font)
 	{
-		const Vector2f boundaries = TextNode::calculateBoundaries(*font, withKerning, string);
+		const Vector2f boundaries = TextNode::calculateBoundaries(*font, withKerning, tabSize, string);
 		LuaVector2fUtils::push(L, boundaries);
 	}
 	else
