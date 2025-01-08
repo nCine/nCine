@@ -430,20 +430,22 @@ void MyEventHandler::onFrameStart()
 			ImGui::Separator();
 
 			nc::Vector2f position(particleSystem_->position());
-			if (ImGui::InputFloat2("Position", position.data(), "%.2f", ImGuiInputTextFlags_EnterReturnsTrue))
+			if (ImGui::InputFloat2("Position", position.data(), "%.2f"))
+			if (ImGui::IsItemDeactivatedAfterEdit())
 				particleSystem_->setPosition(position);
 
 			nc::Vector2f tempEmitVector(emitVector_);
-			if (ImGui::InputFloat2("Emit vector", tempEmitVector.data(), "%.2f", ImGuiInputTextFlags_EnterReturnsTrue))
+			if (ImGui::InputFloat2("Emit vector", tempEmitVector.data(), "%.2f"))
+			if (ImGui::IsItemDeactivatedAfterEdit())
 				emitVector_ = tempEmitVector;
 			ImGui::Dummy(ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * LineHeightSpacing));
 
 			ImGui::SliderInt2("Init amount", particleInit.rndAmount.data(), 1, 10, "%d", ImGuiSliderFlags_AlwaysClamp);
 			ImGui::SliderFloat2("Init life", particleInit.rndLife.data(), 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
-			ImGui::InputFloat2("Init position X", particleInit.rndPositionX.data(), "%.2f", ImGuiInputTextFlags_EnterReturnsTrue);
-			ImGui::InputFloat2("Init position Y", particleInit.rndPositionY.data(), "%.2f", ImGuiInputTextFlags_EnterReturnsTrue);
-			ImGui::InputFloat2("Init velocity X", particleInit.rndVelocityX.data(), "%.2f", ImGuiInputTextFlags_EnterReturnsTrue);
-			ImGui::InputFloat2("Init velocity Y", particleInit.rndVelocityY.data(), "%.2f", ImGuiInputTextFlags_EnterReturnsTrue);
+			ImGui::InputFloat2("Init position X", particleInit.rndPositionX.data(), "%.2f");
+			ImGui::InputFloat2("Init position Y", particleInit.rndPositionY.data(), "%.2f");
+			ImGui::InputFloat2("Init velocity X", particleInit.rndVelocityX.data(), "%.2f");
+			ImGui::InputFloat2("Init velocity Y", particleInit.rndVelocityY.data(), "%.2f");
 			ImGui::SliderFloat2("Init rotation", particleInit.rndRotation.data(), 0.0f, 360.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
 			ImGui::Checkbox("Init emitter rotation", &particleInit.emitterRotation);
 			particleInit.validateMinMax();

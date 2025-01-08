@@ -178,7 +178,7 @@ BEGIN\n\
             VALUE \"FileDescription\", \"nCine\\0\"\n\
             VALUE \"FileVersion\", \"${NCINE_VERSION_MAJOR},${NCINE_VERSION_MINOR},${FILEVERSION_THIRD_WORD},0\\0\"\n\
             VALUE \"InternalName\", \"nCine\\0\"\n\
-            VALUE \"LegalCopyright\", \"Copyright ©2011-2024 Angelo Theodorou\\0\"\n\
+            VALUE \"LegalCopyright\", \"Copyright ©2011-2025 Angelo Theodorou\\0\"\n\
 #ifdef NCINE_DEBUG\n\
             VALUE \"OriginalFilename\", \"${CMAKE_SHARED_LIBRARY_PREFIX}ncine${NCINE_DEBUG_POSTFIX}${CMAKE_SHARED_LIBRARY_SUFFIX}\\0\"\n\
 #else\n\

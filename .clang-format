@@ -6,13 +6,20 @@ AlignConsecutiveAssignments: None
 AlignConsecutiveBitFields: None
 AlignConsecutiveDeclarations: None
 AlignConsecutiveMacros: false
+AlignConsecutiveShortCaseStatements:
+  Enabled: false
+AlignConsecutiveTableGenBreakingDAGArgColons: None
+AlignConsecutiveTableGenCondOperatorColons: None
+AlignConsecutiveTableGenDefinitionColons: None
 AlignEscapedNewlines: DontAlign
 AlignOperands: true
 AlignTrailingComments: false
+AllowAllArgumentsOnNextLine: true
 AllowAllConstructorInitializersOnNextLine: true
 AllowAllParametersOfDeclarationOnNextLine: true
 AllowBreakBeforeNoexceptSpecifier: Never
 AllowShortBlocksOnASingleLine: true
+AllowShortCaseExpressionOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
 AllowShortCompoundRequirementOnASingleLine: true
 AllowShortEnumsOnASingleLine: false
@@ -23,7 +30,6 @@ AllowShortLoopsOnASingleLine: false
 AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: false
-AlwaysBreakTemplateDeclarations: No
 # AttributeMacros:
 BinPackArguments: true
 BinPackParameters: true
@@ -49,15 +55,21 @@ BraceWrapping:
   SplitEmptyNamespace: false
 BracedInitializerIndentWidth: 4
 BreakAdjacentStringLiterals: false
+BreakAfterAttributes: Always
 BreakAfterJavaFieldAnnotations: false
+BreakAfterReturnType: Automatic
 BreakArrays: false
 BreakBeforeBinaryOperators: None
 BreakBeforeBraces: Custom # Allman
 BreakBeforeConceptDeclarations: true
+BreakBeforeInlineASMColon: OnlyMultiline
 BreakBeforeTernaryOperators: true
+# BreakBinaryOperations: Never # clang-format 20
 BreakConstructorInitializers: BeforeColon
+BreakFunctionDefinitionParameters: false
 BreakInheritanceList: AfterColon
 BreakStringLiterals: false
+BreakTemplateDeclarations: MultiLine
 ColumnLimit: 0
 # CommentPragmas:
 CompactNamespaces: true
@@ -75,6 +87,7 @@ ForEachMacros:
   - foreach
   - Q_FOREACH
   - BOOST_FOREACH
+# IfMacros:
 IncludeBlocks: Regroup
 IncludeCategories:
   - Regex: '^<nctl.*'
@@ -95,47 +108,73 @@ IncludeCategories:
     Priority: 3
 IncludeIsMainRegex: '$'
 # IncludeIsMainSourceRegex:
+IndentAccessModifiers: false
 IndentCaseBlocks: false
 IndentCaseLabels: true
 IndentExternBlock: Indent
 IndentGotoLabels: true
 IndentPPDirectives: BeforeHash
+IndentRequiresClause: true
 IndentWidth: 4
 IndentWrappedFunctionNames: false
+InsertBraces: false
 InsertNewlineAtEOF: true
 InsertTrailingCommas: None
+IntegerLiteralSeparator:
+  Binary: 0
+  Decimal: 0
+  Hex: 0
 JavaImportGroups: []
 JavaScriptQuotes: Leave
 JavaScriptWrapImports: true
-KeepEmptyLinesAtTheStartOfBlocks: true
+KeepEmptyLines:
+  AtEndOfFile: false
+  AtStartOfBlock: true
+  AtStartOfFile: false
+# KeepFormFeed: false # clang-format 20
 LambdaBodyIndentation: Signature
 Language: Cpp
 LineEnding: DeriveLF
 MacroBlockBegin: ''
 MacroBlockEnd: ''
+# Macros:
+MainIncludeChar: Quote
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: Inner
 # NamespaceMacros:
 ObjCBinPackProtocolList: Auto
 ObjCBlockIndentWidth: 2
 ObjCBreakBeforeNestedBlockParam: false
+# ObjCPropertyAttributeOrder:
 ObjCSpaceAfterProperty: false
 ObjCSpaceBeforeProtocolList: true
+PPIndentWidth: 4
+PackConstructorInitializers:  BinPack
 PenaltyBreakAssignment: 2
 PenaltyBreakBeforeFirstCallParameter: 19
 PenaltyBreakComment: 300
 PenaltyBreakFirstLessLess: 120
+PenaltyBreakOpenParenthesis: 50
+PenaltyBreakScopeResolution: 1000
 PenaltyBreakString: 1000
 PenaltyBreakTemplateDeclaration: 10
 PenaltyExcessCharacter: 1000000
+PenaltyIndentedWhitespace: 10
 PenaltyReturnTypeOnItsOwnLine: 60
 PointerAlignment: Right
 QualifierAlignment: Custom
 QualifierOrder: ['friend', 'static', 'inline', 'constexpr', 'const', 'restrict', 'volatile', 'type']
 # RawStringFormats:
+ReferenceAlignment: Pointer
 ReflowComments: true
+RemoveBracesLLVM: false
+# RemoveEmptyLinesInUnwrappedLines: true #clang-format 20
 RemoveParentheses: MultipleParentheses
+RemoveSemicolon: false
+RequiresClausePosition: OwnLine
+RequiresExpressionIndentation: OuterScope
 SeparateDefinitionBlocks: Leave
+ShortNamespaceLines: 0
 SkipMacroDefinitionBody: false
 SortIncludes: false
 SortJavaStaticImport: Before
@@ -151,21 +190,31 @@ SpaceBeforeCtorInitializerColon: true
 SpaceBeforeInheritanceColon: true
 SpaceBeforeJsonColon: false
 SpaceBeforeParens: ControlStatements
+# SpaceBeforeParensOptions:
 SpaceBeforeRangeBasedForLoopColon: true
 SpaceBeforeSquareBrackets: false
 SpaceInEmptyBlock: false
 SpacesBeforeTrailingComments: 1
 SpacesInAngles: false
 SpacesInContainerLiterals: true
+SpacesInLineCommentPrefix:
+  Minimum: 1
+  Maximum: -1
 SpacesInParens: Never
+# SpacesInParensOptions:
 SpacesInSquareBrackets: false
 Standard: c++11
 # StatementAttributeLikeMacros:
 StatementMacros:
   - Q_UNUSED
 TabWidth: 4
+# TableGenBreakInsideDAGArg:
+# TableGenBreakingDAGArgOperators:
+# TemplateNames: # clang-format 20
+# TypeNames:
 # TypenameMacros:
 UseTab: ForIndentation
+# VariableTemplates: # clang-format 20
+VerilogBreakBetweenInstancePorts: false
 # WhitespaceSensitiveMacros:
-...
-
+# WrapNamespaceBodyWithEmptyLines: # clang-format 20
