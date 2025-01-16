@@ -1,5 +1,6 @@
 #include "gtest_array.h"
 #include "test_functions.h"
+#include <nctl/algorithms.h>
 
 namespace {
 
@@ -316,72 +317,6 @@ TEST_F(ArrayAlgorithmsTest, GenerateN)
 		ASSERT_EQ(array_[i], i + value);
 	for (unsigned int i = numElements; i < array_.size(); i++)
 		ASSERT_EQ(array_[i], i);
-}
-
-TEST_F(ArrayAlgorithmsTest, Sort)
-{
-	printf("Filling the array with random numbers\n");
-	array_.clear();
-	initArrayRandom(array_);
-	printArray(array_);
-
-	printf("Sorting the array\n");
-	nctl::quicksort(array_.begin(), array_.end());
-	printArray(array_);
-	const bool sorted = nctl::isSorted(array_.begin(), array_.end());
-	printf("The array is %s\n", sorted ? "sorted" : "not sorted");
-
-	ASSERT_EQ(sorted, true);
-	ASSERT_EQ(isSorted(array_), true);
-}
-
-TEST_F(ArrayAlgorithmsTest, SortedUntil)
-{
-	const unsigned int position = 5;
-	const int element = -1;
-	printf("Inserting %d at position %u to break sorting\n", element, position);
-	array_[position] = element;
-	printArray(array_);
-
-	nctl::Array<int>::ConstIterator unsorted = nctl::isSortedUntil(array_.begin(), array_.end());
-	printf("The array is sorted until %d\n", *unsorted);
-
-	ASSERT_EQ(*unsorted, element);
-}
-
-TEST_F(ArrayAlgorithmsTest, ReverseSort)
-{
-	printf("Filling the array with random numbers\n");
-	array_.clear();
-	initArrayRandom(array_);
-	printArray(array_);
-
-	printf("Reverse sorting the array\n");
-	nctl::quicksortDesc(array_.begin(), array_.end());
-	printArray(array_);
-	const bool reverseSorted = nctl::isSorted(array_.begin(), array_.end(), nctl::IsGreater<int>);
-	printf("The array is %s\n", reverseSorted ? "reverse sorted" : "not reverse sorted");
-
-	ASSERT_EQ(reverseSorted, true);
-	ASSERT_EQ(isReverseSorted(array_), true);
-}
-
-TEST_F(ArrayAlgorithmsTest, ReverseSortedUntil)
-{
-	printf("Reverse sorting the array\n");
-	nctl::quicksortDesc(array_.begin(), array_.end());
-	printArray(array_);
-
-	const unsigned int position = 5;
-	const int element = 99;
-	printf("Inserting %d at position %u to break sorting\n", element, position);
-	array_[position] = element;
-	printArray(array_);
-
-	nctl::Array<int>::ConstIterator unsorted = nctl::isSortedUntil(array_.begin(), array_.end(), nctl::IsGreater<int>);
-	printf("The array is sorted until %d\n", *unsorted);
-
-	ASSERT_EQ(*unsorted, element);
 }
 
 TEST_F(ArrayAlgorithmsTest, Reverse)

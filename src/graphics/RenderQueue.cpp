@@ -91,8 +91,8 @@ void RenderQueue::sortAndCommit()
 	const bool batchingEnabled = theApplication().renderingSettings().batchingEnabled;
 
 	// Sorting the queues with the relevant orders
-	nctl::quicksort(opaqueQueue_.begin(), opaqueQueue_.end(), descendingOrder);
-	nctl::quicksort(transparentQueue_.begin(), transparentQueue_.end(), ascendingOrder);
+	nctl::sort(opaqueQueue_.begin(), opaqueQueue_.end(), descendingOrder);
+	nctl::sort(transparentQueue_.begin(), transparentQueue_.end(), ascendingOrder);
 
 	nctl::Array<RenderCommand *> *opaques = batchingEnabled ? &opaqueBatchedQueue_ : &opaqueQueue_;
 	nctl::Array<RenderCommand *> *transparents = batchingEnabled ? &transparentBatchedQueue_ : &transparentQueue_;

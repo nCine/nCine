@@ -1,6 +1,7 @@
 #ifndef NCTL_ALGORITHMS
 #define NCTL_ALGORITHMS
 
+#include <cmath>
 #include "iterator.h"
 #include "utility.h"
 
@@ -709,42 +710,42 @@ inline const Iterator isSortedUntil(Iterator first, const Iterator last, Compare
 	return last;
 }
 
-/// Partition function for quicksort with iterators
-template <class Iterator, class Compare>
-inline Iterator partition(Iterator first, Iterator last, Compare comp)
-{
-	Iterator pivot = last;
+namespace {
 
-	while (first != last)
+	/// Partition function for quicksort with iterators and custom compare function
+	template <class Iterator, class Compare>
+	inline Iterator partition(Iterator first, Iterator last, Compare comp)
 	{
-		while (comp(*first, *pivot))
+		const Iterator pivot = last;
+
+		while (first != last)
 		{
+			while (comp(*first, *pivot))
+			{
+				++first;
+				if (first == last)
+					return first;
+			}
+
+			do
+			{
+				--last;
+				if (first == last)
+					return first;
+			} while (!comp(*last, *pivot));
+
+			swap(*first, *last);
 			++first;
-			if (first == last)
-				return first;
 		}
 
-		do
-		{
-			--last;
-			if (first == last)
-				return first;
-		} while (!comp(*last, *pivot));
-
-		swap(*first, *last);
-		++first;
+		return first;
 	}
-
-	return first;
-}
-
-namespace {
 
 	/// Quicksort implementation with random access iterators and custom compare function
 	template <class Iterator, class Compare>
 	inline void quicksort(Iterator first, Iterator last, RandomAccessIteratorTag, Compare comp)
 	{
-		int size = distance(first, last);
+		const int size = distance(first, last);
 		if (size > 1)
 		{
 			Iterator p = prev(last);
@@ -766,8 +767,8 @@ namespace {
 			swap(*first, *p);
 			Iterator q = partition(first, p, comp);
 			swap(*q, *p);
-			quicksort(first, q, BidirectionalIteratorTag());
-			quicksort(next(q), last, BidirectionalIteratorTag());
+			quicksort(first, q, BidirectionalIteratorTag(), comp);
+			quicksort(next(q), last, BidirectionalIteratorTag(), comp);
 		}
 	}
 
@@ -792,6 +793,149 @@ template <class Iterator>
 inline void quicksortDesc(Iterator first, Iterator last)
 {
 	quicksort(first, last, IteratorTraits<Iterator>::IteratorCategory(), IsNotLess<typename IteratorTraits<Iterator>::ValueType>);
+}
+
+namespace {
+
+	/// Heapsort utility function to return the index of the left child of the heap
+	inline int iLeftChild(int i)
+	{
+		return (2 * i + 1);
+	}
+
+}
+
+/// Heapsort implementation with iterators and custom compare function
+template <class Iterator, class Compare>
+inline void heapsort(Iterator first, Iterator last, Compare comp)
+{
+	const int size = distance(first, last);
+	int start = floor(size / 2);
+	int end = size;
+
+	while (end > 1)
+	{
+		if (start > 0)
+			start--;
+		else
+		{
+			end--;
+			swap(*(first + end), *first);
+		}
+
+		int root = start;
+		while (iLeftChild(root) < end)
+		{
+			int child = iLeftChild(root);
+			if (child + 1 < end && comp(*(first + child), *(first + child + 1)))
+				child++;
+
+			if (comp(*(first + root), *(first + child)))
+			{
+				swap(*(first + root), *(first + child));
+				root = child;
+			}
+			else
+				break;
+		}
+	}
+}
+
+/// Heapsort implementation with iterators, ascending order
+template <class Iterator>
+inline void heapsort(Iterator first, Iterator last)
+{
+	heapsort(first, last, IsLess<typename IteratorTraits<Iterator>::ValueType>);
+}
+
+/// Heapsort implementation with iterators, descending order
+template <class Iterator>
+inline void heapsortDesc(Iterator first, Iterator last)
+{
+	heapsort(first, last, IsNotLess<typename IteratorTraits<Iterator>::ValueType>);
+}
+
+/// Insertion sort implementation with iterators and custom compare function
+template <class Iterator, class Compare>
+inline void insertionsort(Iterator first, Iterator last, Compare comp)
+{
+	const int size = distance(first, last);
+
+	int i = 1;
+	while (i < size)
+	{
+		auto x = *(first + i);
+		int j = i;
+		while (j > 0 && comp(x, *(first + j - 1)))
+		{
+			*(first + j) = *(first + j - 1);
+			j--;
+		}
+		*(first + j) = x;
+		i++;
+	}
+}
+
+/// Insertion sort implementation with iterators, ascending order
+template <class Iterator>
+inline void insertionsort(Iterator first, Iterator last)
+{
+	insertionsort(first, last, IsLess<typename IteratorTraits<Iterator>::ValueType>);
+}
+
+/// Insertion sort implementation with iterators, descending order
+template <class Iterator>
+inline void insertionsortDesc(Iterator first, Iterator last)
+{
+	insertionsort(first, last, IsNotLess<typename IteratorTraits<Iterator>::ValueType>);
+}
+
+namespace {
+
+	/// Introspective sort implementation with iterators and custom compare function
+	template <class Iterator, class Compare>
+	inline void introsort(Iterator first, Iterator last, Compare comp, unsigned int maxDepth)
+	{
+		const int size = distance(first, last);
+		if (size < 16)
+			insertionsort(first, last, comp);
+		else if (maxDepth == 0)
+			heapsort(first, last, comp);
+		else
+		{
+			Iterator p = prev(last);
+			swap(*next(first, size / 2), *p);
+			Iterator q = partition(first, p, comp);
+			swap(*q, *p);
+			introsort(first, q, comp, maxDepth - 1);
+			introsort(next(q), last, comp, maxDepth - 1);
+		}
+	}
+
+}
+
+/// Default sort implementation using introsort, with iterators and custom compare function
+template <class Iterator, class Compare>
+inline void sort(Iterator first, Iterator last, Compare comp)
+{
+	const unsigned int maxDepth = log(distance(first, last)) * 2;
+	introsort(first, last, comp, maxDepth);
+}
+
+/// Default sort implementation using introsort with iterators, ascending order
+template <class Iterator>
+inline void sort(Iterator first, Iterator last)
+{
+	const unsigned int maxDepth = log(distance(first, last)) * 2;
+	introsort(first, last, IsLess<typename IteratorTraits<Iterator>::ValueType>, maxDepth);
+}
+
+/// Default sort implementation using introsort with iterators, descending order
+template <class Iterator>
+inline void sortDesc(Iterator first, Iterator last)
+{
+	const unsigned int maxDepth = log(distance(first, last)) * 2;
+	introsort(first, last, IsNotLess<typename IteratorTraits<Iterator>::ValueType>, maxDepth);
 }
 
 }

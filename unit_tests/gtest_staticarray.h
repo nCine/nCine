@@ -12,7 +12,8 @@ namespace {
 const unsigned int Capacity = 10;
 const int FirstElement = 0;
 
-void printArray(const nctl::StaticArray<int, Capacity> &array)
+template <unsigned int C>
+void printArray(const nctl::StaticArray<int, C> &array)
 {
 	printf("Size: %u, ", array.size());
 	for (unsigned int i = 0; i < array.size(); i++)
@@ -20,25 +21,28 @@ void printArray(const nctl::StaticArray<int, Capacity> &array)
 	printf("\n");
 }
 
-void initArray(nctl::StaticArray<int, Capacity> &array)
+template <unsigned int C>
+void initArray(nctl::StaticArray<int, C> &array)
 {
 	int value = FirstElement;
 
-	for (unsigned int i = 0; i < Capacity; i++)
+	for (unsigned int i = 0; i < C; i++)
 		array.pushBack(value++);
 }
 
-void initArrayRandom(nctl::StaticArray<int, Capacity> &array)
+template <unsigned int C>
+void initArrayRandom(nctl::StaticArray<int, C> &array)
 {
-	for (unsigned int i = 0; i < Capacity; i++)
+	for (unsigned int i = 0; i < C; i++)
 		array.pushBack(nc::random().integer(0, 100));
 }
 
-bool isUnmodified(const nctl::StaticArray<int, Capacity> &array)
+template <unsigned int C>
+bool isUnmodified(const nctl::StaticArray<int, C> &array)
 {
 	int value = FirstElement;
 
-	for (unsigned int i = 0; i < Capacity; i++)
+	for (unsigned int i = 0; i < C; i++)
 	{
 		if (array[i] != value)
 			return false;
@@ -49,9 +53,10 @@ bool isUnmodified(const nctl::StaticArray<int, Capacity> &array)
 	return true;
 }
 
-bool isSorted(const nctl::StaticArray<int, Capacity> &array)
+template <unsigned int C>
+bool isSorted(const nctl::StaticArray<int, C> &array)
 {
-	for (unsigned int i = 0; i < Capacity - 1; i++)
+	for (unsigned int i = 0; i < C - 1; i++)
 	{
 		if (array[i] > array[i + 1])
 			return false;
@@ -60,9 +65,10 @@ bool isSorted(const nctl::StaticArray<int, Capacity> &array)
 	return true;
 }
 
-bool isReverseSorted(const nctl::StaticArray<int, Capacity> &array)
+template <unsigned int C>
+bool isReverseSorted(const nctl::StaticArray<int, C> &array)
 {
-	for (unsigned int i = 0; i < Capacity - 1; i++)
+	for (unsigned int i = 0; i < C - 1; i++)
 	{
 		if (array[i] < array[i + 1])
 			return false;
