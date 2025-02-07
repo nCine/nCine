@@ -20,7 +20,12 @@ class Vector3
 	    : x(xx), y(yy), z(zz) {}
 	Vector3(const Vector3 &other)
 	    : x(other.x), y(other.y), z(other.z) {}
+	Vector3(const Vector2<T> &other, T zz)
+	    : x(other.x), y(other.y), z(zz) {}
 	Vector3 &operator=(const Vector3 &other);
+
+	template <class S>
+	static Vector3 convertType(const Vector3<S> &other);
 
 	void set(T xx, T yy, T zz);
 
@@ -89,6 +94,15 @@ inline Vector3<T> &Vector3<T>::operator=(const Vector3<T> &other)
 	z = other.z;
 
 	return *this;
+}
+
+template <class T>
+template <class S>
+inline Vector3<T> Vector3<T>::convertType(const Vector3<S> &other)
+{
+	return Vector3(static_cast<T>(other.x),
+	               static_cast<T>(other.y),
+	               static_cast<T>(other.z));
 }
 
 template <class T>

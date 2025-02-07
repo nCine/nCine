@@ -1,6 +1,7 @@
 #ifndef CLASS_NCINE_MATRIX4X4
 #define CLASS_NCINE_MATRIX4X4
 
+#include "common_constants.h"
 #include "Vector3.h"
 #include "Vector4.h"
 

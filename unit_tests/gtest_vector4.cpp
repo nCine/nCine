@@ -65,6 +65,35 @@ TEST_F(Vector4Test, ConstructFromVector)
 	ASSERT_FLOAT_EQ(newVector.w, v1_.w);
 }
 
+TEST_F(Vector4Test, ConstructFromVector3)
+{
+	const nc::Vector3f vector3(1.0f, 2.0f, 3.0f);
+	const float ww = 4.0f;
+	const nc::Vector4f newVector(vector3, ww);
+	printf("Constructing a new vector from a Vector3 <%.2f, %.2f, %.2f> and a scalar %.2f: ", vector3.x, vector3.y, vector3.z, ww);
+	printVector(newVector);
+
+	ASSERT_FLOAT_EQ(newVector.x, vector3.x);
+	ASSERT_FLOAT_EQ(newVector.y, vector3.y);
+	ASSERT_FLOAT_EQ(newVector.z, vector3.z);
+	ASSERT_FLOAT_EQ(newVector.w, ww);
+}
+
+TEST_F(Vector4Test, ConstructFromVector2)
+{
+	const nc::Vector2f vector2(1.0f, 2.0f);
+	const float zz = 3.0f;
+	const float ww = 4.0f;
+	const nc::Vector4f newVector(vector2, zz, ww);
+	printf("Constructing a new vector from a Vector2 <%.2f, %.2f> and two scalars, %.2f and %.2f: ", vector2.x, vector2.y, zz, ww);
+	printVector(newVector);
+
+	ASSERT_FLOAT_EQ(newVector.x, vector2.x);
+	ASSERT_FLOAT_EQ(newVector.y, vector2.y);
+	ASSERT_FLOAT_EQ(newVector.z, zz);
+	ASSERT_FLOAT_EQ(newVector.w, ww);
+}
+
 TEST_F(Vector4Test, AssignmentOperator)
 {
 	printf("Creating a new vector with the assignment operator\n");
@@ -76,6 +105,32 @@ TEST_F(Vector4Test, AssignmentOperator)
 	ASSERT_FLOAT_EQ(newVector.y, v1_.y);
 	ASSERT_FLOAT_EQ(newVector.z, v1_.z);
 	ASSERT_FLOAT_EQ(newVector.w, v1_.w);
+}
+
+TEST_F(Vector4Test, ConvertIntToFloat)
+{
+	const nc::Vector4i vectorInt(1, 2, 3, 4);
+	const nc::Vector4f newVector = nc::Vector4f::convertType(vectorInt);
+	printf("Creating a new float vector by converting an integer one: ");
+	printVector(newVector);
+
+	ASSERT_FLOAT_EQ(newVector.x, static_cast<float>(vectorInt.x));
+	ASSERT_FLOAT_EQ(newVector.y, static_cast<float>(vectorInt.y));
+	ASSERT_FLOAT_EQ(newVector.z, static_cast<float>(vectorInt.z));
+	ASSERT_FLOAT_EQ(newVector.w, static_cast<float>(vectorInt.w));
+}
+
+TEST_F(Vector4Test, ConvertFloatToInt)
+{
+	const nc::Vector4f vectorFloat(1.0f, 2.0f, 3.0f, 4.0f);
+	const nc::Vector4i newVector = nc::Vector4i::convertType(vectorFloat);
+	printf("Creating a new integer vector by converting a float one: ");
+	printf("<%d, %d, %d, %d>\n", newVector.x, newVector.y, newVector.z, newVector.w);
+
+	ASSERT_EQ(newVector.x, static_cast<int>(vectorFloat.x));
+	ASSERT_EQ(newVector.y, static_cast<int>(vectorFloat.y));
+	ASSERT_EQ(newVector.z, static_cast<int>(vectorFloat.z));
+	ASSERT_EQ(newVector.w, static_cast<int>(vectorFloat.w));
 }
 
 TEST_F(Vector4Test, SetComponents)

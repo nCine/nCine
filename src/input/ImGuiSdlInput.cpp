@@ -595,13 +595,13 @@ void ImGuiSdlInput::setGamepadMode(GamepadMode mode, SDL_GameController **manual
 	closeGamepads();
 	if (mode == GamepadMode::MANUAL)
 	{
-		IM_ASSERT(manualGamepadsArray != nullptr && manualGamepadsCount > 0);
+		IM_ASSERT(manualGamepadsArray != nullptr || manualGamepadsCount <= 0);
 		for (unsigned int n = 0; n < manualGamepadsCount; n++)
 			gamepads_.push_back(manualGamepadsArray[n]);
 	}
 	else
 	{
-		IM_ASSERT(manualGamepadsArray == nullptr && manualGamepadsCount == 0);
+		IM_ASSERT(manualGamepadsArray == nullptr && manualGamepadsCount <= 0);
 		wantUpdateGamepadsList_ = true;
 	}
 	gamepadMode_ = mode;

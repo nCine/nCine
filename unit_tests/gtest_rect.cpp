@@ -55,6 +55,89 @@ TEST_F(RectTest, VectorsConstructor)
 	ASSERT_EQ(newRect.h, dim.y);
 }
 
+TEST_F(RectTest, VectorScalarsConstructor)
+{
+	const nc::Vector2i pos(X, Y);
+
+	const nc::Recti newRect(pos, Width, Height);
+	printf("Constructing a new rectangle from the specified top-left point as vector, and size with components: ");
+	printRect(newRect);
+
+	ASSERT_EQ(newRect.x, pos.x);
+	ASSERT_EQ(newRect.y, pos.y);
+	ASSERT_EQ(newRect.w, Width);
+	ASSERT_EQ(newRect.h, Height);
+}
+
+TEST_F(RectTest, ScalarsVectorConstructor)
+{
+	const nc::Vector2i dim(Width, Height);
+
+	const nc::Recti newRect(X, Y, dim);
+	printf("Constructing a new rectangle from the specified top-left point with components, and size as vector: ");
+	printRect(newRect);
+
+	ASSERT_EQ(newRect.x, X);
+	ASSERT_EQ(newRect.y, Y);
+	ASSERT_EQ(newRect.w, dim.x);
+	ASSERT_EQ(newRect.h, dim.y);
+}
+
+TEST_F(RectTest, ConstructFromRect)
+{
+	const nc::Recti rect(X, Y, Width, Height);
+
+	const nc::Recti newRect(rect);
+	printf("Constructing a new rectangle from the first one <%d, %d, %d, %d>: ", rect.x, rect.y, rect.w, rect.h);
+	printRect(newRect);
+
+	ASSERT_EQ(newRect.x, rect.x);
+	ASSERT_EQ(newRect.y, rect.y);
+	ASSERT_EQ(newRect.w, rect.w);
+	ASSERT_EQ(newRect.h, rect.h);
+}
+
+TEST_F(RectTest, AssignmentOperator)
+{
+	const nc::Recti rect(X, Y, Width, Height);
+
+	nc::Recti newRect;
+	printf("Creating a new rectangle with the assignment operator\n");
+	newRect = rect;
+	printRect(newRect);
+
+	ASSERT_EQ(newRect.x, rect.x);
+	ASSERT_EQ(newRect.y, rect.y);
+	ASSERT_EQ(newRect.w, rect.w);
+	ASSERT_EQ(newRect.h, rect.h);
+}
+
+TEST_F(RectTest, ConvertIntToFloat)
+{
+	const nc::Recti rectInt(X, Y, Width, Height);
+	const nc::Rectf newRect = nc::Rectf::convertType(rectInt);
+	printf("Creating a new float rectangle by converting an integer one: ");
+	printRect(newRect);
+
+	ASSERT_FLOAT_EQ(newRect.x, static_cast<float>(rectInt.x));
+	ASSERT_FLOAT_EQ(newRect.y, static_cast<float>(rectInt.y));
+	ASSERT_FLOAT_EQ(newRect.w, static_cast<float>(rectInt.w));
+	ASSERT_FLOAT_EQ(newRect.h, static_cast<float>(rectInt.h));
+}
+
+TEST_F(RectTest, ConvertFloatToInt)
+{
+	const nc::Rectf rectFloat(X, Y, Width, Height);
+	const nc::Recti newRect = nc::Recti::convertType(rectFloat);
+	printf("Creating a new integer rectangle by converting a float one: ");
+	printRect(newRect);
+
+	ASSERT_EQ(newRect.x, static_cast<int>(rectFloat.x));
+	ASSERT_EQ(newRect.y, static_cast<int>(rectFloat.y));
+	ASSERT_EQ(newRect.w, static_cast<int>(rectFloat.w));
+	ASSERT_EQ(newRect.h, static_cast<int>(rectFloat.h));
+}
+
 TEST_F(RectTest, CenterComponentsConstructor)
 {
 	const int cx = X + Width / 2;
@@ -89,6 +172,42 @@ TEST_F(RectTest, CenterVectorsConstructor)
 	ASSERT_EQ(newRect.h, dim.y);
 	ASSERT_EQ(newRect.center().x, center.x);
 	ASSERT_EQ(newRect.center().y, center.y);
+}
+
+TEST_F(RectTest, CenterVectorScalarsConstructor)
+{
+	const int cx = X + Width / 2;
+	const int cy = Y + Height / 2;
+	const nc::Vector2i center(cx, cy);
+
+	const nc::Recti newRect = nc::Recti::fromCenterSize(center, Width, Height);
+	printf("Constructing a new rectangle from center as a vector, and size with components: ");
+	printRect(newRect);
+
+	ASSERT_EQ(newRect.x, X);
+	ASSERT_EQ(newRect.y, Y);
+	ASSERT_EQ(newRect.w, Width);
+	ASSERT_EQ(newRect.h, Height);
+	ASSERT_EQ(newRect.center().x, center.x);
+	ASSERT_EQ(newRect.center().y, center.y);
+}
+
+TEST_F(RectTest, CenterScalarsVectorConstructor)
+{
+	const int cx = X + Width / 2;
+	const int cy = Y + Height / 2;
+	const nc::Vector2i dim(Width, Height);
+
+	const nc::Recti newRect = nc::Recti::fromCenterSize(cx, cy, dim);
+	printf("Constructing a new rectangle from center with components, and size as a vector: ");
+	printRect(newRect);
+
+	ASSERT_EQ(newRect.x, X);
+	ASSERT_EQ(newRect.y, Y);
+	ASSERT_EQ(newRect.w, Width);
+	ASSERT_EQ(newRect.h, Height);
+	ASSERT_EQ(newRect.center().x, cx);
+	ASSERT_EQ(newRect.center().y, cy);
 }
 
 TEST_F(RectTest, MinMaxComponentsConstructor)
@@ -132,6 +251,44 @@ TEST_F(RectTest, MinMaxVectorsConstructor)
 
 	const nc::Recti newRect = nc::Recti::fromMinMax(min, max);
 	printf("Constructing a new rectangle from minimum and maximum with vectors: ");
+	printRect(newRect);
+
+	ASSERT_EQ(newRect.x, X);
+	ASSERT_EQ(newRect.y, Y);
+	ASSERT_EQ(newRect.w, Width);
+	ASSERT_EQ(newRect.h, Height);
+
+	ASSERT_EQ(newRect.min().x, X);
+	ASSERT_EQ(newRect.min().y, Y);
+	ASSERT_EQ(newRect.max().x, X + Width);
+	ASSERT_EQ(newRect.max().y, Y + Height);
+}
+
+TEST_F(RectTest, MinMaxVectorScalarsConstructor)
+{
+	const nc::Vector2i min(X, Y);
+
+	const nc::Recti newRect = nc::Recti::fromMinMax(min, X + Width, Y + Height);
+	printf("Constructing a new rectangle from minimum as a vector, and maximum with components: ");
+	printRect(newRect);
+
+	ASSERT_EQ(newRect.x, X);
+	ASSERT_EQ(newRect.y, Y);
+	ASSERT_EQ(newRect.w, Width);
+	ASSERT_EQ(newRect.h, Height);
+
+	ASSERT_EQ(newRect.min().x, X);
+	ASSERT_EQ(newRect.min().y, Y);
+	ASSERT_EQ(newRect.max().x, X + Width);
+	ASSERT_EQ(newRect.max().y, Y + Height);
+}
+
+TEST_F(RectTest, MinMaxScalarsVectorConstructor)
+{
+	const nc::Vector2i max(X + Width, Y + Height);
+
+	const nc::Recti newRect = nc::Recti::fromMinMax(X, Y, max);
+	printf("Constructing a new rectangle from minimum with components, and maximum as a vector: ");
 	printRect(newRect);
 
 	ASSERT_EQ(newRect.x, X);
@@ -240,11 +397,41 @@ TEST_F(RectTest, SetComponents)
 TEST_F(RectTest, SetVectors)
 {
 	const int diff = 10;
-	const nc::Vector2i point(X + diff, Y + diff);
+	const nc::Vector2i topLeft(X + diff, Y + diff);
 	const nc::Vector2i size(Width + diff, Height + diff);
 
-	rect_.set(point, size);
+	rect_.set(topLeft, size);
 	printf("Setting new top-left point and size for the rectangle with vectors: ");
+	printRect(rect_);
+
+	ASSERT_EQ(rect_.x, X + diff);
+	ASSERT_EQ(rect_.y, Y + diff);
+	ASSERT_EQ(rect_.w, Width + diff);
+	ASSERT_EQ(rect_.h, Height + diff);
+}
+
+TEST_F(RectTest, SetVectorComponents)
+{
+	const int diff = 10;
+	const nc::Vector2i topLeft(X + diff, Y + diff);
+
+	rect_.set(topLeft, Width + diff, Height + diff);
+	printf("Setting new top-left point as a vector, and size with components: ");
+	printRect(rect_);
+
+	ASSERT_EQ(rect_.x, X + diff);
+	ASSERT_EQ(rect_.y, Y + diff);
+	ASSERT_EQ(rect_.w, Width + diff);
+	ASSERT_EQ(rect_.h, Height + diff);
+}
+
+TEST_F(RectTest, SetComponentsVector)
+{
+	const int diff = 10;
+	const nc::Vector2i size(Width + diff, Height + diff);
+
+	rect_.set(X + diff, Y + diff, size);
+	printf("Setting new top-left point with components, and size as a vector: ");
 	printRect(rect_);
 
 	ASSERT_EQ(rect_.x, X + diff);
@@ -365,6 +552,50 @@ TEST_F(RectTest, SetCenterSizeVector)
 	ASSERT_EQ(rect_.center().y, newCenter.y);
 }
 
+TEST_F(RectTest, SetCenterSizeVectorScalars)
+{
+	const int diff = 10;
+
+	const int cx = X + (Width + diff) / 2;
+	const int cy = Y + (Height + diff) / 2;
+	const int tx = 10;
+	const int ty = 20;
+	const nc::Vector2i newCenter(cx + tx, cy + ty);
+
+	rect_.setCenterSize(newCenter, Width + diff, Height + diff);
+	printf("Setting a new center as a vector, and size with components: ");
+	printRect(rect_);
+
+	ASSERT_EQ(rect_.x, X + tx);
+	ASSERT_EQ(rect_.y, Y + ty);
+	ASSERT_EQ(rect_.w, Width + diff);
+	ASSERT_EQ(rect_.h, Height + diff);
+	ASSERT_EQ(rect_.center().x, newCenter.x);
+	ASSERT_EQ(rect_.center().y, newCenter.y);
+}
+
+TEST_F(RectTest, SetCenterSizeScalarsVector)
+{
+	const int diff = 10;
+
+	const int cx = X + (Width + diff) / 2;
+	const int cy = Y + (Height + diff) / 2;
+	const int tx = 10;
+	const int ty = 20;
+	const nc::Vector2i newSize(Width + diff, Height + diff);
+
+	rect_.setCenterSize(cx + tx, cy + ty, newSize);
+	printf("Setting a new center with components, and size as a vector: ");
+	printRect(rect_);
+
+	ASSERT_EQ(rect_.x, X + tx);
+	ASSERT_EQ(rect_.y, Y + ty);
+	ASSERT_EQ(rect_.w, Width + diff);
+	ASSERT_EQ(rect_.h, Height + diff);
+	ASSERT_EQ(rect_.center().x, cx + tx);
+	ASSERT_EQ(rect_.center().y, cy + ty);
+}
+
 TEST_F(RectTest, SetMinMaxComponents)
 {
 	const int diff = 10;
@@ -392,6 +623,46 @@ TEST_F(RectTest, SetMinMaxVectors)
 
 	rect_.setMinMax(min, max);
 	printf("Setting a new minimum and maximum for the rectangle with vectors: ");
+	printRect(rect_);
+
+	ASSERT_EQ(rect_.x, X + diff);
+	ASSERT_EQ(rect_.y, Y + diff);
+	ASSERT_EQ(rect_.w, Width - 2 * diff);
+	ASSERT_EQ(rect_.h, Height - 2 * diff);
+
+	ASSERT_EQ(rect_.min().x, X + diff);
+	ASSERT_EQ(rect_.min().y, Y + diff);
+	ASSERT_EQ(rect_.max().x, X + Width - diff);
+	ASSERT_EQ(rect_.max().y, Y + Height - diff);
+}
+
+TEST_F(RectTest, SetMinMaxVectorScalars)
+{
+	const int diff = 10;
+	const nc::Vector2i min(X + diff, Y + diff);
+
+	rect_.setMinMax(min, X + Width - diff, Y + Height - diff);
+	printf("Setting a new minimum as a vector, and maximum with components: ");
+	printRect(rect_);
+
+	ASSERT_EQ(rect_.x, X + diff);
+	ASSERT_EQ(rect_.y, Y + diff);
+	ASSERT_EQ(rect_.w, Width - 2 * diff);
+	ASSERT_EQ(rect_.h, Height - 2 * diff);
+
+	ASSERT_EQ(rect_.min().x, X + diff);
+	ASSERT_EQ(rect_.min().y, Y + diff);
+	ASSERT_EQ(rect_.max().x, X + Width - diff);
+	ASSERT_EQ(rect_.max().y, Y + Height - diff);
+}
+
+TEST_F(RectTest, SetMinMaxScalarsVector)
+{
+	const int diff = 10;
+	const nc::Vector2i max(X + Width - diff, Y + Height - diff);
+
+	rect_.setMinMax(X + diff, Y + diff, max);
+	printf("Setting a new minimum with components, and maximum as a vector: ");
 	printRect(rect_);
 
 	ASSERT_EQ(rect_.x, X + diff);

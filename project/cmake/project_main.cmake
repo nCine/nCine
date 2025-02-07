@@ -79,6 +79,7 @@ elseif(MINGW)
 endif()
 target_link_libraries(${NCPROJECT_EXE_NAME} PRIVATE ncine::ncine_main ncine::ncine)
 
+target_compile_definitions(${NCPROJECT_EXE_NAME} PRIVATE "$<$<CONFIG:Debug>:NCPROJECT_DEBUG>")
 target_compile_definitions(${NCPROJECT_EXE_NAME} PRIVATE "$<$<CONFIG:Debug>:${NCPROJECT_UPPER_NAME}_DEBUG>")
 target_compile_definitions(${NCPROJECT_EXE_NAME} PRIVATE "$<$<CONFIG:Debug>:NCINE_ASSERT_BREAK>")
 

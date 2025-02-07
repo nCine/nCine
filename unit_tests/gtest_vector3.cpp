@@ -60,6 +60,19 @@ TEST_F(Vector3Test, ConstructFromVector)
 	ASSERT_FLOAT_EQ(newVector.z, v1_.z);
 }
 
+TEST_F(Vector3Test, ConstructFromVector2)
+{
+	const nc::Vector2f vector2(1.0f, 2.0f);
+	const float zz = 3.0f;
+	const nc::Vector3f newVector(vector2, zz);
+	printf("Constructing a new vector from a Vector2 <%.2f, %.2f> and a scalar %.2f: ", vector2.x, vector2.y, zz);
+	printVector(newVector);
+
+	ASSERT_FLOAT_EQ(newVector.x, vector2.x);
+	ASSERT_FLOAT_EQ(newVector.y, vector2.y);
+	ASSERT_FLOAT_EQ(newVector.z, zz);
+}
+
 TEST_F(Vector3Test, AssignmentOperator)
 {
 	printf("Creating a new vector with the assignment operator\n");
@@ -70,6 +83,30 @@ TEST_F(Vector3Test, AssignmentOperator)
 	ASSERT_FLOAT_EQ(newVector.x, v1_.x);
 	ASSERT_FLOAT_EQ(newVector.y, v1_.y);
 	ASSERT_FLOAT_EQ(newVector.z, v1_.z);
+}
+
+TEST_F(Vector3Test, ConvertIntToFloat)
+{
+	const nc::Vector3i vectorInt(1, 2, 3);
+	const nc::Vector3f newVector = nc::Vector3f::convertType(vectorInt);
+	printf("Creating a new float vector by converting an integer one: ");
+	printVector(newVector);
+
+	ASSERT_FLOAT_EQ(newVector.x, static_cast<float>(vectorInt.x));
+	ASSERT_FLOAT_EQ(newVector.y, static_cast<float>(vectorInt.y));
+	ASSERT_FLOAT_EQ(newVector.z, static_cast<float>(vectorInt.z));
+}
+
+TEST_F(Vector3Test, ConvertFloatToInt)
+{
+	const nc::Vector3f vectorFloat(1.0f, 2.0f, 3.0f);
+	const nc::Vector3i newVector = nc::Vector3i::convertType(vectorFloat);
+	printf("Creating a new integer vector by converting a float one: ");
+	printf("<%d, %d, %d>\n", newVector.x, newVector.y, newVector.z);
+
+	ASSERT_EQ(newVector.x, static_cast<int>(vectorFloat.x));
+	ASSERT_EQ(newVector.y, static_cast<int>(vectorFloat.y));
+	ASSERT_EQ(newVector.z, static_cast<int>(vectorFloat.z));
 }
 
 TEST_F(Vector3Test, SetComponents)

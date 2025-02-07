@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_VECTOR2
 #define CLASS_NCINE_VECTOR2
 
-#include "common_constants.h"
+#include <cmath>
 
 namespace ncine {
 
@@ -21,6 +21,9 @@ class Vector2
 	Vector2(const Vector2 &other)
 	    : x(other.x), y(other.y) {}
 	Vector2 &operator=(const Vector2 &other);
+
+	template <class S>
+	static Vector2 convertType(const Vector2<S> &other);
 
 	void set(T xx, T yy);
 
@@ -82,6 +85,14 @@ inline Vector2<T> &Vector2<T>::operator=(const Vector2<T> &other)
 	y = other.y;
 
 	return *this;
+}
+
+template <class T>
+template <class S>
+inline Vector2<T> Vector2<T>::convertType(const Vector2<S> &other)
+{
+	return Vector2(static_cast<T>(other.x),
+	               static_cast<T>(other.y));
 }
 
 template <class T>

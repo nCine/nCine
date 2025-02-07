@@ -333,7 +333,7 @@ void MyEventHandler::onFrameStart()
 						texelsRegion.w = nctl::clamp(texelsRegion.w, 0, tex.width() - texelsRegion.x);
 						texelsRegion.h = nctl::clamp(texelsRegion.h, 0, tex.height() - texelsRegion.y);
 
-						ImGui::ColorEdit4("Color", texelsColor.data(), ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_AlphaPreview);
+						ImGui::ColorEdit4("Color", texelsColor.data(), ImGuiColorEditFlags_AlphaBar);
 						if (ImGui::Button("Load##Texels"))
 						{
 							if (w != tex.width() || h != tex.height())

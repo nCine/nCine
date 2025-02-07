@@ -66,6 +66,28 @@ TEST_F(Vector2Test, AssignmentOperator)
 	ASSERT_FLOAT_EQ(newVector.y, v1_.y);
 }
 
+TEST_F(Vector2Test, ConvertIntToFloat)
+{
+	const nc::Vector2i vectorInt(1, 2);
+	const nc::Vector2f newVector = nc::Vector2f::convertType(vectorInt);
+	printf("Creating a new float vector by converting an integer one: ");
+	printVector(newVector);
+
+	ASSERT_FLOAT_EQ(newVector.x, static_cast<float>(vectorInt.x));
+	ASSERT_FLOAT_EQ(newVector.y, static_cast<float>(vectorInt.y));
+}
+
+TEST_F(Vector2Test, ConvertFloatToInt)
+{
+	const nc::Vector2f vectorFloat(1.0f, 2.0f);
+	const nc::Vector2i newVector = nc::Vector2i::convertType(vectorFloat);
+	printf("Creating a new integer vector by converting a float one: ");
+	printf("<%d, %d>\n", newVector.x, newVector.y);
+
+	ASSERT_EQ(newVector.x, static_cast<int>(vectorFloat.x));
+	ASSERT_EQ(newVector.y, static_cast<int>(vectorFloat.y));
+}
+
 TEST_F(Vector2Test, SetComponents)
 {
 	const float scalar = 0.0f;

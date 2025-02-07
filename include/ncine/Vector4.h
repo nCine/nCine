@@ -21,7 +21,14 @@ class Vector4
 	    : x(xx), y(yy), z(zz), w(ww) {}
 	Vector4(const Vector4 &other)
 	    : x(other.x), y(other.y), z(other.z), w(other.w) {}
+	Vector4(const Vector3<T> &other, T ww)
+	    : x(other.x), y(other.y), z(other.z), w(ww) {}
+	Vector4(const Vector2<T> &other, T zz, T ww)
+	    : x(other.x), y(other.y), z(zz), w(ww) {}
 	Vector4 &operator=(const Vector4 &other);
+
+	template <class S>
+	static Vector4 convertType(const Vector4<S> &other);
 
 	void set(T xx, T yy, T zz, T ww);
 
@@ -92,6 +99,16 @@ inline Vector4<T> &Vector4<T>::operator=(const Vector4<T> &other)
 	w = other.w;
 
 	return *this;
+}
+
+template <class T>
+template <class S>
+inline Vector4<T> Vector4<T>::convertType(const Vector4<S> &other)
+{
+	return Vector4(static_cast<T>(other.x),
+	               static_cast<T>(other.y),
+	               static_cast<T>(other.z),
+	               static_cast<T>(other.w));
 }
 
 template <class T>

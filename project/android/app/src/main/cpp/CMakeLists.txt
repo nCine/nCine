@@ -55,6 +55,7 @@ set(JNICALL_FUNCTIONS_LINKER_OPTIONS -Wl,--whole-archive jnicall_functions -Wl,-
 target_link_libraries(${NCPROJECT_EXE_NAME} PRIVATE native_app_glue ${JNICALL_FUNCTIONS_LINKER_OPTIONS} ncine_main ncine)
 target_include_directories(${NCPROJECT_EXE_NAME} PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue)
 
+target_compile_definitions(${NCPROJECT_EXE_NAME} PRIVATE "$<$<CONFIG:Debug>:NCPROJECT_DEBUG>")
 target_compile_definitions(${NCPROJECT_EXE_NAME} PRIVATE "$<$<CONFIG:Debug>:${NCPROJECT_UPPER_NAME}_DEBUG>")
 target_compile_definitions(${NCPROJECT_EXE_NAME} PRIVATE "$<$<CONFIG:Debug>:NCINE_ASSERT_BREAK>")
 

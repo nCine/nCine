@@ -27,18 +27,38 @@ class Rect
 	Rect(T xx, T yy, T ww, T hh)
 	    : x(xx), y(yy), w(ww), h(hh) {}
 	/// Constructs a rectangle from top-left point and size as two `Vector2`
-	Rect(const Vector2<T> &point, const Vector2<T> &size)
-	    : x(point.x), y(point.y), w(size.x), h(size.y) {}
+	Rect(const Vector2<T> &topLeft, const Vector2<T> &size)
+	    : x(topLeft.x), y(topLeft.y), w(size.x), h(size.y) {}
+	/// Constructs a rectangle from top-left point and size, the first as a`Vector2`
+	Rect(const Vector2<T> &topLeft, T ww, T hh)
+	    : x(topLeft.x), y(topLeft.y), w(ww), h(hh) {}
+	/// Constructs a rectangle from top-left point and size, the second as a`Vector2`
+	Rect(T xx, T yy, const Vector2<T> &size)
+	    : x(xx), y(yy), w(size.x), h(size.y) {}
+	Rect(const Rect &other)
+	    : x(other.x), y(other.y), w(other.w), h(other.h) {}
+	Rect &operator=(const Rect &other);
+
+	template <class S>
+	static Rect convertType(const Rect<S> &other);
 
 	/// Creates a rectangle from center and size
 	static Rect fromCenterSize(T xx, T yy, T ww, T hh);
 	/// Creates a rectangle from center and size as two `Vector2`
 	static Rect fromCenterSize(const Vector2<T> &center, const Vector2<T> &size);
+	/// Creates a rectangle from center and size, the first as a`Vector2`
+	static Rect fromCenterSize(const Vector2<T> &center, T ww, T hh);
+	/// Creates a rectangle from center and size, the second as a`Vector2`
+	static Rect fromCenterSize(T xx, T yy, const Vector2<T> &size);
 
 	/// Creates a rectangle from minimum and maximum coordinates
 	static Rect fromMinMax(T minX, T minY, T maxX, T maxY);
 	/// Creates a rectangle from minimum and maximum coordinates as two `Vector2`
 	static Rect fromMinMax(const Vector2<T> &min, const Vector2<T> &max);
+	/// Creates a rectangle from minimum and maximum coordinates, the first as a`Vector2`
+	static Rect fromMinMax(const Vector2<T> &min, T maxX, T maxY);
+	/// Creates a rectangle from minimum and maximum coordinates, the second as a`Vector2`
+	static Rect fromMinMax(T minX, T minY, const Vector2<T> &max);
 
 	/// Calculates the center of the rectangle
 	Vector2<T> center() const;
@@ -50,7 +70,12 @@ class Rect
 	/// Sets rectangle top-left point and size
 	void set(T xx, T yy, T ww, T hh);
 	/// Sets rectangle top-left point and size as two `Vector2`
-	void set(const Vector2<T> &point, const Vector2<T> &size);
+	void set(const Vector2<T> &topLeft, const Vector2<T> &size);
+	/// Sets rectangle top-left point and size, the first as a`Vector2`
+	void set(const Vector2<T> &topLeft, T ww, T hh);
+	/// Sets rectangle top-left point and size, the second as a`Vector2`
+	void set(T xx, T yy, const Vector2<T> &size);
+
 	/// Retains rectangle size but moves its center to another position
 	void setCenter(float cx, float cy);
 	/// Retains rectangle size but moves its center to another position with a `Vector2`
@@ -64,11 +89,19 @@ class Rect
 	void setCenterSize(T xx, T yy, T ww, T hh);
 	/// Sets rectangle center and size as two `Vector2`
 	void setCenterSize(const Vector2<T> &center, const Vector2<T> &size);
+	/// Sets rectangle center and size, the first as a`Vector2`
+	void setCenterSize(const Vector2<T> &center, T ww, T hh);
+	/// Sets rectangle center and size, the second as a`Vector2`
+	void setCenterSize(T xx, T yy, const Vector2<T> &size);
 
 	/// Sets rectangle minimum and maximum coordinates
 	void setMinMax(T minX, T minY, T maxX, T maxY);
 	/// Sets rectangle minimum and maximum coordinates as two `Vector2`
 	void setMinMax(const Vector2<T> &min, const Vector2<T> &max);
+	/// Sets rectangle minimum and maximum coordinates, the first as a`Vector2`
+	void setMinMax(const Vector2<T> &min, T maxX, T maxY);
+	/// Sets rectangle minimum and maximum coordinates, the second as a`Vector2`
+	void setMinMax(T minX, T minY, const Vector2<T> &max);
 
 	/// Inverts rectangle size and moves (x, y) to a different angle
 	void invertSize();
@@ -94,6 +127,27 @@ using Rectf = Rect<float>;
 using Recti = Rect<int>;
 
 template <class T>
+inline Rect<T> &Rect<T>::operator=(const Rect<T> &other)
+{
+	x = other.x;
+	y = other.y;
+	w = other.w;
+	h = other.h;
+
+	return *this;
+}
+
+template <class T>
+template <class S>
+inline Rect<T> Rect<T>::convertType(const Rect<S> &other)
+{
+	return Rect(static_cast<T>(other.x),
+	            static_cast<T>(other.y),
+	            static_cast<T>(other.w),
+	            static_cast<T>(other.h));
+}
+
+template <class T>
 inline Rect<T> Rect<T>::fromCenterSize(T xx, T yy, T ww, T hh)
 {
 	return Rect(xx - static_cast<T>(ww * 0.5f),
@@ -110,6 +164,22 @@ inline Rect<T> Rect<T>::fromCenterSize(const Vector2<T> &center, const Vector2<T
 }
 
 template <class T>
+inline Rect<T> Rect<T>::fromCenterSize(const Vector2<T> &center, T ww, T hh)
+{
+	return Rect(center.x - static_cast<T>(ww * 0.5f),
+	            center.y - static_cast<T>(hh * 0.5f),
+	            ww, hh);
+}
+
+template <class T>
+inline Rect<T> Rect<T>::fromCenterSize(T xx, T yy, const Vector2<T> &size)
+{
+	return Rect(xx - static_cast<T>(size.x * 0.5f),
+	            yy - static_cast<T>(size.y * 0.5f),
+	            size.x, size.y);
+}
+
+template <class T>
 inline Rect<T> Rect<T>::fromMinMax(T minX, T minY, T maxX, T maxY)
 {
 	return Rect(minX, minY, maxX - minX, maxY - minY);
@@ -119,6 +189,18 @@ template <class T>
 inline Rect<T> Rect<T>::fromMinMax(const Vector2<T> &min, const Vector2<T> &max)
 {
 	return Rect(min.x, min.y, max.x - min.x, max.y - min.y);
+}
+
+template <class T>
+inline Rect<T> Rect<T>::fromMinMax(const Vector2<T> &min, T maxX, T maxY)
+{
+	return Rect(min.x, min.y, maxX - min.x, maxY - min.y);
+}
+
+template <class T>
+inline Rect<T> Rect<T>::fromMinMax(T minX, T minY, const Vector2<T> &max)
+{
+	return Rect(minX, minY, max.x - minX, max.y - minY);
 }
 
 template <class T>
@@ -149,10 +231,28 @@ inline void Rect<T>::set(T xx, T yy, T ww, T hh)
 }
 
 template <class T>
-inline void Rect<T>::set(const Vector2<T> &point, const Vector2<T> &size)
+inline void Rect<T>::set(const Vector2<T> &topLeft, const Vector2<T> &size)
 {
-	x = point.x;
-	y = point.y;
+	x = topLeft.x;
+	y = topLeft.y;
+	w = size.x;
+	h = size.y;
+}
+
+template <class T>
+inline void Rect<T>::set(const Vector2<T> &topLeft, T ww, T hh)
+{
+	x = topLeft.x;
+	y = topLeft.y;
+	w = ww;
+	h = hh;
+}
+
+template <class T>
+inline void Rect<T>::set(T xx, T yy, const Vector2<T> &size)
+{
+	x = xx;
+	y = yy;
 	w = size.x;
 	h = size.y;
 }
@@ -204,6 +304,24 @@ inline void Rect<T>::setCenterSize(const Vector2<T> &center, const Vector2<T> &s
 }
 
 template <class T>
+inline void Rect<T>::setCenterSize(const Vector2<T> &center, T ww, T hh)
+{
+	x = center.x - static_cast<T>(ww * 0.5f);
+	y = center.y - static_cast<T>(hh * 0.5f);
+	w = ww;
+	h = hh;
+}
+
+template <class T>
+inline void Rect<T>::setCenterSize(T xx, T yy, const Vector2<T> &size)
+{
+	x = xx - static_cast<T>(size.x * 0.5f);
+	y = yy - static_cast<T>(size.y * 0.5f);
+	w = size.x;
+	h = size.y;
+}
+
+template <class T>
 inline void Rect<T>::setMinMax(T minX, T minY, T maxX, T maxY)
 {
 	x = minX;
@@ -219,6 +337,24 @@ inline void Rect<T>::setMinMax(const Vector2<T> &min, const Vector2<T> &max)
 	y = min.y;
 	w = max.x - min.x;
 	h = max.y - min.y;
+}
+
+template <class T>
+inline void Rect<T>::setMinMax(const Vector2<T> &min, T maxX, T maxY)
+{
+	x = min.x;
+	y = min.y;
+	w = maxX - min.x;
+	h = maxY - min.y;
+}
+
+template <class T>
+inline void Rect<T>::setMinMax(T minX, T minY, const Vector2<T> &max)
+{
+	x = minX;
+	y = minY;
+	w = max.x - minX;
+	h = max.y - minY;
 }
 
 template <class T>
