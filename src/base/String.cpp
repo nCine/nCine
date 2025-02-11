@@ -216,7 +216,7 @@ void String::shrinkToFit()
 		setCapacity(length_ + 1);
 }
 
-/*! Length will be reset to zero but capacity remains unmodified. */
+/*! \note Length will be reset to zero but capacity remains unmodified. */
 void String::clear()
 {
 	length_ = 0;

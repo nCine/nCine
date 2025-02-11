@@ -377,7 +377,7 @@ void Array<T>::shrinkToFit()
 		setCapacity(size_);
 }
 
-/*! Size will be set to zero but capacity remains unmodified. */
+/*! \note Size will be set to zero but capacity remains unmodified. */
 template <class T>
 void Array<T>::clear()
 {

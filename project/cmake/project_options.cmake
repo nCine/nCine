@@ -10,6 +10,9 @@ elseif(EMSCRIPTEN)
 	set(NCINE_EXTERNAL_DIR "${PARENT_SOURCE_DIR}/nCine-external-emscripten" CACHE PATH "Set the path to the nCine Emscripten libraries")
 endif()
 
+# This option can be useful to install libraries when linking with a dynamic nCine linrary and creating a package on Linux
+option(NCPROJECT_ALWAYS_FIND_PACKAGES "To find dependency libraries even when linking with a dynamic nCine library" OFF)
+
 if(MSVC)
 	option(NCPROJECT_INSTALL_SYSLIBS "Install required MSVC system libraries with CMake" ON)
 endif()

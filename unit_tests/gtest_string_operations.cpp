@@ -542,7 +542,7 @@ TEST_F(StringOperationsTest, SetCapacityShrinkFromLocalToLocal)
 	ASSERT_STREQ(string_.data(), "String1");
 }
 
-TEST_F(StringOperationsTest, SetCapacityFixed)
+TEST_F(StringOperationsTest, SetCapacityOnFixed)
 {
 	const unsigned int length = fixedString_.length();
 	fixedString_.setCapacity(Capacity * 2);

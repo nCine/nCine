@@ -330,7 +330,7 @@ struct MakeUniqueReturn<T[size], Deleter>
 };
 
 #if !NCINE_WITH_ALLOCATORS
-// `makeUnique()` for single objects
+/// `makeUnique()` for single objects
 template <class T, class Deleter = DefaultDelete<T>, typename... Args>
 typename MakeUniqueReturn<T, Deleter>::singleObject makeUnique(Args &&... args)
 {
@@ -344,7 +344,7 @@ typename MakeUniqueReturn<T, Deleter>::array makeUnique(unsigned long int size)
 	return UniquePtr<T, Deleter>(new nctl::removeExtentT<T>[size]());
 }
 #else
-// `makeUnique()` for single objects
+/// `makeUnique()` for single objects
 template <class T, class Deleter = DefaultDelete<T>, typename... Args>
 typename MakeUniqueReturn<T, Deleter>::singleObject makeUnique(Args &&... args)
 {

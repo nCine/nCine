@@ -248,6 +248,19 @@ TEST_F(ArrayTest, SetZeroCapacity)
 	ASSERT_EQ(array_.size(), 0);
 }
 
+TEST_F(ArrayTest, SetDoubleCapacity)
+{
+	printf("Doubling the original capacity\n");
+	array_.setCapacity(Capacity * 2);
+	printArray(array_);
+
+	ASSERT_TRUE(isUnmodified(array_));
+	ASSERT_EQ(array_.capacity(), Capacity * 2);
+	ASSERT_EQ(array_.size(), Capacity);
+	for (unsigned int i = 0; i < array_.size(); i++)
+		ASSERT_EQ(array_[i], i);
+}
+
 TEST_F(ArrayTest, WritingBeyondCapacity)
 {
 	printf("Writing beyond capacity\n");
