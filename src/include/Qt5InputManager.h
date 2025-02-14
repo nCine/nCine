@@ -78,23 +78,18 @@ class Qt5ScrollEvent : public ScrollEvent
 class Qt5KeyboardState : public KeyboardState
 {
   public:
-	Qt5KeyboardState()
-	{
-		for (unsigned int i = 0; i < NumKeys; i++)
-			keys_[i] = 0;
-	}
+	Qt5KeyboardState();
 
-	inline bool isKeyDown(KeySym key) const override
-	{
-		if (key == KeySym::UNKNOWN)
-			return false;
-		else
-			return keys_[static_cast<unsigned int>(key)] != 0;
-	}
+	bool isKeyDown(KeySym key) const override;
+	bool isKeyPressed(KeySym key) const override;
+	bool isKeyReleased(KeySym key) const override;
 
   private:
 	static const unsigned int NumKeys = static_cast<unsigned int>(KeySym::COUNT);
-	unsigned char keys_[NumKeys];
+	unsigned int currentStateIndex_;
+	unsigned char keys_[2][NumKeys];
+
+	void copyKeyStateToPrev();
 
 	friend class Qt5InputManager;
 };
@@ -155,6 +150,7 @@ class Qt5InputManager : public IInputManager
 	void updateJoystickStates();
 #endif
 
+	void copyKeyStateToPrev();
 	bool shouldQuitOnRequest();
 	bool event(QEvent *event);
 	void keyPressEvent(QKeyEvent *event);

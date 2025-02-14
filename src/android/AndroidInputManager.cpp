@@ -57,6 +57,53 @@ const int AndroidJoystickState::AxesToMap[AndroidJoystickState::NumAxesToMap] = 
 };
 
 ///////////////////////////////////////////////////////////
+// AndroidKeyboardState
+///////////////////////////////////////////////////////////
+
+AndroidKeyboardState::AndroidKeyboardState()
+    : currentStateIndex_(0)
+{
+	memset(keys_[0], 0, NumKeys * sizeof(unsigned char));
+	memset(keys_[1], 0, NumKeys * sizeof(unsigned char));
+}
+
+bool AndroidKeyboardState::isKeyDown(KeySym key) const
+{
+	const unsigned int keyIndex = static_cast<unsigned int>(key);
+	if (key == KeySym::UNKNOWN)
+		return false;
+	else
+		return keys_[currentStateIndex_][keyIndex] != 0;
+}
+
+bool AndroidKeyboardState::isKeyPressed(KeySym key) const
+{
+	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
+	const unsigned int keyIndex = static_cast<unsigned int>(key);
+	if (key == KeySym::UNKNOWN)
+		return false;
+	else
+		return keys_[currentStateIndex_][keyIndex] != 0 && keys_[prevStateIndex][keyIndex] == 0;
+}
+
+bool AndroidKeyboardState::isKeyReleased(KeySym key) const
+{
+	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
+	const unsigned int keyIndex = static_cast<unsigned int>(key);
+	if (key == KeySym::UNKNOWN)
+		return false;
+	else
+		return keys_[currentStateIndex_][keyIndex] == 0 && keys_[prevStateIndex][keyIndex] != 0;
+}
+
+void AndroidKeyboardState::copyKeyStateToPrev()
+{
+	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
+	memcpy(keys_[prevStateIndex], keys_[currentStateIndex_], NumKeys * sizeof(unsigned char));
+	currentStateIndex_ = prevStateIndex;
+}
+
+///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
@@ -593,12 +640,12 @@ bool AndroidInputManager::processKeyboardEvent(const AInputEvent *event)
 	{
 		case AKEY_EVENT_ACTION_DOWN:
 			if (keyboardEvent_.sym != KeySym::UNKNOWN)
-				keyboardState_.keys_[keySym] = 1;
+				keyboardState_.keys_[keyboardState_.currentStateIndex_][keySym] = 1;
 			inputEventHandler_->onKeyPressed(keyboardEvent_);
 			break;
 		case AKEY_EVENT_ACTION_UP:
 			if (keyboardEvent_.sym != KeySym::UNKNOWN)
-				keyboardState_.keys_[keySym] = 0;
+				keyboardState_.keys_[keyboardState_.currentStateIndex_][keySym] = 0;
 			inputEventHandler_->onKeyReleased(keyboardEvent_);
 			break;
 		case AKEY_EVENT_ACTION_MULTIPLE:
@@ -1020,6 +1067,11 @@ void AndroidInputManager::deviceInfo(int deviceId, int joyId)
 
 		joyState.updateGuidWithCapabilities();
 	}
+}
+
+void AndroidInputManager::copyKeyStateToPrev()
+{
+	keyboardState_.copyKeyStateToPrev();
 }
 
 }

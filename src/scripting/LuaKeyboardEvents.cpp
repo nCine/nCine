@@ -10,7 +10,9 @@ namespace ncine {
 
 namespace LuaNames {
 namespace LuaKeyboardEvents {
-	static const char *isKeyDown = "key_down";
+	static const char *isKeyDown = "is_key_down";
+	static const char *isKeyPressed = "is_key_pressed";
+	static const char *isKeyReleased = "is_key_released";
 
 	static const char *scancode = "scancode";
 	static const char *sym = "sym";
@@ -35,6 +37,8 @@ void LuaKeyboardEvents::expose(lua_State *L)
 	}
 
 	LuaUtils::addFunction(L, LuaNames::LuaKeyboardEvents::isKeyDown, isKeyDown);
+	LuaUtils::addFunction(L, LuaNames::LuaKeyboardEvents::isKeyPressed, isKeyPressed);
+	LuaUtils::addFunction(L, LuaNames::LuaKeyboardEvents::isKeyReleased, isKeyReleased);
 
 	lua_setfield(L, -2, LuaNames::input);
 }
@@ -64,6 +68,32 @@ int LuaKeyboardEvents::isKeyDown(lua_State *L)
 
 	if (state)
 		LuaUtils::push(L, state->isKeyDown(key));
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaKeyboardEvents::isKeyPressed(lua_State *L)
+{
+	const KeyboardState *state = LuaUntrackedUserData<KeyboardState>::retrieve(L, -2);
+	const KeySym key = static_cast<KeySym>(LuaUtils::retrieve<int64_t>(L, -1));
+
+	if (state)
+		LuaUtils::push(L, state->isKeyPressed(key));
+	else
+		LuaUtils::pushNil(L);
+
+	return 1;
+}
+
+int LuaKeyboardEvents::isKeyReleased(lua_State *L)
+{
+	const KeyboardState *state = LuaUntrackedUserData<KeyboardState>::retrieve(L, -2);
+	const KeySym key = static_cast<KeySym>(LuaUtils::retrieve<int64_t>(L, -1));
+
+	if (state)
+		LuaUtils::push(L, state->isKeyReleased(key));
 	else
 		LuaUtils::pushNil(L);
 

@@ -80,6 +80,7 @@ void AndroidApplication::start(struct android_app *state, nctl::UniquePtr<IAppEv
 			{
 				AndroidInputManager::updateJoystickConnections();
 				theApplication().step();
+				nc::AndroidInputManager::copyKeyStateToPrev();
 			}
 		}
 

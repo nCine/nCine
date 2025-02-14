@@ -51,6 +51,53 @@ const float Qt5JoystickState::AxisEventTolerance = 0.001f;
 #endif
 
 ///////////////////////////////////////////////////////////
+// Qt5KeyboardState
+///////////////////////////////////////////////////////////
+
+Qt5KeyboardState::Qt5KeyboardState()
+    : currentStateIndex_(0)
+{
+	memset(keys_[0], 0, NumKeys * sizeof(unsigned char));
+	memset(keys_[1], 0, NumKeys * sizeof(unsigned char));
+}
+
+bool Qt5KeyboardState::isKeyDown(KeySym key) const
+{
+	const unsigned int keyIndex = static_cast<unsigned int>(key);
+	if (key == KeySym::UNKNOWN)
+		return false;
+	else
+		return keys_[currentStateIndex_][keyIndex] != 0;
+}
+
+bool Qt5KeyboardState::isKeyPressed(KeySym key) const
+{
+	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
+	const unsigned int keyIndex = static_cast<unsigned int>(key);
+	if (key == KeySym::UNKNOWN)
+		return false;
+	else
+		return keys_[currentStateIndex_][keyIndex] != 0 && keys_[prevStateIndex][keyIndex] == 0;
+}
+
+bool Qt5KeyboardState::isKeyReleased(KeySym key) const
+{
+	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
+	const unsigned int keyIndex = static_cast<unsigned int>(key);
+	if (key == KeySym::UNKNOWN)
+		return false;
+	else
+		return keys_[currentStateIndex_][keyIndex] == 0 && keys_[prevStateIndex][keyIndex] != 0;
+}
+
+void Qt5KeyboardState::copyKeyStateToPrev()
+{
+	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
+	memcpy(keys_[prevStateIndex], keys_[currentStateIndex_], NumKeys * sizeof(unsigned char));
+	currentStateIndex_ = prevStateIndex;
+}
+
+///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
@@ -227,7 +274,7 @@ void Qt5InputManager::updateJoystickStates()
 		if (state.gamepad_ == nullptr)
 			continue;
 
-		for (int buttonId = 0; buttonId < Qt5JoystickState::NumButtons; buttonId++)
+		for (unsigned int buttonId = 0; buttonId < Qt5JoystickState::NumButtons; buttonId++)
 		{
 			const bool newButtonState = state.isButtonPressed(buttonId);
 			if (state.buttonState_[buttonId] != newButtonState)
@@ -265,7 +312,7 @@ void Qt5InputManager::updateJoystickStates()
 			}
 		}
 
-		for (int axisId = 0; axisId < Qt5JoystickState::NumAxes; axisId++)
+		for (unsigned int axisId = 0; axisId < Qt5JoystickState::NumAxes; axisId++)
 		{
 			const float newAxisValue = state.axisNormValue(axisId);
 			if (fabsf(state.axesValuesState_[axisId] - newAxisValue) > Qt5JoystickState::AxisEventTolerance)
@@ -285,6 +332,11 @@ void Qt5InputManager::updateJoystickStates()
 	}
 }
 #endif
+
+void Qt5InputManager::copyKeyStateToPrev()
+{
+	keyboardState_.copyKeyStateToPrev();
+}
 
 bool Qt5InputManager::shouldQuitOnRequest()
 {
@@ -356,7 +408,7 @@ void Qt5InputManager::keyPressEvent(QKeyEvent *event)
 		if (keyboardEvent_.sym != KeySym::UNKNOWN)
 		{
 			const unsigned int keySym = static_cast<unsigned int>(keyboardEvent_.sym);
-			keyboardState_.keys_[keySym] = 1;
+			keyboardState_.keys_[keyboardState_.currentStateIndex_][keySym] = 1;
 		}
 		inputEventHandler_->onKeyPressed(keyboardEvent_);
 
@@ -378,7 +430,7 @@ void Qt5InputManager::keyReleaseEvent(QKeyEvent *event)
 		if (keyboardEvent_.sym != KeySym::UNKNOWN)
 		{
 			const unsigned int keySym = static_cast<unsigned int>(keyboardEvent_.sym);
-			keyboardState_.keys_[keySym] = 0;
+			keyboardState_.keys_[keyboardState_.currentStateIndex_][keySym] = 0;
 		}
 		inputEventHandler_->onKeyReleased(keyboardEvent_);
 	}

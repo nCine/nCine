@@ -26,23 +26,18 @@ class AndroidKeys
 class AndroidKeyboardState : public KeyboardState
 {
   public:
-	AndroidKeyboardState()
-	{
-		for (unsigned int i = 0; i < NumKeys; i++)
-			keys_[i] = 0;
-	}
+	AndroidKeyboardState();
 
-	inline bool isKeyDown(KeySym key) const override
-	{
-		if (key == KeySym::UNKNOWN)
-			return false;
-		else
-			return keys_[static_cast<unsigned int>(key)] != 0;
-	}
+	bool isKeyDown(KeySym key) const override;
+	bool isKeyPressed(KeySym key) const override;
+	bool isKeyReleased(KeySym key) const override;
 
   private:
 	static const unsigned int NumKeys = static_cast<unsigned int>(KeySym::COUNT);
-	unsigned char keys_[NumKeys];
+	unsigned int currentStateIndex_;
+	unsigned char keys_[2][NumKeys];
+
+	void copyKeyStateToPrev();
 
 	friend class AndroidInputManager;
 };
@@ -221,6 +216,8 @@ class AndroidInputManager : public IInputManager
 	static int findJoyId(int deviceId);
 	static bool isDeviceConnected(int deviceId);
 	static void deviceInfo(int deviceId, int joyId);
+
+	static void copyKeyStateToPrev();
 
 	/// To update joystick connections in `AndroidApplication::androidMain()`
 	friend class AndroidApplication;

@@ -168,14 +168,14 @@ function nc.on_frame_start()
 
 	local velocity = {x = 0, y = 0}
 	local keystate = nc.input.key_state()
-	if nc.input.key_down(keystate, nc.keysym.LEFT) then
+	if nc.input.is_key_down(keystate, nc.keysym.LEFT) then
 		velocity.x = -1
-	elseif nc.input.key_down(keystate, nc.keysym.RIGHT) then
+	elseif nc.input.is_key_down(keystate, nc.keysym.RIGHT) then
 		velocity.x = 1
 	end
-	if nc.input.key_down(keystate, nc.keysym.DOWN) then
+	if nc.input.is_key_down(keystate, nc.keysym.DOWN) then
 		velocity.y = -1
-	elseif nc.input.key_down(keystate, nc.keysym.UP) then
+	elseif nc.input.is_key_down(keystate, nc.keysym.UP) then
 		velocity.y = 1
 	end
 
@@ -191,21 +191,21 @@ function nc.on_frame_start()
 	animated_sprite_pos.y = animated_sprite_pos.y + velocity.y * 100 * interval
 	nc.animated_sprite.set_position(animated_sprite_, animated_sprite_pos)
 
-	if nc.input.key_down(keystate, nc.keysym.LEFT) and nc.input.key_down(keystate, nc.keysym.DOWN) then
+	if nc.input.is_key_down(keystate, nc.keysym.LEFT) and nc.input.is_key_down(keystate, nc.keysym.DOWN) then
 		nc.animated_sprite.set_rotation(animated_sprite_, 270 + 45)
-	elseif nc.input.key_down(keystate, nc.keysym.RIGHT) and nc.input.key_down(keystate, nc.keysym.DOWN) then
+	elseif nc.input.is_key_down(keystate, nc.keysym.RIGHT) and nc.input.is_key_down(keystate, nc.keysym.DOWN) then
 		nc.animated_sprite.set_rotation(animated_sprite_, 90 - 45)
-	elseif nc.input.key_down(keystate, nc.keysym.LEFT) and nc.input.key_down(keystate, nc.keysym.UP) then
+	elseif nc.input.is_key_down(keystate, nc.keysym.LEFT) and nc.input.is_key_down(keystate, nc.keysym.UP) then
 		nc.animated_sprite.set_rotation(animated_sprite_, 270 - 45)
-	elseif nc.input.key_down(keystate, nc.keysym.RIGHT) and nc.input.key_down(keystate, nc.keysym.UP) then
+	elseif nc.input.is_key_down(keystate, nc.keysym.RIGHT) and nc.input.is_key_down(keystate, nc.keysym.UP) then
 		nc.animated_sprite.set_rotation(animated_sprite_, 90 + 45)
-	elseif nc.input.key_down(keystate, nc.keysym.LEFT) then
+	elseif nc.input.is_key_down(keystate, nc.keysym.LEFT) then
 		nc.animated_sprite.set_rotation(animated_sprite_, 270)
-	elseif nc.input.key_down(keystate, nc.keysym.RIGHT) then
+	elseif nc.input.is_key_down(keystate, nc.keysym.RIGHT) then
 		nc.animated_sprite.set_rotation(animated_sprite_, 90)
-	elseif nc.input.key_down(keystate, nc.keysym.DOWN) then
+	elseif nc.input.is_key_down(keystate, nc.keysym.DOWN) then
 		nc.animated_sprite.set_rotation(animated_sprite_, 0)
-	elseif nc.input.key_down(keystate, nc.keysym.UP) then
+	elseif nc.input.is_key_down(keystate, nc.keysym.UP) then
 		nc.animated_sprite.set_rotation(animated_sprite_, 180)
 	end
 end

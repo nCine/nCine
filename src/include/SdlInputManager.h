@@ -69,21 +69,22 @@ class SdlScrollEvent : public ScrollEvent
 class SdlKeyboardState : public KeyboardState
 {
   public:
-	SdlKeyboardState() { keyState_ = SDL_GetKeyboardState(nullptr); }
+	SdlKeyboardState();
 
-	inline bool isKeyDown(KeySym key) const override
-	{
-		const int sdlKey = SdlKeys::enumToScancode(key);
-		if (sdlKey == SDL_SCANCODE_UNKNOWN)
-			return false;
-		else
-			return keyState_[SdlKeys::enumToScancode(key)] != 0;
-	}
-
-	friend class SdlInputManager;
+	bool isKeyDown(KeySym key) const override;
+	bool isKeyPressed(KeySym key) const override;
+	bool isKeyReleased(KeySym key) const override;
 
   private:
+	static const unsigned int MaxKeyStateArrayLength = 512;
+
+	int keyStateArrayLength_;
 	const unsigned char *keyState_;
+	unsigned char prevKeyState_[MaxKeyStateArrayLength];
+
+	void copyKeyStateToPrev();
+
+	friend class SdlInputManager;
 };
 
 /// Information about SDL joystick state
@@ -114,6 +115,7 @@ class SdlInputManager : public IInputManager
 	~SdlInputManager();
 
 	static bool shouldQuitOnRequest();
+	static void copyKeyStateToPrev();
 	static void parseEvent(const SDL_Event &event);
 
 	inline const MouseState &mouseState() const override

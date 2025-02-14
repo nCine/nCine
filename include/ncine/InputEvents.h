@@ -98,8 +98,12 @@ class DLL_PUBLIC ScrollEvent
 class DLL_PUBLIC KeyboardState
 {
   public:
-	/// Returns `true` if the specified key is down
+	/// Returns `true` if the specified key is down this frame
 	virtual bool isKeyDown(KeySym key) const = 0;
+	/// Returns `true` if the specified key went from not down to down this frame
+	virtual bool isKeyPressed(KeySym key) const = 0;
+	/// Returns `true` if the specified key went from down to not down this frame
+	virtual bool isKeyReleased(KeySym key) const = 0;
 };
 
 /// Information about a keyboard event

@@ -47,6 +47,54 @@ int GlfwInputManager::preScalingHeight_ = 0;
 unsigned long int GlfwInputManager::lastFrameWindowSizeChanged_ = 0;
 
 ///////////////////////////////////////////////////////////
+// GlfwKeyboardState
+///////////////////////////////////////////////////////////
+
+GlfwKeyboardState::GlfwKeyboardState()
+{
+	memset(prevKeyState_, GLFW_RELEASE, NumKeys * sizeof(unsigned char));
+}
+
+bool GlfwKeyboardState::isKeyDown(KeySym key) const
+{
+	const int glfwKey = GlfwKeys::enumToKeySymValue(key);
+	if (glfwKey == GLFW_KEY_UNKNOWN)
+		return false;
+	else
+		return glfwGetKey(GlfwGfxDevice::windowHandle(), glfwKey) == GLFW_PRESS;
+}
+
+bool GlfwKeyboardState::isKeyPressed(KeySym key) const
+{
+	const unsigned int keyIndex = static_cast<unsigned int>(key);
+	const int glfwKey = GlfwKeys::enumToKeySymValue(key);
+	if (glfwKey == GLFW_KEY_UNKNOWN)
+		return false;
+	else
+		return (glfwGetKey(GlfwGfxDevice::windowHandle(), glfwKey) == GLFW_PRESS && prevKeyState_[keyIndex] == GLFW_RELEASE);
+}
+
+bool GlfwKeyboardState::isKeyReleased(KeySym key) const
+{
+	const unsigned int keyIndex = static_cast<unsigned int>(key);
+	const int glfwKey = GlfwKeys::enumToKeySymValue(key);
+	if (glfwKey == GLFW_KEY_UNKNOWN)
+		return false;
+	else
+		return (glfwGetKey(GlfwGfxDevice::windowHandle(), glfwKey) == GLFW_RELEASE && prevKeyState_[keyIndex] == GLFW_PRESS);
+}
+
+void GlfwKeyboardState::copyKeyStateToPrev()
+{
+	for (unsigned int i = 0; i < NumKeys; i++)
+	{
+		const int glfwKey = GlfwKeys::enumToKeySymValue(static_cast<KeySym>(i));
+		if (glfwKey != GLFW_KEY_UNKNOWN)
+			prevKeyState_[i] = glfwGetKey(GlfwGfxDevice::windowHandle(), glfwKey);
+	}
+}
+
+///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
@@ -138,6 +186,11 @@ bool GlfwInputManager::hasFocus()
 		windowHasFocus_ = glfwFocused;
 
 	return windowHasFocus_;
+}
+
+void GlfwInputManager::copyKeyStateToPrev()
+{
+	keyboardState_.copyKeyStateToPrev();
 }
 
 void GlfwInputManager::updateJoystickStates()

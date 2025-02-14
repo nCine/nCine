@@ -77,14 +77,17 @@ class GlfwScrollEvent : public ScrollEvent
 class GlfwKeyboardState : public KeyboardState
 {
   public:
-	inline bool isKeyDown(KeySym key) const override
-	{
-		const int glfwKey = GlfwKeys::enumToKeySymValue(key);
-		if (glfwKey == GLFW_KEY_UNKNOWN)
-			return false;
-		else
-			return glfwGetKey(GlfwGfxDevice::windowHandle(), glfwKey) == GLFW_PRESS;
-	}
+	GlfwKeyboardState();
+
+	bool isKeyDown(KeySym key) const override;
+	bool isKeyPressed(KeySym key) const override;
+	bool isKeyReleased(KeySym key) const override;
+
+  private:
+	static const unsigned int NumKeys = static_cast<unsigned int>(KeySym::COUNT);
+	unsigned char prevKeyState_[NumKeys];
+
+	void copyKeyStateToPrev();
 
 	friend class GlfwInputManager;
 };
@@ -122,6 +125,7 @@ class GlfwInputManager : public IInputManager
 
 	/// Detects window focus gain/loss events
 	static bool hasFocus();
+	static void copyKeyStateToPrev();
 	/// Updates joystick state structures and simulates events
 	static void updateJoystickStates();
 

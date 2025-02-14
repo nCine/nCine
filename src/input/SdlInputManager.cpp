@@ -47,6 +47,51 @@ JoyConnectionEvent SdlInputManager::joyConnectionEvent_;
 char SdlInputManager::joyGuidString_[33];
 
 ///////////////////////////////////////////////////////////
+// SdlKeyboardState
+///////////////////////////////////////////////////////////
+
+SdlKeyboardState::SdlKeyboardState()
+    : keyStateArrayLength_(0), keyState_(nullptr)
+{
+	keyState_ = SDL_GetKeyboardState(&keyStateArrayLength_);
+	FATAL_ASSERT(keyStateArrayLength_ <= MaxKeyStateArrayLength);
+
+	memset(prevKeyState_, 0, keyStateArrayLength_);
+}
+
+bool SdlKeyboardState::isKeyDown(KeySym key) const
+{
+	const int sdlKey = SdlKeys::enumToScancode(key);
+	if (sdlKey == SDL_SCANCODE_UNKNOWN)
+		return false;
+	else
+		return keyState_[sdlKey] != 0;
+}
+
+bool SdlKeyboardState::isKeyPressed(KeySym key) const
+{
+	const int sdlKey = SdlKeys::enumToScancode(key);
+	if (sdlKey == SDL_SCANCODE_UNKNOWN)
+		return false;
+	else
+		return (keyState_[sdlKey] != 0 && prevKeyState_[sdlKey] == 0);
+}
+
+bool SdlKeyboardState::isKeyReleased(KeySym key) const
+{
+	const int sdlKey = SdlKeys::enumToScancode(key);
+	if (sdlKey == SDL_SCANCODE_UNKNOWN)
+		return false;
+	else
+		return (keyState_[sdlKey] == 0 && prevKeyState_[sdlKey] != 0);
+}
+
+void SdlKeyboardState::copyKeyStateToPrev()
+{
+	memcpy(prevKeyState_, keyState_, keyStateArrayLength_ * sizeof(unsigned char));
+}
+
+///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
@@ -152,6 +197,11 @@ bool SdlInputManager::shouldQuitOnRequest()
 		shouldQuit = inputEventHandler_->onQuitRequest();
 
 	return shouldQuit;
+}
+
+void SdlInputManager::copyKeyStateToPrev()
+{
+	keyboardState_.copyKeyStateToPrev();
 }
 
 void SdlInputManager::parseEvent(const SDL_Event &event)

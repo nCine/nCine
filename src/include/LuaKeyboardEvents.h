@@ -19,6 +19,8 @@ class LuaKeyboardEvents
 
   private:
 	static int isKeyDown(lua_State *L);
+	static int isKeyPressed(lua_State *L);
+	static int isKeyReleased(lua_State *L);
 };
 
 }

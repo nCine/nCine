@@ -1040,14 +1040,14 @@ void ImGuiDebugOverlay::guiInputState()
 
 		if (ImGui::TreeNode("Keyboard"))
 		{
-			nctl::String pressedKeys;
+			nctl::String downKeys;
 			const KeyboardState &keyState = input.keyboardState();
 			for (unsigned int i = 0; i < static_cast<int>(KeySym::COUNT); i++)
 			{
 				if (keyState.isKeyDown(static_cast<KeySym>(i)))
-					pressedKeys.formatAppend("%d ", i);
+					downKeys.formatAppend("%d ", i);
 			}
-			ImGui::Text("Keys pressed: %s", pressedKeys.data());
+			ImGui::Text("Pressed down keys: %s", downKeys.data());
 			ImGui::TreePop();
 		}
 
