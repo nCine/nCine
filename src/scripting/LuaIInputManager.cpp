@@ -18,7 +18,7 @@ namespace IInputManager {
 	static const char *mouseState = "mouse_state";
 	static const char *keyboardState = "key_state";
 
-	static const char *isJoyPresent = "joy_present";
+	static const char *isJoyPresent = "is_joy_present";
 	static const char *joyName = "joy_name";
 	static const char *joyGuid = "joy_guid";
 	static const char *joyNumButtons = "joy_num_buttons";
@@ -26,7 +26,7 @@ namespace IInputManager {
 	static const char *joyNumAxes = "joy_num_axes";
 	static const char *joystickState = "joy_state";
 
-	static const char *isJoyMapped = "joy_mapped";
+	static const char *isJoyMapped = "is_joy_mapped";
 	static const char *joyMappedState = "joymapped_state";
 	static const char *deadZoneNormalize = "deadzone_normalize";
 
@@ -113,7 +113,8 @@ void LuaIInputManager::exposeConstants(lua_State *L)
 
 int LuaIInputManager::mouseState(lua_State *L)
 {
-	LuaMouseEvents::pushMouseState(L, theApplication().inputManager().mouseState());
+	MouseState *mouseState = const_cast<MouseState *>(&theApplication().inputManager().mouseState());
+	LuaUntrackedUserData<MouseState>::push(L, mouseState);
 	return 1;
 }
 

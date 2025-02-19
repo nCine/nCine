@@ -217,9 +217,9 @@ void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 		return;
 #endif
 
-	if (event.isLeftButton())
+	if (event.button == nc::MouseButton::LEFT)
 		setNumBunnies(transforms_.size() + appendSize);
-	else if (event.isRightButton())
+	else if (event.button == nc::MouseButton::RIGHT)
 		setNumBunnies(InitialSize);
 }
 

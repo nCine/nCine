@@ -362,7 +362,7 @@ void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 {
 #ifndef HAS_GUI
-	if (event.isLeftButton())
+	if (event.button == nc::MouseButton::LEFT)
 		pause = true;
 #endif
 }
@@ -370,7 +370,7 @@ void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 {
 #ifndef HAS_GUI
-	if (event.isLeftButton())
+	if (event.button == nc::MouseButton::LEFT)
 		pause = false;
 #endif
 }

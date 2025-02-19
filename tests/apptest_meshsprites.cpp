@@ -341,13 +341,13 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 {
-	if (event.isLeftButton())
+	if (event.button == nc::MouseButton::LEFT)
 		checkClick(static_cast<float>(event.x), static_cast<float>(event.y));
 }
 
 void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 {
-	if (event.isLeftButton())
+	if (event.button == nc::MouseButton::LEFT)
 	{
 		if (lastClickTime_.secondsSince() < DoubleClickDelay)
 			resetCamera();

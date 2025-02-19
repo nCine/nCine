@@ -136,7 +136,7 @@ void PCApplication::run()
 		step();
 
 #if defined(WITH_QT5)
-	static_cast<Qt5InputManager &>(*inputManager_).copyKeyStateToPrev();
+	static_cast<Qt5InputManager &>(*inputManager_).copyButtonStatesToPrev();
 #endif
 }
 
@@ -145,7 +145,7 @@ void PCApplication::processEvents()
 {
 	ZoneScoped;
 
-	SdlInputManager::copyKeyStateToPrev();
+	SdlInputManager::copyButtonStatesToPrev();
 
 	SDL_Event event;
 	#ifndef __EMSCRIPTEN__
@@ -219,7 +219,7 @@ void PCApplication::processEvents()
 {
 	ZoneScoped;
 
-	GlfwInputManager::copyKeyStateToPrev();
+	GlfwInputManager::copyButtonStatesToPrev();
 
 	// GLFW does not seem to correctly handle Emscripten focus and blur events
 	#ifndef __EMSCRIPTEN__

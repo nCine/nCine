@@ -564,7 +564,7 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 {
-	if (event.isLeftButton() && captureMouse)
+	if (event.button == nc::MouseButton::LEFT && captureMouse)
 		particleSystem_->setPosition(static_cast<float>(event.x), static_cast<float>(event.y));
 }
 
@@ -572,9 +572,9 @@ void MyEventHandler::onMouseMoved(const nc::MouseState &state)
 {
 	if (captureMouse)
 	{
-		if (state.isLeftButtonDown())
+		if (state.isButtonDown(nc::MouseButton::LEFT))
 			particleSystem_->setPosition(static_cast<float>(state.x), static_cast<float>(state.y));
-		else if (state.isRightButtonDown())
+		else if (state.isButtonDown(nc::MouseButton::RIGHT))
 		{
 			emitVector_.x = (state.x - particleSystem_->position().x) * 2.5f;
 			emitVector_.y = (state.y - particleSystem_->position().y) * 2.5f;

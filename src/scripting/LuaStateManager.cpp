@@ -614,6 +614,7 @@ void LuaStateManager::exposeApi()
 	LuaColor::expose(L_);
 	LuaILogger::expose(L_);
 	LuaIInputManager::expose(L_);
+	LuaMouseEvents::expose(L_);
 	LuaKeyboardEvents::expose(L_);
 	LuaJoystickEvents::expose(L_);
 

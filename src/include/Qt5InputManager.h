@@ -31,36 +31,17 @@ class Qt5Keys
 class Qt5MouseState : public MouseState
 {
   public:
-	Qt5MouseState()
-	    : buttons_(Qt::NoButton) {}
+	Qt5MouseState();
 
-	inline bool isLeftButtonDown() const override { return buttons_ & Qt::LeftButton; }
-	inline bool isMiddleButtonDown() const override { return buttons_ & Qt::MiddleButton; }
-	inline bool isRightButtonDown() const override { return buttons_ & Qt::RightButton; }
-	inline bool isFourthButtonDown() const override { return buttons_ & Qt::BackButton; }
-	inline bool isFifthButtonDown() const override { return buttons_ & Qt::ForwardButton; }
+	bool isButtonDown(MouseButton button) const override;
+	bool isButtonPressed(MouseButton button) const override;
+	bool isButtonReleased(MouseButton button) const override;
 
   private:
-	Qt::MouseButtons buttons_;
+	unsigned int currentStateIndex_;
+	Qt::MouseButtons buttonStates_[2];
 
-	friend class Qt5InputManager;
-};
-
-/// Information about a Qt5 mouse event
-class Qt5MouseEvent : public MouseEvent
-{
-  public:
-	Qt5MouseEvent()
-	    : button_(Qt::NoButton) {}
-
-	inline bool isLeftButton() const override { return button_ & Qt::LeftButton; }
-	inline bool isMiddleButton() const override { return button_ & Qt::MiddleButton; }
-	inline bool isRightButton() const override { return button_ & Qt::RightButton; }
-	inline bool isFourthButton() const override { return button_ & Qt::BackButton; }
-	inline bool isFifthButton() const override { return button_ & Qt::ForwardButton; }
-
-  private:
-	Qt::MouseButton button_;
+	void copyButtonStateToPrev();
 
 	friend class Qt5InputManager;
 };
@@ -101,23 +82,31 @@ class Qt5JoystickState : public JoystickState
   public:
 	Qt5JoystickState();
 
+	bool isButtonDown(int buttonId) const override;
 	bool isButtonPressed(int buttonId) const override;
+	bool isButtonReleased(int buttonId) const override;
+
 	unsigned char hatState(int hatId) const override;
 	short int axisValue(int axisId) const override;
 	float axisNormValue(int axisId) const override;
 
   private:
 	static const unsigned int MaxNameLength = 256;
-	static const unsigned int NumButtons = 12;
+	static const int NumButtons = 12;
 	static const unsigned int NumAxes = 6;
 	/// Minimum difference between two axis readings in order to trigger an event
 	static const float AxisEventTolerance;
-	bool buttonState_[NumButtons];
+
+	unsigned int currentStateIndex_;
+	unsigned char buttonState_[2][NumButtons];
 	unsigned char hatState_;
 	float axesValuesState_[NumAxes];
 
 	char name_[MaxNameLength];
 	nctl::UniquePtr<QGamepad> gamepad_;
+
+	void copyButtonStateToPrev();
+	void resetPrevButtonState();
 
 	friend class Qt5InputManager;
 };
@@ -127,7 +116,10 @@ class Qt5JoystickState : public JoystickState
   public:
 	Qt5JoystickState() {}
 
+	inline bool isButtonDown(int buttonId) const override { return false; }
 	inline bool isButtonPressed(int buttonId) const override { return false; }
+	inline bool isButtonReleased(int buttonId) const override { return false; }
+
 	inline unsigned char hatState(int hatId) const override { return HatState::CENTERED; }
 	inline short int axisValue(int axisId) const override { return 0U; }
 	inline float axisNormValue(int axisId) const override { return 0.0f; }
@@ -150,7 +142,7 @@ class Qt5InputManager : public IInputManager
 	void updateJoystickStates();
 #endif
 
-	void copyKeyStateToPrev();
+	void copyButtonStatesToPrev();
 	bool shouldQuitOnRequest();
 	bool event(QEvent *event);
 	void keyPressEvent(QKeyEvent *event);
@@ -192,7 +184,7 @@ class Qt5InputManager : public IInputManager
 
 	static TouchEvent touchEvent_;
 	static Qt5MouseState mouseState_;
-	static Qt5MouseEvent mouseEvent_;
+	static MouseEvent mouseEvent_;
 	static Qt5ScrollEvent scrollEvent_;
 	static Qt5KeyboardState keyboardState_;
 	static KeyboardEvent keyboardEvent_;

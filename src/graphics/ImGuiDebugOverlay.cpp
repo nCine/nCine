@@ -1058,18 +1058,18 @@ void ImGuiDebugOverlay::guiInputState()
 			const MouseState &mouseState = input.mouseState();
 			ImGui::Text("Position: %d, %d", mouseState.x, mouseState.y);
 
-			nctl::String pressedMouseButtons(32);
-			if (mouseState.isLeftButtonDown())
-				pressedMouseButtons.append("left ");
-			if (mouseState.isRightButtonDown())
-				pressedMouseButtons.append("right ");
-			if (mouseState.isMiddleButtonDown())
-				pressedMouseButtons.append("middle ");
-			if (mouseState.isFourthButtonDown())
-				pressedMouseButtons.append("fourth ");
-			if (mouseState.isFifthButtonDown())
-				pressedMouseButtons.append("fifth");
-			ImGui::Text("Pressed buttons: %s", pressedMouseButtons.data());
+			nctl::String downMouseButtons(32);
+			if (mouseState.isButtonDown(MouseButton::LEFT))
+				downMouseButtons.append("left ");
+			if (mouseState.isButtonDown(MouseButton::RIGHT))
+				downMouseButtons.append("right ");
+			if (mouseState.isButtonDown(MouseButton::MIDDLE))
+				downMouseButtons.append("middle ");
+			if (mouseState.isButtonDown(MouseButton::FOURTH))
+				downMouseButtons.append("fourth ");
+			if (mouseState.isButtonDown(MouseButton::FIFTH))
+				downMouseButtons.append("fifth");
+			ImGui::Text("Pressed down buttons: %s", downMouseButtons.data());
 			ImGui::TreePop();
 		}
 
@@ -1102,13 +1102,13 @@ void ImGuiDebugOverlay::guiInputState()
 						ImGui::Separator();
 
 						const JoystickState &joyState = input.joystickState(joyId);
-						nctl::String pressedButtons;
+						nctl::String downButtons;
 						for (int buttonId = 0; buttonId < input.joyNumButtons(joyId); buttonId++)
 						{
-							if (joyState.isButtonPressed(buttonId))
-								pressedButtons.formatAppend("%d ", buttonId);
+							if (joyState.isButtonDown(buttonId))
+								downButtons.formatAppend("%d ", buttonId);
 						}
-						ImGui::Text("Pressed buttons: %s", pressedButtons.data());
+						ImGui::Text("Pressed down buttons: %s", downButtons.data());
 
 						for (int hatId = 0; hatId < input.joyNumHats(joyId); hatId++)
 						{
@@ -1130,14 +1130,14 @@ void ImGuiDebugOverlay::guiInputState()
 						{
 							ImGui::Separator();
 							const JoyMappedState &joyMappedState = input.joyMappedState(joyId);
-							nctl::String pressedMappedButtons(64);
+							nctl::String downMappedButtons(64);
 							for (unsigned int buttonId = 0; buttonId < JoyMappedState::NumButtons; buttonId++)
 							{
 								const ButtonName buttonName = static_cast<ButtonName>(buttonId);
-								if (joyMappedState.isButtonPressed(buttonName))
-									pressedMappedButtons.formatAppend("%s ", mappedButtonNameToString(buttonName));
+								if (joyMappedState.isButtonDown(buttonName))
+									downMappedButtons.formatAppend("%s ", mappedButtonNameToString(buttonName));
 							}
-							ImGui::Text("Pressed buttons: %s", pressedMappedButtons.data());
+							ImGui::Text("Pressed down buttons: %s", downMappedButtons.data());
 
 							for (unsigned int axisId = 0; axisId < JoyMappedState::NumAxes; axisId++)
 							{

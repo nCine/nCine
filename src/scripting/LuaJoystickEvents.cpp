@@ -10,7 +10,10 @@ namespace ncine {
 
 namespace LuaNames {
 namespace LuaJoystickEvents {
-	static const char *isButtonPressed = "joy_button_pressed";
+	static const char *isButtonDown = "is_joy_button_down";
+	static const char *isButtonPressed = "is_joy_button_pressed";
+	static const char *isButtonReleased = "is_joy_button_released";
+
 	static const char *joyHatState = "joy_hat_state";
 	static const char *axisValue = "joy_axis_value";
 	static const char *axisNormValue = "joy_axis_normvalue";
@@ -80,10 +83,13 @@ void LuaJoystickEvents::expose(lua_State *L)
 	if (type == LUA_TNIL)
 	{
 		lua_pop(L, 1);
-		lua_createtable(L, 0, 4);
+		lua_createtable(L, 0, 6);
 	}
 
+	LuaUtils::addFunction(L, LuaNames::LuaJoystickEvents::isButtonDown, isButtonDown);
 	LuaUtils::addFunction(L, LuaNames::LuaJoystickEvents::isButtonPressed, isButtonPressed);
+	LuaUtils::addFunction(L, LuaNames::LuaJoystickEvents::isButtonReleased, isButtonReleased);
+
 	LuaUtils::addFunction(L, LuaNames::LuaJoystickEvents::joyHatState, hatState);
 	LuaUtils::addFunction(L, LuaNames::LuaJoystickEvents::axisValue, axisValue);
 	LuaUtils::addFunction(L, LuaNames::LuaJoystickEvents::axisNormValue, axisNormValue);
@@ -195,6 +201,35 @@ void LuaJoystickEvents::pushJoyConnectionEvent(lua_State *L, const JoyConnection
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+int LuaJoystickEvents::isButtonDown(lua_State *L)
+{
+	bool isButtonDown = false;
+
+	void *pointer = LuaUtils::retrieveUserData<void *>(L, -2);
+	const LuaTypes::UserDataType type = LuaStateManager::manager(L)->untrackedType(pointer);
+
+	if (type == LuaTypes::JOYSTICKSTATE)
+	{
+		const JoystickState *state = reinterpret_cast<JoystickState *>(pointer);
+		const int buttonId = LuaUtils::retrieve<int32_t>(L, -1);
+		if (state)
+			isButtonDown = state->isButtonDown(buttonId);
+	}
+	else if (type == LuaTypes::JOYMAPPEDSTATE)
+	{
+		const JoyMappedState *state = reinterpret_cast<JoyMappedState *>(pointer);
+		const ButtonName button = static_cast<ButtonName>(LuaUtils::retrieve<int64_t>(L, -1));
+		if (state)
+			isButtonDown = state->isButtonDown(button);
+	}
+	else
+		LuaDebug::traceError(L, "Expecting a JoystickState or a JoyMappedState object instead of %s", LuaTypes::userDataTypeToName(type));
+
+	LuaUtils::push(L, isButtonDown);
+
+	return 1;
+}
+
 int LuaJoystickEvents::isButtonPressed(lua_State *L)
 {
 	bool isButtonPressed = false;
@@ -220,6 +255,35 @@ int LuaJoystickEvents::isButtonPressed(lua_State *L)
 		LuaDebug::traceError(L, "Expecting a JoystickState or a JoyMappedState object instead of %s", LuaTypes::userDataTypeToName(type));
 
 	LuaUtils::push(L, isButtonPressed);
+
+	return 1;
+}
+
+int LuaJoystickEvents::isButtonReleased(lua_State *L)
+{
+	bool isButtonReleased = false;
+
+	void *pointer = LuaUtils::retrieveUserData<void *>(L, -2);
+	const LuaTypes::UserDataType type = LuaStateManager::manager(L)->untrackedType(pointer);
+
+	if (type == LuaTypes::JOYSTICKSTATE)
+	{
+		const JoystickState *state = reinterpret_cast<JoystickState *>(pointer);
+		const int buttonId = LuaUtils::retrieve<int32_t>(L, -1);
+		if (state)
+			isButtonReleased = state->isButtonReleased(buttonId);
+	}
+	else if (type == LuaTypes::JOYMAPPEDSTATE)
+	{
+		const JoyMappedState *state = reinterpret_cast<JoyMappedState *>(pointer);
+		const ButtonName button = static_cast<ButtonName>(LuaUtils::retrieve<int64_t>(L, -1));
+		if (state)
+			isButtonReleased = state->isButtonReleased(button);
+	}
+	else
+		LuaDebug::traceError(L, "Expecting a JoystickState or a JoyMappedState object instead of %s", LuaTypes::userDataTypeToName(type));
+
+	LuaUtils::push(L, isButtonReleased);
 
 	return 1;
 }

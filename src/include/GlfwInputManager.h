@@ -23,43 +23,16 @@ class GlfwKeys
 class GlfwMouseState : public MouseState
 {
   public:
-	inline bool isLeftButtonDown() const override
-	{
-		return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS);
-	}
-	inline bool isMiddleButtonDown() const override
-	{
-		return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS);
-	}
-	inline bool isRightButtonDown() const override
-	{
-		return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS);
-	}
-	inline bool isFourthButtonDown() const override
-	{
-		return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_4) == GLFW_PRESS);
-	}
-	inline bool isFifthButtonDown() const override
-	{
-		return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), GLFW_MOUSE_BUTTON_5) == GLFW_PRESS);
-	}
-};
+	GlfwMouseState();
 
-/// Information about a GLFW mouse event
-class GlfwMouseEvent : public MouseEvent
-{
-  public:
-	GlfwMouseEvent()
-	    : button_(0) {}
-
-	inline bool isLeftButton() const override { return button_ == GLFW_MOUSE_BUTTON_LEFT; }
-	inline bool isMiddleButton() const override { return button_ == GLFW_MOUSE_BUTTON_MIDDLE; }
-	inline bool isRightButton() const override { return button_ == GLFW_MOUSE_BUTTON_RIGHT; }
-	inline bool isFourthButton() const override { return button_ == GLFW_MOUSE_BUTTON_4; }
-	inline bool isFifthButton() const override { return button_ == GLFW_MOUSE_BUTTON_5; }
+	bool isButtonDown(MouseButton button) const override;
+	bool isButtonPressed(MouseButton button) const override;
+	bool isButtonReleased(MouseButton button) const override;
 
   private:
-	int button_;
+	unsigned char prevButtonState_[MouseState::NumButtons];
+
+	void copyButtonStateToPrev();
 
 	friend class GlfwInputManager;
 };
@@ -96,22 +69,30 @@ class GlfwKeyboardState : public KeyboardState
 class GlfwJoystickState : public JoystickState
 {
   public:
-	GlfwJoystickState()
-	    : numButtons_(0), numHats_(0), numAxes_(0), buttons_(nullptr), hats_(nullptr), axesValues_(nullptr) {}
+	GlfwJoystickState();
 
+	bool isButtonDown(int buttonId) const override;
 	bool isButtonPressed(int buttonId) const override;
+	bool isButtonReleased(int buttonId) const override;
+
 	unsigned char hatState(int hatId) const override;
 	short int axisValue(int axisId) const override;
 	float axisNormValue(int axisId) const override;
 
   private:
+	static const unsigned int MaxNumButtons = 32;
+
 	int numButtons_;
 	int numHats_;
 	int numAxes_;
 
 	const unsigned char *buttons_;
+	unsigned char prevButtonState_[MaxNumButtons];
 	const unsigned char *hats_;
 	const float *axesValues_;
+
+	void copyButtonStateToPrev();
+	void resetPrevButtonState();
 
 	friend class GlfwInputManager;
 };
@@ -125,7 +106,7 @@ class GlfwInputManager : public IInputManager
 
 	/// Detects window focus gain/loss events
 	static bool hasFocus();
-	static void copyKeyStateToPrev();
+	static void copyButtonStatesToPrev();
 	/// Updates joystick state structures and simulates events
 	static void updateJoystickStates();
 
@@ -155,7 +136,7 @@ class GlfwInputManager : public IInputManager
 		void simulateAxesEvents(int joyId, int numAxes, const float *axesValues);
 
 	  private:
-		static const unsigned int MaxNumButtons = 16;
+		static const unsigned int MaxNumButtons = 32;
 		static const unsigned int MaxNumHats = 4;
 		static const unsigned int MaxNumAxes = 16;
 		/// Minimum difference between two axis readings in order to trigger an event
@@ -171,7 +152,7 @@ class GlfwInputManager : public IInputManager
 
 	static bool windowHasFocus_;
 	static GlfwMouseState mouseState_;
-	static GlfwMouseEvent mouseEvent_;
+	static MouseEvent mouseEvent_;
 	static GlfwScrollEvent scrollEvent_;
 	static GlfwKeyboardState keyboardState_;
 	static KeyboardEvent keyboardEvent_;

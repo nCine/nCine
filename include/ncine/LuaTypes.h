@@ -8,6 +8,7 @@ struct lua_State;
 
 namespace ncine {
 
+class MouseState;
 class KeyboardState;
 class JoystickState;
 class JoyMappedState;
@@ -43,7 +44,8 @@ class ParticleAffector;
 namespace LuaTypes {
 	enum UserDataType
 	{
-		KEYBOARDSTATE = 0,
+		MOUSESTATE = 0,
+		KEYBOARDSTATE,
 		JOYSTICKSTATE,
 		JOYMAPPEDSTATE,
 
@@ -79,6 +81,7 @@ namespace LuaTypes {
 
 	template <class T> inline LuaTypes::UserDataType classToUserDataType(T *) { return LuaTypes::UserDataType::UNKNOWN; }
 
+	template <> inline LuaTypes::UserDataType classToUserDataType<MouseState>(MouseState *) { return LuaTypes::UserDataType::MOUSESTATE; }
 	template <> inline LuaTypes::UserDataType classToUserDataType<KeyboardState>(KeyboardState *) { return LuaTypes::UserDataType::KEYBOARDSTATE; }
 	template <> inline LuaTypes::UserDataType classToUserDataType<JoystickState>(JoystickState *) { return LuaTypes::UserDataType::JOYSTICKSTATE; }
 	template <> inline LuaTypes::UserDataType classToUserDataType<JoyMappedState>(JoyMappedState *) { return LuaTypes::UserDataType::JOYMAPPEDSTATE; }
@@ -112,6 +115,7 @@ namespace LuaTypes {
 
 	template <class T> inline const char *classToName(T *) { return "unknown"; }
 
+	template <> inline const char *classToName<MouseState>(MouseState *) { return "MouseState"; }
 	template <> inline const char *classToName<KeyboardState>(KeyboardState *) { return "KeyboardState"; }
 	template <> inline const char *classToName<JoystickState>(JoystickState *) { return "JoystickState"; }
 	template <> inline const char *classToName<JoyMappedState>(JoyMappedState *) { return "JoyMappedState"; }
@@ -149,6 +153,7 @@ namespace LuaTypes {
 		{
 			case LuaTypes::UserDataType::UNKNOWN: return "unknown";
 
+			case LuaTypes::UserDataType::MOUSESTATE: return "MouseState";
 			case LuaTypes::UserDataType::KEYBOARDSTATE: return "KeyboardState";
 			case LuaTypes::UserDataType::JOYSTICKSTATE: return "JoystickState";
 			case LuaTypes::UserDataType::JOYMAPPEDSTATE: return "JoyMappedState";

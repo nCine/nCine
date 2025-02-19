@@ -36,7 +36,7 @@ AndroidKeyboardState AndroidInputManager::keyboardState_;
 KeyboardEvent AndroidInputManager::keyboardEvent_;
 TextInputEvent AndroidInputManager::textInputEvent_;
 AndroidMouseState AndroidInputManager::mouseState_;
-AndroidMouseEvent AndroidInputManager::mouseEvent_;
+MouseEvent AndroidInputManager::mouseEvent_;
 ScrollEvent AndroidInputManager::scrollEvent_;
 int AndroidInputManager::simulatedMouseButtonState_ = 0;
 
@@ -55,6 +55,74 @@ const int AndroidJoystickState::AxesToMap[AndroidJoystickState::NumAxesToMap] = 
 	AMOTION_EVENT_AXIS_BRAKE, AMOTION_EVENT_AXIS_GAS,
 	AMOTION_EVENT_AXIS_HAT_X, AMOTION_EVENT_AXIS_HAT_Y
 };
+
+namespace {
+
+	MouseButton androidToNcineMouseButton(int button)
+	{
+		if (button == AMOTION_EVENT_BUTTON_PRIMARY)
+			return MouseButton::LEFT;
+		else if (button == AMOTION_EVENT_BUTTON_TERTIARY)
+			return MouseButton::MIDDLE;
+		else if (button == AMOTION_EVENT_BUTTON_SECONDARY)
+			return MouseButton::RIGHT;
+		else if (button == AMOTION_EVENT_BUTTON_BACK)
+			return MouseButton::FOURTH;
+		else if (button == AMOTION_EVENT_BUTTON_FORWARD)
+			return MouseButton::FIFTH;
+		else
+			return MouseButton::LEFT;
+	}
+
+	bool checkMouseButton(int buttonState, MouseButton button)
+	{
+		switch (button)
+		{
+			case MouseButton::LEFT: return ((buttonState & AMOTION_EVENT_BUTTON_PRIMARY) != 0);
+			case MouseButton::MIDDLE: return ((buttonState & AMOTION_EVENT_BUTTON_TERTIARY) != 0);
+			case MouseButton::RIGHT: return ((buttonState & AMOTION_EVENT_BUTTON_SECONDARY) != 0);
+			case MouseButton::FOURTH: return ((buttonState & AMOTION_EVENT_BUTTON_BACK) != 0);
+			case MouseButton::FIFTH: return ((buttonState & AMOTION_EVENT_BUTTON_FORWARD) != 0);
+			default: return false;
+		}
+	}
+
+}
+
+///////////////////////////////////////////////////////////
+// AndroidMouseState
+///////////////////////////////////////////////////////////
+
+AndroidMouseState::AndroidMouseState()
+    : currentStateIndex_(0), buttonStates_{0, 0}
+{
+}
+
+bool AndroidMouseState::isButtonDown(MouseButton button) const
+{
+	return checkMouseButton(buttonStates_[currentStateIndex_], button);
+}
+
+bool AndroidMouseState::isButtonPressed(MouseButton button) const
+{
+	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
+	return (checkMouseButton(buttonStates_[currentStateIndex_], button) == true &&
+	        checkMouseButton(buttonStates_[prevStateIndex], button) == false);
+}
+
+bool AndroidMouseState::isButtonReleased(MouseButton button) const
+{
+	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
+	return (checkMouseButton(buttonStates_[currentStateIndex_], button) == false &&
+	        checkMouseButton(buttonStates_[prevStateIndex], button) == true);
+}
+
+void AndroidMouseState::copyButtonStateToPrev()
+{
+	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
+	buttonStates_[prevStateIndex] = buttonStates_[currentStateIndex_];
+	currentStateIndex_ = prevStateIndex;
+}
 
 ///////////////////////////////////////////////////////////
 // AndroidKeyboardState
@@ -104,20 +172,22 @@ void AndroidKeyboardState::copyKeyStateToPrev()
 }
 
 ///////////////////////////////////////////////////////////
-// CONSTRUCTORS and DESTRUCTOR
+// AndroidJoystickState
 ///////////////////////////////////////////////////////////
 
 AndroidJoystickState::AndroidJoystickState()
     : deviceId_(-1), numButtons_(0), numAxes_(0), numMappedAxes_(0),
-      hasDPad_(false), hasHatAxes_(false), hatState_(HatState::CENTERED)
+      hasDPad_(false), hasHatAxes_(false), currentStateIndex_(0),
+      hatState_(HatState::CENTERED)
 {
 	guid_[0] = '\0';
 	name_[0] = '\0';
 	for (int i = 0; i < MaxButtons; i++)
-	{
 		buttonsMapping_[i] = 0;
-		buttons_[i] = false;
-	}
+
+	memset(buttonStates_[0], 0, MaxButtons * sizeof(unsigned char));
+	memset(buttonStates_[1], 0, MaxButtons * sizeof(unsigned char));
+
 	for (int i = 0; i < MaxAxes; i++)
 	{
 		axesMapping_[i] = 0;
@@ -125,6 +195,63 @@ AndroidJoystickState::AndroidJoystickState()
 		axesRangeValues_[i] = 2.0f;
 		axesValues_[i] = 0.0f;
 	}
+}
+
+bool AndroidJoystickState::isButtonDown(int buttonId) const
+{
+	ASSERT(buttonId < MaxButtons);
+	bool isDown = false;
+	if (buttonId >= 0 && buttonId < numButtons_)
+		isDown = buttonStates_[currentStateIndex_][buttonId];
+	return isDown;
+}
+
+bool AndroidJoystickState::isButtonPressed(int buttonId) const
+{
+	ASSERT(buttonId < MaxButtons);
+	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
+	bool isPressed = false;
+	if (buttonId >= 0 && buttonId < numButtons_)
+		isPressed = (buttonStates_[currentStateIndex_][buttonId] != 0 && buttonStates_[prevStateIndex][buttonId] == 0);
+	return isPressed;
+}
+
+bool AndroidJoystickState::isButtonReleased(int buttonId) const
+{
+	ASSERT(buttonId < MaxButtons);
+	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
+	bool isReleased = false;
+	if (buttonId >= 0 && buttonId < numButtons_)
+		isReleased = (buttonStates_[currentStateIndex_][buttonId] == 0 && buttonStates_[prevStateIndex][buttonId] != 0);
+	return isReleased;
+}
+
+unsigned char AndroidJoystickState::hatState(int hatId) const
+{
+	unsigned char hatState = HatState::CENTERED;
+	if (hatId >= 0 && hatId < numHats_)
+		hatState = hatState_;
+	return hatState;
+}
+
+short int AndroidJoystickState::axisValue(int axisId) const
+{
+	short int axisValue = 0;
+	if (axisId >= 0 && axisId < numMappedAxes_)
+		axisValue = static_cast<short int>(axesValues_[axisId] * IInputManager::MaxAxisValue);
+
+	return axisValue;
+}
+
+float AndroidJoystickState::axisNormValue(int axisId) const
+{
+	float axisValue = 0.0f;
+	if (axisId >= 0 && axisId < numMappedAxes_)
+	{
+		// The value has already been remapped from min..max to -1.0f..1.0f
+		axisValue = axesValues_[axisId];
+	}
+	return axisValue;
 }
 
 void AndroidJoystickState::createGuid(uint16_t bus, uint16_t vendor, uint16_t product, uint16_t version,
@@ -197,6 +324,23 @@ void AndroidJoystickState::updateGuidWithCapabilities()
 	guid_[15] = (axisMask >> 8) & 0xff;
 }
 
+void AndroidJoystickState::copyButtonStateToPrev()
+{
+	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
+	memcpy(buttonStates_[prevStateIndex], buttonStates_[currentStateIndex_], MaxButtons * sizeof(unsigned char));
+	currentStateIndex_ = prevStateIndex;
+}
+
+void AndroidJoystickState::resetPrevButtonState()
+{
+	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
+	memset(buttonStates_[prevStateIndex], 0, MaxButtons * sizeof(unsigned char));
+}
+
+///////////////////////////////////////////////////////////
+// CONSTRUCTORS and DESTRUCTOR
+///////////////////////////////////////////////////////////
+
 AndroidInputManager::AndroidInputManager(struct android_app *state)
 {
 	initAccelerometerSensor(state);
@@ -226,92 +370,6 @@ AndroidInputManager::~AndroidInputManager()
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
-
-bool AndroidMouseState::isLeftButtonDown() const
-{
-	return (buttonState_ & AMOTION_EVENT_BUTTON_PRIMARY) != 0;
-}
-
-bool AndroidMouseState::isMiddleButtonDown() const
-{
-	return (buttonState_ & AMOTION_EVENT_BUTTON_TERTIARY) != 0;
-}
-
-bool AndroidMouseState::isRightButtonDown() const
-{
-	return (buttonState_ & AMOTION_EVENT_BUTTON_SECONDARY) != 0;
-}
-
-bool AndroidMouseState::isFourthButtonDown() const
-{
-	return (buttonState_ & AMOTION_EVENT_BUTTON_BACK) != 0;
-}
-
-bool AndroidMouseState::isFifthButtonDown() const
-{
-	return (buttonState_ & AMOTION_EVENT_BUTTON_FORWARD) != 0;
-}
-
-bool AndroidMouseEvent::isLeftButton() const
-{
-	return (button_ & AMOTION_EVENT_BUTTON_PRIMARY) != 0;
-}
-
-bool AndroidMouseEvent::isMiddleButton() const
-{
-	return (button_ & AMOTION_EVENT_BUTTON_TERTIARY) != 0;
-}
-
-bool AndroidMouseEvent::isRightButton() const
-{
-	return (button_ & AMOTION_EVENT_BUTTON_SECONDARY) != 0;
-}
-
-bool AndroidMouseEvent::isFourthButton() const
-{
-	return (button_ & AMOTION_EVENT_BUTTON_BACK) != 0;
-}
-
-bool AndroidMouseEvent::isFifthButton() const
-{
-	return (button_ & AMOTION_EVENT_BUTTON_FORWARD) != 0;
-}
-
-bool AndroidJoystickState::isButtonPressed(int buttonId) const
-{
-	bool isPressed = false;
-	if (buttonId >= 0 && buttonId < numButtons_)
-		isPressed = buttons_[buttonId];
-	return isPressed;
-}
-
-unsigned char AndroidJoystickState::hatState(int hatId) const
-{
-	unsigned char hatState = HatState::CENTERED;
-	if (hatId >= 0 && hatId < numHats_)
-		hatState = hatState_;
-	return hatState;
-}
-
-short int AndroidJoystickState::axisValue(int axisId) const
-{
-	short int axisValue = 0;
-	if (axisId >= 0 && axisId < numMappedAxes_)
-		axisValue = static_cast<short int>(axesValues_[axisId] * IInputManager::MaxAxisValue);
-
-	return axisValue;
-}
-
-float AndroidJoystickState::axisNormValue(int axisId) const
-{
-	float axisValue = 0.0f;
-	if (axisId >= 0 && axisId < numMappedAxes_)
-	{
-		// The value has already been remapped from min..max to -1.0f..1.0f
-		axisValue = axesValues_[axisId];
-	}
-	return axisValue;
-}
 
 /*! This method is called by `enableAccelerometer()` and when the application gains focus */
 void AndroidInputManager::enableAccelerometerSensor()
@@ -374,9 +432,9 @@ bool AndroidInputManager::parseEvent(const AInputEvent *event)
 #endif
 
 	// Checking for gamepad events first
-	if (((AInputEvent_getSource(event) & AINPUT_SOURCE_GAMEPAD) == AINPUT_SOURCE_GAMEPAD ||
-	     (AInputEvent_getSource(event) & AINPUT_SOURCE_JOYSTICK) == AINPUT_SOURCE_JOYSTICK ||
-	     (AInputEvent_getSource(event) & AINPUT_SOURCE_DPAD) == AINPUT_SOURCE_DPAD))
+	if ((AInputEvent_getSource(event) & AINPUT_SOURCE_GAMEPAD) == AINPUT_SOURCE_GAMEPAD ||
+	    (AInputEvent_getSource(event) & AINPUT_SOURCE_JOYSTICK) == AINPUT_SOURCE_JOYSTICK ||
+	    (AInputEvent_getSource(event) & AINPUT_SOURCE_DPAD) == AINPUT_SOURCE_DPAD)
 	{
 		isEventHandled = processGamepadEvent(event);
 	}
@@ -488,19 +546,20 @@ bool AndroidInputManager::processGamepadEvent(const AInputEvent *event)
 	// If the index is valid then the structure can be updated
 	if (joyId > -1)
 	{
-		joystickStates_[joyId].deviceId_ = deviceId;
+		AndroidJoystickState &joystickState = joystickStates_[joyId];
+		joystickState.deviceId_ = deviceId;
 
 		if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_KEY)
 		{
 			const int keyCode = AKeyEvent_getKeyCode(event);
 			int buttonIndex = -1;
 			if (keyCode >= AKEYCODE_BUTTON_A && keyCode < AKEYCODE_ESCAPE)
-				buttonIndex = joystickStates_[joyId].buttonsMapping_[keyCode - AKEYCODE_BUTTON_A];
+				buttonIndex = joystickState.buttonsMapping_[keyCode - AKEYCODE_BUTTON_A];
 			else if (keyCode == AKEYCODE_BACK)
 			{
 				// Back button is always the last one
 				const unsigned int lastIndex = AndroidJoystickState::MaxButtons - 1;
-				buttonIndex = joystickStates_[joyId].buttonsMapping_[lastIndex];
+				buttonIndex = joystickState.buttonsMapping_[lastIndex];
 			}
 
 			if (buttonIndex > -1)
@@ -510,12 +569,12 @@ bool AndroidInputManager::processGamepadEvent(const AInputEvent *event)
 				switch (AKeyEvent_getAction(event))
 				{
 					case AKEY_EVENT_ACTION_DOWN:
-						joystickStates_[joyId].buttons_[buttonIndex] = true;
+						joystickState.buttonStates_[joystickState.currentStateIndex_][buttonIndex] = true;
 						joyMapping_.onJoyButtonPressed(joyButtonEvent_);
 						inputEventHandler_->onJoyButtonPressed(joyButtonEvent_);
 						break;
 					case AKEY_EVENT_ACTION_UP:
-						joystickStates_[joyId].buttons_[buttonIndex] = false;
+						joystickState.buttonStates_[joystickState.currentStateIndex_][buttonIndex] = false;
 						joyMapping_.onJoyButtonReleased(joyButtonEvent_);
 						inputEventHandler_->onJoyButtonReleased(joyButtonEvent_);
 						break;
@@ -529,7 +588,7 @@ bool AndroidInputManager::processGamepadEvent(const AInputEvent *event)
 				joyHatEvent_.joyId = joyId;
 				joyHatEvent_.hatId = 0; // No more than one hat is supported
 
-				unsigned char hatState = joystickStates_[joyId].hatState_;
+				unsigned char hatState = joystickState.hatState_;
 				unsigned char hatValue = 0;
 
 				switch (keyCode)
@@ -552,10 +611,10 @@ bool AndroidInputManager::processGamepadEvent(const AInputEvent *event)
 				else
 					hatState &= ~hatValue;
 
-				if (joystickStates_[joyId].hatState_ != hatState)
+				if (joystickState.hatState_ != hatState)
 				{
-					joystickStates_[joyId].hatState_ = hatState;
-					joyHatEvent_.hatState = joystickStates_[joyId].hatState_;
+					joystickState.hatState_ = hatState;
+					joyHatEvent_.hatState = joystickState.hatState_;
 
 					joyMapping_.onJoyHatMoved(joyHatEvent_);
 					inputEventHandler_->onJoyHatMoved(joyHatEvent_);
@@ -567,12 +626,12 @@ bool AndroidInputManager::processGamepadEvent(const AInputEvent *event)
 			joyAxisEvent_.joyId = joyId;
 
 			unsigned char hatState = 0;
-			for (int i = 0; i < joystickStates_[joyId].numAxes_; i++)
+			for (int i = 0; i < joystickState.numAxes_; i++)
 			{
-				const int axis = joystickStates_[joyId].axesMapping_[i];
+				const int axis = joystickState.axesMapping_[i];
 				const float axisRawValue = AMotionEvent_getAxisValue(event, axis, 0);
 				// Remapping the axis range from min..max to -1.0f..1.0f
-				const float normValue = -1.0f + 2.0f * (axisRawValue - joystickStates_[joyId].axesMinValues_[i]) / joystickStates_[joyId].axesRangeValues_[i];
+				const float normValue = -1.0f + 2.0f * (axisRawValue - joystickState.axesMinValues_[i]) / joystickState.axesRangeValues_[i];
 
 				if (axis == AMOTION_EVENT_AXIS_HAT_X || axis == AMOTION_EVENT_AXIS_HAT_Y)
 				{
@@ -597,7 +656,7 @@ bool AndroidInputManager::processGamepadEvent(const AInputEvent *event)
 				}
 				else
 				{
-					joystickStates_[joyId].axesValues_[i] = normValue;
+					joystickState.axesValues_[i] = normValue;
 
 					joyAxisEvent_.axisId = i;
 					joyAxisEvent_.value = normValue * MaxAxisValue;
@@ -607,10 +666,10 @@ bool AndroidInputManager::processGamepadEvent(const AInputEvent *event)
 				}
 			}
 
-			if (joystickStates_[joyId].hatState_ != hatState)
+			if (joystickState.hatState_ != hatState)
 			{
-				joystickStates_[joyId].hatState_ = hatState;
-				joyHatEvent_.hatState = joystickStates_[joyId].hatState_;
+				joystickState.hatState_ = hatState;
+				joyHatEvent_.hatState = joystickState.hatState_;
 
 				joyMapping_.onJoyHatMoved(joyHatEvent_);
 				inputEventHandler_->onJoyHatMoved(joyHatEvent_);
@@ -726,23 +785,29 @@ bool AndroidInputManager::processMouseEvent(const AInputEvent *event)
 	switch (action)
 	{
 		case AMOTION_EVENT_ACTION_DOWN:
+		{
 			buttonState = AMotionEvent_getButtonState(event);
 			buttonState &= ~maskOutButtons;
 			buttonState |= simulatedMouseButtonState_;
 
-			mouseEvent_.button_ = mouseState_.buttonState_ ^ buttonState; // pressed button mask
-			mouseState_.buttonState_ = buttonState;
+			const int button = mouseState_.buttonStates_[mouseState_.currentStateIndex_] ^ buttonState; // pressed button mask
+			mouseEvent_.button = androidToNcineMouseButton(button);
+			mouseState_.buttonStates_[mouseState_.currentStateIndex_] = buttonState;
 			inputEventHandler_->onMouseButtonPressed(mouseEvent_);
 			break;
+		}
 		case AMOTION_EVENT_ACTION_UP:
+		{
 			buttonState = AMotionEvent_getButtonState(event);
 			buttonState &= ~maskOutButtons;
 			buttonState |= simulatedMouseButtonState_;
 
-			mouseEvent_.button_ = mouseState_.buttonState_ ^ buttonState; // released button mask
-			mouseState_.buttonState_ = buttonState;
+			const int button = mouseState_.buttonStates_[mouseState_.currentStateIndex_] ^ buttonState; // released button mask
+			mouseEvent_.button = androidToNcineMouseButton(button);
+			mouseState_.buttonStates_[mouseState_.currentStateIndex_] = buttonState;
 			inputEventHandler_->onMouseButtonReleased(mouseEvent_);
 			break;
+		}
 		case AMOTION_EVENT_ACTION_MOVE:
 		case AMOTION_EVENT_ACTION_HOVER_MOVE:
 			inputEventHandler_->onMouseMoved(mouseState_);
@@ -771,16 +836,16 @@ bool AndroidInputManager::processMouseKeyEvent(const AInputEvent *event)
 		{
 			oldAction = action;
 			simulatedMouseButtonState_ |= simulatedButton;
-			mouseEvent_.button_ = simulatedButton;
-			mouseState_.buttonState_ |= simulatedButton;
+			mouseEvent_.button = androidToNcineMouseButton(simulatedButton);
+			mouseState_.buttonStates_[mouseState_.currentStateIndex_] |= simulatedButton;
 			inputEventHandler_->onMouseButtonPressed(mouseEvent_);
 		}
 		else if (action == AKEY_EVENT_ACTION_UP && oldAction == AKEY_EVENT_ACTION_DOWN)
 		{
 			oldAction = action;
 			simulatedMouseButtonState_ &= ~simulatedButton;
-			mouseEvent_.button_ = simulatedButton;
-			mouseState_.buttonState_ &= ~simulatedButton;
+			mouseEvent_.button = androidToNcineMouseButton(simulatedButton);
+			mouseState_.buttonStates_[mouseState_.currentStateIndex_] &= ~simulatedButton;
 			inputEventHandler_->onMouseButtonReleased(mouseEvent_);
 		}
 	}
@@ -823,6 +888,7 @@ void AndroidInputManager::checkDisconnectedJoysticks()
 		if (deviceId > -1 && isDeviceConnected(deviceId) == false)
 		{
 			LOGI_X("Joystick %d (device %d) \"%s\" has been disconnected", i, deviceId, joystickStates_[i].name_);
+			joystickStates_[i].resetPrevButtonState();
 			joystickStates_[i].deviceId_ = -1;
 
 			if (inputEventHandler_ != nullptr)
@@ -1069,9 +1135,14 @@ void AndroidInputManager::deviceInfo(int deviceId, int joyId)
 	}
 }
 
-void AndroidInputManager::copyKeyStateToPrev()
+void AndroidInputManager::copyButtonStatesToPrev()
 {
 	keyboardState_.copyKeyStateToPrev();
+	mouseState_.copyButtonStateToPrev();
+
+	for (unsigned int joyId = 0; joyId < MaxNumJoysticks; joyId++)
+		joystickStates_[joyId].copyButtonStateToPrev();
+	joyMapping_.copyButtonStateToPrev();
 }
 
 }

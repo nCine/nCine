@@ -31,7 +31,7 @@ SDL_Window *SdlInputManager::windowHandle_ = nullptr;
 
 TouchEvent SdlInputManager::touchEvent_;
 SdlMouseState SdlInputManager::mouseState_;
-SdlMouseEvent SdlInputManager::mouseEvent_;
+MouseEvent SdlInputManager::mouseEvent_;
 SdlScrollEvent SdlInputManager::scrollEvent_;
 SdlKeyboardState SdlInputManager::keyboardState_;
 KeyboardEvent SdlInputManager::keyboardEvent_;
@@ -45,6 +45,75 @@ JoyAxisEvent SdlInputManager::joyAxisEvent_;
 JoyConnectionEvent SdlInputManager::joyConnectionEvent_;
 
 char SdlInputManager::joyGuidString_[33];
+
+namespace {
+
+	MouseButton sdlToNcineMouseButton(int button)
+	{
+		if (button == SDL_BUTTON_LEFT)
+			return MouseButton::LEFT;
+		else if (button == SDL_BUTTON_MIDDLE)
+			return MouseButton::MIDDLE;
+		else if (button == SDL_BUTTON_RIGHT)
+			return MouseButton::RIGHT;
+		else if (button == SDL_BUTTON_X1)
+			return MouseButton::FOURTH;
+		else if (button == SDL_BUTTON_X2)
+			return MouseButton::FIFTH;
+		else
+			return MouseButton::LEFT;
+	}
+
+	int ncineToSdlMouseButtonMask(MouseButton button)
+	{
+		switch (button)
+		{
+			case MouseButton::LEFT: return SDL_BUTTON_LMASK;
+			case MouseButton::MIDDLE: return SDL_BUTTON_MMASK;
+			case MouseButton::RIGHT: return SDL_BUTTON_RMASK;
+			case MouseButton::FOURTH: return SDL_BUTTON_X1MASK;
+			case MouseButton::FIFTH: return SDL_BUTTON_X2MASK;
+			default: return SDL_BUTTON_LMASK;
+		}
+	}
+
+}
+
+///////////////////////////////////////////////////////////
+// SdlMouseState
+///////////////////////////////////////////////////////////
+
+SdlMouseState::SdlMouseState()
+    : currentStateIndex_(0), buttons_{0, 0}
+{
+}
+
+bool SdlMouseState::isButtonDown(MouseButton button) const
+{
+	const int sdlButtonMask = ncineToSdlMouseButtonMask(button);
+	return (buttons_[currentStateIndex_] & sdlButtonMask) != 0;
+}
+
+bool SdlMouseState::isButtonPressed(MouseButton button) const
+{
+	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
+	const int sdlButtonMask = ncineToSdlMouseButtonMask(button);
+	return ((buttons_[currentStateIndex_] & sdlButtonMask) != 0 && (buttons_[prevStateIndex] & sdlButtonMask) == 0);
+}
+
+bool SdlMouseState::isButtonReleased(MouseButton button) const
+{
+	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
+	const int sdlButtonMask = ncineToSdlMouseButtonMask(button);
+	return ((buttons_[currentStateIndex_] & sdlButtonMask) == 0 && (buttons_[prevStateIndex] & sdlButtonMask) != 0);
+}
+
+void SdlMouseState::copyButtonStateToPrev()
+{
+	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
+	buttons_[prevStateIndex] = buttons_[currentStateIndex_];
+	currentStateIndex_ = prevStateIndex;
+}
 
 ///////////////////////////////////////////////////////////
 // SdlKeyboardState
@@ -89,6 +158,78 @@ bool SdlKeyboardState::isKeyReleased(KeySym key) const
 void SdlKeyboardState::copyKeyStateToPrev()
 {
 	memcpy(prevKeyState_, keyState_, keyStateArrayLength_ * sizeof(unsigned char));
+}
+
+///////////////////////////////////////////////////////////
+// SdlJoystickState
+///////////////////////////////////////////////////////////
+
+SdlJoystickState::SdlJoystickState()
+    : sdlJoystick_(nullptr)
+{
+	memset(prevButtonState_, 0, MaxNumButtons * sizeof(unsigned char));
+}
+
+bool SdlJoystickState::isButtonDown(int buttonId) const
+{
+	bool isDown = false;
+	if (sdlJoystick_ != nullptr)
+		isDown = SDL_JoystickGetButton(sdlJoystick_, buttonId) != 0;
+	return isDown;
+}
+
+bool SdlJoystickState::isButtonPressed(int buttonId) const
+{
+	ASSERT(buttonId < static_cast<int>(MaxNumButtons));
+	bool isPressed = false;
+	if (buttonId >= 0 && buttonId < static_cast<int>(MaxNumButtons))
+		isPressed = (SDL_JoystickGetButton(sdlJoystick_, buttonId) != 0 && prevButtonState_[buttonId] == 0);
+	return isPressed;
+}
+
+bool SdlJoystickState::isButtonReleased(int buttonId) const
+{
+	ASSERT(buttonId < static_cast<int>(MaxNumButtons));
+	bool isReleased = false;
+	if (buttonId >= 0 && buttonId < static_cast<int>(MaxNumButtons))
+		isReleased = (SDL_JoystickGetButton(sdlJoystick_, buttonId) == 0 && prevButtonState_[buttonId] != 0);
+	return isReleased;
+}
+
+unsigned char SdlJoystickState::hatState(int hatId) const
+{
+	unsigned char hatState = 0;
+	if (sdlJoystick_ != nullptr)
+		hatState = SDL_JoystickGetHat(sdlJoystick_, hatId);
+
+	return hatState;
+}
+
+short int SdlJoystickState::axisValue(int axisId) const
+{
+	short int axisValue = 0;
+	if (sdlJoystick_ != nullptr)
+		axisValue = SDL_JoystickGetAxis(sdlJoystick_, axisId);
+	return axisValue;
+}
+
+float SdlJoystickState::axisNormValue(int axisId) const
+{
+	// If the joystick is not present the returned value is zero
+	const float value = axisValue(axisId) / float(IInputManager::MaxAxisValue);
+
+	return value;
+}
+
+void SdlJoystickState::copyButtonStateToPrev()
+{
+	for (unsigned int i = 0; i < MaxNumButtons; i++)
+		prevButtonState_[i] = SDL_JoystickGetButton(sdlJoystick_, i);
+}
+
+void SdlJoystickState::resetPrevButtonState()
+{
+	memset(prevButtonState_, 0, MaxNumButtons);
 }
 
 ///////////////////////////////////////////////////////////
@@ -156,39 +297,6 @@ SdlInputManager::~SdlInputManager()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-bool SdlJoystickState::isButtonPressed(int buttonId) const
-{
-	bool isPressed = false;
-	if (sdlJoystick_ != nullptr)
-		isPressed = SDL_JoystickGetButton(sdlJoystick_, buttonId) != 0;
-	return isPressed;
-}
-
-unsigned char SdlJoystickState::hatState(int hatId) const
-{
-	unsigned char hatState = 0;
-	if (sdlJoystick_ != nullptr)
-		hatState = SDL_JoystickGetHat(sdlJoystick_, hatId);
-
-	return hatState;
-}
-
-short int SdlJoystickState::axisValue(int axisId) const
-{
-	short int axisValue = 0;
-	if (sdlJoystick_ != nullptr)
-		axisValue = SDL_JoystickGetAxis(sdlJoystick_, axisId);
-	return axisValue;
-}
-
-float SdlJoystickState::axisNormValue(int axisId) const
-{
-	// If the joystick is not present the returned value is zero
-	const float value = axisValue(axisId) / float(IInputManager::MaxAxisValue);
-
-	return value;
-}
-
 bool SdlInputManager::shouldQuitOnRequest()
 {
 	bool shouldQuit = true;
@@ -199,9 +307,14 @@ bool SdlInputManager::shouldQuitOnRequest()
 	return shouldQuit;
 }
 
-void SdlInputManager::copyKeyStateToPrev()
+void SdlInputManager::copyButtonStatesToPrev()
 {
+	mouseState_.copyButtonStateToPrev();
 	keyboardState_.copyKeyStateToPrev();
+
+	for (unsigned int joyId = 0; joyId < MaxNumJoysticks; joyId++)
+		joystickStates_[joyId].copyButtonStateToPrev();
+	joyMapping_.copyButtonStateToPrev();
 }
 
 void SdlInputManager::parseEvent(const SDL_Event &event)
@@ -239,7 +352,7 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 		case SDL_MOUSEBUTTONUP:
 			mouseEvent_.x = event.button.x;
 			mouseEvent_.y = theApplication().heightInt() - event.button.y;
-			mouseEvent_.button_ = event.button.button;
+			mouseEvent_.button = sdlToNcineMouseButton(event.button.button);
 			break;
 		case SDL_MOUSEMOTION:
 			if (mouseCursorMode_ != MouseCursorMode::DISABLED)
@@ -252,7 +365,7 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 				mouseState_.x += event.motion.xrel;
 				mouseState_.y -= event.motion.yrel;
 			}
-			mouseState_.buttons_ = event.motion.state;
+			mouseState_.buttons_[mouseState_.currentStateIndex_] = event.motion.state;
 			break;
 		case SDL_MOUSEWHEEL:
 			scrollEvent_.x = static_cast<float>(event.wheel.x);

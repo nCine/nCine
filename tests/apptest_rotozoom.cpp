@@ -171,17 +171,17 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 {
-	if (event.isLeftButton())
+	if (event.button == nc::MouseButton::LEFT)
 		checkClick(static_cast<float>(event.x), static_cast<float>(event.y));
-	else if (event.isRightButton())
+	else if (event.button == nc::MouseButton::RIGHT)
 		pauseGroup_ = true;
 }
 
 void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 {
-	if (event.isLeftButton())
+	if (event.button == nc::MouseButton::LEFT)
 		pauseSprites_ = false;
-	else if (event.isRightButton())
+	else if (event.button == nc::MouseButton::RIGHT)
 		pauseGroup_ = false;
 }
 

@@ -27,7 +27,10 @@ class LuaJoystickEvents
 	static void pushJoyConnectionEvent(lua_State *L, const JoyConnectionEvent &event);
 
   private:
+	static int isButtonDown(lua_State *L);
 	static int isButtonPressed(lua_State *L);
+	static int isButtonReleased(lua_State *L);
+
 	static int hatState(lua_State *L);
 	static int axisValue(lua_State *L);
 	static int axisNormValue(lua_State *L);

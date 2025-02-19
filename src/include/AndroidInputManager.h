@@ -22,6 +22,25 @@ class AndroidKeys
 	static int keyModMaskToEnumMask(int keymod);
 };
 
+/// Information about Android mouse state
+class AndroidMouseState : public MouseState
+{
+  public:
+	AndroidMouseState();
+
+	bool isButtonDown(MouseButton button) const override;
+	bool isButtonPressed(MouseButton button) const override;
+	bool isButtonReleased(MouseButton button) const override;
+
+  private:
+	unsigned int currentStateIndex_;
+	int buttonStates_[2];
+
+	void copyButtonStateToPrev();
+
+	friend class AndroidInputManager;
+};
+
 /// Simulated information about Android keyboard state
 class AndroidKeyboardState : public KeyboardState
 {
@@ -42,51 +61,16 @@ class AndroidKeyboardState : public KeyboardState
 	friend class AndroidInputManager;
 };
 
-/// Information about Android mouse state
-class AndroidMouseState : public MouseState
-{
-  public:
-	AndroidMouseState()
-	    : buttonState_(0) {}
-
-	bool isLeftButtonDown() const override;
-	bool isMiddleButtonDown() const override;
-	bool isRightButtonDown() const override;
-	bool isFourthButtonDown() const override;
-	bool isFifthButtonDown() const override;
-
-  private:
-	int buttonState_;
-
-	friend class AndroidInputManager;
-};
-
-/// Information about an Android mouse event
-class AndroidMouseEvent : public MouseEvent
-{
-  public:
-	AndroidMouseEvent()
-	    : button_(0) {}
-
-	bool isLeftButton() const override;
-	bool isMiddleButton() const override;
-	bool isRightButton() const override;
-	bool isFourthButton() const override;
-	bool isFifthButton() const override;
-
-  private:
-	int button_;
-
-	friend class AndroidInputManager;
-};
-
 /// Information about Android joystick state
 class AndroidJoystickState : JoystickState
 {
   public:
 	AndroidJoystickState();
 
+	bool isButtonDown(int buttonId) const override;
 	bool isButtonPressed(int buttonId) const override;
+	bool isButtonReleased(int buttonId) const override;
+
 	unsigned char hatState(int hatId) const override;
 	short int axisValue(int axisId) const override;
 	float axisNormValue(int axisId) const override;
@@ -115,7 +99,8 @@ class AndroidJoystickState : JoystickState
 	bool hasHatAxes_;
 	short int buttonsMapping_[MaxButtons];
 	short int axesMapping_[MaxAxes];
-	bool buttons_[MaxButtons];
+	unsigned int currentStateIndex_;
+	unsigned char buttonStates_[2][MaxButtons];
 	/// Minimum value for every available axis (used for -1..1 range remapping)
 	float axesMinValues_[MaxAxes];
 	/// Range value for every available axis (used for -1..1 range remapping)
@@ -126,6 +111,9 @@ class AndroidJoystickState : JoystickState
 
 	void createGuid(uint16_t bus, uint16_t vendor, uint16_t product, uint16_t version, const char *name, uint8_t driverSignature, uint8_t driverData);
 	void updateGuidWithCapabilities();
+
+	void copyButtonStateToPrev();
+	void resetPrevButtonState();
 
 	friend class AndroidInputManager;
 };
@@ -177,7 +165,7 @@ class AndroidInputManager : public IInputManager
 	static KeyboardEvent keyboardEvent_;
 	static TextInputEvent textInputEvent_;
 	static AndroidMouseState mouseState_;
-	static AndroidMouseEvent mouseEvent_;
+	static MouseEvent mouseEvent_;
 	static ScrollEvent scrollEvent_;
 	/// Back and forward key events triggered by the mouse are simulated as right and middle button
 	static int simulatedMouseButtonState_;
@@ -217,7 +205,7 @@ class AndroidInputManager : public IInputManager
 	static bool isDeviceConnected(int deviceId);
 	static void deviceInfo(int deviceId, int joyId);
 
-	static void copyKeyStateToPrev();
+	static void copyButtonStatesToPrev();
 
 	/// To update joystick connections in `AndroidApplication::androidMain()`
 	friend class AndroidApplication;

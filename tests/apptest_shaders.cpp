@@ -545,7 +545,7 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 {
-	if (event.isLeftButton() && captureMouse)
+	if (event.button == nc::MouseButton::LEFT && captureMouse)
 	{
 		checkClick(static_cast<float>(event.x), static_cast<float>(event.y));
 		multiTextureShaderData.lightPosition.x = event.x;
@@ -556,7 +556,7 @@ void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 
 void MyEventHandler::onMouseMoved(const nc::MouseState &state)
 {
-	if (state.isLeftButtonDown() && captureMouse)
+	if (state.isButtonDown(nc::MouseButton::LEFT) && captureMouse)
 	{
 		multiTextureShaderData.lightPosition.x = state.x;
 		multiTextureShaderData.lightPosition.y = state.y;

@@ -351,7 +351,7 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 {
-	if (event.isLeftButton())
+	if (event.button == nc::MouseButton::LEFT)
 	{
 		scrollOrigin_.x = static_cast<float>(event.x);
 		scrollOrigin_.y = static_cast<float>(event.y);
@@ -359,7 +359,7 @@ void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 
 		checkClick(static_cast<float>(event.x), static_cast<float>(event.y));
 	}
-	else if (event.isRightButton())
+	else if (event.button == nc::MouseButton::RIGHT)
 	{
 		scrollOrigin2_.x = static_cast<float>(event.x);
 		scrollOrigin2_.y = static_cast<float>(event.y);
@@ -369,7 +369,7 @@ void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 
 void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 {
-	if (event.isLeftButton())
+	if (event.button == nc::MouseButton::LEFT)
 	{
 		if (lastClickTime_.secondsSince() < DoubleClickDelay)
 			resetCamera();
@@ -379,12 +379,12 @@ void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 
 void MyEventHandler::onMouseMoved(const nc::MouseState &state)
 {
-	if (state.isLeftButtonDown())
+	if (state.isButtonDown(nc::MouseButton::LEFT))
 	{
 		scrollMove_.x = static_cast<float>(state.x);
 		scrollMove_.y = static_cast<float>(state.y);
 	}
-	else if (state.isRightButtonDown())
+	else if (state.isButtonDown(nc::MouseButton::RIGHT))
 	{
 		scrollMove2_.x = static_cast<float>(state.x);
 		scrollMove2_.y = static_cast<float>(state.y);

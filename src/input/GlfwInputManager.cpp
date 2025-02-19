@@ -27,7 +27,7 @@ const int IInputManager::MaxNumJoysticks = GLFW_JOYSTICK_LAST - GLFW_JOYSTICK_1 
 
 bool GlfwInputManager::windowHasFocus_ = true;
 GlfwMouseState GlfwInputManager::mouseState_;
-GlfwMouseEvent GlfwInputManager::mouseEvent_;
+MouseEvent GlfwInputManager::mouseEvent_;
 GlfwScrollEvent GlfwInputManager::scrollEvent_;
 GlfwKeyboardState GlfwInputManager::keyboardState_;
 KeyboardEvent GlfwInputManager::keyboardEvent_;
@@ -45,6 +45,74 @@ GlfwInputManager::JoystickEventsSimulator GlfwInputManager::joyEventsSimulator_;
 int GlfwInputManager::preScalingWidth_ = 0;
 int GlfwInputManager::preScalingHeight_ = 0;
 unsigned long int GlfwInputManager::lastFrameWindowSizeChanged_ = 0;
+
+namespace {
+
+	MouseButton glfwToNcineMouseButton(int button)
+	{
+		switch (button)
+		{
+			case GLFW_MOUSE_BUTTON_LEFT: return MouseButton::LEFT;
+			case GLFW_MOUSE_BUTTON_MIDDLE: return MouseButton::MIDDLE;
+			case GLFW_MOUSE_BUTTON_RIGHT: return MouseButton::RIGHT;
+			case GLFW_MOUSE_BUTTON_4: return MouseButton::FOURTH;
+			case GLFW_MOUSE_BUTTON_5: return MouseButton::FIFTH;
+			default: return MouseButton::LEFT;
+		}
+	}
+
+	int ncineToGlfwMouseButton(MouseButton button)
+	{
+		switch (button)
+		{
+			case MouseButton::LEFT: return GLFW_MOUSE_BUTTON_LEFT;
+			case MouseButton::MIDDLE: return GLFW_MOUSE_BUTTON_MIDDLE;
+			case MouseButton::RIGHT: return GLFW_MOUSE_BUTTON_RIGHT;
+			case MouseButton::FOURTH: return GLFW_MOUSE_BUTTON_4;
+			case MouseButton::FIFTH: return GLFW_MOUSE_BUTTON_5;
+			default: return GLFW_MOUSE_BUTTON_LEFT;
+		}
+	}
+
+}
+
+///////////////////////////////////////////////////////////
+// GlfwMouseState
+///////////////////////////////////////////////////////////
+
+GlfwMouseState::GlfwMouseState()
+{
+	memset(prevButtonState_, GLFW_RELEASE, MouseState::NumButtons * sizeof(unsigned char));
+}
+
+bool GlfwMouseState::isButtonDown(MouseButton button) const
+{
+	const int glfwButton = ncineToGlfwMouseButton(button);
+	return glfwGetMouseButton(GlfwGfxDevice::windowHandle(), glfwButton) == GLFW_PRESS;
+}
+
+bool GlfwMouseState::isButtonPressed(MouseButton button) const
+{
+	const unsigned int buttonIndex = static_cast<unsigned int>(button);
+	const int glfwButton = ncineToGlfwMouseButton(button);
+	return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), glfwButton) == GLFW_PRESS && prevButtonState_[buttonIndex] == GLFW_RELEASE);
+}
+
+bool GlfwMouseState::isButtonReleased(MouseButton button) const
+{
+	const unsigned int buttonIndex = static_cast<unsigned int>(button);
+	const int glfwButton = ncineToGlfwMouseButton(button);
+	return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), glfwButton) == GLFW_RELEASE && prevButtonState_[buttonIndex] == GLFW_PRESS);
+}
+
+void GlfwMouseState::copyButtonStateToPrev()
+{
+	for (unsigned int i = 0; i < MouseState::NumButtons; i++)
+	{
+		const int glfwButton = ncineToGlfwMouseButton(static_cast<MouseButton>(i));
+		prevButtonState_[i] = glfwGetMouseButton(GlfwGfxDevice::windowHandle(), glfwButton);
+	}
+}
 
 ///////////////////////////////////////////////////////////
 // GlfwKeyboardState
@@ -92,6 +160,77 @@ void GlfwKeyboardState::copyKeyStateToPrev()
 		if (glfwKey != GLFW_KEY_UNKNOWN)
 			prevKeyState_[i] = glfwGetKey(GlfwGfxDevice::windowHandle(), glfwKey);
 	}
+}
+
+///////////////////////////////////////////////////////////
+// GlfwJoystickState
+///////////////////////////////////////////////////////////
+
+GlfwJoystickState::GlfwJoystickState()
+    : numButtons_(0), numHats_(0), numAxes_(0), buttons_(nullptr), hats_(nullptr), axesValues_(nullptr)
+{
+	memset(prevButtonState_, GLFW_RELEASE, numButtons_ * sizeof(unsigned char));
+}
+
+bool GlfwJoystickState::isButtonDown(int buttonId) const
+{
+	ASSERT(buttonId < static_cast<int>(MaxNumButtons));
+	bool isDown = false;
+	if (buttonId >= 0 && buttonId < numButtons_ && buttonId < static_cast<int>(MaxNumButtons))
+		isDown = (buttons_[buttonId] != GLFW_RELEASE);
+	return isDown;
+}
+
+bool GlfwJoystickState::isButtonPressed(int buttonId) const
+{
+	ASSERT(buttonId < static_cast<int>(MaxNumButtons));
+	bool isPressed = false;
+	if (buttonId >= 0 && buttonId < numButtons_ && buttonId < static_cast<int>(MaxNumButtons))
+		isPressed = (buttons_[buttonId] != GLFW_RELEASE && prevButtonState_[buttonId] == GLFW_RELEASE);
+	return isPressed;
+}
+
+bool GlfwJoystickState::isButtonReleased(int buttonId) const
+{
+	ASSERT(buttonId < static_cast<int>(MaxNumButtons));
+	bool isReleased = false;
+	if (buttonId >= 0 && buttonId < numButtons_ && buttonId < static_cast<int>(MaxNumButtons))
+		isReleased = (buttons_[buttonId] == GLFW_RELEASE && prevButtonState_[buttonId] != GLFW_RELEASE);
+	return isReleased;
+}
+
+unsigned char GlfwJoystickState::hatState(int hatId) const
+{
+	unsigned char hatState = HatState::CENTERED;
+	if (hatId >= 0 && hatId < numHats_)
+		hatState = hats_[hatId];
+	return hatState;
+}
+
+short int GlfwJoystickState::axisValue(int axisId) const
+{
+	// If the joystick is not present the returned value is zero
+	const short int axisValue = static_cast<short int>(axisNormValue(axisId) * IInputManager::MaxAxisValue);
+
+	return axisValue;
+}
+
+float GlfwJoystickState::axisNormValue(int axisId) const
+{
+	float axisValue = 0.0f;
+	if (axisId >= 0 && axisId < numAxes_)
+		axisValue = axesValues_[axisId];
+	return axisValue;
+}
+
+void GlfwJoystickState::copyButtonStateToPrev()
+{
+	memcpy(prevButtonState_, buttons_, numButtons_);
+}
+
+void GlfwJoystickState::resetPrevButtonState()
+{
+	memset(prevButtonState_, GLFW_RELEASE, numButtons_);
 }
 
 ///////////////////////////////////////////////////////////
@@ -145,38 +284,6 @@ GlfwInputManager::~GlfwInputManager()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-bool GlfwJoystickState::isButtonPressed(int buttonId) const
-{
-	bool isPressed = false;
-	if (buttonId >= 0 && buttonId < numButtons_)
-		isPressed = (buttons_[buttonId] != GLFW_RELEASE);
-	return isPressed;
-}
-
-unsigned char GlfwJoystickState::hatState(int hatId) const
-{
-	unsigned char hatState = HatState::CENTERED;
-	if (hatId >= 0 && hatId < numHats_)
-		hatState = hats_[hatId];
-	return hatState;
-}
-
-short int GlfwJoystickState::axisValue(int axisId) const
-{
-	// If the joystick is not present the returned value is zero
-	const short int axisValue = static_cast<short int>(axisNormValue(axisId) * IInputManager::MaxAxisValue);
-
-	return axisValue;
-}
-
-float GlfwJoystickState::axisNormValue(int axisId) const
-{
-	float axisValue = 0.0f;
-	if (axisId >= 0 && axisId < numAxes_)
-		axisValue = axesValues_[axisId];
-	return axisValue;
-}
-
 bool GlfwInputManager::hasFocus()
 {
 	const bool glfwFocused = (glfwGetWindowAttrib(GlfwGfxDevice::windowHandle(), GLFW_FOCUSED) != 0);
@@ -188,9 +295,14 @@ bool GlfwInputManager::hasFocus()
 	return windowHasFocus_;
 }
 
-void GlfwInputManager::copyKeyStateToPrev()
+void GlfwInputManager::copyButtonStatesToPrev()
 {
+	mouseState_.copyButtonStateToPrev();
 	keyboardState_.copyKeyStateToPrev();
+
+	for (unsigned int joyId = 0; joyId < MaxNumJoysticks; joyId++)
+		joystickStates_[joyId].copyButtonStateToPrev();
+	joyMapping_.copyButtonStateToPrev();
 }
 
 void GlfwInputManager::updateJoystickStates()
@@ -415,7 +527,7 @@ void GlfwInputManager::mouseButtonCallback(GLFWwindow *window, int button, int a
 	glfwGetCursorPos(window, &xCursor, &yCursor);
 	mouseEvent_.x = static_cast<int>(xCursor);
 	mouseEvent_.y = theApplication().heightInt() - static_cast<int>(yCursor);
-	mouseEvent_.button_ = button;
+	mouseEvent_.button = glfwToNcineMouseButton(button);
 
 	if (action == GLFW_PRESS)
 		inputEventHandler_->onMouseButtonPressed(mouseEvent_);
@@ -467,6 +579,7 @@ void GlfwInputManager::joystickCallback(int joy, int event)
 	}
 	else if (event == GLFW_DISCONNECTED)
 	{
+		joystickStates_[joyId].resetPrevButtonState();
 		joyEventsSimulator_.resetJoystickState(joyId);
 		LOGI_X("Joystick %d has been disconnected", joyId);
 		if (inputEventHandler_ != nullptr)

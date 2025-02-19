@@ -50,6 +50,69 @@ JoyMappedButtonEvent JoyMapping::mappedButtonEvent_;
 JoyMappedAxisEvent JoyMapping::mappedAxisEvent_;
 
 ///////////////////////////////////////////////////////////
+// JoyMappedStateImpl (copied from `JoyMapping.cpp`)
+///////////////////////////////////////////////////////////
+
+JoyMappedStateImpl::JoyMappedStateImpl()
+{
+	memset(buttons_[0], 0, JoyMappedState::NumButtons);
+	memset(buttons_[1], 0, JoyMappedState::NumButtons);
+	for (unsigned int i = 0; i < JoyMappedState::NumAxes; i++)
+		axesValues_[i] = 0.0f;
+	lastHatState_ = HatState::CENTERED;
+}
+
+bool JoyMappedStateImpl::isButtonDown(ButtonName name) const
+{
+	const unsigned int buttonIndex = static_cast<unsigned int>(name);
+	bool isDown = false;
+	if (name != ButtonName::UNKNOWN)
+		isDown = (buttons_[currentButtonStateIndex_][buttonIndex] != 0);
+	return isDown;
+}
+
+bool JoyMappedStateImpl::isButtonPressed(ButtonName name) const
+{
+	const unsigned int prevButtonStateIndex = (currentButtonStateIndex_ == 0 ? 1 : 0);
+	const unsigned int buttonIndex = static_cast<unsigned int>(name);
+	bool isPressed = false;
+	if (name != ButtonName::UNKNOWN)
+		isPressed = (buttons_[currentButtonStateIndex_][buttonIndex] != 0 && buttons_[prevButtonStateIndex][buttonIndex] == 0);
+	return isPressed;
+}
+
+bool JoyMappedStateImpl::isButtonReleased(ButtonName name) const
+{
+	const unsigned int prevButtonStateIndex = (currentButtonStateIndex_ == 0 ? 1 : 0);
+	const unsigned int buttonIndex = static_cast<unsigned int>(name);
+	bool isReleased = false;
+	if (name != ButtonName::UNKNOWN)
+		isReleased = (buttons_[currentButtonStateIndex_][buttonIndex] == 0 && buttons_[prevButtonStateIndex][buttonIndex] != 0);
+	return isReleased;
+}
+
+float JoyMappedStateImpl::axisValue(AxisName name) const
+{
+	float value = 0.0f;
+	if (name != AxisName::UNKNOWN)
+		value = axesValues_[static_cast<int>(name)];
+	return value;
+}
+
+void JoyMappedStateImpl::copyButtonStateToPrev()
+{
+	const unsigned int prevButtonStateIndex = (currentButtonStateIndex_ == 0 ? 1 : 0);
+	memcpy(buttons_[prevButtonStateIndex], buttons_[currentButtonStateIndex_], JoyMappedState::NumButtons * sizeof(unsigned char));
+	currentButtonStateIndex_ = prevButtonStateIndex;
+}
+
+void JoyMappedStateImpl::resetPrevButtonState()
+{
+	const unsigned int prevButtonStateIndex = (currentButtonStateIndex_ == 0 ? 1 : 0);
+	memset(buttons_[prevButtonStateIndex], 0, JoyMappedState::NumButtons);
+}
+
+///////////////////////////////////////////////////////////
 // CONSTRUCTORS AND DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
@@ -162,8 +225,9 @@ void JoyMapping::onJoyButtonPressed(const JoyButtonEvent &event)
 		mappedButtonEvent_.buttonName = mappings_[mappingIndex].buttons[event.buttonId];
 		if (mappedButtonEvent_.buttonName != ButtonName::UNKNOWN)
 		{
+			const unsigned int currentButtonStateIndex_ = mappedJoyStates_[event.joyId].currentButtonStateIndex_;
 			const int buttonId = static_cast<int>(mappedButtonEvent_.buttonName);
-			mappedJoyStates_[event.joyId].buttons_[buttonId] = true;
+			mappedJoyStates_[event.joyId].buttons_[currentButtonStateIndex_][buttonId] = true;
 			inputEventHandler_->onJoyMappedButtonPressed(mappedButtonEvent_);
 		}
 		// There are no button axes mapped in the class constructor
@@ -185,8 +249,9 @@ void JoyMapping::onJoyButtonReleased(const JoyButtonEvent &event)
 		mappedButtonEvent_.buttonName = mappings_[mappingIndex].buttons[event.buttonId];
 		if (mappedButtonEvent_.buttonName != ButtonName::UNKNOWN)
 		{
+			const unsigned int currentButtonStateIndex_ = mappedJoyStates_[event.joyId].currentButtonStateIndex_;
 			const int buttonId = static_cast<int>(mappedButtonEvent_.buttonName);
-			mappedJoyStates_[event.joyId].buttons_[buttonId] = false;
+			mappedJoyStates_[event.joyId].buttons_[currentButtonStateIndex_][buttonId] = false;
 			inputEventHandler_->onJoyMappedButtonReleased(mappedButtonEvent_);
 		}
 		// There are no button axes mapped in the class constructor
@@ -219,15 +284,16 @@ void JoyMapping::onJoyHatMoved(const JoyHatEvent &event)
 				mappedButtonEvent_.buttonName = mappings_[mappingIndex].hats[hatIndex];
 				if (mappedButtonEvent_.buttonName != ButtonName::UNKNOWN)
 				{
+					const unsigned int currentButtonStateIndex_ = mappedJoyStates_[event.joyId].currentButtonStateIndex_;
 					const int buttonId = static_cast<int>(mappedButtonEvent_.buttonName);
 					if (newHatState & hatValue)
 					{
-						mappedJoyStates_[event.joyId].buttons_[buttonId] = true;
+						mappedJoyStates_[event.joyId].buttons_[currentButtonStateIndex_][buttonId] = true;
 						inputEventHandler_->onJoyMappedButtonPressed(mappedButtonEvent_);
 					}
 					else
 					{
-						mappedJoyStates_[event.joyId].buttons_[buttonId] = false;
+						mappedJoyStates_[event.joyId].buttons_[currentButtonStateIndex_][buttonId] = false;
 						inputEventHandler_->onJoyMappedButtonReleased(mappedButtonEvent_);
 					}
 				}
@@ -276,6 +342,7 @@ bool JoyMapping::onJoyConnected(const JoyConnectionEvent &event)
 void JoyMapping::onJoyDisconnected(const JoyConnectionEvent &event)
 {
 	mappingIndices_[event.joyId] = InvalidMappingIndex;
+	mappedJoyStates_[event.joyId].resetPrevButtonState();
 }
 
 bool JoyMapping::isJoyMapped(int joyId) const
@@ -303,6 +370,12 @@ void JoyMapping::deadZoneNormalize(Vector2f &joyVector, float deadZoneValue) con
 		normalizedLength = nctl::clamp(normalizedLength, 0.0f, 1.0f);
 		joyVector = joyVector.normalize() * normalizedLength;
 	}
+}
+
+void JoyMapping::copyButtonStateToPrev()
+{
+	for (unsigned int i = 0; i < MaxNumJoysticks; i++)
+		mappedJoyStates_[i].copyButtonStateToPrev();
 }
 
 ///////////////////////////////////////////////////////////

@@ -342,7 +342,7 @@ function nc.on_mouse_button_released(event)
 end
 
 function nc.on_mouse_moved(state)
-	if state.left_pressed then
+	if state.is_left_down then
 		nc.particle_system.set_position(particlesys_, state.x, state.y)
 	end
 end

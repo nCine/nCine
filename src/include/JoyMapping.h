@@ -20,35 +20,22 @@ using Vector2f = Vector2<float>;
 class JoyMappedStateImpl : public JoyMappedState
 {
   public:
-	JoyMappedStateImpl()
-	{
-		for (unsigned int i = 0; i < JoyMappedState::NumButtons; i++)
-			buttons_[i] = false;
-		for (unsigned int i = 0; i < JoyMappedState::NumAxes; i++)
-			axesValues_[i] = 0.0f;
-		lastHatState_ = HatState::CENTERED;
-	}
+	JoyMappedStateImpl();
 
-	bool isButtonPressed(ButtonName name) const override
-	{
-		bool pressed = false;
-		if (name != ButtonName::UNKNOWN)
-			pressed = buttons_[static_cast<int>(name)];
-		return pressed;
-	}
+	bool isButtonDown(ButtonName name) const override;
+	bool isButtonPressed(ButtonName name) const override;
+	bool isButtonReleased(ButtonName name) const override;
 
-	float axisValue(AxisName name) const override
-	{
-		float value = 0.0f;
-		if (name != AxisName::UNKNOWN)
-			value = axesValues_[static_cast<int>(name)];
-		return value;
-	}
+	float axisValue(AxisName name) const override;
 
   private:
-	unsigned char buttons_[JoyMappedState::NumButtons];
+	unsigned int currentButtonStateIndex_;
+	unsigned char buttons_[2][JoyMappedState::NumButtons];
 	float axesValues_[JoyMappedState::NumAxes];
 	unsigned char lastHatState_;
+
+	void copyButtonStateToPrev();
+	void resetPrevButtonState();
 
 	friend class JoyMapping;
 };
@@ -77,6 +64,8 @@ class JoyMapping
 	bool isJoyMapped(int joyId) const;
 	const JoyMappedStateImpl &joyMappedState(int joyId) const;
 	void deadZoneNormalize(Vector2f &joyVector, float deadZoneValue) const;
+
+	void copyButtonStateToPrev();
 
   private:
 	static const unsigned int MaxNameLength = 64;

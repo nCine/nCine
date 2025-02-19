@@ -139,7 +139,7 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 {
-	if (event.isLeftButton())
+	if (event.button == nc::MouseButton::LEFT)
 	{
 		destVector_.x = static_cast<float>(event.x);
 		destVector_.y = static_cast<float>(event.y);
@@ -148,7 +148,7 @@ void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 
 void MyEventHandler::onMouseMoved(const nc::MouseState &state)
 {
-	if (state.isLeftButtonDown())
+	if (state.isButtonDown(nc::MouseButton::LEFT))
 	{
 		destVector_.x = static_cast<float>(state.x);
 		destVector_.y = static_cast<float>(state.y);

@@ -52,6 +52,15 @@ class DLL_PUBLIC AccelerometerEvent
 };
 #endif
 
+enum class MouseButton : short int
+{
+	LEFT,
+	MIDDLE,
+	RIGHT,
+	FOURTH,
+	FIFTH
+};
+
 /// Information about the mouse state
 class DLL_PUBLIC MouseState
 {
@@ -61,11 +70,15 @@ class DLL_PUBLIC MouseState
 	/// Pointer position on the Y axis
 	int y;
 
-	virtual bool isLeftButtonDown() const = 0;
-	virtual bool isMiddleButtonDown() const = 0;
-	virtual bool isRightButtonDown() const = 0;
-	virtual bool isFourthButtonDown() const = 0;
-	virtual bool isFifthButtonDown() const = 0;
+	/// Returns `true` if the specified button is down this frame
+	virtual bool isButtonDown(MouseButton button) const = 0;
+	/// Returns `true` if the specified button went from not down to down this frame
+	virtual bool isButtonPressed(MouseButton button) const = 0;
+	/// Returns `true` if the specified button went from down to not down this frame
+	virtual bool isButtonReleased(MouseButton button) const = 0;
+
+  protected:
+	static const unsigned int NumButtons = 5;
 };
 
 /// Information about a mouse event
@@ -76,12 +89,8 @@ class DLL_PUBLIC MouseEvent
 	int x;
 	/// Pointer position on the Y axis
 	int y;
-
-	virtual bool isLeftButton() const = 0;
-	virtual bool isMiddleButton() const = 0;
-	virtual bool isRightButton() const = 0;
-	virtual bool isFourthButton() const = 0;
-	virtual bool isFifthButton() const = 0;
+	/// The button that has been pressed or released
+	MouseButton button;
 };
 
 /// Information about a scroll event (mouse wheel, touchpad gesture, etc.)
@@ -155,8 +164,13 @@ class DLL_PUBLIC DropEvent
 class DLL_PUBLIC JoystickState
 {
   public:
-	/// Returns 'true' if the specified button is pressed
+	/// Returns `true` if the specified button is down this frame
+	virtual bool isButtonDown(int buttonId) const = 0;
+	/// Returns `true` if the specified button went from not down to down this frame
 	virtual bool isButtonPressed(int buttonId) const = 0;
+	/// Returns `true` if the specified button went from down to not down this frame
+	virtual bool isButtonReleased(int buttonId) const = 0;
+
 	/// Returns the state of the specified hat
 	virtual unsigned char hatState(int hatId) const = 0;
 	/// Returns a value between -32768 and 32767 for a joystick axis
@@ -273,8 +287,13 @@ class DLL_PUBLIC JoyMappedState
 
 	virtual ~JoyMappedState() {}
 
-	/// Returns 'true' if the specified button is pressed
+	/// Returns `true` if the specified button is down this frame
+	virtual bool isButtonDown(ButtonName name) const = 0;
+	/// Returns `true` if the specified button went from not down to down this frame
 	virtual bool isButtonPressed(ButtonName name) const = 0;
+	///// Returns `true` if the specified button went from down to not down this frame
+	virtual bool isButtonReleased(ButtonName name) const = 0;
+
 	/// Returns the value of the specified axis
 	virtual float axisValue(AxisName name) const = 0;
 };

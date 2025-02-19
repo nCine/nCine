@@ -214,7 +214,7 @@ void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 
 void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 {
-	if (event.isLeftButton())
+	if (event.button == nc::MouseButton::LEFT)
 		handleCoordInput(static_cast<float>(event.x), static_cast<float>(event.y));
 }
 
