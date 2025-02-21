@@ -44,17 +44,17 @@ void Particle::init(float life, Vector2f pos, Vector2f vel, float rot, bool inLo
 	setEnabled(true);
 }
 
-void Particle::update(float interval)
+void Particle::update(float frameTime)
 {
-	if (interval >= life_)
+	if (frameTime >= life_)
 	{
 		life_ = 0.0f; // dead particle
 		setEnabled(false);
 	}
 	else
 	{
-		life_ -= interval;
-		move(velocity_ * interval);
+		life_ -= frameTime;
+		move(velocity_ * frameTime);
 	}
 }
 

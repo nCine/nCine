@@ -359,7 +359,7 @@ void Viewport::update()
 	{
 		ZoneScoped;
 		if (rootNode_->lastFrameUpdated() < theApplication().numFrames())
-			rootNode_->update(theApplication().interval());
+			rootNode_->update(theApplication().frameTime());
 		// AABBs should update after nodes have been transformed
 		updateCulling(rootNode_);
 	}

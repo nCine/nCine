@@ -81,14 +81,14 @@ void MyEventHandler::onFrameStart()
 
 	if (pauseSprites_ == false)
 	{
-		angleSprites_ += 2.5f * nc::theApplication().interval();
+		angleSprites_ += 2.5f * nc::theApplication().frameTime();
 		for (unsigned int i = 0; i < NumColSprites * NumRowSprites; i++)
 			sprites_[i]->setRotation(-angleSprites_ * 8.0f);
 	}
 
 	if (pauseGroup_ == false)
 	{
-		angleGroup_ += 2.5f * nc::theApplication().interval();
+		angleGroup_ += 2.5f * nc::theApplication().frameTime();
 		const float sine = sinf(angleGroup_);
 		const float cosine = cosf(angleGroup_);
 

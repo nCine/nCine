@@ -5,7 +5,7 @@
 
 namespace ncine {
 
-/// Frame interval and average FPS calculator interface class
+/// Frame time and average FPS calculator interface class
 class IFrameTimer
 {
   public:
@@ -14,9 +14,10 @@ class IFrameTimer
 	/// Returns the total number of frames rendered since the application started
 	virtual unsigned long int totalNumberFrames() const = 0;
 	/// Returns the time in seconds that last frame took to complete
-	virtual float lastFrameDuration() const = 0;
+	//! \note Also called delta time. */
+	virtual float lastFrameTime() const = 0;
 	/// Returns the elapsed time in seconds since current frame started
-	virtual float currentFrameDuration() const = 0;
+	virtual float currentFrameTime() const = 0;
 
 	/// Returns the average FPS during the update interval
 	virtual float averageFps() const = 0;

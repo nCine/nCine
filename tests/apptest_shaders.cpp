@@ -326,7 +326,7 @@ void MyEventHandler::onFrameStart()
 
 	if (pause_ == false)
 	{
-		angle_ += 1.0f * nc::theApplication().interval();
+		angle_ += 1.0f * nc::theApplication().frameTime();
 		if (angle_ > 360.0f)
 			angle_ -= 360.0f;
 	}

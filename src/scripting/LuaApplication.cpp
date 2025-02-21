@@ -28,7 +28,7 @@ namespace Application {
 	static const char *rootNode = "get_rootnode";
 	static const char *screenViewport = "get_screen_viewport";
 	static const char *numFrames = "get_num_frames";
-	static const char *interval = "get_interval";
+	static const char *frameTime = "get_frame_time";
 
 	static const char *width = "get_width";
 	static const char *height = "get_height";
@@ -86,7 +86,7 @@ void LuaApplication::expose(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::Application::rootNode, rootNode);
 	LuaUtils::addFunction(L, LuaNames::Application::screenViewport, screenViewport);
 	LuaUtils::addFunction(L, LuaNames::Application::numFrames, numFrames);
-	LuaUtils::addFunction(L, LuaNames::Application::interval, interval);
+	LuaUtils::addFunction(L, LuaNames::Application::frameTime, frameTime);
 
 	LuaUtils::addFunction(L, LuaNames::Application::width, width);
 	LuaUtils::addFunction(L, LuaNames::Application::height, height);
@@ -228,9 +228,9 @@ int LuaApplication::numFrames(lua_State *L)
 	return 1;
 }
 
-int LuaApplication::interval(lua_State *L)
+int LuaApplication::frameTime(lua_State *L)
 {
-	LuaUtils::push(L, theApplication().interval());
+	LuaUtils::push(L, theApplication().frameTime());
 	return 1;
 }
 

@@ -141,40 +141,40 @@ void MyEventHandler::onInit()
 
 void MyEventHandler::onFrameStart()
 {
-	const float interval = nc::theApplication().interval();
+	const float frameTime = nc::theApplication().frameTime();
 	if (!pause_)
-		angle_ += 2.0f * interval;
+		angle_ += 2.0f * frameTime;
 
 	const nc::KeyboardState &keyState = nc::theApplication().inputManager().keyboardState();
 
 	if (keyState.isKeyDown(nc::KeySym::D))
-		camPos_.x -= MoveSpeed * interval;
+		camPos_.x -= MoveSpeed * frameTime;
 	else if (keyState.isKeyDown(nc::KeySym::A))
-		camPos_.x += MoveSpeed * interval;
+		camPos_.x += MoveSpeed * frameTime;
 	if (keyState.isKeyDown(nc::KeySym::W))
-		camPos_.y -= MoveSpeed * interval;
+		camPos_.y -= MoveSpeed * frameTime;
 	else if (keyState.isKeyDown(nc::KeySym::S))
-		camPos_.y += MoveSpeed * interval;
+		camPos_.y += MoveSpeed * frameTime;
 
 	if (keyState.isKeyDown(nc::KeySym::RIGHT))
-		camRot_ += RotateSpeed * interval;
+		camRot_ += RotateSpeed * frameTime;
 	else if (keyState.isKeyDown(nc::KeySym::LEFT))
-		camRot_ -= RotateSpeed * interval;
+		camRot_ -= RotateSpeed * frameTime;
 
 	if (keyState.isKeyDown(nc::KeySym::UP))
-		camScale_ += ScaleSpeed * interval;
+		camScale_ += ScaleSpeed * frameTime;
 	else if (keyState.isKeyDown(nc::KeySym::DOWN))
-		camScale_ -= ScaleSpeed * interval;
+		camScale_ -= ScaleSpeed * frameTime;
 
 	if (joyVectorLeft_.length() > nc::IInputManager::LeftStickDeadZone)
 	{
-		camPos_.x -= joyVectorLeft_.x * MoveSpeed * interval;
-		camPos_.y -= joyVectorLeft_.y * MoveSpeed * interval;
+		camPos_.x -= joyVectorLeft_.x * MoveSpeed * frameTime;
+		camPos_.y -= joyVectorLeft_.y * MoveSpeed * frameTime;
 	}
 	if (joyVectorRight_.length() > nc::IInputManager::RightStickDeadZone)
 	{
-		camRot_ += joyVectorRight_.x * RotateSpeed * interval;
-		camScale_ += joyVectorRight_.y * ScaleSpeed * interval;
+		camRot_ += joyVectorRight_.x * RotateSpeed * frameTime;
+		camScale_ += joyVectorRight_.y * ScaleSpeed * frameTime;
 	}
 
 	const nc::Vector2f scrollDiff = scrollMove_ - scrollOrigin_;

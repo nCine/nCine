@@ -140,8 +140,8 @@ void MyEventHandler::onFrameStart()
 	if (pause_)
 		return;
 
-	const float interval = nc::theApplication().interval();
-	angle_ += 20.0f * interval;
+	const float frameTime = nc::theApplication().frameTime();
+	angle_ += 20.0f * frameTime;
 	float xAbsMax = 0.0f;
 	float yAbsMax = 0.0f;
 	for (unsigned int i = 0; i < GridSize; i++)

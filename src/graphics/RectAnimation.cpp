@@ -17,13 +17,13 @@ RectAnimation::RectAnimation(float defaultFrameDuration, LoopMode loopMode, Rewi
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void RectAnimation::updateFrame(float interval)
+void RectAnimation::updateFrame(float frameTime)
 {
 	// No frame calculation if the animation is paused or has only one rect
 	if (isPaused_ == true || rects_.size() < 2)
 		return;
 
-	elapsedFrameTime_ += interval;
+	elapsedFrameTime_ += frameTime;
 	// Determine the next frame rectangle
 	while (elapsedFrameTime_ >= frameDurations_[currentFrame_])
 	{

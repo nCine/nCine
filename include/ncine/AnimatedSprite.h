@@ -38,7 +38,7 @@ class DLL_PUBLIC AnimatedSprite : public Sprite
 	/// Sets the pause state for the animation
 	void setPaused(bool isPaused);
 
-	void update(float interval) override;
+	void update(float frameTime) override;
 
 	/// Adds a new animation
 	void addAnimation(const RectAnimation &anim);

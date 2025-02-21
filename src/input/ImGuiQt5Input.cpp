@@ -239,7 +239,7 @@ void ImGuiQt5Input::newFrame()
 {
 	ImGuiIO &io = ImGui::GetIO();
 	IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! Missing call to ImGuiDrawing::buildFonts() function?");
-	io.DeltaTime = theApplication().interval();
+	io.DeltaTime = theApplication().frameTime();
 
 	io.DisplaySize = ImVec2(theApplication().width(), theApplication().height());
 

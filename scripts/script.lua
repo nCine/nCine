@@ -153,8 +153,8 @@ function nc.on_frame_start()
 		return
 	end
 
-	local interval = nc.application.get_interval()
-	angle_ = angle_ + 100 * interval
+	local frame_time = nc.application.get_frame_time()
+	angle_ = angle_ + 100 * frame_time
 
 	local newpos = {x = 0, y = 0}
 	newpos.x = pos_.x + 200 * math.sin(math.rad(angle_))
@@ -187,8 +187,8 @@ function nc.on_frame_start()
 		nc.animated_sprite.set_frame(animated_sprite_, 0)
 	end
 	local animated_sprite_pos = nc.animated_sprite.get_position(animated_sprite_)
-	animated_sprite_pos.x = animated_sprite_pos.x + velocity.x * 100 * interval
-	animated_sprite_pos.y = animated_sprite_pos.y + velocity.y * 100 * interval
+	animated_sprite_pos.x = animated_sprite_pos.x + velocity.x * 100 * frame_time
+	animated_sprite_pos.y = animated_sprite_pos.y + velocity.y * 100 * frame_time
 	nc.animated_sprite.set_position(animated_sprite_, animated_sprite_pos)
 
 	if nc.input.is_key_down(keystate, nc.keysym.LEFT) and nc.input.is_key_down(keystate, nc.keysym.DOWN) then

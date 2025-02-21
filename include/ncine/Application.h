@@ -107,7 +107,7 @@ class DLL_PUBLIC Application
 	/// Returns the total number of frames already rendered
 	unsigned long int numFrames() const;
 	/// Returns the time in seconds that last frame took to complete
-	float interval() const;
+	float frameTime() const;
 	/// Returns the frame timer interface
 	IFrameTimer &frameTimer();
 

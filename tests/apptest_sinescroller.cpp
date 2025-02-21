@@ -60,9 +60,9 @@ void MyEventHandler::onInit()
 
 void MyEventHandler::onFrameStart()
 {
-	const float interval = nc::theApplication().interval();
+	const float frameTime = nc::theApplication().frameTime();
 	if (!pause_)
-		angle_ += 2.0f * interval;
+		angle_ += 2.0f * frameTime;
 
 	const nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
 	debugString_->clear();

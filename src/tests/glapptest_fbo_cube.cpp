@@ -216,10 +216,11 @@ void MyEventHandler::onFrameStart()
 	texture_->bind();
 	glDrawElements(GL_TRIANGLES, 12 * 3, GL_UNSIGNED_SHORT, nullptr);
 
+	const float frameTime = nc::theApplication().frameTime();
 	if (pauseTri_ == false)
-		angleTri_ += 20.0f * nc::theApplication().interval();
+		angleTri_ += 20.0f * frameTime;
 	if (pauseCube_ == false)
-		angleCube_ += 20.0f * nc::theApplication().interval();
+		angleCube_ += 20.0f * frameTime;
 }
 
 void MyEventHandler::onResizeWindow(int width, int height)

@@ -50,7 +50,7 @@ class Particle : public Sprite
 	/// Initializes a particle with initial life, position, velocity and rotation
 	void init(float life, Vector2f pos, Vector2f vel, float rot, bool inLocalSpace);
 	/// Updates particle data after the specified amount of seconds has passed
-	void update(float interval) override;
+	void update(float frameTime) override;
 	/// Custom transform method to allow independent position from parent
 	void transform() override;
 

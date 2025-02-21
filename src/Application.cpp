@@ -87,9 +87,10 @@ unsigned long int Application::numFrames() const
 	return frameTimer_->totalNumberFrames();
 }
 
-float Application::interval() const
+//! \note Also called delta time. */
+float Application::frameTime() const
 {
-	return frameTimer_->lastFrameDuration();
+	return frameTimer_->lastFrameTime();
 }
 
 ///////////////////////////////////////////////////////////
@@ -338,7 +339,7 @@ void Application::step()
 	if (appCfg_.frameLimit > 0)
 	{
 		const float frameTimeDuration = 1.0f / static_cast<float>(appCfg_.frameLimit);
-		while (frameTimer_->currentFrameDuration() < frameTimeDuration)
+		while (frameTimer_->currentFrameTime() < frameTimeDuration)
 			Timer::sleep(0);
 	}
 }

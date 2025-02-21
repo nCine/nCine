@@ -87,7 +87,7 @@ class DLL_PUBLIC SceneNode : public Object
 	inline uint16_t visitOrderIndex() const { return visitOrderIndex_; }
 
 	/// Called once every frame to update the node
-	virtual void update(float interval);
+	virtual void update(float frameTime);
 	/// Draws the node and visits its children
 	virtual void visit(RenderQueue &renderQueue, unsigned int &visitOrderIndex);
 	/// Renders the node

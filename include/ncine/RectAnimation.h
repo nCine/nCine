@@ -38,7 +38,7 @@ class DLL_PUBLIC RectAnimation
 	inline void setPaused(bool isPaused) { isPaused_ = isPaused; }
 
 	/// Updates current frame based on time passed
-	void updateFrame(float interval);
+	void updateFrame(float frameTime);
 
 	/// Returns the number of frames (rectangles)
 	inline unsigned int numFrames() const { return rects_.size(); }

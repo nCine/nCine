@@ -26,7 +26,7 @@ class LuaApplication
 	static int rootNode(lua_State *L);
 	static int screenViewport(lua_State *L);
 	static int numFrames(lua_State *L);
-	static int interval(lua_State *L);
+	static int frameTime(lua_State *L);
 
 	static int width(lua_State *L);
 	static int height(lua_State *L);

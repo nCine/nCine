@@ -144,7 +144,7 @@ void ImGuiDebugOverlay::updateFrameTimings()
 		const AppConfiguration &appCfg = theApplication().appConfiguration();
 		const float *timings = theApplication().timings();
 
-		plotValues_[ValuesType::FRAME_TIME][index_] = theApplication().interval();
+		plotValues_[ValuesType::FRAME_TIME][index_] = theApplication().frameTime();
 		plotValues_[ValuesType::FRAME_START][index_] = timings[Application::Timings::FRAME_START];
 		if (appCfg.withScenegraph)
 			plotValues_[ValuesType::POST_UPDATE][index_] = timings[Application::Timings::POST_UPDATE];
@@ -1820,7 +1820,7 @@ void ImGuiDebugOverlay::guiTopRight()
 	{
 		ImGui::Begin("###Top-Right", nullptr, windowFlags);
 
-		ImGui::Text("FPS: %.0f (%.2f ms)", 1.0f / theApplication().interval(), theApplication().interval() * 1000.0f);
+		ImGui::Text("FPS: %.0f (%.2f ms)", 1.0f / theApplication().frameTime(), theApplication().frameTime() * 1000.0f);
 		ImGui::Text("Num Frames: %lu", theApplication().numFrames());
 
 		const AppConfiguration &appCfg = theApplication().appConfiguration();

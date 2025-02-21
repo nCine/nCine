@@ -13,8 +13,8 @@ class LuaIFrameTimer
 
   private:
 	static int totalNumberFrames(lua_State *L);
-	static int lastFrameDuration(lua_State *L);
-	static int currentFrameDuration(lua_State *L);
+	static int lastFrameTime(lua_State *L);
+	static int currentFrameTime(lua_State *L);
 
 	static int averageFps(lua_State *L);
 	static int averageFrameTime(lua_State *L);

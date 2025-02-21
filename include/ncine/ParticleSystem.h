@@ -88,7 +88,7 @@ class DLL_PUBLIC ParticleSystem : public SceneNode
 	/// Sets the rendering layer for every particle in the system
 	void setLayer(uint16_t layer);
 
-	void update(float interval) override;
+	void update(float frameTime) override;
 
 	inline static ObjectType sType() { return ObjectType::PARTICLE_SYSTEM; }
 

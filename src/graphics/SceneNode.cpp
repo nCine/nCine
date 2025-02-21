@@ -279,7 +279,8 @@ bool SceneNode::swapNodeBack()
 	return parent_->swapChildrenNodes(childOrderIndex_, childOrderIndex_ - 1);
 }
 
-void SceneNode::update(float interval)
+/*! \note The frame time is expressed in seconds. */
+void SceneNode::update(float frameTime)
 {
 	// Early return not needed, the first call to this method is on the root node
 
@@ -287,7 +288,7 @@ void SceneNode::update(float interval)
 	{
 		transform();
 		for (SceneNode *child : children_)
-			child->update(interval);
+			child->update(frameTime);
 
 		// A non drawable scenenode does not have the `updateRenderCommand()` method to reset the flags
 		if (type_ == ObjectType::SCENENODE)

@@ -180,7 +180,7 @@ void ImGuiAndroidInput::newFrame()
 {
 	ImGuiIO &io = ImGui::GetIO();
 	IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! Missing call to ImGuiDrawing::buildFonts() function?");
-	io.DeltaTime = theApplication().interval();
+	io.DeltaTime = theApplication().frameTime();
 
 	// Setup display size (every frame to accommodate for window resizing)
 	const int32_t windowWidth = ANativeWindow_getWidth(window_);

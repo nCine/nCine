@@ -16,9 +16,9 @@ class FrameTimer : public IFrameTimer
 	/// Returns the total number of frames counted
 	inline unsigned long int totalNumberFrames() const override { return totNumFrames_; }
 	/// Returns the duration in seconds between the last two subsequent calls to `addFrame()`
-	inline float lastFrameDuration() const override { return frameDuration_; }
-	/// Returns the duration in seconds since the last call to `addFrame()`
-	inline float currentFrameDuration() const override { return frameStart_.secondsSince(); }
+	inline float lastFrameTime() const override { return frameTime_; }
+	/// Returns the elapsed time in seconds since the last call to `addFrame()`
+	inline float currentFrameTime() const override { return frameStart_.secondsSince(); }
 
 	inline float averageFps() const override { return avgFps_; }
 	inline float averageFrameTime() const override { return avgFrameTime_; }
@@ -52,8 +52,8 @@ class FrameTimer : public IFrameTimer
 
 	/// Timestamp at the beginning of a frame
 	TimeStamp frameStart_;
-	/// Last frame duration in seconds
-	float frameDuration_;
+	/// Last frame time in seconds
+	float frameTime_;
 	/// Timestamp at the begininng of application suspension
 	TimeStamp suspensionStart_;
 

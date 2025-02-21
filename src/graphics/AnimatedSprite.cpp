@@ -60,19 +60,19 @@ void AnimatedSprite::setPaused(bool isPaused)
 		anims_[currentAnimIndex_].setPaused(isPaused);
 }
 
-void AnimatedSprite::update(float interval)
+void AnimatedSprite::update(float frameTime)
 {
 	if (anims_.isEmpty() == false)
 	{
 		const unsigned int previousFrame = anims_[currentAnimIndex_].frame();
-		anims_[currentAnimIndex_].updateFrame(interval);
+		anims_[currentAnimIndex_].updateFrame(frameTime);
 
 		// Updating sprite texture rectangle only on change
 		if (previousFrame != anims_[currentAnimIndex_].frame())
 			setTexRect(anims_[currentAnimIndex_].rect());
 	}
 
-	Sprite::update(interval);
+	Sprite::update(frameTime);
 }
 
 void AnimatedSprite::addAnimation(const RectAnimation &anim)

@@ -38,7 +38,7 @@ int imguiWindowSizeFrames = 3;
 int swapInterval = 1;
 
 const float fpsShowTime = 0.25f;
-float showInterval = 0.0f;
+float showFrameTime = 0.0f;
 nc::TimeStamp showFpsTimestamp;
 
 bool showImGui = true;
@@ -269,10 +269,10 @@ void MyEventHandler::onFrameStart()
 			if (showFpsTimestamp.secondsSince() > fpsShowTime)
 			{
 				showFpsTimestamp = nc::TimeStamp::now();
-				showInterval = nc::theApplication().interval();
+				showFrameTime = nc::theApplication().frameTime();
 			}
 
-			ImGui::Text("FPS: %u (%.2f ms)", static_cast<unsigned int>(1.0f / showInterval), showInterval * 1000.0f);
+			ImGui::Text("FPS: %u (%.2f ms)", static_cast<unsigned int>(1.0f / showFrameTime), showFrameTime * 1000.0f);
 		}
 		ImGui::End();
 	}

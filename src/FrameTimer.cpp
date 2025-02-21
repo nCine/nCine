@@ -16,7 +16,7 @@ IFrameTimer::~IFrameTimer()
  *  seconds and writes to the log every `loggingInterval` seconds. */
 FrameTimer::FrameTimer(float averageInterval, float loggingInterval)
     : averageInterval_(averageInterval), loggingInterval_(loggingInterval),
-      frameDuration_(0.0f),
+      frameTime_(0.0f),
       totNumFrames_(0L), avgNumFrames_(0L), logNumFrames_(0L),
       avgFps_(0.0f), avgFrameTime_(0.0f), logLevel_(ILogger::LogLevel::INFO)
 {
@@ -100,9 +100,9 @@ void FrameTimer::setLogLevel(ILogger::LogLevel logLevel)
 
 void FrameTimer::addFrame()
 {
-	frameDuration_ = frameStart_.secondsSince();
+	frameTime_ = frameStart_.secondsSince();
 
-	// Start counting for the next frame interval
+	// Start counting for the next frame time
 	frameStart_ = TimeStamp::now();
 
 	totNumFrames_++;

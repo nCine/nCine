@@ -186,7 +186,7 @@ void ParticleSystem::setLayer(uint16_t layer)
 		particle->setLayer(layer);
 }
 
-void ParticleSystem::update(float interval)
+void ParticleSystem::update(float frameTime)
 {
 	if (updateEnabled_ == false)
 		return;
@@ -212,7 +212,7 @@ void ParticleSystem::update(float interval)
 
 			if (particlesUpdateEnabled_)
 			{
-				particle->update(interval);
+				particle->update(frameTime);
 
 				// Releasing the particle if it has just died
 				if (particle->isAlive() == false)

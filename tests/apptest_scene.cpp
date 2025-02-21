@@ -168,7 +168,7 @@ void MyEventHandler::onFrameStart()
 
 	if (pause == false)
 	{
-		angle_ += 1.0f * nc::theApplication().interval();
+		angle_ += 1.0f * nc::theApplication().frameTime();
 		if (angle_ > 360.0f)
 			angle_ -= 360.0f;
 	}
@@ -326,7 +326,7 @@ void MyEventHandler::onFrameStart()
 
 #ifdef HAS_GUI
 	if (pause == false && speed == FAST)
-		angle_ += 1.0f * nc::theApplication().interval();
+		angle_ += 1.0f * nc::theApplication().frameTime();
 
 	#ifdef __ANDROID__
 	if (softInputState != softInputPreviousState)

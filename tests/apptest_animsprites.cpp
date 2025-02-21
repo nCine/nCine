@@ -97,7 +97,7 @@ void MyEventHandler::onFrameStart()
 		const float angle = 180.0f + (atan2f(reachVector.y, reachVector.x) - atan2f(1.0f, 0.0f)) * nc::fRadToDeg;
 		animSprite_->setRotation(angle);
 
-		reachVector *= nc::theApplication().interval() * SpriteSpeed;
+		reachVector *= nc::theApplication().frameTime() * SpriteSpeed;
 		animSprite_->move(reachVector);
 	}
 	else

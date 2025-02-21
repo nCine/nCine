@@ -177,36 +177,36 @@ void MyEventHandler::onInit()
 
 void MyEventHandler::onFrameStart()
 {
-	const float interval = nc::theApplication().interval();
+	const float frameTime = nc::theApplication().frameTime();
 	if (!pause_)
-		angle_ += 20.0f * interval;
+		angle_ += 20.0f * frameTime;
 
 	const nc::KeyboardState &keyState = nc::theApplication().inputManager().keyboardState();
 
 	if (keyState.isKeyDown(nc::KeySym::UP) || keyState.isKeyDown(nc::KeySym::W))
-		camScale_ += ScaleSpeed * interval;
+		camScale_ += ScaleSpeed * frameTime;
 	else if (keyState.isKeyDown(nc::KeySym::DOWN) || keyState.isKeyDown(nc::KeySym::S))
-		camScale_ -= ScaleSpeed * interval;
+		camScale_ -= ScaleSpeed * frameTime;
 
 	if (keyState.isKeyDown(nc::KeySym::RIGHT) || keyState.isKeyDown(nc::KeySym::D))
 	{
-		activeSpritesFloat_ += EnableSpriteSpeed * interval;
+		activeSpritesFloat_ += EnableSpriteSpeed * frameTime;
 		updateActiveSprites_ = true;
 	}
 	else if (keyState.isKeyDown(nc::KeySym::LEFT) || keyState.isKeyDown(nc::KeySym::A))
 	{
-		activeSpritesFloat_ -= EnableSpriteSpeed * interval;
+		activeSpritesFloat_ -= EnableSpriteSpeed * frameTime;
 		updateActiveSprites_ = true;
 	}
 
 	if (joyVectorLeft_.length() > nc::IInputManager::LeftStickDeadZone)
 	{
-		activeSpritesFloat_ += joyVectorLeft_.x * EnableSpriteSpeed * interval;
+		activeSpritesFloat_ += joyVectorLeft_.x * EnableSpriteSpeed * frameTime;
 		updateActiveSprites_ = true;
 	}
 
 	if (joyVectorRight_.length() > nc::IInputManager::RightStickDeadZone)
-		camScale_ += joyVectorRight_.y * ScaleSpeed * interval;
+		camScale_ += joyVectorRight_.y * ScaleSpeed * frameTime;
 
 	const nc::Vector2f scrollDiff = scrollMove_ - scrollOrigin_;
 	if (scrollDiff.sqrLength() > 2.0f)

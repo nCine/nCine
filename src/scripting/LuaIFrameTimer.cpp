@@ -12,8 +12,8 @@ namespace IFrameTimer {
 	static const char *IFrameTimer = "frame_timer";
 
 	static const char *totalNumberFrames = "total_number_frames";
-	static const char *lastFrameDuration = "last_frame_duration";
-	static const char *currentFrameDuration = "current_frame_duration";
+	static const char *lastFrameTime = "last_frame_time";
+	static const char *currentFrameTime = "current_frame_time";
 
 	static const char *averageFps = "average_fps";
 	static const char *averageFrameTime = "average_frame_time";
@@ -40,8 +40,8 @@ void LuaIFrameTimer::expose(lua_State *L)
 	LuaUtils::createTable(L, 0, 13);
 
 	LuaUtils::addFunction(L, LuaNames::IFrameTimer::totalNumberFrames, totalNumberFrames);
-	LuaUtils::addFunction(L, LuaNames::IFrameTimer::lastFrameDuration, lastFrameDuration);
-	LuaUtils::addFunction(L, LuaNames::IFrameTimer::currentFrameDuration, currentFrameDuration);
+	LuaUtils::addFunction(L, LuaNames::IFrameTimer::lastFrameTime, lastFrameTime);
+	LuaUtils::addFunction(L, LuaNames::IFrameTimer::currentFrameTime, currentFrameTime);
 
 	LuaUtils::addFunction(L, LuaNames::IFrameTimer::averageFps, averageFps);
 	LuaUtils::addFunction(L, LuaNames::IFrameTimer::averageFrameTime, averageFrameTime);
@@ -73,17 +73,17 @@ int LuaIFrameTimer::totalNumberFrames(lua_State *L)
 	return 1;
 }
 
-int LuaIFrameTimer::lastFrameDuration(lua_State *L)
+int LuaIFrameTimer::lastFrameTime(lua_State *L)
 {
 	const IFrameTimer &frameTimer = theApplication().frameTimer();
-	LuaUtils::push(L, frameTimer.lastFrameDuration());
+	LuaUtils::push(L, frameTimer.lastFrameTime());
 	return 1;
 }
 
-int LuaIFrameTimer::currentFrameDuration(lua_State *L)
+int LuaIFrameTimer::currentFrameTime(lua_State *L)
 {
 	const IFrameTimer &frameTimer = theApplication().frameTimer();
-	LuaUtils::push(L, frameTimer.currentFrameDuration());
+	LuaUtils::push(L, frameTimer.currentFrameTime());
 	return 1;
 }
 
