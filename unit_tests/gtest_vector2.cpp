@@ -314,6 +314,30 @@ TEST_F(Vector2Test, DotProduct)
 	ASSERT_FLOAT_EQ(result, v1_.x * v2_.x + v1_.y * v2_.y);
 }
 
+TEST_F(Vector2Test, Normalized)
+{
+	printVector("v1: ", v1_);
+	const nc::Vector2f newVector = v1_.normalized();
+	printVector("Creating a new vector as the normalized version of the first one: ", newVector);
+
+	const float length = sqrt(v1_.x * v1_.x + v1_.y * v1_.y);
+	ASSERT_FLOAT_EQ(newVector.x, v1_.x / length);
+	ASSERT_FLOAT_EQ(newVector.y, v1_.y / length);
+}
+
+TEST_F(Vector2Test, NormalizedZero)
+{
+	nc::Vector2f shortVector(FLT_MIN, 0.0f);
+	printVector("Short vector: ", shortVector);
+	const nc::Vector2f newVector = shortVector.normalized();
+	printVector("Creating a new vector as the normalized version of the first one: ", newVector);
+
+	const float length = sqrt(newVector.x * newVector.x + newVector.y * newVector.y);
+	ASSERT_EQ(length, 0.0f);
+	ASSERT_EQ(newVector.x, 0.0f);
+	ASSERT_EQ(newVector.y, 0.0f);
+}
+
 TEST_F(Vector2Test, Normalize)
 {
 	const nc::Vector2f oldV1 = v1_;
@@ -326,15 +350,18 @@ TEST_F(Vector2Test, Normalize)
 	ASSERT_FLOAT_EQ(v1_.y, oldV1.y / length);
 }
 
-TEST_F(Vector2Test, Normalized)
+TEST_F(Vector2Test, NormalizeZero)
 {
-	printVector("v1: ", v1_);
-	const nc::Vector2f newVector = v1_.normalized();
-	printVector("Creating a new vector as the normalized version of the first one: ", v1_.normalize());
+	nc::Vector2f shortVector(FLT_MIN, 0.0f);
 
-	const float length = sqrt(v1_.x * v1_.x + v1_.y * v1_.y);
-	ASSERT_FLOAT_EQ(newVector.x, v1_.x / length);
-	ASSERT_FLOAT_EQ(newVector.y, v1_.y / length);
+	printVector("Short vector: ", shortVector);
+	printVector("Normalizing the short vector: ", shortVector.normalize());
+
+	const float length = sqrt(shortVector.x * shortVector.x +
+	                          shortVector.y * shortVector.y);
+	ASSERT_EQ(length, 0.0f);
+	ASSERT_EQ(shortVector.x, 0.0f);
+	ASSERT_EQ(shortVector.y, 0.0f);
 }
 
 TEST_F(Vector2Test, Length)
@@ -373,7 +400,7 @@ TEST_F(Vector2Test, EqualityOperator)
 	const nc::Vector2f newVector = v1_;
 	printVector("Creating a new vector as a copy of the first one: ", newVector);
 
-	printf("The first vector components are equal to the new one: %d", v1_ == newVector);
+	printf("The first vector components are equal to the new one: %d\n", v1_ == newVector);
 
 	ASSERT_TRUE(v1_ == newVector);
 	ASSERT_FLOAT_EQ(v1_.x, newVector.x);

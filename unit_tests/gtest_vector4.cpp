@@ -395,6 +395,37 @@ TEST_F(Vector4Test, DotProduct)
 	ASSERT_FLOAT_EQ(result, v1_.x * v2_.x + v1_.y * v2_.y + v1_.z * v2_.z + v1_.w * v2_.w);
 }
 
+TEST_F(Vector4Test, Normalized)
+{
+	printVector("v1: ", v1_);
+	const nc::Vector4f newVector = v1_.normalized();
+	printVector("Creating a new vector as the normalized version of the first one: ", newVector);
+
+	const float length = sqrt(v1_.x * v1_.x + v1_.y * v1_.y + v1_.z * v1_.z + v1_.w * v1_.w);
+	ASSERT_FLOAT_EQ(newVector.x, v1_.x / length);
+	ASSERT_FLOAT_EQ(newVector.y, v1_.y / length);
+	ASSERT_FLOAT_EQ(newVector.z, v1_.z / length);
+	ASSERT_FLOAT_EQ(newVector.w, v1_.w / length);
+}
+
+TEST_F(Vector4Test, NormalizedZero)
+{
+	nc::Vector4f shortVector(FLT_MIN, 0.0f, 0.0f, 0.0f);
+	printVector("Short vector: ", shortVector);
+	const nc::Vector4f newVector = shortVector.normalized();
+	printVector("Creating a new vector as the normalized version of the first one: ", newVector);
+
+	const float length = sqrt(newVector.x * newVector.x +
+	                          newVector.y * newVector.y +
+	                          newVector.z * newVector.z +
+	                          newVector.w * newVector.w);
+	ASSERT_EQ(length, 0.0f);
+	ASSERT_EQ(newVector.x, 0.0f);
+	ASSERT_EQ(newVector.y, 0.0f);
+	ASSERT_EQ(newVector.z, 0.0f);
+	ASSERT_EQ(newVector.w, 0.0f);
+}
+
 TEST_F(Vector4Test, Normalize)
 {
 	const nc::Vector4f oldV1 = v1_;
@@ -409,17 +440,22 @@ TEST_F(Vector4Test, Normalize)
 	ASSERT_FLOAT_EQ(v1_.w, oldV1.w / length);
 }
 
-TEST_F(Vector4Test, Normalized)
+TEST_F(Vector4Test, NormalizeZero)
 {
-	printVector("v1: ", v1_);
-	const nc::Vector4f newVector = v1_.normalized();
-	printVector("Creating a new vector as the normalized version of the first one: ", v1_.normalize());
+	nc::Vector4f shortVector(FLT_MIN, 0.0f, 0.0f, 0.0f);
 
-	const float length = sqrt(v1_.x * v1_.x + v1_.y * v1_.y + v1_.z * v1_.z + v1_.w * v1_.w);
-	ASSERT_FLOAT_EQ(newVector.x, v1_.x / length);
-	ASSERT_FLOAT_EQ(newVector.y, v1_.y / length);
-	ASSERT_FLOAT_EQ(newVector.z, v1_.z / length);
-	ASSERT_FLOAT_EQ(newVector.w, v1_.w / length);
+	printVector("Short vector: ", shortVector);
+	printVector("Normalizing the short vector: ", shortVector.normalize());
+
+	const float length = sqrt(shortVector.x * shortVector.x +
+	                          shortVector.y * shortVector.y +
+	                          shortVector.z * shortVector.z +
+	                          shortVector.w * shortVector.w);
+	ASSERT_EQ(length, 0.0f);
+	ASSERT_EQ(shortVector.x, 0.0f);
+	ASSERT_EQ(shortVector.y, 0.0f);
+	ASSERT_EQ(shortVector.z, 0.0f);
+	ASSERT_EQ(shortVector.w, 0.0f);
 }
 
 TEST_F(Vector4Test, Length)
@@ -483,7 +519,7 @@ TEST_F(Vector4Test, EqualityOperator)
 	const nc::Vector4f newVector = v1_;
 	printVector("Creating a new vector as a copy of the first one: ", newVector);
 
-	printf("The first vector components are equal to the new one: %d", v1_ == newVector);
+	printf("The first vector components are equal to the new one: %d\n", v1_ == newVector);
 
 	ASSERT_TRUE(v1_ == newVector);
 	ASSERT_FLOAT_EQ(v1_.x, newVector.x);

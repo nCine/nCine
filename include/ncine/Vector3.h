@@ -318,18 +318,34 @@ inline T Vector3<T>::sqrLength() const
 template <class T>
 inline Vector3<T> Vector3<T>::normalized() const
 {
-	const T len = length();
-	return Vector3(x / len, y / len, z / len);
+	const T sqrLen = sqrLength();
+	if (sqrLen > 0)
+	{
+		const T len = sqrt(sqrLen);
+		return Vector3(x / len, y / len, z / len);
+	}
+
+	return Vector3::Zero;
 }
 
 template <class T>
 inline Vector3<T> &Vector3<T>::normalize()
 {
-	const T len = length();
+	const T sqrLen = sqrLength();
 
-	x /= len;
-	y /= len;
-	z /= len;
+	if (sqrLen > 0)
+	{
+		const T len = sqrt(sqrLen);
+		x /= len;
+		y /= len;
+		z /= len;
+	}
+	else
+	{
+		x = 0;
+		y = 0;
+		z = 0;
+	}
 
 	return *this;
 }

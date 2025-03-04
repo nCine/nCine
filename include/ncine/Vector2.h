@@ -290,17 +290,32 @@ inline T Vector2<T>::sqrLength() const
 template <class T>
 inline Vector2<T> Vector2<T>::normalized() const
 {
-	const T len = length();
-	return Vector2(x / len, y / len);
+	const T sqrLen = sqrLength();
+	if (sqrLen > 0)
+	{
+		const T len = sqrt(sqrLen);
+		return Vector2(x / len, y / len);
+	}
+
+	return Vector2::Zero;
 }
 
 template <class T>
 inline Vector2<T> &Vector2<T>::normalize()
 {
-	const T len = length();
+	const T sqrLen = sqrLength();
 
-	x /= len;
-	y /= len;
+	if (sqrLen > 0)
+	{
+		const T len = sqrt(sqrLen);
+		x /= len;
+		y /= len;
+	}
+	else
+	{
+		x = 0;
+		y = 0;
+	}
 
 	return *this;
 }
