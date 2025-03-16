@@ -39,7 +39,7 @@ if("${NCINE_OPTIONS_PRESETS}" STREQUAL "LuaDist")
 else()
 	if(PNG_FOUND)
 		list(APPEND APPTESTS apptest_texformats apptest_joystick apptest_rotozoom apptest_animsprites
-			apptest_particles apptest_scene apptest_font apptest_multitouch apptest_camera apptest_meshsprites
+			apptest_particles apptest_gui apptest_font apptest_multitouch apptest_camera apptest_meshsprites
 			apptest_meshdeform apptest_sinescroller apptest_clones apptest_shaders apptest_bunnymark)
 		if(OPENAL_FOUND)
 			list(APPEND APPTESTS apptest_audio)

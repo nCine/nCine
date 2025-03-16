@@ -1,6 +1,6 @@
 #include <ncine/config.h>
 
-#include "apptest_scene.h"
+#include "apptest_gui.h"
 #include <ncine/Application.h>
 #include <ncine/Texture.h>
 #include <ncine/Sprite.h>

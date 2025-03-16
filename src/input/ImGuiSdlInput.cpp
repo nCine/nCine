@@ -19,6 +19,7 @@
 	#define SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE 0
 #endif
 #define SDL_HAS_VULKAN SDL_VERSION_ATLEAST(2, 0, 6)
+#define SDL_HAS_OPEN_URL SDL_VERSION_ATLEAST(2,0,14)
 #if SDL_HAS_VULKAN
 extern "C" { extern DECLSPEC void SDLCALL SDL_Vulkan_GetDrawableSize(SDL_Window *window, int *w, int *h); }
 #endif
@@ -54,7 +55,6 @@ namespace {
 
 	ImGuiKey sdlKeycodeToImGuiKey(SDL_Keycode keycode, SDL_Scancode scancode)
 	{
-		IM_UNUSED(scancode);
 		switch (keycode)
 		{
 			case SDLK_TAB: return ImGuiKey_Tab;
@@ -72,17 +72,17 @@ namespace {
 			case SDLK_SPACE: return ImGuiKey_Space;
 			case SDLK_RETURN: return ImGuiKey_Enter;
 			case SDLK_ESCAPE: return ImGuiKey_Escape;
-			case SDLK_QUOTE: return ImGuiKey_Apostrophe;
+			//case SDLK_QUOTE: return ImGuiKey_Apostrophe;
 			case SDLK_COMMA: return ImGuiKey_Comma;
-			case SDLK_MINUS: return ImGuiKey_Minus;
+			//case SDLK_MINUS: return ImGuiKey_Minus;
 			case SDLK_PERIOD: return ImGuiKey_Period;
-			case SDLK_SLASH: return ImGuiKey_Slash;
+			//case SDLK_SLASH: return ImGuiKey_Slash;
 			case SDLK_SEMICOLON: return ImGuiKey_Semicolon;
-			case SDLK_EQUALS: return ImGuiKey_Equal;
-			case SDLK_LEFTBRACKET: return ImGuiKey_LeftBracket;
-			case SDLK_BACKSLASH: return ImGuiKey_Backslash;
-			case SDLK_RIGHTBRACKET: return ImGuiKey_RightBracket;
-			case SDLK_BACKQUOTE: return ImGuiKey_GraveAccent;
+			//case SDLK_EQUALS: return ImGuiKey_Equal;
+			//case SDLK_LEFTBRACKET: return ImGuiKey_LeftBracket;
+			//case SDLK_BACKSLASH: return ImGuiKey_Backslash;
+			//case SDLK_RIGHTBRACKET: return ImGuiKey_RightBracket;
+			//case SDLK_BACKQUOTE: return ImGuiKey_GraveAccent;
 			case SDLK_CAPSLOCK: return ImGuiKey_CapsLock;
 			case SDLK_SCROLLLOCK: return ImGuiKey_ScrollLock;
 			case SDLK_NUMLOCKCLEAR: return ImGuiKey_NumLock;
@@ -176,6 +176,24 @@ namespace {
 			case SDLK_F24: return ImGuiKey_F24;
 			case SDLK_AC_BACK: return ImGuiKey_AppBack;
 			case SDLK_AC_FORWARD: return ImGuiKey_AppForward;
+			default: break;
+		}
+
+		// Fallback to scancode
+		switch (scancode)
+		{
+			case SDL_SCANCODE_GRAVE: return ImGuiKey_GraveAccent;
+			case SDL_SCANCODE_MINUS: return ImGuiKey_Minus;
+			case SDL_SCANCODE_EQUALS: return ImGuiKey_Equal;
+			case SDL_SCANCODE_LEFTBRACKET: return ImGuiKey_LeftBracket;
+			case SDL_SCANCODE_RIGHTBRACKET: return ImGuiKey_RightBracket;
+			case SDL_SCANCODE_NONUSBACKSLASH: return ImGuiKey_Oem102;
+			case SDL_SCANCODE_BACKSLASH: return ImGuiKey_Backslash;
+			case SDL_SCANCODE_SEMICOLON: return ImGuiKey_Semicolon;
+			case SDL_SCANCODE_APOSTROPHE: return ImGuiKey_Apostrophe;
+			case SDL_SCANCODE_COMMA: return ImGuiKey_Comma;
+			case SDL_SCANCODE_PERIOD: return ImGuiKey_Period;
+			case SDL_SCANCODE_SLASH: return ImGuiKey_Slash;
 			default: break;
 		}
 		return ImGuiKey_None;
@@ -279,6 +297,8 @@ void ImGuiSdlInput::init(SDL_Window *window)
 	platformIo.Platform_SetImeDataFn = setPlatformImeData;
 #ifdef __EMSCRIPTEN__
 	platformIo.Platform_OpenInShellFn = [](ImGuiContext*, const char *url) { emscriptenOpenURL(url); return true; };
+#elif SDL_HAS_OPEN_URL
+	platformIo.Platform_OpenInShellFn = [](ImGuiContext*, const char *url) { return SDL_OpenURL(url) == 0; };
 #endif
 
 	// Gamepad handling
@@ -294,6 +314,8 @@ void ImGuiSdlInput::init(SDL_Window *window)
 	mouseCursors_[ImGuiMouseCursor_ResizeNESW] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENESW);
 	mouseCursors_[ImGuiMouseCursor_ResizeNWSE] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE);
 	mouseCursors_[ImGuiMouseCursor_Hand] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
+	mouseCursors_[ImGuiMouseCursor_Wait] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_WAIT);
+	mouseCursors_[ImGuiMouseCursor_Progress] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_WAITARROW);
 	mouseCursors_[ImGuiMouseCursor_NotAllowed] = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NO);
 
 	// Set platform dependent data in viewport
@@ -531,8 +553,14 @@ void ImGuiSdlInput::updateMouseData()
 
 	// We forward mouse input when hovered or captured (via SDL_MOUSEMOTION) or when focused (below)
 #if SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE
-	// SDL_CaptureMouse() let the OS know e.g. that our imgui drag outside the SDL window boundaries shouldn't e.g. trigger other operations outside
-	SDL_CaptureMouse((mouseButtonsDown_ != 0) ? SDL_TRUE : SDL_FALSE);
+	// - SDL_CaptureMouse() let the OS know e.g. that our drags can extend outside of parent boundaries (we want updated position) and shouldn't trigger other operations outside.
+	// - Debuggers under Linux tends to leave captured mouse on break, which may be very inconvenient, so to migitate the issue we wait until mouse has moved to begin capture.
+	bool wantCapture = false;
+	for (int buttonN = 0; buttonN < ImGuiMouseButton_COUNT && !wantCapture; buttonN++)
+		if (ImGui::IsMouseDragging(buttonN, 1.0f))
+			wantCapture = true;
+	SDL_CaptureMouse(wantCapture ? SDL_TRUE : SDL_FALSE);
+
 	SDL_Window *focusedWindow = SDL_GetKeyboardFocus();
 	const bool isAppFocused = (window_ == focusedWindow);
 #else
@@ -546,8 +574,10 @@ void ImGuiSdlInput::updateMouseData()
 			SDL_WarpMouseInWindow(window_, static_cast<int>(io.MousePos.x), static_cast<int>(io.MousePos.y));
 
 		// (Optional) Fallback to provide mouse position when focused (SDL_MOUSEMOTION already provides this when hovered or captured)
-		if (mouseCanUseGlobalState_ && mouseButtonsDown_ == 0)
+		const bool isRelativeMouseMode = SDL_GetRelativeMouseMode() != 0;
+		if (mouseCanUseGlobalState_ && mouseButtonsDown_ == 0 && !isRelativeMouseMode)
 		{
+			// Single-viewport mode: mouse position in client window coordinates (io.MousePos is (0,0) when the mouse is on the upper-left corner of the app window)
 			int windowX, windowY, mouseXGlobal, mouseYGlobal;
 			SDL_GetGlobalMouseState(&mouseXGlobal, &mouseYGlobal);
 			SDL_GetWindowPosition(window_, &windowX, &windowY);
