@@ -18,6 +18,11 @@ TimeStamp::TimeStamp()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+void TimeStamp::toNow()
+{
+	counter_ = clock().now();
+}
+
 bool TimeStamp::operator>(const TimeStamp &other) const
 {
 	return counter_ > other.counter_;

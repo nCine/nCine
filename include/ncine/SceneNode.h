@@ -159,15 +159,15 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Sets the node color through a `Color` object
 	void setColor(Color color);
 	/// Sets the node color through a `Colorf` object
-	void setColor(Colorf color);
+	void setColorF(Colorf color);
 	/// Sets the node color through unsigned char components
 	void setColor(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha);
 	/// Sets the node color through float components
 	void setColorF(float red, float green, float blue, float alpha);
 	/// Gets the node alpha
-	inline float alpha() const { return color_.a(); }
+	inline unsigned char alpha() const { return color_.a(); }
 	/// Gets the node absolute alpha
-	inline float absAlpha() const { return absColor_.a(); }
+	inline unsigned char absAlpha() const { return absColor_.a(); }
 	/// Sets the node alpha through an unsigned char component
 	void setAlpha(unsigned char alpha);
 	/// Sets the node alpha through a float component
@@ -407,7 +407,7 @@ inline void SceneNode::setColor(Color color)
 	dirtyBits_.set(DirtyBitPositions::ColorBit);
 }
 
-inline void SceneNode::setColor(Colorf color)
+inline void SceneNode::setColorF(Colorf color)
 {
 	color_ = color;
 	dirtyBits_.set(DirtyBitPositions::ColorBit);

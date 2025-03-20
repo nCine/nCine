@@ -191,7 +191,7 @@ void MyEventHandler::onFrameStart()
 
 					nc::Colorf color(texts_[i]->color());
 					if (ImGui::ColorEdit4("Color", color.data()))
-						texts_[i]->setColor(color);
+						texts_[i]->setColorF(color);
 
 					int tabSize = texts_[i]->tabSize();
 					if (ImGui::SliderInt("Tab size", &tabSize, 0, nc::TextNode::MaxTabSize, "%d spaces", ImGuiSliderFlags_AlwaysClamp))

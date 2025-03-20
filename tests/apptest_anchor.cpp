@@ -367,7 +367,7 @@ void MyEventHandler::onFrameStart()
 			sprites_[i]->setScale(scale_);
 			sprites_[i]->setFlippedX(flippedX_);
 			sprites_[i]->setFlippedY(flippedY_);
-			sprites_[i]->setColor(color_);
+			sprites_[i]->setColorF(color_);
 			sprites_[i]->setBlendingEnabled(blendingEnabled_);
 			sprites_[i]->setBlendingPreset(blendingPreset_);
 		}
@@ -380,7 +380,7 @@ void MyEventHandler::onFrameStart()
 			meshSprites_[i]->setScale(scale_);
 			meshSprites_[i]->setFlippedX(flippedX_);
 			meshSprites_[i]->setFlippedY(flippedY_);
-			meshSprites_[i]->setColor(color_);
+			meshSprites_[i]->setColorF(color_);
 			meshSprites_[i]->setBlendingEnabled(blendingEnabled_);
 			meshSprites_[i]->setBlendingPreset(blendingPreset_);
 		}
@@ -391,7 +391,7 @@ void MyEventHandler::onFrameStart()
 			textNodes_[i]->setPositionY(position_.y + (height * 0.5f));
 			textNodes_[i]->setRotation(angle_);
 			textNodes_[i]->setScale(scale_);
-			textNodes_[i]->setColor(color_);
+			textNodes_[i]->setColorF(color_);
 			textNodes_[i]->setBlendingEnabled(blendingEnabled_);
 			textNodes_[i]->setBlendingPreset(blendingPreset_);
 		}
@@ -404,7 +404,7 @@ void MyEventHandler::onFrameStart()
 			sizeAffectors_[i]->setBaseScale(scale_);
 			particleSystems_[i]->setFlippedX(flippedX_);
 			particleSystems_[i]->setFlippedY(flippedY_);
-			particleSystems_[i]->setColor(color_);
+			particleSystems_[i]->setColorF(color_);
 			particleSystems_[i]->setBlendingPreset(blendingPreset_);
 		}
 

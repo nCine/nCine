@@ -53,12 +53,12 @@ void ColorAffector::affect(Particle *particle, float normalizedAge)
 
 	if (normalizedAge <= colorSteps_[0].age)
 	{
-		particle->setColor(colorSteps_[0].color);
+		particle->setColorF(colorSteps_[0].color);
 		return;
 	}
 	else if (normalizedAge >= colorSteps_.back().age)
 	{
-		particle->setColor(colorSteps_.back().color);
+		particle->setColorF(colorSteps_.back().color);
 		return;
 	}
 
@@ -80,7 +80,7 @@ void ColorAffector::affect(Particle *particle, float normalizedAge)
 	const float alpha = prevStep.color.a() + (nextStep.color.a() - prevStep.color.a()) * factor;
 	const Colorf color(red, green, blue, alpha);
 
-	particle->setColor(color);
+	particle->setColorF(color);
 }
 
 ///////////////////////////////////////////////////////////

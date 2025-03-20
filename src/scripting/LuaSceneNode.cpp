@@ -579,7 +579,7 @@ int LuaSceneNode::setColor(lua_State *L)
 	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, colorIndex - 1);
 
 	if (node)
-		node->setColor(nodeColor);
+		node->setColorF(nodeColor);
 
 	return 0;
 }
@@ -589,7 +589,10 @@ int LuaSceneNode::alpha(lua_State *L)
 	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, -1);
 
 	if (node)
-		LuaUtils::push(L, node->alpha());
+	{
+		const float alpha = node->alpha() / 255.0f;
+		LuaUtils::push(L, alpha);
+	}
 	else
 		LuaUtils::pushNil(L);
 

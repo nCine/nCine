@@ -1608,7 +1608,7 @@ void ImGuiDebugOverlay::guiRecursiveChildrenNodes(SceneNode *node, unsigned int 
 		ImGui::SameLine();
 		if (ImGui::Button("Reset##Color"))
 			nodeColor.set(1.0f, 1.0f, 1.0f, 1.0f);
-		node->setColor(nodeColor);
+		node->setColorF(nodeColor);
 
 		if (drawable)
 		{
