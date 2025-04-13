@@ -1508,18 +1508,71 @@ void ImGuiDebugOverlay::guiAllocators()
 
 void ImGuiDebugOverlay::guiViewports(Viewport *viewport, unsigned int viewportId)
 {
-	widgetName_.format("#%u Viewport", viewportId);
+	if (viewport->type() == Viewport::Type::SCREEN)
+		widgetName_.format("#%u Screen Viewport", viewportId);
+	else
+		widgetName_.format("#%u Viewport", viewportId);
+
 	if (viewport->type() != Viewport::Type::NO_TEXTURE)
-		widgetName_.formatAppend(" - size: %d x %d", viewport->width(), viewport->height());
-	const Recti viewportRect = viewport->viewportRect();
-	widgetName_.formatAppend(" - rect: pos <%d, %d>, size %d x %d", viewportRect.x, viewportRect.y, viewportRect.w, viewportRect.h);
-	const Rectf cullingRect = viewport->cullingRect();
-	widgetName_.formatAppend(" - culling: pos <%.2f, %.2f>, size %.2f x %.2f", cullingRect.x, cullingRect.y, cullingRect.w, cullingRect.h);
-	widgetName_.formatAppend("###0x%x", uintptr_t(viewport));
+	{
+		widgetName_.formatAppend(" (%d x %d)", viewport->width(), viewport->height());
+		if (viewport->type() == Viewport::Type::WITH_TEXTURE)
+		{
+			const char *textureName = viewport->texture()->name();
+			if (textureName != nullptr)
+				widgetName_.formatAppend(" - to texture: \"%s\"", textureName);
+		}
+	}
+
+	SceneNode *sceneNode = viewport->rootNode();
+	BaseSprite *baseSprite = nullptr;
+	while (sceneNode != nullptr && baseSprite == nullptr)
+	{
+		if (sceneNode->type() == Object::ObjectType::SPRITE ||
+			sceneNode->type() == Object::ObjectType::MESH_SPRITE ||
+			sceneNode->type() == Object::ObjectType::ANIMATED_SPRITE)
+		{
+			baseSprite = reinterpret_cast<BaseSprite *>(sceneNode); // exit the loop
+		}
+		else if (sceneNode->children().size() == 1)
+			sceneNode = sceneNode->children()[0];
+		else
+			sceneNode = nullptr; // exit the loop
+	}
+
+	if (baseSprite != nullptr)
+	{
+		const Texture *texture = baseSprite->texture();
+		if (texture != nullptr && texture->name() != nullptr)
+		{
+			widgetName_.formatAppend(" - from texture: \"%s\" (%d x %d)",
+			                         texture->name(), texture->width(), texture->height());
+		}
+	}
+
+	widgetName_.formatAppend("###0x%x-%u", uintptr_t(viewport), viewportId); // Can't use pointer alone, as the same viewport can repeat in multi-pass techniques
+
+	// Open the tree node by default if there is only the viewport screen
+	const bool screenViewportOnly = (viewport->type() == Viewport::Type::SCREEN && Viewport::chain().isEmpty());
+	const ImGuiTreeNodeFlags treeNodeFlags = screenViewportOnly ? ImGuiTreeNodeFlags_DefaultOpen : ImGuiTreeNodeFlags_None;
 
 	SceneNode *rootNode = viewport->rootNode();
-	if (rootNode != nullptr && ImGui::TreeNode(widgetName_.data()))
+	if (rootNode != nullptr && ImGui::TreeNodeEx(widgetName_.data(), treeNodeFlags))
 	{
+		const Recti viewportRect = viewport->viewportRect();
+		const Rectf cullingRect = viewport->cullingRect();
+		const bool vpRectModified = (viewportRect.x > 0 || viewportRect.y > 0 ||
+		                             viewportRect.w < viewport->width() || viewportRect.h < viewport->height());
+		const bool cullRectModified = (cullingRect.x > 0.0f || cullingRect.y > 0.0f ||
+		                               cullingRect.w < viewport->width() || cullingRect.h < viewport->height());
+
+		if (vpRectModified || cullRectModified)
+		{
+			ImGui::Text("rect: pos <%d, %d>, size %d x %d - culling: pos <%.2f, %.2f>, size %.2f x %.2f",
+			            viewportRect.x, viewportRect.y, viewportRect.w, viewportRect.h,
+			            cullingRect.x, cullingRect.y, cullingRect.w, cullingRect.h);
+		}
+
 		if (viewport->camera() != nullptr)
 		{
 			const Camera::ViewValues &viewValues = viewport->camera()->viewValues();
@@ -1610,22 +1663,21 @@ void ImGuiDebugOverlay::guiRecursiveChildrenNodes(SceneNode *node, unsigned int 
 			nodeColor.set(1.0f, 1.0f, 1.0f, 1.0f);
 		node->setColorF(nodeColor);
 
+		int layer = node->layer();
+		ImGui::PushItemWidth(100.0f);
+		ImGui::InputInt("Layer", &layer);
+		ImGui::PopItemWidth();
+		if (layer < 0)
+			layer = 0;
+		else if (layer > 0xffff)
+			layer = 0xffff;
+		node->setLayer(static_cast<uint16_t>(layer));
+
+		ImGui::SameLine();
+		ImGui::Text("Visit order: %u", node->visitOrderIndex());
+
 		if (drawable)
 		{
-			int layer = drawable->layer();
-			ImGui::PushItemWidth(100.0f);
-			ImGui::InputInt("Layer", &layer);
-			ImGui::PopItemWidth();
-			if (layer < 0)
-				layer = 0;
-			else if (layer > 0xffff)
-				layer = 0xffff;
-			drawable->setLayer(static_cast<uint16_t>(layer));
-
-			ImGui::SameLine();
-			ASSERT(childId == node->childOrderIndex());
-			ImGui::Text("Visit order: %u", node->visitOrderIndex());
-
 			ImGui::SameLine();
 			bool isBlendingEnabled = drawable->isBlendingEnabled();
 			ImGui::Checkbox("Blending", &isBlendingEnabled);
@@ -1675,7 +1727,7 @@ void ImGuiDebugOverlay::guiRecursiveChildrenNodes(SceneNode *node, unsigned int 
 		else if (particleSys)
 		{
 			const float aliveFraction = particleSys->numAliveParticles() / static_cast<float>(particleSys->numParticles());
-			widgetName_.format("%u / %u", particleSys->numAliveParticles(), particleSys->numParticles());
+			widgetName_.format("%u / %u particles", particleSys->numAliveParticles(), particleSys->numParticles());
 			ImGui::ProgressBar(aliveFraction, ImVec2(0.0f, 0.0f), widgetName_.data());
 			ImGui::SameLine();
 			if (ImGui::Button("Kill All##Particles"))
@@ -1737,9 +1789,11 @@ void ImGuiDebugOverlay::guiNodeInspector()
 {
 	if (ImGui::CollapsingHeader("Node Inspector"))
 	{
-		guiViewports(&theApplication().screenViewport(), 0);
-		for (unsigned int i = 0; i < Viewport::chain().size(); i++)
-			guiViewports(Viewport::chain()[i], i + 1);
+		// Print viewport information in reverse order (same as chain processing one)
+		const unsigned int chainLength = Viewport::chain().size();
+		for (unsigned int i = 0; i < chainLength; i++)
+			guiViewports(Viewport::chain()[chainLength - i - 1], i);
+		guiViewports(&theApplication().screenViewport(), chainLength);
 	}
 }
 

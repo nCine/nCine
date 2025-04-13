@@ -36,13 +36,8 @@ class RenderCommand
 		};
 	};
 
-	explicit RenderCommand(CommandTypes::Enum profilingType);
+	explicit RenderCommand(CommandTypes::Enum type);
 	RenderCommand();
-
-	/// Returns the command type for profiling counter
-	inline CommandTypes::Enum profilingType() const { return profilingType_; }
-	/// Sets the command type for profiling counter
-	inline void setProfilingType(CommandTypes::Enum profilingType) { profilingType_ = profilingType; }
 
 	/// Returns the number of instances collected in the command or zero if instancing is not used
 	inline int numInstances() const { return numInstances_; }
@@ -78,9 +73,9 @@ class RenderCommand
 	void issue();
 
 	/// Gets the command type (for profiling purposes)
-	inline CommandTypes::Enum type() const { return profilingType_; }
+	inline CommandTypes::Enum type() const { return type_; }
 	/// Sets the command type (for profiling purposes)
-	inline void setType(CommandTypes::Enum type) { profilingType_ = type; }
+	inline void setType(CommandTypes::Enum type) { type_ = type; }
 
 	inline void setScissor(Recti scissorRect) { scissorRect_ = scissorRect; }
 	void setScissor(GLint x, GLint y, GLsizei width, GLsizei height);
@@ -122,7 +117,7 @@ class RenderCommand
 	bool transformationCommitted_;
 
 	/// Command type for profiling counter
-	CommandTypes::Enum profilingType_;
+	CommandTypes::Enum type_;
 
 	Recti scissorRect_;
 

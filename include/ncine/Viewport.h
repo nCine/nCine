@@ -33,6 +33,7 @@ class DLL_PUBLIC Viewport
 	};
 
 	/// The clear mode for a viewport with a texture or for the screen
+	/// \note If a viewport appears multiple times in a chain, the frame modes will clear it the first time only.
 	enum class ClearMode
 	{
 		/// The viewport is cleared every time it is drawn

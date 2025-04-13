@@ -168,7 +168,7 @@ RenderCommand *NuklearDrawing::retrieveCommandFromPool()
 
 void NuklearDrawing::setupRenderCmd(RenderCommand &cmd)
 {
-	cmd.setProfilingType(RenderCommand::CommandTypes::NUKLEAR);
+	cmd.setType(RenderCommand::CommandTypes::NUKLEAR);
 
 	Material &material = cmd.material();
 	material.setShaderProgram(nuklearShaderProgram_.get());

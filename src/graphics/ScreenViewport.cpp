@@ -103,10 +103,17 @@ void ScreenViewport::draw()
 		{
 			chain_[i]->renderQueue_->clear();
 			chain_[i]->stateBits_.reset();
+			// Change the mode only after the whole chain has been drawn,
+			// as the same viewport can appear multiple times.
+			if (chain_[i]->clearMode_ == ClearMode::NEXT_FRAME_ONLY)
+				chain_[i]->clearMode_ = ClearMode::THIS_FRAME_ONLY;
 		}
 	}
+
 	renderQueue_->clear();
 	stateBits_.reset();
+	if (clearMode_ == ClearMode::NEXT_FRAME_ONLY)
+		clearMode_ = ClearMode::THIS_FRAME_ONLY;
 
 	RenderResources::buffersManager().remap();
 	RenderResources::renderCommandPool().reset();

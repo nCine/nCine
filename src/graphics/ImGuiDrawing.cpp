@@ -175,7 +175,7 @@ RenderCommand *ImGuiDrawing::retrieveCommandFromPool()
 
 void ImGuiDrawing::setupRenderCmd(RenderCommand &cmd)
 {
-	cmd.setProfilingType(RenderCommand::CommandTypes::IMGUI);
+	cmd.setType(RenderCommand::CommandTypes::IMGUI);
 
 	Material &material = cmd.material();
 	material.setShaderProgram(imguiShaderProgram_.get());

@@ -18,10 +18,10 @@ const float RenderCommand::LayerStep = 1.0f / static_cast<float>(0xFFFF);
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-RenderCommand::RenderCommand(CommandTypes::Enum profilingType)
+RenderCommand::RenderCommand(CommandTypes::Enum type)
     : materialSortKey_(0), layer_(0),
       numInstances_(0), batchSize_(0), transformationCommitted_(false),
-      profilingType_(profilingType), modelMatrix_(Matrix4x4f::Identity)
+      type_(type), modelMatrix_(Matrix4x4f::Identity)
 {
 }
 

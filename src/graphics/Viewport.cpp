@@ -409,7 +409,7 @@ void Viewport::draw(unsigned int nextIndex)
 		debugString.format("Draw viewport \"%s\" (0x%lx)", textures_[0]->name(), uintptr_t(this));
 	else
 		debugString.format("Draw viewport (0x%lx)", uintptr_t(this));
-	GLDebug::ScopedGroup(debugString.data());
+	GLDebug::ScopedGroup scoped(debugString.data());
 
 	RenderResources::setCurrentViewport(this);
 	{
@@ -433,7 +433,20 @@ void Viewport::draw(unsigned int nextIndex)
 			const GLClearColor::State clearColorState = GLClearColor::state();
 			GLClearColor::setColor(clearColor_);
 
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+			switch (depthStencilFormat_)
+			{
+				default:
+				case DepthStencilFormat::DEPTH24_STENCIL8:
+					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+					break;
+				case DepthStencilFormat::DEPTH24:
+				case DepthStencilFormat::DEPTH16:
+					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+					break;
+				case DepthStencilFormat::NONE:
+					glClear(GL_COLOR_BUFFER_BIT);
+					break;
+			}
 			lastFrameCleared_ = numFrames;
 
 			GLClearColor::setState(clearColorState);
@@ -483,8 +496,7 @@ void Viewport::draw(unsigned int nextIndex)
 
 	if (clearMode_ == ClearMode::THIS_FRAME_ONLY)
 		clearMode_ = ClearMode::NEVER;
-	else if (clearMode_ == ClearMode::NEXT_FRAME_ONLY)
-		clearMode_ = ClearMode::THIS_FRAME_ONLY;
+	// `ClearMode::NEXT_FRAME_ONLY` is handled after the whole chain is drawn
 
 	if (type_ == Type::WITH_TEXTURE)
 	{
