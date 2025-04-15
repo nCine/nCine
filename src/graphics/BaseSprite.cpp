@@ -130,17 +130,14 @@ void BaseSprite::updateRenderCommand()
 {
 	ZoneScoped;
 
-	if (dirtyBits_.test(DirtyBitPositions::TransformationBit))
-	{
+	if (dirtyBits_.test(DirtyBitPositions::TransformationUploadBit))
 		renderCommand_->setTransformation(worldMatrix_);
-		dirtyBits_.reset(DirtyBitPositions::TransformationBit);
-	}
-	if (dirtyBits_.test(DirtyBitPositions::ColorBit))
+
+	if (dirtyBits_.test(DirtyBitPositions::ColorUploadBit))
 	{
 		GLUniformCache *colorUniform = instanceBlock_->uniform(Material::ColorUniformName);
 		if (colorUniform)
 			colorUniform->setFloatVector(Colorf(absColor()).data());
-		dirtyBits_.reset(DirtyBitPositions::ColorBit);
 	}
 	if (dirtyBits_.test(DirtyBitPositions::SizeBit))
 	{

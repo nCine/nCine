@@ -290,11 +290,14 @@ void SceneNode::update(float frameTime)
 		for (SceneNode *child : children_)
 			child->update(frameTime);
 
-		// A non drawable scenenode does not have the `updateRenderCommand()` method to reset the flags
-		if (type_ == ObjectType::SCENENODE)
+		dirtyBits_.reset(DirtyBitPositions::TransformationBit);
+		dirtyBits_.reset(DirtyBitPositions::ColorBit);
+
+		// A non-drawable scenenode does not have the `updateRenderCommand()` method to reset the flags
+		if (type_ == ObjectType::SCENENODE || type_ == ObjectType::PARTICLE_SYSTEM)
 		{
-			dirtyBits_.reset(DirtyBitPositions::TransformationBit);
-			dirtyBits_.reset(DirtyBitPositions::ColorBit);
+			dirtyBits_.reset(DirtyBitPositions::TransformationUploadBit);
+			dirtyBits_.reset(DirtyBitPositions::ColorUploadBit);
 		}
 
 		lastFrameUpdated_ = theApplication().numFrames();
@@ -385,7 +388,10 @@ void SceneNode::transform()
 		dirtyBits_.set(DirtyBitPositions::ColorBit);
 
 	if (dirtyBits_.test(DirtyBitPositions::ColorBit))
+	{
 		absColor_ = parent_ ? color_ * parent_->absColor_ : color_;
+		dirtyBits_.set(DirtyBitPositions::ColorUploadBit);
+	}
 
 	const bool parentHasDirtyTransformation = parent_ && parent_->dirtyBits_.test(DirtyBitPositions::TransformationBit);
 	if (parentHasDirtyTransformation)
@@ -418,6 +424,8 @@ void SceneNode::transform()
 
 	absPosition_.x = worldMatrix_[3][0];
 	absPosition_.y = worldMatrix_[3][1];
+
+	dirtyBits_.set(DirtyBitPositions::TransformationUploadBit);
 }
 
 }

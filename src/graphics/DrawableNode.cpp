@@ -128,7 +128,11 @@ bool DrawableNode::draw(RenderQueue &renderQueue)
 	{
 		renderCommand_->setLayer(absLayer_);
 		renderCommand_->setVisitOrder(withVisitOrder_ ? visitOrderIndex_ : 0);
+
 		updateRenderCommand();
+		dirtyBits_.reset(DirtyBitPositions::TransformationUploadBit);
+		dirtyBits_.reset(DirtyBitPositions::ColorUploadBit);
+
 		renderQueue.addCommand(renderCommand_.get());
 	}
 	else
