@@ -5,7 +5,6 @@
 
 #include "AndroidInputManager.h"
 #include "IInputEventHandler.h"
-#include "AndroidJniHelper.h"
 #include "AndroidApplication.h"
 #include "Timer.h"
 #include "JoyMapping.h"
@@ -25,6 +24,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 const int IInputManager::MaxNumJoysticks = 4;
+const unsigned short int IInputManager::MaxVibrationValue = 255;
 
 ASensorManager *AndroidInputManager::sensorManager_ = nullptr;
 const ASensor *AndroidInputManager::accelerometerSensor_ = nullptr;
@@ -178,7 +178,7 @@ void AndroidKeyboardState::copyKeyStateToPrev()
 AndroidJoystickState::AndroidJoystickState()
     : deviceId_(-1), numButtons_(0), numAxes_(0), numMappedAxes_(0),
       hasDPad_(false), hasHatAxes_(false), currentStateIndex_(0),
-      hatState_(HatState::CENTERED)
+      hatState_(HatState::CENTERED), numVibrators_(0)
 {
 	guid_[0] = '\0';
 	name_[0] = '\0';
@@ -195,6 +195,9 @@ AndroidJoystickState::AndroidJoystickState()
 		axesRangeValues_[i] = 2.0f;
 		axesValues_[i] = 0.0f;
 	}
+
+	for (int i = 0; i < MaxVibrators; i++)
+		vibratorsIds_[i] = 0;
 }
 
 bool AndroidJoystickState::isButtonDown(int buttonId) const
@@ -532,6 +535,53 @@ const JoystickState &AndroidInputManager::joystickState(int joyId) const
 		return joystickStates_[joyId];
 	else
 		return nullJoystickState_;
+}
+
+bool AndroidInputManager::hasJoyVibration(int joyId) const
+{
+	bool hasVibration = false;
+
+	if (isJoyPresent(joyId))
+		hasVibration = (joystickStates_[joyId].numVibrators_ > 0);
+
+	return hasVibration;
+}
+
+void AndroidInputManager::joyVibrate(int joyId, float lowFreqIntensity, float highFreqIntensity, unsigned int duration) const
+{
+	if (isJoyPresent(joyId))
+	{
+		if (joystickStates_[joyId].numVibrators_ > 0)
+		{
+			// Clamp intensity between 0.0f and 1.0f
+			lowFreqIntensity = (lowFreqIntensity < 0.0f) ? 0.0f : lowFreqIntensity;
+			lowFreqIntensity = (lowFreqIntensity > 1.0f) ? 1.0f : lowFreqIntensity;
+			const unsigned char amplitude = static_cast<unsigned char>(lowFreqIntensity * MaxVibrationValue);
+
+			joystickStates_[joyId].vibrators_[0].cancel();
+			// `amplitude` must either be `DEFAULT_AMPLITUDE`, or between 1 and 255 inclusive
+			if (amplitude > 0)
+			{
+				const AndroidJniClass_VibrationEffect vibration = AndroidJniClass_VibrationEffect::createOneShot(duration, amplitude);
+				joystickStates_[joyId].vibrators_[0].vibrate(vibration);
+			}
+		}
+		if (joystickStates_[joyId].numVibrators_ > 1)
+		{
+			// Clamp intensity between 0.0f and 1.0f
+			highFreqIntensity = (highFreqIntensity < 0.0f) ? 0.0f : highFreqIntensity;
+			highFreqIntensity = (highFreqIntensity > 1.0f) ? 1.0f : highFreqIntensity;
+			const unsigned char amplitude = static_cast<unsigned char>(highFreqIntensity * MaxVibrationValue);
+
+			joystickStates_[joyId].vibrators_[1].cancel();
+			// `amplitude` must either be `DEFAULT_AMPLITUDE`, or between 1 and 255 inclusive
+			if (amplitude > 0)
+			{
+				const AndroidJniClass_VibrationEffect vibration = AndroidJniClass_VibrationEffect::createOneShot(duration, amplitude);
+				joystickStates_[joyId].vibrators_[1].vibrate(vibration);
+			}
+		}
+	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -887,10 +937,10 @@ void AndroidInputManager::checkDisconnectedJoysticks()
 		const int deviceId = joystickStates_[i].deviceId_;
 		if (deviceId > -1 && isDeviceConnected(deviceId) == false)
 		{
-			LOGI_X("Joystick %d (device %d) \"%s\" has been disconnected", i, deviceId, joystickStates_[i].name_);
 			joystickStates_[i].resetPrevButtonState();
 			joystickStates_[i].deviceId_ = -1;
 
+			LOGI_X("Joystick %d (device %d) \"%s\" has been disconnected", i, deviceId, joystickStates_[i].name_);
 			if (inputEventHandler_ != nullptr)
 			{
 				joyConnectionEvent_.joyId = i;
@@ -955,11 +1005,12 @@ int AndroidInputManager::findJoyId(int deviceId)
 	if (joyId > -1 && joystickStates_[joyId].deviceId_ != deviceId)
 	{
 		deviceInfo(deviceId, joyId);
-		const uint8_t *g = reinterpret_cast<const uint8_t *>(joystickStates_[joyId].guid_);
-		LOGI_X("Device %d, \"%s\" (GUID: \"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\"), has been connected as joystick %d - %d axes, %d buttons",
-		       deviceId, joystickStates_[joyId].name_, g[0], g[1], g[2], g[3], g[4], g[5], g[6], g[7], g[8], g[9], g[10], g[11], g[12], g[13], g[14], g[15],
-		       joyId, joystickStates_[joyId].numAxes_, joystickStates_[joyId].numButtons_);
 		joystickStates_[joyId].deviceId_ = deviceId;
+
+		const uint8_t *g = reinterpret_cast<const uint8_t *>(joystickStates_[joyId].guid_);
+		LOGI_X("Device %d, \"%s\" (GUID: \"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\"), has been connected as joystick %d - %d axes, %d buttons, %d vibrators",
+		       deviceId, joystickStates_[joyId].name_, g[0], g[1], g[2], g[3], g[4], g[5], g[6], g[7], g[8], g[9], g[10], g[11], g[12], g[13], g[14], g[15],
+		       joyId, joystickStates_[joyId].numAxes_, joystickStates_[joyId].numButtons_, joystickStates_[joyId].numVibrators_);
 
 		if (inputEventHandler_ != nullptr)
 		{
@@ -1130,6 +1181,28 @@ void AndroidInputManager::deviceInfo(int deviceId, int joyId)
 		joyState.numHats_ = 0;
 		if (joyState.hasDPad_ || joyState.hasHatAxes_)
 			joyState.numHats_ = 1; // No more than one hat is supported
+
+		deviceInfoString.clear();
+		if (AndroidJniHelper::sdkVersion() >= 31)
+		{
+			AndroidJniClass_VibratorManager vibratorManager = inputDevice.getVibratorManager();
+
+			const int numVibrators = vibratorManager.getVibratorIds(joyState.vibratorsIds_, AndroidJoystickState::MaxVibrators);
+			// There might be more vibrators available than the maximum number supported
+			joyState.numVibrators_ = (numVibrators > AndroidJoystickState::MaxVibrators) ? AndroidJoystickState::MaxVibrators : numVibrators;
+
+			if (joyState.numVibrators_ == 0)
+				deviceInfoString.append(" not detected");
+			else
+			{
+				for (int i = 0; i < joyState.numVibrators_; i++)
+				{
+					joyState.vibrators_[i] = vibratorManager.getVibrator(joyState.vibratorsIds_[i]);
+					deviceInfoString.formatAppend(" %d", joyState.vibratorsIds_[i]);
+				}
+			}
+			LOGV_X("device (%d, %d) - Vibrator Ids%s (%d)", deviceId, joyId, deviceInfoString.data(), numVibrators);
+		}
 
 		joyState.updateGuidWithCapabilities();
 	}

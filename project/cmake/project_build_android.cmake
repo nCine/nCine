@@ -15,7 +15,9 @@ if(NCPROJECT_BUILD_ANDROID)
 	set(ANDROID_TOOLCHAIN clang)
 	set(ANDROID_STL c++_shared)
 
-	set(MANIFEST_PERMISSIONS "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" />")
+	string(CONCAT MANIFEST_PERMISSIONS
+		"<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" android:maxSdkVersion=\"18\" />\n"
+		"\t<uses-permission android:name=\"android.permission.VIBRATE\" />")
 	if(IS_DIRECTORY ${NCINE_ANDROID_DIR}/app/src/main/cpp/ncine/include/tracy)
 		string(CONCAT MANIFEST_PERMISSIONS "${MANIFEST_PERMISSIONS}\n"
 			"\t<uses-permission android:name=\"android.permission.INTERNET\" />\n"

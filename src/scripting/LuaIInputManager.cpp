@@ -27,12 +27,15 @@ namespace IInputManager {
 	static const char *joystickState = "joy_state";
 
 	static const char *isJoyMapped = "is_joy_mapped";
-	static const char *joyMappedState = "joymapped_state";
+	static const char *joyMappedState = "joy_mapped_state";
 	static const char *deadZoneNormalize = "deadzone_normalize";
 
 	static const char *addJoyMappingsFromFile = "add_joymappings_from_file";
 	static const char *addJoyMappingsFromStrings = "add_joymappings_from_strings";
 	static const char *numJoyMappings = "num_joymappings";
+
+	static const char *hasJoyVibration = "has_joy_vibration";
+	static const char *joyVibrate = "joy_vibrate";
 
 	static const char *mouseCursorMode = "get_mouse_cursor_mode";
 	static const char *setMouseCursorMode = "set_mouse_cursor_mode";
@@ -46,6 +49,8 @@ namespace IInputManager {
 	static const char *RIGHT_STICK = "RIGHT_STICK";
 	static const char *TRIGGER = "TRIGGER";
 	static const char *DeadZone = "joy_dead_zone";
+
+	static const char *MaxVibrationValue = "joy_max_vibration_value";
 }}
 
 ///////////////////////////////////////////////////////////
@@ -60,7 +65,7 @@ void LuaIInputManager::expose(lua_State *L)
 	if (type == LUA_TNIL)
 	{
 		lua_pop(L, 1);
-		lua_createtable(L, 0, 17);
+		lua_createtable(L, 0, 19);
 	}
 
 	LuaUtils::addFunction(L, LuaNames::IInputManager::mouseState, mouseState);
@@ -81,6 +86,9 @@ void LuaIInputManager::expose(lua_State *L)
 	LuaUtils::addFunction(L, LuaNames::IInputManager::addJoyMappingsFromFile, addJoyMappingsFromFile);
 	LuaUtils::addFunction(L, LuaNames::IInputManager::addJoyMappingsFromStrings, addJoyMappingsFromStrings);
 	LuaUtils::addFunction(L, LuaNames::IInputManager::numJoyMappings, numJoyMappings);
+
+	LuaUtils::addFunction(L, LuaNames::IInputManager::hasJoyVibration, hasJoyVibration);
+	LuaUtils::addFunction(L, LuaNames::IInputManager::joyVibrate, joyVibrate);
 
 	LuaUtils::addFunction(L, LuaNames::IInputManager::mouseCursorMode, mouseCursorMode);
 	LuaUtils::addFunction(L, LuaNames::IInputManager::setMouseCursorMode, setMouseCursorMode);
@@ -105,6 +113,8 @@ void LuaIInputManager::exposeConstants(lua_State *L)
 	LuaUtils::pushField(L, LuaNames::IInputManager::TRIGGER, IInputManager::TriggerDeadZone);
 
 	lua_setfield(L, -2, LuaNames::IInputManager::DeadZone);
+
+	LuaUtils::pushField(L, LuaNames::IInputManager::MaxVibrationValue, IInputManager::MaxVibrationValue);
 }
 
 ///////////////////////////////////////////////////////////
@@ -271,6 +281,28 @@ int LuaIInputManager::numJoyMappings(lua_State *L)
 	LuaUtils::push(L, numJoyMappings);
 
 	return 1;
+}
+
+int LuaIInputManager::hasJoyVibration(lua_State *L)
+{
+	const int joyId = LuaUtils::retrieve<int32_t>(L, -1);
+
+	const bool hasJoyVibration = theApplication().inputManager().hasJoyVibration(joyId);
+	LuaUtils::push(L, hasJoyVibration);
+
+	return 1;
+}
+
+int LuaIInputManager::joyVibrate(lua_State *L)
+{
+	const int joyId = LuaUtils::retrieve<int32_t>(L, -4);
+	const float lowFreqIntensity = LuaUtils::retrieve<float>(L, -3);
+	const float highFreqIntensity = LuaUtils::retrieve<float>(L, -2);
+	const unsigned int duration = LuaUtils::retrieve<uint32_t>(L, -1);
+
+	theApplication().inputManager().joyVibrate(joyId, lowFreqIntensity, highFreqIntensity, duration);
+
+	return 0;
 }
 
 int LuaIInputManager::mouseCursorMode(lua_State *L)

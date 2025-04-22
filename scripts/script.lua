@@ -144,6 +144,8 @@ void main()
 		print("  "..key .. ": " .. tostring(value))
 	end
 
+	perform_vibration_ = false
+
 	nc.log.info("on_init() Lua function terminated")
 end
 
@@ -207,6 +209,21 @@ function nc.on_frame_start()
 		nc.animated_sprite.set_rotation(animated_sprite_, 0)
 	elseif nc.input.is_key_down(keystate, nc.keysym.UP) then
 		nc.animated_sprite.set_rotation(animated_sprite_, 180)
+	end
+
+	local joy_state = nc.input.joy_mapped_state(0)
+	local has_vibration = nc.input.has_joy_vibration(0)
+	local intensities = { 0.0, 0.0 }
+
+	if (perform_vibration_ and has_vibration) then
+		if nc.input.joy_axis_value(joy_state, nc.joy_axis.LTRIGGER) > nc.joy_dead_zone.TRIGGER then
+			intensities[1] = nc.input.joy_axis_value(joy_state, nc.joy_axis.LTRIGGER)
+		end
+		if nc.input.joy_axis_value(joy_state, nc.joy_axis.RTRIGGER) > nc.joy_dead_zone.TRIGGER then
+			intensities[2] = nc.input.joy_axis_value(joy_state, nc.joy_axis.RTRIGGER)
+		end
+
+		nc.input.joy_vibrate(0, intensities[1], intensities[2], math.floor(frame_time * 1000))
 	end
 end
 
@@ -355,6 +372,8 @@ function nc.on_joymapped_button_released(event)
 	if event.button == nc.joy_button.A then
 		with_viewport_ = not with_viewport_
 		setup_viewport()
+	elseif event.button == nc.joy_button.BACK then
+		perform_vibration_ = not perform_vibration_
 	elseif event.button == nc.joy_button.START then
 		pause_ = not pause_
 	elseif event.button == nc.joy_button.GUIDE then

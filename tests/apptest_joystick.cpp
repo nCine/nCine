@@ -51,6 +51,8 @@ const float startUnpressedSize = 0.13f;
 const float guidePressedSize = 0.33f;
 const float guideUnpressedSize = 0.3f;
 
+bool performVibration = false;
+
 const char *hatStateToString(unsigned char hatState)
 {
 	switch (hatState)
@@ -109,6 +111,7 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 void MyEventHandler::onInit()
 {
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
+	const nc::IInputManager &inputManager = nc::theApplication().inputManager();
 
 	joyString_ = nctl::makeUnique<nctl::String>(unsigned(MaxNumChars));
 
@@ -168,26 +171,28 @@ void MyEventHandler::onInit()
 
 	for (int i = 0; i < nc::IInputManager::MaxNumJoysticks; i++)
 	{
-		if (nc::theApplication().inputManager().isJoyPresent(i))
+		if (inputManager.isJoyPresent(i))
 		{
 			LOGI_X("Joystick %d (%s) - %d axes, %d buttons, %d hats", i,
-			       nc::theApplication().inputManager().joyName(i),
-			       nc::theApplication().inputManager().joyNumAxes(i),
-			       nc::theApplication().inputManager().joyNumButtons(i),
-			       nc::theApplication().inputManager().joyNumHats(i));
+			       inputManager.joyName(i),
+			       inputManager.joyNumAxes(i),
+			       inputManager.joyNumButtons(i),
+			       inputManager.joyNumHats(i));
 		}
 	}
 }
 
 void MyEventHandler::onFrameStart()
 {
+	nc::IInputManager &inputManager = nc::theApplication().inputManager();
+
 	const float appWidth = nc::theApplication().width();
 	const float appHeight = nc::theApplication().height();
 
 	int firstJoy = -1;
 	for (int i = 0; i < nc::IInputManager::MaxNumJoysticks; i++)
 	{
-		if (nc::theApplication().inputManager().isJoyPresent(i))
+		if (inputManager.isJoyPresent(i))
 		{
 			firstJoy = i;
 			break;
@@ -199,27 +204,28 @@ void MyEventHandler::onFrameStart()
 	{
 		for (int i = 0; i < nc::IInputManager::MaxNumJoysticks; i++)
 		{
-			if (nc::theApplication().inputManager().isJoyPresent(i))
+			if (inputManager.isJoyPresent(i))
 			{
-				const char *joyName = nc::theApplication().inputManager().joyName(i);
-				const char *joyGuid = nc::theApplication().inputManager().joyGuid(i);
-				const int numAxes = nc::theApplication().inputManager().joyNumAxes(i);
-				const int numButtons = nc::theApplication().inputManager().joyNumButtons(i);
-				const int numHats = nc::theApplication().inputManager().joyNumHats(i);
-				const bool isMapped = nc::theApplication().inputManager().isJoyMapped(i);
+				const char *joyName = inputManager.joyName(i);
+				const char *joyGuid = inputManager.joyGuid(i);
+				const int numAxes = inputManager.joyNumAxes(i);
+				const int numButtons = inputManager.joyNumButtons(i);
+				const int numHats = inputManager.joyNumHats(i);
+				const bool isMapped = inputManager.isJoyMapped(i);
+				const bool hasVibration = inputManager.hasJoyVibration(i);
 
-				joyString_->formatAppend("Joystick %d is %s: \"%s\" (%d axes, %d buttons, %d hats)\n",
-				                         i, isMapped ? "mapped" : "unmapped", joyName, numAxes, numButtons, numHats);
+				joyString_->formatAppend("Joystick %d is %s: \"%s\" (%d axes, %d buttons, %d hats, %s vibration)\n",
+				                         i, isMapped ? "mapped" : "unmapped", joyName, numAxes, numButtons, numHats, hasVibration ? "has" : "no");
 				joyString_->formatAppend("GUID: \"%s\"\n", joyGuid);
 			}
 		}
 
-		if (nc::theApplication().inputManager().isJoyPresent(firstJoy))
+		if (inputManager.isJoyPresent(firstJoy))
 		{
-			const int numAxes = nctl::min(nc::theApplication().inputManager().joyNumAxes(firstJoy), static_cast<int>(MaxNumAxes));
-			const int numButtons = nctl::min(nc::theApplication().inputManager().joyNumButtons(firstJoy), static_cast<int>(MaxNumButtons));
-			const int numHats = nctl::min(nc::theApplication().inputManager().joyNumHats(firstJoy), static_cast<int>(MaxNumHats));
-			const nc::JoystickState &joyState = nc::theApplication().inputManager().joystickState(firstJoy);
+			const int numAxes = nctl::min(inputManager.joyNumAxes(firstJoy), static_cast<int>(MaxNumAxes));
+			const int numButtons = nctl::min(inputManager.joyNumButtons(firstJoy), static_cast<int>(MaxNumButtons));
+			const int numHats = nctl::min(inputManager.joyNumHats(firstJoy), static_cast<int>(MaxNumHats));
+			const nc::JoystickState &joyState = inputManager.joystickState(firstJoy);
 
 			*joyString_ += "\nAxes:";
 			for (int i = 0; i < numAxes; i++)
@@ -242,9 +248,9 @@ void MyEventHandler::onFrameStart()
 			*joyString_ += "\n";
 		}
 
-		if (nc::theApplication().inputManager().isJoyMapped(firstJoy))
+		if (inputManager.isJoyMapped(firstJoy))
 		{
-			const nc::JoyMappedState &joyState = nc::theApplication().inputManager().joyMappedState(firstJoy);
+			const nc::JoyMappedState &joyState = inputManager.joyMappedState(firstJoy);
 
 			*joyString_ += "\nAxes:";
 			joyString_->formatAppend("  LX: (%.2f), LY: (%.2f), RX: (%.2f), RY: (%.2f), LTrigger: (%.2f), RTrigger: (%.2f)",
@@ -270,11 +276,11 @@ void MyEventHandler::onFrameStart()
 	textNode_->setString(*joyString_);
 	textNode_->setPosition(appWidth * 0.05f + textNode_->width() * 0.5f, appHeight * 0.38f - textNode_->height() * 0.5f);
 
-	const nc::JoyMappedState &joyMappedState = nc::theApplication().inputManager().joyMappedState(firstJoy);
+	const nc::JoyMappedState &joyMappedState = inputManager.joyMappedState(firstJoy);
 	nc::Vector2f joyVectorLeft(joyMappedState.axisValue(nc::AxisName::LX), joyMappedState.axisValue(nc::AxisName::LY));
 	nc::Vector2f joyVectorRight(joyMappedState.axisValue(nc::AxisName::RX), joyMappedState.axisValue(nc::AxisName::RY));
-	nc::theApplication().inputManager().deadZoneNormalize(joyVectorLeft, nc::IInputManager::LeftStickDeadZone);
-	nc::theApplication().inputManager().deadZoneNormalize(joyVectorRight, nc::IInputManager::RightStickDeadZone);
+	inputManager.deadZoneNormalize(joyVectorLeft, nc::IInputManager::LeftStickDeadZone);
+	inputManager.deadZoneNormalize(joyVectorRight, nc::IInputManager::RightStickDeadZone);
 	const bool lIsDown = joyMappedState.isButtonDown(nc::ButtonName::LSTICK);
 	const bool rIsDown = joyMappedState.isButtonDown(nc::ButtonName::RSTICK);
 
@@ -317,6 +323,26 @@ void MyEventHandler::onFrameStart()
 	sprites_[DPAD_UP]->setScale(dpadUpIsDown ? buttonPressedSize : buttonUnpressedSize);
 	sprites_[DPAD_DOWN]->setScale(dpadDownIsDown ? buttonPressedSize : buttonUnpressedSize);
 	sprites_[DPAD_RIGHT]->setScale(dpadRighgtIsDown ? buttonPressedSize : buttonUnpressedSize);
+
+	const bool hasVibration = inputManager.hasJoyVibration(firstJoy);
+	if (joyMappedState.isButtonPressed(nc::ButtonName::BACK))
+	{
+		performVibration = !performVibration;
+		if (hasVibration && performVibration == false)
+			inputManager.joyVibrate(firstJoy, 0.0f, 0.0f, 0);
+	}
+
+	if (hasVibration && performVibration)
+	{
+		float intensities[2] = { 0.0f, 0.0f };
+		if (joyLeftTrigger > nc::IInputManager::TriggerDeadZone)
+			intensities[0] = joyLeftTrigger;
+		if (joyRightTrigger > nc::IInputManager::TriggerDeadZone)
+			intensities[1] = joyRightTrigger;
+
+		const int frameTimeMs = static_cast<int>(nc::theApplication().frameTime() * 1000.0f);
+		inputManager.joyVibrate(firstJoy, intensities[0], intensities[1], frameTimeMs);
+	}
 }
 
 void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)

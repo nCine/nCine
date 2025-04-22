@@ -32,6 +32,21 @@ unsigned int AndroidJniHelper::sdkVersion_ = 0;
 
 jclass AndroidJniClass_Version::javaClass_ = nullptr;
 jfieldID AndroidJniClass_Version::fidSdkInt_ = nullptr;
+jclass AndroidJniClass_MotionRange::javaClass_ = nullptr;
+jmethodID AndroidJniClass_MotionRange::midGetFlat_ = nullptr;
+jmethodID AndroidJniClass_MotionRange::midGetFuzz_ = nullptr;
+jmethodID AndroidJniClass_MotionRange::midGetMax_ = nullptr;
+jmethodID AndroidJniClass_MotionRange::midGetMin_ = nullptr;
+jmethodID AndroidJniClass_MotionRange::midGetRange_ = nullptr;
+jclass AndroidJniClass_VibrationEffect::javaClass_ = nullptr;
+jmethodID AndroidJniClass_VibrationEffect::midCreateOneShot_ = nullptr;
+jclass AndroidJniClass_Vibrator::javaClass_ = nullptr;
+jmethodID AndroidJniClass_Vibrator::midCancel_ = nullptr;
+jmethodID AndroidJniClass_Vibrator::midVibrate_ = nullptr;
+jclass AndroidJniClass_VibratorManager::javaClass_ = nullptr;
+jmethodID AndroidJniClass_VibratorManager::midCancel_ = nullptr;
+jmethodID AndroidJniClass_VibratorManager::midGetVibratorIds_ = nullptr;
+jmethodID AndroidJniClass_VibratorManager::midGetVibrator_ = nullptr;
 jclass AndroidJniClass_InputDevice::javaClass_ = nullptr;
 jmethodID AndroidJniClass_InputDevice::midGetDevice_ = nullptr;
 jmethodID AndroidJniClass_InputDevice::midGetDeviceIds_ = nullptr;
@@ -42,14 +57,9 @@ jmethodID AndroidJniClass_InputDevice::midGetVendorId_ = nullptr;
 jmethodID AndroidJniClass_InputDevice::midGetMotionRange_ = nullptr;
 jmethodID AndroidJniClass_InputDevice::midGetSources_ = nullptr;
 jmethodID AndroidJniClass_InputDevice::midHasKeys_ = nullptr;
+jmethodID AndroidJniClass_InputDevice::midGetVibratorManager_ = nullptr;
 jclass AndroidJniClass_KeyCharacterMap::javaClass_ = nullptr;
 jmethodID AndroidJniClass_KeyCharacterMap::midDeviceHasKey_ = nullptr;
-jclass AndroidJniClass_MotionRange::javaClass_ = nullptr;
-jmethodID AndroidJniClass_MotionRange::midGetFlat_ = nullptr;
-jmethodID AndroidJniClass_MotionRange::midGetFuzz_ = nullptr;
-jmethodID AndroidJniClass_MotionRange::midGetMax_ = nullptr;
-jmethodID AndroidJniClass_MotionRange::midGetMin_ = nullptr;
-jmethodID AndroidJniClass_MotionRange::midGetRange_ = nullptr;
 jclass AndroidJniClass_KeyEvent::javaClass_ = nullptr;
 jmethodID AndroidJniClass_KeyEvent::midConstructor_ = nullptr;
 jmethodID AndroidJniClass_KeyEvent::midGetUnicodeCharMetaState_ = nullptr;
@@ -143,6 +153,9 @@ void AndroidJniHelper::initClasses()
 {
 	AndroidJniClass_Version::init();
 	AndroidJniClass_MotionRange::init();
+	AndroidJniClass_VibrationEffect::init();
+	AndroidJniClass_Vibrator::init();
+	AndroidJniClass_VibratorManager::init();
 	AndroidJniClass_InputDevice::init();
 	AndroidJniClass_KeyCharacterMap::init();
 	AndroidJniClass_KeyEvent::init();
@@ -257,6 +270,119 @@ int AndroidJniClass_Version::sdkInt()
 	return int(sdkInt);
 }
 
+// ------------------- AndroidJniClass_MotionRange -------------------
+
+void AndroidJniClass_MotionRange::init()
+{
+	javaClass_ = findClass("android/view/InputDevice$MotionRange");
+	midGetFlat_ = getMethodID(javaClass_, "getFlat", "()F");
+	midGetFuzz_ = getMethodID(javaClass_, "getFuzz", "()F");
+	midGetMax_ = getMethodID(javaClass_, "getMax", "()F");
+	midGetMin_ = getMethodID(javaClass_, "getMin", "()F");
+	midGetRange_ = getMethodID(javaClass_, "getRange", "()F");
+}
+
+float AndroidJniClass_MotionRange::getFlat() const
+{
+	const jfloat flatValue = AndroidJniHelper::jniEnv->CallFloatMethod(javaObject_, midGetFlat_);
+	return float(flatValue);
+}
+
+float AndroidJniClass_MotionRange::getFuzz() const
+{
+	const jfloat fuzzValue = AndroidJniHelper::jniEnv->CallFloatMethod(javaObject_, midGetFuzz_);
+	return float(fuzzValue);
+}
+
+float AndroidJniClass_MotionRange::getMax() const
+{
+	const jfloat maxValue = AndroidJniHelper::jniEnv->CallFloatMethod(javaObject_, midGetMax_);
+	return float(maxValue);
+}
+
+float AndroidJniClass_MotionRange::getMin() const
+{
+	const jfloat minValue = AndroidJniHelper::jniEnv->CallFloatMethod(javaObject_, midGetMin_);
+	return float(minValue);
+}
+
+float AndroidJniClass_MotionRange::getRange() const
+{
+	const jfloat rangeValue = AndroidJniHelper::jniEnv->CallFloatMethod(javaObject_, midGetRange_);
+	return float(rangeValue);
+}
+
+// ------------------- AndroidJniClass_VibrationEffect -------------------
+
+void AndroidJniClass_VibrationEffect::init()
+{
+	javaClass_ = findClass("android/os/VibrationEffect");
+	midCreateOneShot_ = getStaticMethodID(javaClass_, "createOneShot", "(JI)Landroid/os/VibrationEffect;");
+}
+
+AndroidJniClass_VibrationEffect AndroidJniClass_VibrationEffect::createOneShot(long milliseconds, int amplitude)
+{
+	jobject vibrationEffect = AndroidJniHelper::jniEnv->CallStaticObjectMethod(javaClass_, midCreateOneShot_, milliseconds, amplitude);
+	return AndroidJniClass_VibrationEffect(vibrationEffect);
+}
+
+// ------------------- AndroidJniClass_Vibrator -------------------
+
+void AndroidJniClass_Vibrator::init()
+{
+	javaClass_ = findClass("android/os/Vibrator");
+	midCancel_ = getMethodID(javaClass_, "cancel", "()V");
+	midVibrate_ = getMethodID(javaClass_, "vibrate", "(Landroid/os/VibrationEffect;)V");
+}
+
+void AndroidJniClass_Vibrator::cancel() const
+{
+	AndroidJniHelper::jniEnv->CallVoidMethod(javaObject_, midCancel_);
+}
+
+void AndroidJniClass_Vibrator::vibrate(const AndroidJniClass_VibrationEffect &vibe) const
+{
+	AndroidJniHelper::jniEnv->CallVoidMethod(javaObject_, midVibrate_, vibe.javaObject());
+}
+
+// ------------------- AndroidJniClass_VibratorManager -------------------
+
+void AndroidJniClass_VibratorManager::init()
+{
+	javaClass_ = findClass("android/os/VibratorManager");
+	midCancel_ = getMethodID(javaClass_, "cancel", "()V");
+	midGetVibratorIds_ = getMethodID(javaClass_, "getVibratorIds", "()[I");
+	midGetVibrator_ = getMethodID(javaClass_, "getVibrator", "(I)Landroid/os/Vibrator;");
+}
+
+void AndroidJniClass_VibratorManager::cancel() const
+{
+	AndroidJniHelper::jniEnv->CallVoidMethod(javaObject_, midCancel_);
+}
+
+int AndroidJniClass_VibratorManager::getVibratorIds(int *destination, int maxSize) const
+{
+	jintArray arrVibratorIds = static_cast<jintArray>(AndroidJniHelper::jniEnv->CallObjectMethod(javaObject_, midGetVibratorIds_));
+	const jint length = AndroidJniHelper::jniEnv->GetArrayLength(arrVibratorIds);
+
+	if (destination != nullptr && maxSize > 0)
+	{
+		jint *intsVibratorIds = AndroidJniHelper::jniEnv->GetIntArrayElements(arrVibratorIds, nullptr);
+		for (int i = 0; i < length && i < maxSize; i++)
+			destination[i] = int(intsVibratorIds[i]);
+		AndroidJniHelper::jniEnv->ReleaseIntArrayElements(arrVibratorIds, intsVibratorIds, 0);
+	}
+	AndroidJniHelper::jniEnv->DeleteLocalRef(arrVibratorIds);
+
+	return int(length);
+}
+
+AndroidJniClass_Vibrator AndroidJniClass_VibratorManager::getVibrator(int vibratorId) const
+{
+	jobject vibratorObject = AndroidJniHelper::jniEnv->CallObjectMethod(javaObject_, midGetVibrator_, vibratorId);
+	return AndroidJniClass_Vibrator(vibratorObject);
+}
+
 // ------------------- AndroidJniClass_InputDevice -------------------
 
 void AndroidJniClass_InputDevice::init()
@@ -271,6 +397,7 @@ void AndroidJniClass_InputDevice::init()
 	midGetMotionRange_ = getMethodID(javaClass_, "getMotionRange", "(I)Landroid/view/InputDevice$MotionRange;");
 	midGetSources_ = getMethodID(javaClass_, "getSources", "()I");
 	midHasKeys_ = getMethodID(javaClass_, "hasKeys", "([I)[Z");
+	midGetVibratorManager_ = getMethodID(javaClass_, "getVibratorManager", "()Landroid/os/VibratorManager;");
 }
 
 AndroidJniClass_InputDevice AndroidJniClass_InputDevice::getDevice(int deviceId)
@@ -284,10 +411,13 @@ int AndroidJniClass_InputDevice::getDeviceIds(int *destination, int maxSize)
 	jintArray arrDeviceIds = static_cast<jintArray>(AndroidJniHelper::jniEnv->CallStaticObjectMethod(javaClass_, midGetDeviceIds_));
 	const jint length = AndroidJniHelper::jniEnv->GetArrayLength(arrDeviceIds);
 
-	jint *intsDeviceIds = AndroidJniHelper::jniEnv->GetIntArrayElements(arrDeviceIds, nullptr);
-	for (int i = 0; i < length && i < maxSize; i++)
-		destination[i] = int(intsDeviceIds[i]);
-	AndroidJniHelper::jniEnv->ReleaseIntArrayElements(arrDeviceIds, intsDeviceIds, 0);
+	if (destination != nullptr && maxSize > 0)
+	{
+		jint *intsDeviceIds = AndroidJniHelper::jniEnv->GetIntArrayElements(arrDeviceIds, nullptr);
+		for (int i = 0; i < length && i < maxSize; i++)
+			destination[i] = int(intsDeviceIds[i]);
+		AndroidJniHelper::jniEnv->ReleaseIntArrayElements(arrDeviceIds, intsDeviceIds, 0);
+	}
 	AndroidJniHelper::jniEnv->DeleteLocalRef(arrDeviceIds);
 
 	return int(length);
@@ -360,6 +490,14 @@ void AndroidJniClass_InputDevice::hasKeys(const int *buttons, const int length, 
 	AndroidJniHelper::jniEnv->DeleteLocalRef(arrBooleans);
 }
 
+AndroidJniClass_VibratorManager AndroidJniClass_InputDevice::getVibratorManager() const
+{
+	// Minimum SDK version should be 31 but early-out has not been implemented
+
+	jobject vibratorManagerObject = AndroidJniHelper::jniEnv->CallObjectMethod(javaObject_, midGetVibratorManager_);
+	return AndroidJniClass_VibratorManager(vibratorManagerObject);
+}
+
 // ------------------- AndroidJniClass_KeyCharacterMap -------------------
 
 void AndroidJniClass_KeyCharacterMap::init()
@@ -372,48 +510,6 @@ bool AndroidJniClass_KeyCharacterMap::deviceHasKey(int button)
 {
 	const jboolean hasKey = AndroidJniHelper::jniEnv->CallStaticBooleanMethod(javaClass_, midDeviceHasKey_, button);
 	return (hasKey == JNI_TRUE);
-}
-
-// ------------------- AndroidJniClass_MotionRange -------------------
-
-void AndroidJniClass_MotionRange::init()
-{
-	javaClass_ = findClass("android/view/InputDevice$MotionRange");
-	midGetFlat_ = getMethodID(javaClass_, "getFlat", "()F");
-	midGetFuzz_ = getMethodID(javaClass_, "getFuzz", "()F");
-	midGetMax_ = getMethodID(javaClass_, "getMax", "()F");
-	midGetMin_ = getMethodID(javaClass_, "getMin", "()F");
-	midGetRange_ = getMethodID(javaClass_, "getRange", "()F");
-}
-
-float AndroidJniClass_MotionRange::getFlat() const
-{
-	const jfloat flatValue = AndroidJniHelper::jniEnv->CallFloatMethod(javaObject_, midGetFlat_);
-	return float(flatValue);
-}
-
-float AndroidJniClass_MotionRange::getFuzz() const
-{
-	const jfloat fuzzValue = AndroidJniHelper::jniEnv->CallFloatMethod(javaObject_, midGetFuzz_);
-	return float(fuzzValue);
-}
-
-float AndroidJniClass_MotionRange::getMax() const
-{
-	const jfloat maxValue = AndroidJniHelper::jniEnv->CallFloatMethod(javaObject_, midGetMax_);
-	return float(maxValue);
-}
-
-float AndroidJniClass_MotionRange::getMin() const
-{
-	const jfloat minValue = AndroidJniHelper::jniEnv->CallFloatMethod(javaObject_, midGetMin_);
-	return float(minValue);
-}
-
-float AndroidJniClass_MotionRange::getRange() const
-{
-	const jfloat rangeValue = AndroidJniHelper::jniEnv->CallFloatMethod(javaObject_, midGetRange_);
-	return float(rangeValue);
 }
 
 // ------------------- AndroidJniClass_KeyEvent -------------------
@@ -645,15 +741,6 @@ AndroidJniClass_Display AndroidJniWrap_DisplayManager::getDisplay(int displayId)
 	jobject displayObject = static_cast<jobject>(AndroidJniHelper::jniEnv->CallObjectMethod(displayManagerObject_, midGetDisplay_, displayId));
 	AndroidJniClass_Display display(displayObject);
 	return display;
-}
-
-int AndroidJniWrap_DisplayManager::getNumDisplays()
-{
-	jobjectArray arrDisplays = static_cast<jobjectArray>(AndroidJniHelper::jniEnv->CallObjectMethod(displayManagerObject_, midGetDisplays_));
-	const jint length = AndroidJniHelper::jniEnv->GetArrayLength(arrDisplays);
-	AndroidJniHelper::jniEnv->DeleteLocalRef(arrDisplays);
-
-	return int(length);
 }
 
 int AndroidJniWrap_DisplayManager::getDisplays(AndroidJniClass_Display *destination, int maxSize)

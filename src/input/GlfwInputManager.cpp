@@ -24,6 +24,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 const int IInputManager::MaxNumJoysticks = GLFW_JOYSTICK_LAST - GLFW_JOYSTICK_1 + 1;
+const unsigned short int IInputManager::MaxVibrationValue = 0;
 
 bool GlfwInputManager::windowHasFocus_ = true;
 GlfwMouseState GlfwInputManager::mouseState_;

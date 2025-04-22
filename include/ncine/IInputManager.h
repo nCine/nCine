@@ -28,6 +28,9 @@ class DLL_PUBLIC IInputManager
 
 	static const int MaxNumJoysticks;
 	static const short int MaxAxisValue = 32767;
+	/// The maximum vibration value supported by the backend
+	/*! \note The reciprocal of this number can be used as the vibration resolution value. */
+	static const unsigned short int MaxVibrationValue;
 
 	// From `XInput.h` in DirectX SDK
 	static const float LeftStickDeadZone;
@@ -74,6 +77,12 @@ class DLL_PUBLIC IInputManager
 	void addJoyMappingsFromStrings(const char **mappingStrings);
 	/// Returns the current number of valid joystick mappings
 	unsigned int numJoyMappings() const;
+
+	/// Returns `true` if the specified joystick supports vibration
+	virtual bool hasJoyVibration(int joyId) const = 0;
+	/// Vibrates the low (left) and high (right) frequency motors for the specified number of milliseconds
+	/*! \note Intensity goes from 0 to 1. Each call to this function cancels any previous vibration effect, and calling it with zero intensity stops any vibrations. */
+	virtual void joyVibrate(int joyId, float lowFreqIntensity, float highFreqIntensity, unsigned int duration) const = 0;
 
 	/// Returns current mouse cursor mode
 	inline MouseCursorMode mouseCursorMode() const { return mouseCursorMode_; }

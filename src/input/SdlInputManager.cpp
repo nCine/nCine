@@ -26,6 +26,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 const int IInputManager::MaxNumJoysticks = 16;
+const unsigned short int IInputManager::MaxVibrationValue = 0xFFFF;
 
 SDL_Window *SdlInputManager::windowHandle_ = nullptr;
 
@@ -557,6 +558,32 @@ const JoystickState &SdlInputManager::joystickState(int joyId) const
 		joystickStates_[joyId].sdlJoystick_ = sdlJoysticks_[joyId];
 
 	return joystickStates_[joyId];
+}
+
+bool SdlInputManager::hasJoyVibration(int joyId) const
+{
+	bool hasVibration = false;
+
+	if (isJoyPresent(joyId))
+		hasVibration = SDL_JoystickHasRumble(sdlJoysticks_[joyId]);
+
+	return hasVibration;
+}
+
+void SdlInputManager::joyVibrate(int joyId, float lowFreqIntensity, float highFreqIntensity, unsigned int duration) const
+{
+	if (isJoyPresent(joyId))
+	{
+		// Clamp intensity between 0.0f and 1.0f
+		lowFreqIntensity = (lowFreqIntensity < 0.0f) ? 0.0f : lowFreqIntensity;
+		lowFreqIntensity = (lowFreqIntensity > 1.0f) ? 1.0f : lowFreqIntensity;
+		highFreqIntensity = (highFreqIntensity < 0.0f) ? 0.0f : highFreqIntensity;
+		highFreqIntensity = (highFreqIntensity > 1.0f) ? 1.0f : highFreqIntensity;
+
+		const unsigned short int leftIntensity = static_cast<unsigned short int>(lowFreqIntensity * MaxVibrationValue);
+		const unsigned short int rightIntensity = static_cast<unsigned short int>(highFreqIntensity * MaxVibrationValue);
+		SDL_JoystickRumble(sdlJoysticks_[joyId], leftIntensity, rightIntensity, duration);
+	}
 }
 
 void SdlInputManager::setMouseCursorMode(MouseCursorMode mode)

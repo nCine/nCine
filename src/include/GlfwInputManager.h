@@ -121,6 +121,9 @@ class GlfwInputManager : public IInputManager
 	int joyNumAxes(int joyId) const override;
 	const JoystickState &joystickState(int joyId) const override;
 
+	inline bool hasJoyVibration(int joyId) const override { return false; }
+	inline void joyVibrate(int joyId, float lowFreqIntensity, float highFreqIntensity, unsigned int duration) const override {}
+
 	void setMouseCursorMode(MouseCursorMode mode) override;
 
   private:

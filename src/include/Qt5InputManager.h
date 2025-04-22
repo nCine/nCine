@@ -176,6 +176,8 @@ class Qt5InputManager : public IInputManager
 	inline int joyNumAxes(int joyId) const override { return 0; }
 	inline const JoystickState &joystickState(int joyId) const override { return nullJoystickState_; }
 #endif
+	inline bool hasJoyVibration(int joyId) const override { return false; }
+	inline void joyVibrate(int joyId, float lowFreqIntensity, float highFreqIntensity, unsigned int duration) const override {}
 
 	void setMouseCursorMode(MouseCursorMode mode) override;
 

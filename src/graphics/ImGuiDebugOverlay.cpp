@@ -1150,6 +1150,40 @@ void ImGuiDebugOverlay::guiInputState()
 								ImGui::Text("%.2f", axisValue);
 							}
 						}
+
+						if (input.hasJoyVibration(joyId))
+						{
+							ImGui::Separator();
+							static float intensities[2] = { 0.5f, 0.5f };
+							ImGui::SliderFloat2("Intensity", intensities, 0.0f, 1.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+							static int duration = 1000;
+							ImGui::SliderInt("Duration", &duration, 0, 5000, "%d ms", ImGuiSliderFlags_AlwaysClamp);
+
+							static TimeStamp vibrationStart;
+							static int vibratingDuration = 0;
+							if (vibratingDuration > 0)
+							{
+								const float elapsed = vibrationStart.millisecondsSince();
+								const float fraction = elapsed / vibratingDuration;
+								widgetName_.format("%.0f/%d ms", elapsed, vibratingDuration);
+								ImGui::ProgressBar(fraction, ImVec2(0.0f, 0.0f), widgetName_.data());
+								if (elapsed >= vibratingDuration)
+									vibratingDuration = 0;
+							}
+
+							if (ImGui::Button("Vibrate"))
+							{
+								input.joyVibrate(joyId, intensities[0], intensities[1], duration);
+								vibratingDuration = duration;
+								vibrationStart = TimeStamp::now();
+							}
+							ImGui::SameLine();
+							if (ImGui::Button("Stop##Vibrate"))
+							{
+								input.joyVibrate(joyId, 0.0f, 0.0f, 0);
+								vibratingDuration = 0;
+							}
+						}
 						ImGui::TreePop();
 					}
 				}

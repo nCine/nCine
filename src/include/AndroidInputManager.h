@@ -3,6 +3,7 @@
 
 #include <android/keycodes.h>
 #include "IInputManager.h"
+#include "AndroidJniHelper.h"
 
 struct AInputEvent;
 struct ASensorManager;
@@ -65,6 +66,9 @@ class AndroidKeyboardState : public KeyboardState
 class AndroidJoystickState : JoystickState
 {
   public:
+	/// Supporting no more than a left and a right vibrator
+	static const int MaxVibrators = 2;
+
 	AndroidJoystickState();
 
 	bool isButtonDown(int buttonId) const override;
@@ -108,6 +112,9 @@ class AndroidJoystickState : JoystickState
 	/// Normalized value in the -1..1 range
 	float axesValues_[MaxAxes];
 	unsigned char hatState_; // no more than one hat is supported
+	int numVibrators_;
+	int vibratorsIds_[MaxVibrators];
+	AndroidJniClass_Vibrator vibrators_[MaxVibrators];
 
 	void createGuid(uint16_t bus, uint16_t vendor, uint16_t product, uint16_t version, const char *name, uint8_t driverSignature, uint8_t driverData);
 	void updateGuidWithCapabilities();
@@ -148,6 +155,9 @@ class AndroidInputManager : public IInputManager
 	int joyNumHats(int joyId) const override;
 	int joyNumAxes(int joyId) const override;
 	const JoystickState &joystickState(int joyId) const override;
+
+	bool hasJoyVibration(int joyId) const override;
+	void joyVibrate(int joyId, float lowFreqIntensity, float highFreqIntensity, unsigned int duration) const override;
 
 	void setMouseCursorMode(MouseCursorMode mode) override { mouseCursorMode_ = mode; }
 

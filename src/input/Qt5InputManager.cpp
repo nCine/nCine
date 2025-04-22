@@ -31,6 +31,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 const int IInputManager::MaxNumJoysticks = 4;
+const unsigned short int IInputManager::MaxVibrationValue = 0;
 
 TouchEvent Qt5InputManager::touchEvent_;
 Qt5MouseState Qt5InputManager::mouseState_;
