@@ -60,11 +60,11 @@ android {
 		def cmakeBuildDependsTasks = []
 
 		if (arch == "armeabi-v7a")
-			androidPlatform = (androidPlatform >= 28) ? androidPlatform : 28
+			androidPlatform = (androidPlatform >= 21) ? androidPlatform : 21
 		else if (arch == "arm64-v8a")
-			androidPlatform = (androidPlatform >= 28) ? androidPlatform : 28
+			androidPlatform = (androidPlatform >= 21) ? androidPlatform : 21
 		else if (arch == "x86_64")
-			androidPlatform = (androidPlatform >= 28) ? androidPlatform : 28
+			androidPlatform = (androidPlatform >= 21) ? androidPlatform : 21
 
 		if (libcppIsShared) {
 			// Mapping from architecture name to toolchain tuple
