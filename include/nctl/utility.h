@@ -145,7 +145,7 @@ namespace detail {
 
 }
 
-//// Forwards lvalues as either lvalues or as rvalues, depending on T
+/// Forwards lvalues as either lvalues or as rvalues, depending on T
 template <typename T>
 inline constexpr T &&forward(typename removeReference<T>::type &arg)
 {

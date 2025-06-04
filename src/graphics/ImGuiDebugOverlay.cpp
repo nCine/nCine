@@ -90,8 +90,9 @@ ImGuiDebugOverlay::ImGuiDebugOverlay(float profileTextUpdateTime)
 #ifdef WITH_RENDERDOC
       ,
       renderDocPathTemplate_(MaxRenderDocPathLength),
-      renderDocFileComments_(MaxRenderDocCommentsLength),
       renderDocCapturePath_(MaxRenderDocPathLength),
+      renderDocCaptureTitle_(MaxRenderDocCaptureTitle),
+      renderDocFileComments_(MaxRenderDocCommentsLength),
       renderDocLastNumCaptures_(0)
 #endif
 {
@@ -577,7 +578,7 @@ void ImGuiDebugOverlay::guiFrameTimer()
 
 		int logLevel = static_cast<int>(frameTimer.logLevel());
 		ImGui::Combo("Log Level", &logLevel, "Off\0Verbose\0Debug\0Info\0Warning\0Error\0Fatal\0");
-		frameTimer.setLogLevel(static_cast<ILogger::LogLevel>(logLevel ));
+		frameTimer.setLogLevel(static_cast<ILogger::LogLevel>(logLevel));
 
 		float loggingInterval = frameTimer.loggingInterval();
 		bool loggingEnabled = frameTimer.loggingEnabled();
@@ -1230,7 +1231,7 @@ void ImGuiDebugOverlay::guiBinaryShaderCache()
 			// Reporting statistics for shaders hashing
 			const Hash64::Statistics &hash64Stats = RenderResources::hash64().statistics();
 			ImGui::Text("Hashed: %u sources (%u strings, %u characters), %u files, %u scanned",
-						hash64Stats.HashStringCalls, hash64Stats.HashedStrings, hash64Stats.HashedCharacters, hash64Stats.HashedFiles, hash64Stats.ScannedHashStrings);
+			            hash64Stats.HashStringCalls, hash64Stats.HashedStrings, hash64Stats.HashedCharacters, hash64Stats.HashedFiles, hash64Stats.ScannedHashStrings);
 			ImGui::Text("Requests: %u loaded, %u saved", stats.LoadedShaders, stats.SavedShaders);
 			ImGui::Text("Count: %u (total: %u)", stats.PlatformFilesCount, stats.TotalFilesCount);
 			ImGui::Text("Size: %u Kb (total: %u Kb)", stats.PlatformBytesCount / 1024, stats.TotalBytesCount / 1024);
@@ -1327,6 +1328,8 @@ void ImGuiDebugOverlay::guiRenderDoc()
 	if (RenderDocCapture::isAvailable() == false)
 		return;
 
+	static bool isCapturing = false;
+
 	if (RenderDocCapture::numCaptures() > renderDocLastNumCaptures_)
 	{
 		unsigned int pathLength = 0;
@@ -1359,6 +1362,13 @@ void ImGuiDebugOverlay::guiRenderDoc()
 			RenderDocCapture::setCaptureFilePathTemplate(renderDocPathTemplate_.data());
 		}
 
+		if (ImGui::InputText("Capture title", renderDocCaptureTitle_.data(), MaxRenderDocCaptureTitle,
+		                     ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackResize,
+		                     inputTextCallback, &renderDocCaptureTitle_))
+		{
+			RenderDocCapture::setCaptureTitle(renderDocCaptureTitle_.data());
+		}
+
 		ImGui::InputTextMultiline("File comments", renderDocFileComments_.data(), MaxRenderDocCommentsLength,
 		                          ImVec2(0, 0), ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackResize,
 		                          inputTextCallback, &renderDocFileComments_);
@@ -1368,7 +1378,16 @@ void ImGuiDebugOverlay::guiRenderDoc()
 		RenderDocCapture::enableOverlay(overlayEnabled);
 
 		if (RenderDocCapture::isFrameCapturing())
+		{
 			ImGui::TextUnformatted("Capturing a frame...");
+			isCapturing = true;
+		}
+		else if (isCapturing == true)
+		{
+			if (RenderDocCapture::isTargetControlConnected())
+				RenderDocCapture::showReplayUI();
+			isCapturing = false;
+		}
 		else
 		{
 			static int numFrames = 1;
@@ -1382,7 +1401,12 @@ void ImGuiDebugOverlay::guiRenderDoc()
 		}
 
 		if (RenderDocCapture::isTargetControlConnected())
+		{
 			ImGui::TextUnformatted("Replay UI is connected");
+			ImGui::SameLine();
+			if (ImGui::Button("Show Replay UI"))
+				RenderDocCapture::showReplayUI();
+		}
 		else
 		{
 			if (ImGui::Button("Launch Replay UI"))
@@ -1448,7 +1472,7 @@ void guiAllocator(nctl::IAllocator &alloc)
 
 			ImGui::TableNextRow();
 			ImGui::TableNextColumn();
-			ImGui::Text("#%u", i);
+			ImGui::Text("#%lu", i);
 			ImGui::TableNextColumn();
 			ImGui::Text("%f s", e.timestamp.seconds());
 			ImGui::TableNextColumn();
@@ -1489,22 +1513,25 @@ void guiAllocator(nctl::IAllocator &alloc)
 void ImGuiDebugOverlay::guiAllocators()
 {
 #ifdef WITH_ALLOCATORS
-	const unsigned int NumAllocators = 6;
-	const char *allocatorNames[NumAllocators] = { "Default", "String", "ImGui", "Nuklear", "Lua", "GLFW" };
+	const unsigned int NumAllocators = 7;
+	const char *allocatorNames[NumAllocators] = { "Default", "String", "GLFW", "SDL2", "ImGui", "Nuklear", "Lua" };
 	nctl::IAllocator *allocators[NumAllocators] = { &nctl::theDefaultAllocator(), &nctl::theStringAllocator(),
-	                                                nullptr, nullptr, nullptr, nullptr };
+	                                                nullptr, nullptr, nullptr, nullptr, nullptr };
 
+	#ifdef WITH_GLFW
+	allocators[2] = &nctl::theGlfwAllocator();
+	#endif
+	#ifdef WITH_SDL
+	allocators[3] = &nctl::theSdl2Allocator();
+	#endif
 	#ifdef WITH_IMGUI
-	allocators[2] = &nctl::theImGuiAllocator();
+	allocators[4] = &nctl::theImGuiAllocator();
 	#endif
 	#ifdef WITH_NUKLEAR
-	allocators[3] = &nctl::theNuklearAllocator();
+	allocators[5] = &nctl::theNuklearAllocator();
 	#endif
 	#ifdef WITH_LUA
-	allocators[4] = &nctl::theLuaAllocator();
-	#endif
-	#ifdef WITH_GLFW
-	allocators[5] = &nctl::theGlfwAllocator();
+	allocators[6] = &nctl::theLuaAllocator();
 	#endif
 
 	if (ImGui::CollapsingHeader("Memory Allocators"))
@@ -1563,8 +1590,8 @@ void ImGuiDebugOverlay::guiViewports(Viewport *viewport, unsigned int viewportId
 	while (sceneNode != nullptr && baseSprite == nullptr)
 	{
 		if (sceneNode->type() == Object::ObjectType::SPRITE ||
-			sceneNode->type() == Object::ObjectType::MESH_SPRITE ||
-			sceneNode->type() == Object::ObjectType::ANIMATED_SPRITE)
+		    sceneNode->type() == Object::ObjectType::MESH_SPRITE ||
+		    sceneNode->type() == Object::ObjectType::ANIMATED_SPRITE)
 		{
 			baseSprite = reinterpret_cast<BaseSprite *>(sceneNode); // exit the loop
 		}

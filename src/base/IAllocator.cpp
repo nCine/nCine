@@ -110,19 +110,15 @@ void IAllocator::countNotFreed()
 		const IAllocator::Entry &e = entries_[i];
 		if (e.alignment > 0)
 		{
-			printf("- #%lu 0x%lx, %lu bytes, %u align", i, uintptr_t(e.ptr), e.bytes, e.alignment);
-
 			const size_t deallocationIndex = findDeallocation(i);
-			if (deallocationIndex != InvalidEntryIndex)
-				printf(" - freed #%lu\n", deallocationIndex);
-			else
+			if (deallocationIndex == InvalidEntryIndex)
 			{
-				printf(" - NOT FREED\n");
+				printf("- #%lu 0x%lx, %lu bytes, %u align - NOT FREED\n", i, uintptr_t(e.ptr), e.bytes, e.alignment);
 				notFreed++;
 			}
 		}
 	}
-	printf("-> Not freed allocations: %u\n", notFreed);
+	printf("-> Not freed allocations: %lu\n", notFreed);
 }
 
 struct Counters

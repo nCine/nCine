@@ -292,6 +292,8 @@ SdlInputManager::~SdlInputManager()
 			sdlJoysticks_[i] = nullptr;
 		}
 	}
+
+	SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 }
 
 ///////////////////////////////////////////////////////////

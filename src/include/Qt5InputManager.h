@@ -55,7 +55,7 @@ class Qt5ScrollEvent : public ScrollEvent
 	friend class Qt5InputManager;
 };
 
-//// Simulated information about Qt5 keyboard state
+/// Simulated information about Qt5 keyboard state
 class Qt5KeyboardState : public KeyboardState
 {
   public:
