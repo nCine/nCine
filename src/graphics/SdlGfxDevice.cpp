@@ -47,6 +47,8 @@ SdlGfxDevice::~SdlGfxDevice()
 	glContextHandle_ = nullptr;
 	SDL_DestroyWindow(windowHandle_);
 	windowHandle_ = nullptr;
+
+	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 	SDL_Quit();
 }
 
@@ -174,8 +176,8 @@ bool SdlGfxDevice::setVideoMode(unsigned int modeIndex)
 
 void SdlGfxDevice::initGraphics()
 {
-	const int err = SDL_Init(SDL_INIT_VIDEO);
-	FATAL_ASSERT_MSG_X(!err, "SDL_Init(SDL_INIT_VIDEO) failed: %s", SDL_GetError());
+	const int err = SDL_InitSubSystem(SDL_INIT_VIDEO);
+	FATAL_ASSERT_MSG_X(!err, "SDL_InitSubSystem(SDL_INIT_VIDEO) failed: %s", SDL_GetError());
 }
 
 void SdlGfxDevice::initDevice(const WindowMode &windowMode)

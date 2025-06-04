@@ -99,7 +99,7 @@ jobs:
       run: |
         mkdir ../RenderDoc
         cd ../RenderDoc
-        curl -fsSL https://raw.githubusercontent.com/baldurk/renderdoc/v1.x/renderdoc/api/app/renderdoc_app.h -o renderdoc.h
+        curl -fsSL https://raw.githubusercontent.com/baldurk/renderdoc/v1.x/renderdoc/api/app/renderdoc_app.h -o renderdoc_app.h
 
     - name: 'CMake Configuration, Make and Test'
       if: matrix.BuildType != 'DevDist' && matrix.BuildType != 'LuaDist'

@@ -1,14 +1,15 @@
 #if !defined(_WIN32) && !defined(__APPLE__)
 	#include <dlfcn.h>
-	#include "renderdoc.h"
 #else
 	#include "common_windefines.h"
 	#include <libloaderapi.h>
-	#include "renderdoc_app.h"
 #endif
+#include "renderdoc_app.h"
 
 #include "common_macros.h"
 #include "RenderDocCapture.h"
+#include "Application.h"
+#include "AppConfiguration.h"
 
 namespace ncine {
 
@@ -17,7 +18,7 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 namespace {
-	RENDERDOC_API_1_1_2 *rdocApi = nullptr;
+	RENDERDOC_API_1_6_0 *rdocApi = nullptr;
 }
 
 ///////////////////////////////////////////////////////////
@@ -70,10 +71,16 @@ void RenderDocCapture::enableOverlay(bool enabled)
 		else
 		{
 			rdocApi->MaskOverlayBits(RENDERDOC_OverlayBits::eRENDERDOC_Overlay_All &
-			                             ~RENDERDOC_OverlayBits::eRENDERDOC_Overlay_Enabled,
+			                        ~RENDERDOC_OverlayBits::eRENDERDOC_Overlay_Enabled,
 			                         RENDERDOC_OverlayBits::eRENDERDOC_Overlay_None);
 		}
 	}
+}
+
+void RenderDocCapture::setCaptureTitle(const char *title)
+{
+	if (rdocApi)
+		rdocApi->SetCaptureTitle(title);
 }
 
 void RenderDocCapture::triggerCapture()
@@ -142,6 +149,13 @@ uint32_t RenderDocCapture::launchReplayUI(uint32_t connectTargetControl, const c
 	return 0;
 }
 
+uint32_t RenderDocCapture::showReplayUI()
+{
+	if (rdocApi)
+		return rdocApi->ShowReplayUI();
+	return 0;
+}
+
 void RenderDocCapture::unloadCrashHandler()
 {
 	if (rdocApi)
@@ -158,7 +172,7 @@ void RenderDocCapture::init()
 	if (HMODULE mod = GetModuleHandleA("renderdoc.dll"))
 	{
 		pRENDERDOC_GetAPI RENDERDOC_GetAPI = reinterpret_cast<pRENDERDOC_GetAPI>(GetProcAddress(mod, "RENDERDOC_GetAPI"));
-		const int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, reinterpret_cast<void **>(&rdocApi));
+		const int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_6_0, reinterpret_cast<void **>(&rdocApi));
 		ASSERT(ret == 1);
 	}
 #elif !defined(__APPLE__)
@@ -169,7 +183,7 @@ void RenderDocCapture::init()
 	#endif
 	{
 		pRENDERDOC_GetAPI RENDERDOC_GetAPI = reinterpret_cast<pRENDERDOC_GetAPI>(dlsym(mod, "RENDERDOC_GetAPI"));
-		const int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, reinterpret_cast<void **>(&rdocApi));
+		const int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_6_0, reinterpret_cast<void **>(&rdocApi));
 		ASSERT(ret == 1);
 	}
 #endif
@@ -179,6 +193,13 @@ void RenderDocCapture::init()
 		int major, minor, patch;
 		apiVersion(&major, &minor, &patch);
 		LOGI_X("RenderDoc API: %d.%d.%d", major, minor, patch);
+
+		const AppConfiguration &appCfg = theApplication().appConfiguration();
+		if (appCfg.withGlDebugContext)
+		{
+			rdocApi->SetCaptureOptionU32(RENDERDOC_CaptureOption::eRENDERDOC_Option_APIValidation, 1);
+			rdocApi->SetCaptureOptionU32(RENDERDOC_CaptureOption::eRENDERDOC_Option_CaptureCallstacks, 1);
+		}
 	}
 }
 
