@@ -81,12 +81,14 @@ class ImGuiDebugOverlay : public IDebugOverlay
 	nctl::String comboVideoModes_;
 
 #ifdef WITH_RENDERDOC
-	const unsigned int MaxRenderDocPathLength = 128;
+	const unsigned int MaxRenderDocPathLength = 256;
+	const unsigned int MaxRenderDocCaptureTitle = 64;
 	const unsigned int MaxRenderDocCommentsLength = 512;
 
 	nctl::String renderDocPathTemplate_;
-	nctl::String renderDocFileComments_;
 	nctl::String renderDocCapturePath_;
+	nctl::String renderDocCaptureTitle_;
+	nctl::String renderDocFileComments_;
 	unsigned int renderDocLastNumCaptures_;
 #endif
 

@@ -27,11 +27,13 @@ AllowShortFunctionsOnASingleLine: Inline
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLambdasOnASingleLine: true
 AllowShortLoopsOnASingleLine: false
+AllowShortNamespacesOnASingleLine: false # clang-format 20
 AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: false
 # AttributeMacros:
 BinPackArguments: true
+# BinPackLongBracedList: true # clan-format 21
 BinPackParameters: true
 BitFieldColonSpacing: After
 BraceWrapping:
@@ -63,8 +65,9 @@ BreakBeforeBinaryOperators: None
 BreakBeforeBraces: Custom # Allman
 BreakBeforeConceptDeclarations: true
 BreakBeforeInlineASMColon: OnlyMultiline
+# BreakBeforeTemplateCloser: true # clang-format 21
 BreakBeforeTernaryOperators: true
-# BreakBinaryOperations: Never # clang-format 20
+BreakBinaryOperations: Never # clang-format 20
 BreakConstructorInitializers: BeforeColon
 BreakFunctionDefinitionParameters: false
 BreakInheritanceList: AfterColon
@@ -81,6 +84,7 @@ DerivePointerAlignment: false
 DisableFormat: false
 EmptyLineAfterAccessModifier: Never
 EmptyLineBeforeAccessModifier: LogicalBlock
+# EnumTrailingComma: Remove # clang-format 21
 ExperimentalAutoDetectBinPacking: false
 FixNamespaceComments: false
 ForEachMacros:
@@ -111,6 +115,7 @@ IncludeIsMainRegex: '$'
 IndentAccessModifiers: false
 IndentCaseBlocks: false
 IndentCaseLabels: true
+IndentExportBlock: true # clang-format 20
 IndentExternBlock: Indent
 IndentGotoLabels: true
 IndentPPDirectives: BeforeHash
@@ -131,7 +136,7 @@ KeepEmptyLines:
   AtEndOfFile: false
   AtStartOfBlock: true
   AtStartOfFile: false
-# KeepFormFeed: false # clang-format 20
+KeepFormFeed: false # clang-format 20
 LambdaBodyIndentation: Signature
 Language: Cpp
 LineEnding: DeriveLF
@@ -148,10 +153,12 @@ ObjCBreakBeforeNestedBlockParam: false
 # ObjCPropertyAttributeOrder:
 ObjCSpaceAfterProperty: false
 ObjCSpaceBeforeProtocolList: true
+# OneLineFormatOffRegex:  # clang-format 21
 PPIndentWidth: 4
 PackConstructorInitializers:  BinPack
 PenaltyBreakAssignment: 2
 PenaltyBreakBeforeFirstCallParameter: 19
+PenaltyBreakBeforeMemberAccess: 10000 # clang-format 20
 PenaltyBreakComment: 300
 PenaltyBreakFirstLessLess: 120
 PenaltyBreakOpenParenthesis: 50
@@ -168,7 +175,7 @@ QualifierOrder: ['friend', 'static', 'inline', 'constexpr', 'const', 'restrict',
 ReferenceAlignment: Pointer
 ReflowComments: true
 RemoveBracesLLVM: false
-# RemoveEmptyLinesInUnwrappedLines: true #clang-format 20
+RemoveEmptyLinesInUnwrappedLines: true #clang-format 20
 RemoveParentheses: MultipleParentheses
 RemoveSemicolon: false
 RequiresClausePosition: OwnLine
@@ -181,6 +188,7 @@ SortJavaStaticImport: Before
 SortUsingDeclarations: true
 SpaceAfterCStyleCast: false
 SpaceAfterLogicalNot: false
+# SpaceAfterOperatorKeyword: false # clang-formmat 21
 SpaceAfterTemplateKeyword: true
 SpaceAroundPointerQualifiers: Both
 SpaceBeforeAssignmentOperators: true
@@ -217,4 +225,4 @@ UseTab: ForIndentation
 # VariableTemplates: # clang-format 20
 VerilogBreakBetweenInstancePorts: false
 # WhitespaceSensitiveMacros:
-# WrapNamespaceBodyWithEmptyLines: # clang-format 20
+WrapNamespaceBodyWithEmptyLines: Leave # clang-format 20

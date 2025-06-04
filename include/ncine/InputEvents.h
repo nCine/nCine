@@ -291,7 +291,7 @@ class DLL_PUBLIC JoyMappedState
 	virtual bool isButtonDown(ButtonName name) const = 0;
 	/// Returns `true` if the specified button went from not down to down this frame
 	virtual bool isButtonPressed(ButtonName name) const = 0;
-	///// Returns `true` if the specified button went from down to not down this frame
+	/// Returns `true` if the specified button went from down to not down this frame
 	virtual bool isButtonReleased(ButtonName name) const = 0;
 
 	/// Returns the value of the specified axis

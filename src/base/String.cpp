@@ -160,7 +160,7 @@ void String::setCapacity(unsigned int newCapacity)
 #if !defined(WITH_ALLOCATORS)
 		newArray = static_cast<char *>(::operator new[](newCapacity * sizeof(char)));
 #else
-		newArray = theStringAllocator().newArray<char>(capacity_);
+		newArray = theStringAllocator().newArray<char>(newCapacity * sizeof(char));
 #endif
 		if (length_ > 0)
 		{

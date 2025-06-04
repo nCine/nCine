@@ -17,6 +17,7 @@ class DLL_PUBLIC RenderDocCapture
 	static bool isOverlayEnabled();
 	static void enableOverlay(bool enabled);
 
+	static void setCaptureTitle(const char *title);
 	static void triggerCapture();
 	static void triggerMultiFrameCapture(uint32_t numFrames);
 	static bool endFrameCapture();
@@ -29,6 +30,7 @@ class DLL_PUBLIC RenderDocCapture
 	static void setCaptureFileComments(const char *filePath, const char *comments);
 
 	static uint32_t launchReplayUI(uint32_t connectTargetControl, const char *cmdLine);
+	static uint32_t showReplayUI();
 	static void unloadCrashHandler();
 
   private:
