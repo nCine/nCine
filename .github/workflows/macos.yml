@@ -7,7 +7,6 @@ env:
 
      - nCine artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
   DEPLOY_BRANCH: nCine-BRANCH_NAME-OS-COMPILER
-  NUM_THREADS: 2
 
 on: [push, workflow_dispatch]
 
@@ -17,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         BuildType: [Debug, Release, DevDist, LuaDist]
-        os: [macOS-13, macOS-14]
+        os: [macOS-13, macOS-15]
 
     runs-on: ${{ matrix.os }}
 
@@ -32,8 +31,8 @@ jobs:
 
     - name: 'Download nCine-libraries Artifacts and nCine-data'
       run: |
-        if [[ "${{ matrix.os }}" == "macOS-14" ]]; then
-          export OS=macos14
+        if [[ "${{ matrix.os }}" == "macOS-15" ]]; then
+          export OS=macos15
         else
           export OS=macos13
         fi
@@ -66,9 +65,9 @@ jobs:
         export CMAKE_ARGS="-B ../nCine-buildtests-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=UnitTests"
 
         cmake $CMAKE_ARGS
-        make -j $NUM_THREADS -C ../nCine-buildtests-${{ matrix.BuildType }}
+        make -j $(getconf _NPROCESSORS_ONLN) -C ../nCine-buildtests-${{ matrix.BuildType }}
         cd ../nCine-buildtests-${{ matrix.BuildType }}
-        ctest -j $NUM_THREADS --build-config ${{ matrix.BuildType }}
+        ctest -j $(getconf _NPROCESSORS_ONLN) --build-config ${{ matrix.BuildType }}
 
     - name: 'CMake Configuration'
       run: |
@@ -82,7 +81,7 @@ jobs:
 
     - name: 'Make'
       run: |
-        make -j $NUM_THREADS -C ../nCine-build-${{ matrix.BuildType }}
+        make -j $(getconf _NPROCESSORS_ONLN) -C ../nCine-build-${{ matrix.BuildType }}
 
     - name: 'Package'
       if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'
@@ -100,8 +99,8 @@ jobs:
         export BRANCH_NAME=$(git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git rev-parse --short HEAD)
         export DEPLOY_MESSAGE=`sed 's/BRANCH_NAME/'"$BRANCH_NAME"'/' <<< "$DEPLOY_MESSAGE"`
 
-        if [[ "${{ matrix.os }}" == "macOS-14" ]]; then
-          export OS=macos14
+        if [[ "${{ matrix.os }}" == "macOS-15" ]]; then
+          export OS=macos15
         else
           export OS=macos13
         fi

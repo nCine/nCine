@@ -7,7 +7,6 @@ env:
 
      - nCine artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
   DEPLOY_BRANCH: nCine-BRANCH_NAME-OS-COMPILER
-  NUM_THREADS: 2
 
 on: [push, workflow_dispatch]
 
@@ -49,7 +48,7 @@ jobs:
           CC: clang
           CXX: clang++
 
-    runs-on: 'windows-2019'
+    runs-on: 'windows-2022'
 
     steps:
     - name: 'Checkout Code'
@@ -66,7 +65,7 @@ jobs:
       run: |
         $env:MSYSTEM = "MINGW64"
 
-        C:\msys64\usr\bin\bash -lc 'pacman --needed --noconfirm -S mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-SDL2 mingw-w64-x86_64-openal mingw-w64-x86_64-libvorbis mingw-w64-x86_64-libwebp mingw-w64-x86_64-lua mingw-w64-x86_64-cmake'
+        C:\msys64\usr\bin\bash -lc 'pacman --needed --noconfirm -S mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-SDL2 mingw-w64-x86_64-openal mingw-w64-x86_64-libvorbis mingw-w64-x86_64-libwebp mingw-w64-x86_64-lua mingw-w64-x86_64-cmake make patch'
 
         if ("${{ matrix.CC }}" -eq "gcc") { C:\msys64\usr\bin\bash -lc 'pacman --needed --noconfirm -S mingw-w64-x86_64-gcc' }
         else { C:\msys64\usr\bin\bash -lc 'pacman --needed --noconfirm -S mingw-w64-x86_64-clang' }
@@ -128,9 +127,9 @@ jobs:
         $env:MSYSTEM = "MINGW64"
 
         C:\msys64\usr\bin\bash.exe -lc "cmake -G 'MSYS Makefiles' -B ../nCine-buildtests-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=UnitTests"
-        C:\msys64\usr\bin\bash.exe -lc 'make -j $NUM_THREADS -C ../nCine-buildtests-${{ matrix.BuildType }}'
+        C:\msys64\usr\bin\bash.exe -lc 'make -j $NUMBER_OF_PROCESSORS -C ../nCine-buildtests-${{ matrix.BuildType }}'
         cd ..\nCine-buildtests-${{ matrix.BuildType }}
-        C:\msys64\usr\bin\bash.exe -lc 'ctest -j $NUM_THREADS --build-config ${{ matrix.BuildType }}'
+        C:\msys64\usr\bin\bash.exe -lc 'ctest -j $NUMBER_OF_PROCESSORS --build-config ${{ matrix.BuildType }}'
 
     - name: 'CMake Configuration'
       env:
@@ -156,7 +155,7 @@ jobs:
       run: |
         $env:MSYSTEM = "MINGW64"
 
-        C:\msys64\usr\bin\bash.exe -lc 'make -j $NUM_THREADS -C ../nCine-build-${{ matrix.BuildType }}'
+        C:\msys64\usr\bin\bash.exe -lc 'make -j $NUMBER_OF_PROCESSORS -C ../nCine-build-${{ matrix.BuildType }}'
 
     - name: 'Package'
       if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'

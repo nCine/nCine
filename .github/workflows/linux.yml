@@ -7,7 +7,6 @@ env:
 
      - nCine artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
   DEPLOY_BRANCH: nCine-BRANCH_NAME-OS-COMPILER
-  NUM_THREADS: 2
 
 on: [push, workflow_dispatch]
 
@@ -49,7 +48,7 @@ jobs:
           CC: clang
           CXX: clang++
 
-    runs-on: 'ubuntu-22.04'
+    runs-on: 'ubuntu-24.04'
 
     steps:
     - name: 'Checkout Code'
@@ -58,7 +57,7 @@ jobs:
     - name: 'Install Build Dependencies'
       run: |
         sudo apt-get update
-        sudo apt-get install -y libgl1-mesa-dev
+        sudo apt-get install -y libgl-dev libxext-dev
         if [[ "${{ matrix.BuildType }}" == "DevDist" && "${{ matrix.CC }}" == "gcc" ]]; then
           sudo apt-get install -y doxygen graphviz
         fi
@@ -110,9 +109,9 @@ jobs:
         export CMAKE_ARGS="-B ../nCine-buildtests-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=UnitTests -D CMAKE_PREFIX_PATH=$(pwd)/../nCine-external"
 
         cmake $CMAKE_ARGS
-        make -j $NUM_THREADS -C ../nCine-buildtests-${{ matrix.BuildType }}
+        make -j $(getconf _NPROCESSORS_ONLN) -C ../nCine-buildtests-${{ matrix.BuildType }}
         cd ../nCine-buildtests-${{ matrix.BuildType }}
-        ctest -j $NUM_THREADS --build-config ${{ matrix.BuildType }}
+        ctest -j $(getconf _NPROCESSORS_ONLN) --build-config ${{ matrix.BuildType }}
 
     - name: 'CMake Configuration'
       run: |
@@ -130,7 +129,7 @@ jobs:
 
     - name: 'Make'
       run: |
-        make -j $NUM_THREADS -C ../nCine-build-${{ matrix.BuildType }}
+        make -j $(getconf _NPROCESSORS_ONLN) -C ../nCine-build-${{ matrix.BuildType }}
 
     - name: 'Package'
       if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'

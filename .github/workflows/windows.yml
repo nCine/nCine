@@ -7,7 +7,6 @@ env:
 
      - nCine artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
   DEPLOY_BRANCH: nCine-BRANCH_NAME-OS-COMPILER
-  NUM_THREADS: 2
 
 on: [push, workflow_dispatch]
 
@@ -16,10 +15,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-2019, windows-2022]
         BuildType: [Debug, Release, DevDist, LuaDist]
 
-    runs-on: ${{ matrix.os }}
+    runs-on: 'windows-2022'
 
     steps:
     - name: 'Checkout Code'
@@ -34,17 +32,12 @@ jobs:
     - name: 'Download nCine-libraries Artifacts and nCine-data'
       run: |
         $env:GIT_REDIRECT_STDERR = '2>&1'
-        $env:vsversion = switch ("${{ matrix.os }}")
-        {
-          "windows-2022" {"vs2022"}
-          "windows-2019" {"vs2019"}
-        }
 
         cd ..
         git clone https://github.com/nCine/nCine-libraries-artifacts.git
         cd nCine-libraries-artifacts
 
-        $env:LIBRARIES_BRANCH = $env:LIBRARIES_BRANCH -replace "OS","windows" -replace "COMPILER",$env:vsversion
+        $env:LIBRARIES_BRANCH = $env:LIBRARIES_BRANCH -replace "OS","windows" -replace "COMPILER","vs2022"
         git checkout $env:LIBRARIES_BRANCH
         $env:LIBRARIES_FILE = Get-ChildItem -Path $(pwd) -Name -File | Select-Object -First 1
         7z x $env:LIBRARIES_FILE
@@ -85,36 +78,24 @@ jobs:
     - name: 'CMake Configuration, Build and Test'
       if: matrix.BuildType != 'DevDist' && matrix.BuildType != 'LuaDist'
       run: |
-        $env:generator = switch ("${{ matrix.os }}")
-        {
-          "windows-2022" {"Visual Studio 17 2022"}
-          "windows-2019" {"Visual Studio 16 2019"}
-        }
-
-        cmake -G "$env:generator" -A x64 -B ../nCine-buildtests-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=UnitTests
-        cmake --build ../nCine-buildtests-${{ matrix.BuildType }} --config ${{ matrix.BuildType }}
+        cmake -G "Visual Studio 17 2022" -A x64 -B ../nCine-buildtests-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=UnitTests
+        cmake --build ../nCine-buildtests-${{ matrix.BuildType }} --config ${{ matrix.BuildType }} -j $env:NUMBER_OF_PROCESSORS
         cd ../nCine-buildtests-${{ matrix.BuildType }}
-        ctest -j $env:NUM_THREADS --build-config ${{ matrix.BuildType }}
+        ctest -j $env:NUMBER_OF_PROCESSORS --build-config ${{ matrix.BuildType }}
 
     - name: 'CMake Configuration'
       run: |
-        $env:generator = switch ("${{ matrix.os }}")
-        {
-          "windows-2022" {"Visual Studio 17 2022"}
-          "windows-2019" {"Visual Studio 16 2019"}
-        }
-
         if ("${{ matrix.BuildType }}" -eq "DevDist" -Or "${{ matrix.BuildType }}" -eq "LuaDist")
-          { cmake -G "$env:generator" -A x64 -B ../nCine-build-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }} -D NDK_DIR=$env:ANDROID_NDK_LATEST_HOME }
+          { cmake -G "Visual Studio 17 2022" -A x64 -B ../nCine-build-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }} -D NDK_DIR=$env:ANDROID_NDK_LATEST_HOME }
         else
-          { cmake -G "$env:generator" -A x64 -B ../nCine-build-${{ matrix.BuildType }} -D NCINE_BUILD_BENCHMARKS=ON -D NCINE_WITH_TRACY=ON -D NCINE_WITH_RENDERDOC=ON -D RENDERDOC_DIR=$(pwd)/../RenderDoc }
+          { cmake -G "Visual Studio 17 2022" -A x64 -B ../nCine-build-${{ matrix.BuildType }} -D NCINE_BUILD_BENCHMARKS=ON -D NCINE_WITH_TRACY=ON -D NCINE_WITH_RENDERDOC=ON -D RENDERDOC_DIR=$(pwd)/../RenderDoc }
 
     - name: 'CMake Build'
       run: |
         if ("${{ matrix.BuildType }}" -eq "DevDist" -Or "${{ matrix.BuildType }}" -eq "LuaDist")
-          { cmake --build ../nCine-build-${{ matrix.BuildType }} --config Release }
+          { cmake --build ../nCine-build-${{ matrix.BuildType }} --config Release -j $env:NUMBER_OF_PROCESSORS }
         else
-          { cmake --build ../nCine-build-${{ matrix.BuildType }} --config ${{ matrix.BuildType }} }
+          { cmake --build ../nCine-build-${{ matrix.BuildType }} --config ${{ matrix.BuildType }} -j $env:NUMBER_OF_PROCESSORS }
 
     - name: 'Package'
       if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'
@@ -133,14 +114,8 @@ jobs:
         $env:branch_name = git describe --tags --exact-match; if (-not $?) { $env:branch_name = git symbolic-ref -q --short HEAD }; if (-not $?) { $env:branch_name = git rev-parse --short HEAD }
         $env:DEPLOY_MESSAGE = $env:DEPLOY_MESSAGE -replace "BRANCH_NAME",$env:branch_name
 
-        $env:vsversion = switch ("${{ matrix.os }}")
-        {
-          "windows-2022" {"vs2022"}
-          "windows-2019" {"vs2019"}
-        }
-
         $env:DEPLOY_BRANCH = $env:DEPLOY_BRANCH -replace "BRANCH_NAME",$env:branch_name
-        $env:DEPLOY_BRANCH = $env:DEPLOY_BRANCH -replace "OS","windows" -replace "COMPILER",$env:vsversion
+        $env:DEPLOY_BRANCH = $env:DEPLOY_BRANCH -replace "OS","windows" -replace "COMPILER","vs2022"
         $env:package_ext0 = "exe"
         $env:package_ext1 = "zip"
 

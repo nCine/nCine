@@ -7,7 +7,6 @@ env:
 
      - nCine artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
   DEPLOY_BRANCH: nCine-BRANCH_NAME-OS-COMPILER
-  NUM_THREADS: 2
 
 on: [push, workflow_dispatch]
 
@@ -18,7 +17,7 @@ jobs:
       matrix:
         BuildType: [Debug, Release, DevDist, LuaDist]
 
-    runs-on: 'ubuntu-22.04'
+    runs-on: 'ubuntu-24.04'
 
     steps:
     - name: 'Checkout Code'
@@ -66,9 +65,9 @@ jobs:
         # Not using emcmake to avoid issue #10028 with CMAKE_CROSSCOMPILING_EMULATOR path
         cmake -B ../nCine-buildtests-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=UnitTests -D CMAKE_CROSSCOMPILING_EMULATOR=$EMSDK_NODE -D CMAKE_TOOLCHAIN_FILE=$EMSDK/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
 
-        make -j $NUM_THREADS -C ../nCine-buildtests-${{ matrix.BuildType }}
+        make -j $(getconf _NPROCESSORS_ONLN) -C ../nCine-buildtests-${{ matrix.BuildType }}
         cd ../nCine-buildtests-${{ matrix.BuildType }}
-        ctest -j $NUM_THREADS --build-config ${{ matrix.BuildType }}
+        ctest -j $(getconf _NPROCESSORS_ONLN) --build-config ${{ matrix.BuildType }}
 
     - name: 'CMake Configuration'
       run: |
@@ -84,7 +83,7 @@ jobs:
 
     - name: 'Make'
       run: |
-        make -j $NUM_THREADS -C ../nCine-build-${{ matrix.BuildType }}
+        make -j $(getconf _NPROCESSORS_ONLN) -C ../nCine-build-${{ matrix.BuildType }}
 
     - name: 'Package'
       if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'
