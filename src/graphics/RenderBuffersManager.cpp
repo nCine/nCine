@@ -18,6 +18,7 @@ namespace {
 RenderBuffersManager::RenderBuffersManager(bool useBufferMapping, unsigned long vboMaxSize, unsigned long iboMaxSize)
     : buffers_(4)
 {
+	FATAL_ASSERT_MSG_X(vboMaxSize > 0, "vboMaxSize should be greater than zero");
 	BufferSpecifications &vboSpecs = specs_[BufferTypes::ARRAY];
 	vboSpecs.type = BufferTypes::ARRAY;
 	vboSpecs.target = GL_ARRAY_BUFFER;
@@ -26,6 +27,7 @@ RenderBuffersManager::RenderBuffersManager(bool useBufferMapping, unsigned long 
 	vboSpecs.maxSize = vboMaxSize;
 	vboSpecs.alignment = sizeof(GLfloat);
 
+	FATAL_ASSERT_MSG_X(iboMaxSize > 0, "iboMaxSize should be greater than zero");
 	BufferSpecifications &iboSpecs = specs_[BufferTypes::ELEMENT_ARRAY];
 	iboSpecs.type = BufferTypes::ELEMENT_ARRAY;
 	iboSpecs.target = GL_ELEMENT_ARRAY_BUFFER;

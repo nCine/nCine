@@ -24,7 +24,7 @@ class DLL_PUBLIC AppConfiguration
 	ILogger::LogLevel consoleLogLevel;
 	/// The logging level for messages written in the log file
 	ILogger::LogLevel fileLogLevel;
-	/// The interval for frame timer accumulation average and log
+	/// The interval in seconds for frame timer accumulation average and log
 	float frameTimerLogInterval;
 
 	/// The window size or the resolution of the closest video mode if going full screen
@@ -62,7 +62,7 @@ class DLL_PUBLIC AppConfiguration
 	\warning If this value is changed, the binary shader cache needs to be manually cleared. */
 	unsigned int fixedBatchSize;
 	/// The flag is `true` if the shader cache is enabled to load and save binary shader programs
-	/*! \note Even if the flag is `true` the functionality might still not be supported by the OpenGL context */
+	/*! \note Even if the flag is `true`, the functionality might still not be supported by the OpenGL context. */
 	bool useBinaryShaderCache;
 	/// The directory name (not the complete path) for the binary shaders cache
 	nctl::String shaderCacheDirname;
@@ -104,7 +104,7 @@ class DLL_PUBLIC AppConfiguration
 	/// The flag is `true` if console log messages should use colors
 	bool withConsoleColors;
 
-	/// \returns The path for the application to load data from
+	/// \returns The constant path for the application to load data from
 	const nctl::String &dataPath() const;
 	/// \returns The path for the application to load data from
 	nctl::String &dataPath();
@@ -126,6 +126,54 @@ class DLL_PUBLIC AppConfiguration
 	const char *argv(int index) const;
 
   private:
+	/// A structure holding the variables that can be overridden by environment ones
+	struct OldValues
+	{
+		nctl::String logFile;
+		ILogger::LogLevel consoleLogLevel;
+		ILogger::LogLevel fileLogLevel;
+		float frameTimerLogInterval;
+
+		Vector2i resolution;
+		float refreshRate;
+		Vector2i windowPosition;
+		bool fullScreen;
+		bool resizable;
+		bool windowScaling;
+		unsigned int frameLimit;
+
+		nctl::String windowTitle;
+		nctl::String windowIconFilename;
+
+		bool useBufferMapping;
+		bool deferShaderQueries;
+		unsigned int fixedBatchSize;
+		bool useBinaryShaderCache;
+		nctl::String shaderCacheDirname;
+		bool compileBatchedShadersTwice;
+
+		unsigned long vboSize;
+		unsigned long iboSize;
+		unsigned int vaoPoolSize;
+		unsigned int renderCommandPoolSize;
+
+		unsigned int outputAudioFrequency;
+		unsigned int monoAudioSources;
+		unsigned int stereoAudioSources;
+
+		bool withDebugOverlay;
+		bool withAudio;
+		bool withThreads;
+		bool withScenegraph;
+		bool withVSync;
+		bool withGlDebugContext;
+		bool withConsoleColors;
+
+		nctl::String dataPath;
+
+		OldValues(const AppConfiguration &appCfg);
+	};
+
 	// Pre-configured compile-time variables
 	const bool glCoreProfile_;
 	const bool glForwardCompatible_;
@@ -136,7 +184,16 @@ class DLL_PUBLIC AppConfiguration
 	int argc_;
 	char **argv_;
 
+	/// The old variables before a potential overriding by environment ones
+	struct OldValues old;
+
+	/// Reads the environment variables that can override the user ones
+	void readEnvVariables();
+	/// Logs the environment variables that have overridden the user ones
+	void logEnvVariables() const;
+
 	friend class PCApplication;
+	friend class AndroidApplication;
 };
 
 }
