@@ -39,6 +39,7 @@ class Vector4
 	const T &operator[](unsigned int index) const;
 
 	bool operator==(const Vector4 &v) const;
+	bool operator!=(const Vector4 &v) const;
 	Vector4 operator-() const;
 
 	Vector4 &operator+=(const Vector4 &v);
@@ -150,6 +151,12 @@ template <class T>
 inline bool Vector4<T>::operator==(const Vector4 &v) const
 {
 	return (x == v.x && y == v.y && z == v.z && w == v.w);
+}
+
+template <class T>
+inline bool Vector4<T>::operator!=(const Vector4 &v) const
+{
+	return (x != v.x || y != v.y || z != v.z || w != v.w);
 }
 
 template <class T>

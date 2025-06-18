@@ -262,6 +262,19 @@ TEST_F(QuaternionTest, EqualityOperator)
 	ASSERT_FLOAT_EQ(q1_.w, newQuat.w);
 }
 
+TEST_F(QuaternionTest, InequalityOperator)
+{
+	printQuaternion("q1: ", q1_);
+	nc::Quaternionf newQuat = q1_;
+	newQuat.x += 1.0f;
+	printQuaternion("Creating a new quaternion as a copy of the first one, and then changing it: ", newQuat);
+
+	printf("The first quaternion components are not equal to the new one: %d", q1_ != newQuat);
+
+	ASSERT_TRUE(q1_ != newQuat);
+	ASSERT_FALSE(q1_ == newQuat);
+}
+
 TEST_F(QuaternionTest, Negation)
 {
 	printQuaternion("q1: ", q1_);

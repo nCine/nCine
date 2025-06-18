@@ -34,6 +34,7 @@ class Vector2
 	const T &operator[](unsigned int index) const;
 
 	bool operator==(const Vector2 &v) const;
+	bool operator!=(const Vector2 &v) const;
 	Vector2 operator-() const;
 
 	Vector2 &operator+=(const Vector2 &v);
@@ -132,6 +133,12 @@ template <class T>
 inline bool Vector2<T>::operator==(const Vector2 &v) const
 {
 	return (x == v.x && y == v.y);
+}
+
+template <class T>
+inline bool Vector2<T>::operator!=(const Vector2 &v) const
+{
+	return (x != v.x || y != v.y);
 }
 
 template <class T>

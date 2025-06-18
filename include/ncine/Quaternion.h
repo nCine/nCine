@@ -31,6 +31,7 @@ class Quaternion
 	const T &operator[](unsigned int index) const;
 
 	bool operator==(const Quaternion &q) const;
+	bool operator!=(const Quaternion &q) const;
 	Quaternion operator-() const;
 
 	Quaternion &operator+=(const Quaternion &q);
@@ -119,6 +120,12 @@ template <class T>
 inline bool Quaternion<T>::operator==(const Quaternion &q) const
 {
 	return (x == q.x && y == q.y && z == q.z && w == q.w);
+}
+
+template <class T>
+inline bool Quaternion<T>::operator!=(const Quaternion &q) const
+{
+	return (x != q.x || y != q.y || z != q.z || w != q.w);
 }
 
 template <class T>

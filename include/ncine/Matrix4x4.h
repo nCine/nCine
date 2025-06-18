@@ -25,6 +25,7 @@ class Matrix4x4
 	const Vector4<T> &operator[](unsigned int index) const;
 
 	bool operator==(const Matrix4x4 &m) const;
+	bool operator!=(const Matrix4x4 &m) const;
 	Matrix4x4 operator-() const;
 
 	Matrix4x4 &operator+=(const Matrix4x4 &m);
@@ -140,6 +141,12 @@ template <class T>
 inline bool Matrix4x4<T>::operator==(const Matrix4x4 &m) const
 {
 	return (vecs_[0] == m[0] && vecs_[1] == m[1] && vecs_[2] == m[2] && vecs_[3] == m[3]);
+}
+
+template <class T>
+inline bool Matrix4x4<T>::operator!=(const Matrix4x4 &m) const
+{
+	return (vecs_[0] != m[0] || vecs_[1] != m[1] || vecs_[2] != m[2] || vecs_[3] != m[3]);
 }
 
 template <class T>

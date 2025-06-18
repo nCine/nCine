@@ -315,6 +315,22 @@ TEST_F(Matrix4x4Test, EqualityOperator)
 	assertVectorsAreEqual(m1_[3], newMatrix[3]);
 }
 
+TEST_F(Matrix4x4Test, InequalityOperator)
+{
+	printMatrix("m1:\n", m1_);
+	nc::Matrix4x4f newMatrix = m1_;
+	m1_[0].x += 1.0f;
+	m1_[1].x += 1.0f;
+	m1_[2].x += 1.0f;
+	m1_[3].x += 1.0f;
+	printMatrix("Creating a new matrix as a copy of the first one, and then changing it:\n", newMatrix);
+
+	printf("The first matrix vectors are not equal to the new one: %d", m1_ != newMatrix);
+
+	ASSERT_TRUE(m1_ != newMatrix);
+	ASSERT_FALSE(m1_ == newMatrix);
+}
+
 TEST_F(Matrix4x4Test, Negation)
 {
 	printMatrix("m1:\n", m1_);

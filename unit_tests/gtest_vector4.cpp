@@ -528,6 +528,19 @@ TEST_F(Vector4Test, EqualityOperator)
 	ASSERT_FLOAT_EQ(v1_.w, newVector.w);
 }
 
+TEST_F(Vector4Test, InequalityOperator)
+{
+	printVector("v1: ", v1_);
+	nc::Vector4f newVector = v1_;
+	newVector.x += 1.0f;
+	printVector("Creating a new vector as a copy of the first one, and then changing it: ", newVector);
+
+	printf("The first vector components are not equal to the new one: %d\n", v1_ != newVector);
+
+	ASSERT_TRUE(v1_ != newVector);
+	ASSERT_FALSE(v1_ == newVector);
+}
+
 TEST_F(Vector4Test, Negation)
 {
 	printVector("v1: ", v1_);

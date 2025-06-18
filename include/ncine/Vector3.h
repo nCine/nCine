@@ -36,6 +36,7 @@ class Vector3
 	const T &operator[](unsigned int index) const;
 
 	bool operator==(const Vector3 &v) const;
+	bool operator!=(const Vector3 &v) const;
 	Vector3 operator-() const;
 
 	Vector3 &operator+=(const Vector3 &v);
@@ -143,6 +144,12 @@ template <class T>
 inline bool Vector3<T>::operator==(const Vector3 &v) const
 {
 	return (x == v.x && y == v.y && z == v.z);
+}
+
+template <class T>
+inline bool Vector3<T>::operator!=(const Vector3 &v) const
+{
+	return (x != v.x || y != v.y || z != v.z);
 }
 
 template <class T>
