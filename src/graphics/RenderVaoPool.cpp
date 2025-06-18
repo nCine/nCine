@@ -18,6 +18,7 @@ namespace {
 RenderVaoPool::RenderVaoPool(unsigned int vaoPoolSize)
     : vaoPool_(vaoPoolSize, nctl::ArrayMode::FIXED_CAPACITY)
 {
+	FATAL_ASSERT_MSG_X(vaoPoolSize > 0, "vaoPoolSize should be greater than zero");
 	// Start with a VAO bound to the OpenGL context
 	GLVertexFormat format;
 	bindVao(format);

@@ -72,6 +72,7 @@ void PCApplication::init(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandl
 	modifiableAppCfg.argc_ = argc;
 	modifiableAppCfg.argv_ = argv;
 	appEventHandler_->onPreInit(modifiableAppCfg);
+	modifiableAppCfg.readEnvVariables();
 
 	// Setting log levels and filename based on application configuration
 	FileLogger &fileLogger = static_cast<FileLogger &>(theServiceLocator().logger());
@@ -79,6 +80,7 @@ void PCApplication::init(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandl
 	fileLogger.setFileLevel(appCfg_.fileLogLevel);
 	fileLogger.openLogFile(appCfg_.logFile.data());
 	LOGI("IAppEventHandler::onPreInit() invoked"); // Logging delayed to set up the logger first
+	appCfg_.logEnvVariables();
 
 	// The application's `onPreInit()` might have requested to quit
 	if (shouldQuit_)
