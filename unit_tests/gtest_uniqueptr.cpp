@@ -14,7 +14,7 @@ class UniquePtrTest : public ::testing::Test
 
 TEST_F(UniquePtrTest, PointerSize)
 {
-	printf("Size of a unique pointer instance: %lu (raw poiner: %lu)\n", sizeof(ptr_), sizeof(int *));
+	printf("Size of a unique pointer instance: %lu (raw pointer: %lu)\n", sizeof(ptr_), sizeof(int *));
 	ASSERT_EQ(sizeof(ptr_), sizeof(int *));
 }
 
@@ -173,7 +173,7 @@ namespace {
 TEST_F(UniquePtrTest, PointerSizeWithAllocator)
 {
 	auto newPtr = nctl::allocateUnique<int>(nctl::theDefaultAllocator(), Value);
-	printf("Size of a unique pointer instance with a custom allocator deleter: %lu (raw poiner: %lu)\n", sizeof(newPtr), sizeof(int *));
+	printf("Size of a unique pointer instance with a custom allocator deleter: %lu (raw pointer: %lu)\n", sizeof(newPtr), sizeof(int *));
 	ASSERT_EQ(sizeof(newPtr), sizeof(int *) * 2);
 }
 

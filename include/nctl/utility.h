@@ -33,10 +33,22 @@ namespace detail {
 		}
 
 		template <class T>
+		inline static void copyConstructObject(T *dest, const T *src)
+		{
+			new (dest) T(*src);
+		}
+
+		template <class T>
 		inline static void copyConstructArray(T *dest, const T *src, unsigned int numElements)
 		{
 			for (unsigned int i = 0; i < numElements; i++)
 				new (dest + i) T(src[i]);
+		}
+
+		template <class T>
+		inline static void moveConstructObject(T *dest, T *src)
+		{
+			new (dest) T(nctl::move(*src));
 		}
 
 		template <class T>
@@ -62,9 +74,21 @@ namespace detail {
 		}
 
 		template <class T>
+		inline static void copyConstructObject(T *dest, const T *src)
+		{
+			memcpy(dest, src, sizeof(T));
+		}
+
+		template <class T>
 		inline static void copyConstructArray(T *dest, const T *src, unsigned int numElements)
 		{
 			memcpy(dest, src, numElements * sizeof(T));
+		}
+
+		template <class T>
+		inline static void moveConstructObject(T *dest, T *src)
+		{
+			memcpy(dest, src, sizeof(T));
 		}
 
 		template <class T>
@@ -107,15 +131,27 @@ namespace detail {
 		}
 	};
 
-	/// A container for functions to copy arrays of objects
+	/// A container for functions to assign objects and arrays of objects
 	template <bool value>
 	struct copyHelpers
 	{
+		template <class T>
+		inline static void copyAssignObject(T *dest, const T *src)
+		{
+			*dest = *src;
+		}
+
 		template <class T>
 		inline static void copyAssignArray(T *dest, const T *src, unsigned int numElements)
 		{
 			for (unsigned int i = 0; i < numElements; i++)
 				dest[i] = src[i];
+		}
+
+		template <class T>
+		inline static void moveAssignObject(T *dest, T *src)
+		{
+			*dest = nctl::move(*src);
 		}
 
 		template <class T>
@@ -131,9 +167,21 @@ namespace detail {
 	struct copyHelpers<true>
 	{
 		template <class T>
+		inline static void copyAssignObject(T *dest, const T *src)
+		{
+			memcpy(dest, src, sizeof(T));
+		}
+
+		template <class T>
 		inline static void copyAssignArray(T *dest, const T *src, unsigned int numElements)
 		{
 			memcpy(dest, src, numElements * sizeof(T));
+		}
+
+		template <class T>
+		inline static void moveAssignObject(T *dest, T *src)
+		{
+			memcpy(dest, src, sizeof(T));
 		}
 
 		template <class T>
@@ -210,9 +258,21 @@ void constructArray(T *ptr, unsigned int numElements)
 }
 
 template <class T>
+void copyConstructObject(T *dest, const T *src)
+{
+	detail::constructHelpers<isTriviallyConstructible<T>::value>::copyConstructObject(dest, src);
+}
+
+template <class T>
 void copyConstructArray(T *dest, const T *src, unsigned int numElements)
 {
 	detail::constructHelpers<isTriviallyConstructible<T>::value>::copyConstructArray(dest, src, numElements);
+}
+
+template <class T>
+void moveConstructObject(T *dest, T *src)
+{
+	detail::constructHelpers<isTriviallyConstructible<T>::value>::moveConstructObject(dest, src);
 }
 
 template <class T>
@@ -234,9 +294,21 @@ void destructArray(T *ptr, unsigned int numElements)
 }
 
 template <class T>
+void copyAssignObject(T *dest, const T *src)
+{
+	detail::copyHelpers<isTriviallyCopyable<T>::value>::copyAssignObject(dest, src);
+}
+
+template <class T>
 void copyAssignArray(T *dest, const T *src, unsigned int numElements)
 {
 	detail::copyHelpers<isTriviallyCopyable<T>::value>::copyAssignArray(dest, src, numElements);
+}
+
+template <class T>
+void moveAssignObject(T *dest, T *src)
+{
+	detail::copyHelpers<isTriviallyCopyable<T>::value>::moveAssignObject(dest, src);
 }
 
 template <class T>
