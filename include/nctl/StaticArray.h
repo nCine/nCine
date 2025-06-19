@@ -303,11 +303,19 @@ T *StaticArray<T, C>::insertRange(unsigned int index, const T *firstPtr, const T
 	FATAL_ASSERT_MSG_X(firstPtr <= lastPtr, "First pointer %p should precede or be equal to the last one %p", firstPtr, lastPtr);
 
 	const unsigned int numElements = static_cast<unsigned int>(lastPtr - firstPtr);
+	if (numElements == 0)
+		return (array_ + index);
 	FATAL_ASSERT_MSG_X(size_ + numElements <= capacity_, "Can't add element beyond capacity (%d)", capacity_);
 
 	// Backwards loop to account for overlapping areas
 	for (unsigned int i = size_ - index; i > 0; i--)
-		array_[index + numElements + i - 1] = nctl::move(array_[index + i - 1]);
+	{
+		T *src = &array_[index + i - 1];
+		T *dst = &array_[index + numElements + i - 1];
+
+		moveConstructObject(dst, src);
+		destructObject(src);
+	}
 	copyConstructArray(array_ + index, firstPtr, numElements);
 	size_ += numElements;
 
@@ -323,15 +331,17 @@ T *StaticArray<T, C>::insertAt(unsigned int index, const T &element)
 
 	if (index < size_)
 	{
-		// Constructing a new element by moving the last one
-		new (array_ + size_) T(nctl::move(array_[size_ - 1]));
-		// Backwards loop to account for overlapping areas
-		for (unsigned int i = size_ - index - 1; i > 0; i--)
-			array_[index + i] = nctl::move(array_[index + i - 1]);
-		array_[index] = element;
+		// Backwards loop to move-construct into the next slot
+		for (unsigned int i = size_; i > index; i--)
+		{
+			T *src = &array_[i - 1];
+			T *dst = &array_[i];
+
+			moveConstructObject(dst, src);
+			destructObject(src);
+		}
 	}
-	else
-		new (array_ + size_) T(element);
+	copyConstructObject(array_ + index, &element);
 	size_++;
 
 	return (array_ + index + 1);
@@ -346,15 +356,16 @@ T *StaticArray<T, C>::insertAt(unsigned int index, T &&element)
 
 	if (index < size_)
 	{
-		// Constructing a new element by moving the last one
-		new (array_ + size_) T(nctl::move(array_[size_ - 1]));
-		// Backwards loop to account for overlapping areas
-		for (unsigned int i = size_ - index - 1; i > 0; i--)
-			array_[index + i] = nctl::move(array_[index + i - 1]);
-		array_[index] = nctl::move(element);
+		for (unsigned int i = size_; i > index; i--)
+		{
+			T *src = &array_[i - 1];
+			T *dst = &array_[i];
+
+			moveConstructObject(dst, src);
+			destructObject(src);
+		}
 	}
-	else
-		new (array_ + size_) T(nctl::move(element));
+	moveConstructObject(array_ + index, &element);
 	size_++;
 
 	return (array_ + index + 1);
@@ -370,12 +381,14 @@ T *StaticArray<T, C>::emplaceAt(unsigned int index, Args &&... args)
 
 	if (index < size_)
 	{
-		// Constructing a new element by moving the last one
-		new (array_ + size_) T(nctl::move(array_[size_ - 1]));
-		// Backwards loop to account for overlapping areas
-		for (unsigned int i = size_ - index - 1; i > 0; i--)
-			array_[index + i] = nctl::move(array_[index + i - 1]);
-		destructObject(array_ + index);
+		for (unsigned int i = size_; i > index; i--)
+		{
+			T *src = &array_[i - 1];
+			T *dst = &array_[i];
+
+			moveConstructObject(dst, src);
+			destructObject(src);
+		}
 	}
 	new (array_ + index) T(nctl::forward<Args>(args)...);
 	size_++;
