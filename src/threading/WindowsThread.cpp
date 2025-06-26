@@ -68,7 +68,7 @@ namespace {
 }
 
 ///////////////////////////////////////////////////////////
-// PUBLIC FUNCTIONS
+// `ThreadAffinityMask`
 ///////////////////////////////////////////////////////////
 
 void ThreadAffinityMask::zero()
@@ -86,9 +86,68 @@ void ThreadAffinityMask::clear(int cpuNum)
 	affinityMask_ &= ~(1LL << cpuNum);
 }
 
-bool ThreadAffinityMask::isSet(int cpuNum)
+bool ThreadAffinityMask::isSet(int cpuNum) const
 {
 	return ((affinityMask_ >> cpuNum) & 1LL) != 0;
+}
+
+///////////////////////////////////////////////////////////
+// `ThisThread`
+///////////////////////////////////////////////////////////
+
+unsigned long int ThisThread::threadId()
+{
+	return static_cast<unsigned long int>(GetCurrentThreadId());
+}
+
+void ThisThread::setName(const char *name)
+{
+#ifdef WITH_TRACY
+	tracy::SetThreadName(name);
+#else
+	setThreadName(reinterpret_cast<HANDLE>(-1), name);
+#endif
+}
+
+ThreadAffinityMask ThisThread::affinityMask()
+{
+	ThreadAffinityMask affinityMask;
+
+	const HANDLE handle = GetCurrentThread();
+
+	DWORD_PTR processAffinityMask = 0;
+	DWORD_PTR systemAffinityMask = 0;
+
+	if (GetProcessAffinityMask(GetCurrentProcess(), &processAffinityMask, &systemAffinityMask))
+	{
+		// Temporarily set affinity to current process mask (always valid for this thread), then restore it
+		DWORD_PTR oldAffinity = SetThreadAffinityMask(handle, processAffinityMask);
+		SetThreadAffinityMask(handle, oldAffinity);
+
+		affinityMask.affinityMask_ = oldAffinity;
+	}
+
+	return affinityMask;
+}
+
+void ThisThread::setAffinityMask(ThreadAffinityMask affinityMask)
+{
+	SetThreadAffinityMask(GetCurrentThread(), affinityMask.affinityMask_);
+}
+
+int ThisThread::priority()
+{
+	return GetThreadPriority(GetCurrentThread());
+}
+
+bool ThisThread::setPriority(int priority)
+{
+	return (SetThreadPriority(GetCurrentThread(), priority) != 0);
+}
+
+[[noreturn]] void ThisThread::exit()
+{
+	_endthreadex(0);
 }
 
 ///////////////////////////////////////////////////////////
@@ -96,7 +155,7 @@ bool ThreadAffinityMask::isSet(int cpuNum)
 ///////////////////////////////////////////////////////////
 
 Thread::Thread()
-    : handle_(0), threadInfo_(nctl::makeUnique<ThreadInfo>())
+    : tid_(0), handle_(0), threadInfo_(nctl::makeUnique<ThreadInfo>())
 {
 }
 
@@ -110,21 +169,11 @@ Thread::Thread(ThreadFunctionPtr threadFunction, void *threadArg)
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-unsigned int Thread::numProcessors()
-{
-	unsigned int numProcs = 0;
-
-	SYSTEM_INFO si;
-	GetSystemInfo(&si);
-	numProcs = si.dwNumberOfProcessors;
-
-	return numProcs;
-}
-
 void Thread::run(ThreadFunctionPtr threadFunction, void *threadArg)
 {
 	if (handle_ == 0)
 	{
+		threadInfo_->tid = &tid_;
 		threadInfo_->threadFunction = threadFunction;
 		threadInfo_->threadArg = threadArg;
 		handle_ = reinterpret_cast<HANDLE>(_beginthreadex(nullptr, 0, wrapperFunction, threadInfo_.get(), 0, nullptr));
@@ -164,42 +213,58 @@ bool Thread::detach()
 
 void Thread::setName(const char *name)
 {
-	setThreadName(handle_, name);
+	if (handle_ != 0)
+		setThreadName(handle_, name);
+	else
+		LOGW("Cannot set the name for an invalid thread id");
 }
 
-void Thread::setSelfName(const char *name)
+ThreadAffinityMask Thread::affinityMask() const
 {
-#ifdef WITH_TRACY
-	tracy::SetThreadName(name);
-#else
-	setThreadName(reinterpret_cast<HANDLE>(-1), name);
-#endif
+	ThreadAffinityMask affinityMask;
+	DWORD_PTR processAffinityMask = 0;
+	DWORD_PTR systemAffinityMask = 0;
+
+	if (handle_ != 0 && GetProcessAffinityMask(GetCurrentProcess(), &processAffinityMask, &systemAffinityMask))
+	{
+		// Temporarily set affinity to current process mask, that is always valid for this thread, and then restore it
+		DWORD_PTR oldAffinity = SetThreadAffinityMask(handle_, processAffinityMask);
+		SetThreadAffinityMask(handle_, oldAffinity);
+
+		affinityMask.affinityMask_ = oldAffinity;
+	}
+
+	return affinityMask;
+}
+
+void Thread::setAffinityMask(ThreadAffinityMask affinityMask)
+{
+	if (handle_ != 0)
+		SetThreadAffinityMask(handle_, affinityMask.affinityMask_);
+	else
+		LOGW("Cannot set the affinity mask for an invalid thread id");
 }
 
 int Thread::priority() const
 {
-	return (handle_ != 0) ? GetThreadPriority(handle_) : 0;
+	int priority = 0;
+
+	if (handle_ != 0)
+		priority = GetThreadPriority(handle_);
+	else
+		LOGW("Cannot get the priority for an invalid thread id");
+
+	return priority;
 }
 
-void Thread::setPriority(int priority)
+// TODO: Use only valid priority values on Windows: https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-setthreadpriority
+// TODO: Check minimum and maximum values for POSIX: `sched_get_priority_min()` and `sched_get_priority_max()`
+bool Thread::setPriority(int priority)
 {
 	if (handle_ != 0)
-		SetThreadPriority(handle_, priority);
-}
-
-long int Thread::self()
-{
-	return GetCurrentThreadId();
-}
-
-[[noreturn]] void Thread::exit()
-{
-	_endthreadex(0);
-}
-
-void Thread::yieldExecution()
-{
-	Sleep(0);
+		return (SetThreadPriority(handle_, priority) != 0);
+	else
+		LOGW("Cannot set the priority for an invalid thread id");
 }
 
 bool Thread::cancel()
@@ -218,30 +283,20 @@ bool Thread::cancel()
 	return success;
 }
 
-ThreadAffinityMask Thread::affinityMask() const
+unsigned int Thread::numProcessors()
 {
-	ThreadAffinityMask affinityMask;
+	unsigned int numProcs = 0;
 
-	if (handle_ != 0)
-	{
-		// A neutral value for the temporary mask
-		const DWORD_PTR allCpus = ~(allCpus & 0);
+	SYSTEM_INFO si;
+	GetSystemInfo(&si);
+	numProcs = si.dwNumberOfProcessors;
 
-		affinityMask.affinityMask_ = SetThreadAffinityMask(handle_, allCpus);
-		SetThreadAffinityMask(handle_, affinityMask.affinityMask_);
-	}
-	else
-		LOGW("Cannot get the affinity for a thread that has not been created yet");
-
-	return affinityMask;
+	return numProcs;
 }
 
-void Thread::setAffinityMask(ThreadAffinityMask affinityMask)
+void Thread::yieldExecution()
 {
-	if (handle_ != 0)
-		SetThreadAffinityMask(handle_, affinityMask.affinityMask_);
-	else
-		LOGW("Cannot set the affinity mask for a not yet created thread");
+	Sleep(0);
 }
 
 ///////////////////////////////////////////////////////////
@@ -251,6 +306,7 @@ void Thread::setAffinityMask(ThreadAffinityMask affinityMask)
 unsigned int Thread::wrapperFunction(void *arg)
 {
 	ThreadInfo *threadInfo = static_cast<ThreadInfo *>(arg);
+	*threadInfo->tid = ThisThread::threadId();
 	threadInfo->threadFunction(threadInfo->threadArg);
 
 	return 0;

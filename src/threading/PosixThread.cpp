@@ -18,13 +18,43 @@ namespace ncine {
 
 namespace {
 	const unsigned int MaxThreadNameLength = 16;
+
+	int priorityImpl(pthread_t pthid)
+	{
+		int priority = 0;
+
+		if (pthid != 0)
+		{
+			int policy;
+			struct sched_param param;
+			pthread_getschedparam(pthid, &policy, &param);
+			priority = param.sched_priority;
+		}
+
+		return priority;
+	}
+
+#ifndef __APPLE__
+	bool setPriorityImpl(pthread_t pthid, int priority)
+	{
+		if (pthid != 0)
+		{
+			int policy;
+			struct sched_param param;
+			pthread_getschedparam(pthid, &policy, &param);
+			param.sched_priority = priority;
+			return (pthread_setschedparam(pthid, policy, &param) == 0);
+		}
+		return false;
+	}
+#endif
 }
 
 ///////////////////////////////////////////////////////////
-// PUBLIC FUNCTIONS
+// `ThreadAffinityMask`
 ///////////////////////////////////////////////////////////
 
-#if !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
+#if !defined(__EMSCRIPTEN__)
 
 void ThreadAffinityMask::zero()
 {
@@ -53,7 +83,7 @@ void ThreadAffinityMask::clear(int cpuNum)
 	#endif
 }
 
-bool ThreadAffinityMask::isSet(int cpuNum)
+bool ThreadAffinityMask::isSet(int cpuNum) const
 {
 	#ifdef __APPLE__
 	return ((affinityTag_ >> cpuNum) & 1) != 0;
@@ -65,11 +95,100 @@ bool ThreadAffinityMask::isSet(int cpuNum)
 #endif
 
 ///////////////////////////////////////////////////////////
+// `ThisThread`
+///////////////////////////////////////////////////////////
+
+unsigned long int ThisThread::threadId()
+{
+#if defined(__APPLE__)
+	uint64_t tid = 0;
+	pthread_threadid_np(nullptr, &tid);
+	return tid;
+#else
+	return static_cast<unsigned long int>(::gettid());
+#endif
+}
+
+#ifndef __EMSCRIPTEN__
+void ThisThread::setName(const char *name)
+{
+	#ifdef WITH_TRACY
+	tracy::SetThreadName(name);
+	#else
+	char buffer[MaxThreadNameLength];
+	strncpy(buffer, name, MaxThreadNameLength - 1);
+	buffer[MaxThreadNameLength - 1] = '\0';
+		#ifdef __APPLE__
+	pthread_setname_np(buffer);
+		#else
+	pthread_setname_np(pthread_self(), buffer);
+		#endif
+	#endif
+}
+
+ThreadAffinityMask ThisThread::affinityMask()
+{
+	ThreadAffinityMask affinityMask;
+
+	#ifdef __APPLE__
+	thread_affinity_policy_data_t threadAffinityPolicy;
+	const thread_port_t threadPort = pthread_mach_thread_np(pthread_self());
+	mach_msg_type_number_t policyCount = THREAD_AFFINITY_POLICY_COUNT;
+	boolean_t getDefault = FALSE;
+	thread_policy_get(threadPort, THREAD_AFFINITY_POLICY, reinterpret_cast<thread_policy_t>(&threadAffinityPolicy), &policyCount, &getDefault);
+	affinityMask.affinityTag_ = threadAffinityPolicy.affinity_tag;
+	#else
+	sched_getaffinity(gettid(), sizeof(cpu_set_t), &affinityMask.cpuSet_);
+	#endif
+
+	return affinityMask;
+}
+
+void ThisThread::setAffinityMask(ThreadAffinityMask affinityMask)
+{
+	#ifdef __APPLE__
+	thread_affinity_policy_data_t threadAffinityPolicy = { affinityMask.affinityTag_ };
+	const thread_port_t threadPort = pthread_mach_thread_np(pthread_self());
+	thread_policy_set(threadPort, THREAD_AFFINITY_POLICY, reinterpret_cast<thread_policy_t>(&threadAffinityPolicy), THREAD_AFFINITY_POLICY_COUNT);
+	#else
+	sched_setaffinity(gettid(), sizeof(cpu_set_t), &affinityMask.cpuSet_);
+	#endif
+}
+#endif
+
+int ThisThread::priority()
+{
+	const pthread_t pthid = pthread_self();
+	return priorityImpl(pthid);
+}
+
+bool ThisThread::setPriority(int priority)
+{
+	const pthread_t pthid = pthread_self();
+
+#ifdef __APPLE__
+	const thread_act_t machThread = pthread_mach_thread_np(pthid);
+
+	thread_precedence_policy_data_t policy;
+	policy.importance = priority;
+	kern_return_t result = thread_policy_set(machThread, THREAD_PRECEDENCE_POLICY, reinterpret_cast<thread_policy_t>(&policy), THREAD_PRECEDENCE_POLICY_COUNT);
+	return (result == KERN_SUCCESS);
+#else
+	return setPriorityImpl(pthid, priority);
+#endif
+}
+
+[[noreturn]] void ThisThread::exit()
+{
+	pthread_exit(nullptr);
+}
+
+///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
 Thread::Thread()
-    : tid_(0), threadInfo_(nctl::makeUnique<ThreadInfo>())
+    : tid_(0), pthid_(0), threadInfo_(nctl::makeUnique<ThreadInfo>())
 {
 }
 
@@ -82,6 +201,127 @@ Thread::Thread(ThreadFunctionPtr threadFunction, void *threadArg)
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
+
+void Thread::run(ThreadFunctionPtr threadFunction, void *threadArg)
+{
+	if (pthid_ == 0)
+	{
+		threadInfo_->tid = &tid_;
+		threadInfo_->threadFunction = threadFunction;
+		threadInfo_->threadArg = threadArg;
+		const int retValue = pthread_create(&pthid_, nullptr, wrapperFunction, threadInfo_.get());
+		FATAL_ASSERT_MSG_X(!retValue, "Error in pthread_create(): %d", retValue);
+	}
+	else
+		LOGW_X("Thread %u is already running", pthid_);
+}
+
+bool Thread::join()
+{
+	bool success = false;
+	if (pthid_ != 0)
+	{
+		const int retValue = pthread_join(pthid_, nullptr);
+		success = (retValue == 0);
+		pthid_ = 0;
+	}
+	return success;
+}
+
+bool Thread::detach()
+{
+	bool success = false;
+	if (pthid_ != 0)
+	{
+		const int retValue = pthread_detach(pthid_);
+		success = (retValue == 0);
+		pthid_ = 0;
+	}
+	return success;
+}
+
+#ifndef __EMSCRIPTEN__
+	#ifndef __APPLE__
+void Thread::setName(const char *name)
+{
+	if (pthid_ != 0)
+	{
+		char buffer[MaxThreadNameLength];
+		strncpy(buffer, name, MaxThreadNameLength - 1);
+		buffer[MaxThreadNameLength - 1] = '\0';
+		pthread_setname_np(pthid_, buffer);
+	}
+	else
+		LOGW("Cannot set the name for an invalid thread id");
+}
+	#endif
+
+ThreadAffinityMask Thread::affinityMask() const
+{
+	ThreadAffinityMask affinityMask;
+
+	if (pthid_ != 0)
+	{
+		#ifdef __APPLE__
+		thread_affinity_policy_data_t threadAffinityPolicy;
+		const thread_port_t threadPort = pthread_mach_thread_np(pthid_);
+		mach_msg_type_number_t policyCount = THREAD_AFFINITY_POLICY_COUNT;
+		boolean_t getDefault = FALSE;
+		thread_policy_get(threadPort, THREAD_AFFINITY_POLICY, reinterpret_cast<thread_policy_t>(&threadAffinityPolicy), &policyCount, &getDefault);
+		affinityMask.affinityTag_ = threadAffinityPolicy.affinity_tag;
+		#else
+		sched_getaffinity(tid_, sizeof(cpu_set_t), &affinityMask.cpuSet_);
+		#endif
+	}
+	else
+		LOGW("Cannot get the affinity mask for an invalid thread id");
+
+	return affinityMask;
+}
+
+void Thread::setAffinityMask(ThreadAffinityMask affinityMask)
+{
+	if (pthid_ != 0)
+	{
+		#ifdef __APPLE__
+		thread_affinity_policy_data_t threadAffinityPolicy = { affinityMask.affinityTag_ };
+		const thread_port_t threadPort = pthread_mach_thread_np(pthid_);
+		thread_policy_set(threadPort, THREAD_AFFINITY_POLICY, reinterpret_cast<thread_policy_t>(&threadAffinityPolicy), THREAD_AFFINITY_POLICY_COUNT);
+		#else
+		sched_setaffinity(tid_, sizeof(cpu_set_t), &affinityMask.cpuSet_);
+		#endif
+	}
+	else
+		LOGW("Cannot set the affinity mask for an invalid thread id");
+}
+#endif
+
+// TODO: Check minimum and maximum values for POSIX: `sched_get_priority_min()` and `sched_get_priority_max()`
+// TODO: Use only valid priority values on Windows: https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-setthreadpriority
+// TODO: Check priority values for macOS
+int Thread::priority() const
+{
+	return priorityImpl(pthid_);
+}
+
+bool Thread::setPriority(int priority)
+{
+	return setPriorityImpl(pthid_, priority);
+}
+
+#ifndef __ANDROID__
+bool Thread::cancel()
+{
+	bool success = false;
+	if (pthid_ != 0)
+	{
+		const int retValue = pthread_cancel(pthid_);
+		success = (retValue == 0);
+		pthid_ = 0;
+	}
+	return success;
+}
+#endif
 
 unsigned int Thread::numProcessors()
 {
@@ -100,189 +340,10 @@ unsigned int Thread::numProcessors()
 	return numProcs;
 }
 
-void Thread::run(ThreadFunctionPtr threadFunction, void *threadArg)
-{
-	if (tid_ == 0)
-	{
-		threadInfo_->threadFunction = threadFunction;
-		threadInfo_->threadArg = threadArg;
-		const int retValue = pthread_create(&tid_, nullptr, wrapperFunction, threadInfo_.get());
-		FATAL_ASSERT_MSG_X(!retValue, "Error in pthread_create(): %d", retValue);
-	}
-	else
-		LOGW_X("Thread %u is already running", tid_);
-}
-
-bool Thread::join()
-{
-	bool success = false;
-	if (tid_ != 0)
-	{
-		const int retValue = pthread_join(tid_, nullptr);
-		success = (retValue == 0);
-		tid_ = 0;
-	}
-	return success;
-}
-
-bool Thread::detach()
-{
-	bool success = false;
-	if (tid_ != 0)
-	{
-		const int retValue = pthread_detach(tid_);
-		success = (retValue == 0);
-		tid_ = 0;
-	}
-	return success;
-}
-
-#ifndef __EMSCRIPTEN__
-	#ifndef __APPLE__
-void Thread::setName(const char *name)
-{
-	if (tid_ == 0)
-		return;
-
-	const auto nameLength = strnlen(name, MaxThreadNameLength);
-	if (nameLength <= MaxThreadNameLength - 1)
-		pthread_setname_np(tid_, name);
-	else
-	{
-		char buffer[MaxThreadNameLength];
-		memcpy(buffer, name, MaxThreadNameLength - 1);
-		buffer[MaxThreadNameLength - 1] = '\0';
-		pthread_setname_np(tid_, name);
-	}
-}
-	#endif
-
-void Thread::setSelfName(const char *name)
-{
-	#ifdef WITH_TRACY
-	tracy::SetThreadName(name);
-	#else
-	const auto nameLength = strnlen(name, MaxThreadNameLength);
-	if (nameLength <= MaxThreadNameLength - 1)
-	{
-		#ifndef __APPLE__
-		pthread_setname_np(pthread_self(), name);
-		#else
-		pthread_setname_np(name);
-		#endif
-	}
-	else
-	{
-		char buffer[MaxThreadNameLength];
-		memcpy(buffer, name, MaxThreadNameLength - 1);
-		buffer[MaxThreadNameLength - 1] = '\0';
-		#ifndef __APPLE__
-		pthread_setname_np(pthread_self(), name);
-		#else
-		pthread_setname_np(name);
-		#endif
-	}
-	#endif
-}
-#endif
-
-int Thread::priority() const
-{
-	if (tid_ == 0)
-		return 0;
-
-	int policy;
-	struct sched_param param;
-	pthread_getschedparam(tid_, &policy, &param);
-	return param.sched_priority;
-}
-
-void Thread::setPriority(int priority)
-{
-	if (tid_ != 0)
-	{
-		int policy;
-		struct sched_param param;
-		pthread_getschedparam(tid_, &policy, &param);
-
-		param.sched_priority = priority;
-		pthread_setschedparam(tid_, policy, &param);
-	}
-}
-
-long int Thread::self()
-{
-#if defined(__APPLE__)
-	return reinterpret_cast<long int>(pthread_self());
-#else
-	return static_cast<long int>(pthread_self());
-#endif
-}
-
-[[noreturn]] void Thread::exit()
-{
-	pthread_exit(nullptr);
-}
-
 void Thread::yieldExecution()
 {
 	sched_yield();
 }
-
-#ifndef __ANDROID__
-bool Thread::cancel()
-{
-	bool success = false;
-	if (tid_ != 0)
-	{
-		const int retValue = pthread_cancel(tid_);
-		success = (retValue == 0);
-		tid_ = 0;
-	}
-	return success;
-}
-
-	#ifndef __EMSCRIPTEN__
-ThreadAffinityMask Thread::affinityMask() const
-{
-	ThreadAffinityMask affinityMask;
-
-	if (tid_ != 0)
-	{
-		#ifdef __APPLE__
-		thread_affinity_policy_data_t threadAffinityPolicy;
-		const thread_port_t threadPort = pthread_mach_thread_np(tid_);
-		mach_msg_type_number_t policyCount = THREAD_AFFINITY_POLICY_COUNT;
-		boolean_t getDefault = FALSE;
-		thread_policy_get(threadPort, THREAD_AFFINITY_POLICY, reinterpret_cast<thread_policy_t>(&threadAffinityPolicy), &policyCount, &getDefault);
-		affinityMask.affinityTag_ = threadAffinityPolicy.affinity_tag;
-		#else
-		pthread_getaffinity_np(tid_, sizeof(cpu_set_t), &affinityMask.cpuSet_);
-		#endif
-	}
-	else
-		LOGW("Cannot get the affinity for a thread that has not been created yet");
-
-	return affinityMask;
-}
-
-void Thread::setAffinityMask(ThreadAffinityMask affinityMask)
-{
-	if (tid_ != 0)
-	{
-		#ifdef __APPLE__
-		thread_affinity_policy_data_t threadAffinityPolicy = { affinityMask.affinityTag_ };
-		const thread_port_t threadPort = pthread_mach_thread_np(tid_);
-		thread_policy_set(threadPort, THREAD_AFFINITY_POLICY, reinterpret_cast<thread_policy_t>(&threadAffinityPolicy), THREAD_AFFINITY_POLICY_COUNT);
-		#else
-		pthread_setaffinity_np(tid_, sizeof(cpu_set_t), &affinityMask.cpuSet_);
-		#endif
-	}
-	else
-		LOGW("Cannot set the affinity mask for a not yet created thread");
-}
-	#endif
-#endif
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
@@ -290,8 +351,9 @@ void Thread::setAffinityMask(ThreadAffinityMask affinityMask)
 
 void *Thread::wrapperFunction(void *arg)
 {
-	const ThreadInfo *pThreadInfo = static_cast<ThreadInfo *>(arg);
-	pThreadInfo->threadFunction(pThreadInfo->threadArg);
+	const ThreadInfo *threadInfo = static_cast<ThreadInfo *>(arg);
+	*threadInfo->tid = ThisThread::threadId();
+	threadInfo->threadFunction(threadInfo->threadArg);
 
 	return nullptr;
 }

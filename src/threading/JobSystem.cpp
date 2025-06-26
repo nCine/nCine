@@ -106,6 +106,10 @@ JobSystem::JobSystem()
 JobSystem::JobSystem(unsigned char numThreads)
 	: IJobSystem(numThreads), commonData_(queueMutex_, queueCV_)
 {
+#ifdef WITH_TRACY
+	queueMutex_.setTracyName("Job Queue Lock");
+#endif
+
 	ASSERT(numThreads > 0);
 	if (numThreads == 0)
 		numThreads_ = 1; // There is at least the main thread
@@ -140,7 +144,6 @@ JobSystem::JobSystem(unsigned char numThreads)
 
 	threadStructs_.setCapacity(numThreads_ - 1); // Capacity needs to be set to avoid reallocation and pointer invalidation
 	threads_.setCapacity(numThreads_ - 1);
-	nctl::StaticString<128> threadName;
 	for (unsigned int i = 0; i < numThreads_ - 1; i++)
 	{
 		const unsigned char threadIndex = i + 1;
@@ -150,18 +153,14 @@ JobSystem::JobSystem(unsigned char numThreads)
 		threads_.emplaceBack();
 		// Create a thread before setting its name and affinity mask
 		threads_[i].run(workerFunction, &threadStructs_[i]);
-
-#if !defined(__EMSCRIPTEN__)
-	#if !defined(__APPLE__)
-		threadName.format("WorkerThread#%02d", threadIndex);
-		threads_.back().setName(threadName.data());
-	#endif
-	#if !defined(__ANDROID__)
-		// TODO: Check that affinity works, and check how to distribue indices among cores
-		threads_.back().setAffinityMask(ThreadAffinityMask(threadIndex));
-	#endif
-#endif
 	}
+
+	// TODO: Check if setting the affinity for the main thread causes performance issues
+	// Setting the affinity mask of the main thread
+#if !defined(__EMSCRIPTEN__) && !defined(__ANDROID__)
+	if (numThreads_ > 1)
+		ThisThread::setAffinityMask(ThreadAffinityMask(threadIndex()));
+#endif
 }
 
 JobSystem::~JobSystem()
@@ -358,9 +357,14 @@ void JobSystem::workerFunction(void *arg)
 	const ThreadStruct *threadStruct = static_cast<const ThreadStruct *>(arg);
 	Mutex &queueMutex = threadStruct->commonData.queueMutex;
 	CondVariable &queueCV = threadStruct->commonData.queueCV;
-	setThreadIndex(threadStruct->threadIndex);
 
-	//LOGD_X("Worker thread %u (id: #%u) is starting", Thread::self(), threadStruct->threadIndex);
+	setThreadIndex(threadStruct->threadIndex);
+	nctl::StaticString<16> threadName;
+	threadName.format("WorkerThread#%02d", threadStruct->threadIndex);
+	ThisThread::setName(threadName.data());
+	ThisThread::setAffinityMask(ThreadAffinityMask(threadStruct->threadIndex));
+
+	//LOGD_X("WorkerThread#%02d (id: %lu) is starting", threadStruct->threadIndex, ThisThread::threadId());
 
 	while (true)
 	{
@@ -380,7 +384,7 @@ void JobSystem::workerFunction(void *arg)
 		execute(job, threadStruct->commonData.jobQueues);
 	}
 
-	//LOGD_X("Worker thread %u (id: #%u) is exiting", Thread::self(), threadStruct->threadIndex);
+	//LOGD_X("WorkerThread#%02d (id: %lu) is exiting", threadStruct->threadIndex, ThisThread::threadId());
 }
 
 }
