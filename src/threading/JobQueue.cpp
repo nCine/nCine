@@ -48,7 +48,7 @@ Job *JobQueue::pop()
 
 	nctl::AtomicFences::threadFence(nctl::MemoryModel::ACQUIRE);
 
-	const int32_t t = top_.load(nctl::MemoryModel::ACQUIRE);
+	int32_t t = top_.load(nctl::MemoryModel::ACQUIRE);
 	if (t <= b)
 	{
 		// Non-empty queue
@@ -61,7 +61,7 @@ Job *JobQueue::pop()
 		}
 
 		// This is the last item in the queue
-		if (top_.cmpExchange(t + 1, t, nctl::MemoryModel::ACQUIRE) == false)
+		if (top_.cmpExchange(t, t + 1, nctl::MemoryModel::ACQUIRE) == false)
 		{
 			// Failed race against steal operation
 			job = nullptr;
@@ -86,7 +86,7 @@ Job *JobQueue::steal()
 
 	if (t < b)
 	{
-		if (top_.cmpExchange(t + 1, t, nctl::MemoryModel::ACQUIRE) == false)
+		if (top_.cmpExchange(t, t + 1, nctl::MemoryModel::ACQUIRE) == false)
 		{
 			// A concurrent steal or pop operation removed an element from the deque in the meantime.
 			return nullptr;
