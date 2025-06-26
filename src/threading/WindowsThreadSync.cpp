@@ -11,6 +11,9 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 Mutex::Mutex()
+#ifdef WITH_TRACY
+    : tracyCtx_(TRACY_SOURCE_LOCATION)
+#endif
 {
 	InitializeCriticalSection(&handle_);
 }
@@ -26,17 +29,36 @@ Mutex::~Mutex()
 
 void Mutex::lock()
 {
+#ifdef WITH_TRACY
+	const bool mark = tracyCtx_.BeforeLock();
+#endif
+
 	EnterCriticalSection(&handle_);
+
+#ifdef WITH_TRACY
+	if (mark)
+		tracyCtx_.AfterLock();
+#endif
 }
 
 void Mutex::unlock()
 {
 	LeaveCriticalSection(&handle_);
+
+#ifdef WITH_TRACY
+	tracyCtx_.AfterUnlock();
+#endif
 }
 
-int Mutex::tryLock()
+bool Mutex::tryLock()
 {
-	return TryEnterCriticalSection(&handle_);
+	const bool acquired = (TryEnterCriticalSection(&handle_) != 0);
+
+#ifdef WITH_TRACY
+	tracyCtx_.AfterTryLock(acquired);
+#endif
+
+	return acquired;
 }
 
 ///////////////////////////////////////////////////////////
@@ -48,18 +70,8 @@ int Mutex::tryLock()
 ///////////////////////////////////////////////////////////
 
 CondVariable::CondVariable()
-    : waitersCount_(0)
 {
-	events_[0] = CreateEvent(nullptr, FALSE, FALSE, nullptr); // Signal
-	events_[1] = CreateEvent(nullptr, TRUE, FALSE, nullptr); // Broadcast
-	InitializeCriticalSection(&waitersCountLock_);
-}
-
-CondVariable::~CondVariable()
-{
-	CloseHandle(events_[0]); // Signal
-	CloseHandle(events_[1]); // Broadcast
-	DeleteCriticalSection(&waitersCountLock_);
+	InitializeConditionVariable(&handle_);
 }
 
 ///////////////////////////////////////////////////////////
@@ -68,50 +80,17 @@ CondVariable::~CondVariable()
 
 void CondVariable::wait(Mutex &mutex)
 {
-	EnterCriticalSection(&waitersCountLock_);
-	waitersCount_++;
-	LeaveCriticalSection(&waitersCountLock_);
-
-	mutex.unlock();
-	waitEvents();
-	mutex.lock();
+	SleepConditionVariableCS(&handle_, &mutex.handle_, INFINITE);
 }
 
 void CondVariable::signal()
 {
-	EnterCriticalSection(&waitersCountLock_);
-	const bool haveWaiters = (waitersCount_ > 0);
-	LeaveCriticalSection(&waitersCountLock_);
-
-	if (haveWaiters)
-		SetEvent(events_[0]); // Signal
+	WakeConditionVariable(&handle_);
 }
 
 void CondVariable::broadcast()
 {
-	EnterCriticalSection(&waitersCountLock_);
-	const bool haveWaiters = (waitersCount_ > 0);
-	LeaveCriticalSection(&waitersCountLock_);
-
-	if (haveWaiters)
-		SetEvent(events_[1]); // Broadcast
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
-void CondVariable::waitEvents()
-{
-	const int result = WaitForMultipleObjects(2, events_, FALSE, INFINITE);
-
-	EnterCriticalSection(&waitersCountLock_);
-	waitersCount_--;
-	const bool isLastWaiter = (result == (WAIT_OBJECT_0 + 1)) && (waitersCount_ == 0);
-	LeaveCriticalSection(&waitersCountLock_);
-
-	if (isLastWaiter)
-		ResetEvent(events_[1]); // Broadcast
+	WakeAllConditionVariable(&handle_);
 }
 
 }

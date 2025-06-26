@@ -11,6 +11,9 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 Mutex::Mutex()
+#ifdef WITH_TRACY
+    : tracyCtx_(TRACY_SOURCE_LOCATION)
+#endif
 {
 	pthread_mutex_init(&mutex_, nullptr);
 }
@@ -26,17 +29,36 @@ Mutex::~Mutex()
 
 void Mutex::lock()
 {
+#ifdef WITH_TRACY
+	const bool mark = tracyCtx_.BeforeLock();
+#endif
+
 	pthread_mutex_lock(&mutex_);
+
+#ifdef WITH_TRACY
+	if (mark)
+		tracyCtx_.AfterLock();
+#endif
 }
 
 void Mutex::unlock()
 {
 	pthread_mutex_unlock(&mutex_);
+
+#ifdef WITH_TRACY
+	tracyCtx_.AfterUnlock();
+#endif
 }
 
-int Mutex::tryLock()
+bool Mutex::tryLock()
 {
-	return pthread_mutex_trylock(&mutex_);
+	const bool acquired = (pthread_mutex_trylock(&mutex_) == 0);
+
+#ifdef WITH_TRACY
+	tracyCtx_.AfterTryLock(acquired);
+#endif
+
+	return acquired;
 }
 
 ///////////////////////////////////////////////////////////

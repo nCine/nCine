@@ -69,7 +69,7 @@ void ThreadPool::workerFunction(void *arg)
 {
 	ThreadStruct *threadStruct = static_cast<ThreadStruct *>(arg);
 
-	LOGD_X("Worker thread %u is starting", Thread::self());
+	LOGD_X("Worker thread %lu is starting", ThisThread::threadId());
 
 	while (true)
 	{
@@ -87,11 +87,11 @@ void ThreadPool::workerFunction(void *arg)
 		threadStruct->queue->popFront();
 		threadStruct->queueMutex->unlock();
 
-		LOGD_X("Worker thread %u is executing its command", Thread::self());
+		LOGD_X("Worker thread %lu is executing its command", ThisThread::threadId());
 		threadCommand->execute();
 	}
 
-	LOGD_X("Worker thread %u is exiting", Thread::self());
+	LOGD_X("Worker thread %lu is exiting", ThisThread::threadId());
 }
 
 }
