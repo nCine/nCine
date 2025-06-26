@@ -9,6 +9,16 @@
 	#include <pthread.h>
 #endif
 
+#include "tracy.h"
+
+#ifdef WITH_TRACY
+	#define TRACY_SOURCE_LOCATION \
+		([]() -> const tracy::SourceLocationData * { \
+			static constexpr tracy::SourceLocationData srcLoc { nullptr, __func__, __FILE__, __LINE__, 0 }; \
+			return &srcLoc; \
+		})()
+#endif
+
 namespace ncine {
 
 /// Mutex class (threads synchronization)
@@ -20,10 +30,11 @@ class Mutex
 
 	void lock();
 	void unlock();
-	int tryLock();
+	bool tryLock();
 
 #ifdef WITH_TRACY
-	inline int try_lock() { return tryLock(); }
+	inline bool try_lock() { return tryLock(); }
+	inline void setTracyName(const char *name) { tracyCtx_.CustomName(name, strlen(name)); }
 #endif
 
   private:
@@ -31,6 +42,10 @@ class Mutex
 	CRITICAL_SECTION handle_;
 #else
 	pthread_mutex_t mutex_;
+#endif
+
+#ifdef WITH_TRACY
+	tracy::LockableCtx tracyCtx_;
 #endif
 
 	/// Deleted copy constructor
@@ -42,13 +57,15 @@ class Mutex
 };
 
 /// Condition variable class (threads synchronization)
-/*! Windows version based on the <em>TinyThread++</em> library implementation.
- *  More info at: http://www.cs.wustl.edu/~schmidt/win32-cv-1.html */
 class CondVariable
 {
   public:
 	CondVariable();
+#if defined(_WIN32)
+	~CondVariable() = default;
+#else
 	~CondVariable();
+#endif
 
 	void wait(Mutex &mutex);
 	void signal();
@@ -56,11 +73,7 @@ class CondVariable
 
   private:
 #if defined(_WIN32)
-	HANDLE events_[2];
-	unsigned int waitersCount_;
-	CRITICAL_SECTION waitersCountLock_;
-
-	void waitEvents();
+	CONDITION_VARIABLE handle_;
 #else
 	pthread_cond_t cond_;
 #endif
