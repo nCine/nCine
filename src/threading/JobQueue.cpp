@@ -41,13 +41,13 @@ void JobQueue::push(Job *job)
 
 Job *JobQueue::pop()
 {
-	const int32_t b = bottom_ - 1;
+	int32_t b = bottom_ - 1;
 	bottom_ = b;
 
 	// Acts as a memory barier to prevent load/store reordering
 	bottom_.cmpExchange(b, b);
 
-	const int32_t t = top_;
+	int32_t t = top_;
 	if (t <= b)
 	{
 		// Non-empty queue
@@ -59,7 +59,7 @@ Job *JobQueue::pop()
 		}
 
 		// This is the last item in the queue
-		if (top_.cmpExchange(t + 1, t) == false)
+		if (top_.cmpExchange(t, t + 1) == false)
 		{
 			// Failed race against steal operation
 			job = nullptr;
@@ -78,7 +78,7 @@ Job *JobQueue::pop()
 
 Job *JobQueue::steal()
 {
-	const int32_t t = top_;
+	int32_t t = top_;
 
 	// Ensure that top is always read before bottom.
 #if defined(__arm__) || defined(__arm64__) ||defined(_M_ARM) || defined(_M_ARM64)
@@ -94,7 +94,7 @@ Job *JobQueue::steal()
 		// Non-empty queue
 		Job *job = jobs_[t & Mask];
 
-		if (top_.cmpExchange(t + 1, t) == false)
+		if (top_.cmpExchange(t, t + 1) == false)
 		{
 			// A concurrent steal or pop operation removed an element from the deque in the meantime.
 			return nullptr;
