@@ -31,6 +31,10 @@ class DLL_PUBLIC ILogger
 	/// Logs a message with a specified level of severity
 	virtual unsigned int write(LogLevel level, const char *fmt, ...) = 0;
 
+	/// Consumes the queue of entries from all threads (called by the main thread only)
+	/*! \returns The number of queued entries */
+	virtual unsigned int consumeQueue() = 0;
+
 	/// Returns the log string with all the recorded log entries
 	virtual const char *logString() const = 0;
 	/// Clears the entries from the log string
@@ -48,6 +52,7 @@ class DLL_PUBLIC NullLogger : public ILogger
 {
   public:
 	inline unsigned int write(LogLevel level, const char *fmt, ...) override { return 0; }
+	inline unsigned int consumeQueue() override { return 0; }
 	inline const char *logString() const override { return nullptr; }
 	inline void clearLogString() override {}
 	inline unsigned int logStringLength() const override { return 0; }

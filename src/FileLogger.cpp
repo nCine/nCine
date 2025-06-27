@@ -13,6 +13,10 @@
 #include "Application.h"
 #include "tracy.h"
 
+#if WITH_THREADS
+	#include "IJobSystem.h"
+#endif
+
 namespace {
 
 const char *Reset = "\033[0m";
@@ -35,6 +39,10 @@ bool enableVirtualTerminalProcessing();
 void writeOutputDebug(const char *logEntry);
 #endif
 
+#ifdef WITH_THREADS
+thread_local char FileLogger::logEntry_[MaxEntryLength];
+#endif
+
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
@@ -47,8 +55,7 @@ FileLogger::FileLogger(LogLevel consoleLevel)
 FileLogger::FileLogger(LogLevel consoleLevel, LogLevel fileLevel, const char *filename)
     : consoleLevel_(LogLevel::OFF), fileLevel_(fileLevel), canUseColors_(true)
 #ifdef WITH_IMGUI
-      ,
-      logString_(LogStringCapacity)
+      , logString_(LogStringCapacity)
 #endif
 {
 	// The setter will create the console on Windows, if needed
@@ -129,11 +136,33 @@ unsigned int FileLogger::write(LogLevel level, const char *fmt, ...)
 	if (consoleLevel_ == LogLevel::OFF && fileLevel_ == LogLevel::OFF)
 		return 0;
 
-	ASSERT(fmt);
-
 	const int levelInt = static_cast<int>(level);
 	const int consoleLevelInt = static_cast<int>(consoleLevel_);
 	const int fileLevelInt = static_cast<int>(fileLevel_);
+
+	// Early-out if this message log level is below both console and file levels
+	if (levelInt < consoleLevelInt && levelInt < fileLevelInt)
+		return 0;
+
+	ASSERT(fmt);
+
+	const char *levelColor = BrightGreen;
+	switch (level)
+	{
+
+		case LogLevel::WARN:
+			levelColor = BrightYellow;
+			break;
+		case LogLevel::ERROR:
+			levelColor = BrightRed;
+			break;
+		case LogLevel::FATAL:
+			levelColor = Black;
+			break;
+		default:
+			levelColor = BrightGreen;
+			break;
+	}
 
 	time_t now;
 	struct tm *ts;
@@ -144,18 +173,44 @@ unsigned int FileLogger::write(LogLevel level, const char *fmt, ...)
 	logEntry_[MaxEntryLength - 1] = '\0';
 	unsigned int length = 0;
 
-	const unsigned int timeMsgStart = length;
-	const unsigned int timeMsgLength = strftime(logEntry_ + length, MaxEntryLength - length - 1, "- %H:%M:%S ", ts);
-	length += timeMsgLength;
+	if (canUseColors_)
+		length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, "%s", Faint);
 
-	length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, "[L%d] - ", levelInt);
+	length += strftime(logEntry_ + length, MaxEntryLength - length - 1, "- %H:%M:%S ", ts);
 
-	const unsigned int logMsgStart = length;
+	if (canUseColors_)
+		length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, " %s", Reset);
+
+#if WITH_THREADS
+	const unsigned char numThreads = theServiceLocator().jobSystem().numThreads();
+	// Don't include the thread index in the log entry if there aren't at least two threads in total
+	if (numThreads > 1)
+		length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, "[T%02u] ", IJobSystem::threadIndex());
+#endif
+
+	if (canUseColors_)
+	{
+		if (level == LogLevel::FATAL)
+			length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, "%s", BrightRedBg);
+
+		length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, "%s[L%d]%s", levelColor, levelInt, Reset);
+		length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, " %s- ", Faint);
+		length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, "%s", Reset);
+	}
+	else
+		length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, "[L%d] - ", levelInt);
+
+	if (canUseColors_ && (level == LogLevel::WARN || level == LogLevel::ERROR || level == LogLevel::FATAL))
+		length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, "%s", Bold);
+
 	va_list args;
 	va_start(args, fmt);
 	const unsigned int logMsgLength = vsnprintf(logEntry_ + length, MaxEntryLength - length - 1, fmt, args);
 	va_end(args);
 	length += logMsgLength;
+
+	if (canUseColors_ && (level == LogLevel::WARN || level == LogLevel::ERROR || level == LogLevel::FATAL))
+		length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, "%s", Reset);
 
 	if (length < MaxEntryLength - 2)
 	{
@@ -163,25 +218,61 @@ unsigned int FileLogger::write(LogLevel level, const char *fmt, ...)
 		logEntry_[length] = '\0';
 	}
 
-	const char *consoleLogEntry = logEntry_;
-	if (canUseColors_)
+#if WITH_THREADS
+	// Only enqueue if there are more than two threads in total and if the message is not coming from the main thread
+	if (numThreads > 1 && IJobSystem::isMainThread() == false)
+		logEntryQueue_.enqueue(logEntry_, length);
+	else
+		writeOut(level, logEntry_, length);
+#else
+	writeOut(level, logEntry_, length);
+#endif
+
+	return length;
+}
+
+unsigned int FileLogger::consumeQueue()
+{
+	unsigned int numEntries = 0;
+
+#if WITH_THREADS
+	FATAL_ASSERT_MSG(IJobSystem::isMainThread() == true, "This method should be called by the main thread only");
+	while (unsigned int length = logEntryQueue_.dequeue(queueEntry_, MaxEntryLength))
 	{
-		writeWithColors(level, logEntry_ + timeMsgStart, timeMsgLength, logEntry_ + logMsgStart, logMsgLength);
-		consoleLogEntry = logEntryWithColors_;
+		const char *offset = strstr(queueEntry_, "[L");
+		int logLevelInt = static_cast<int>(LogLevel::OFF);
+		if (offset != nullptr)
+			sscanf(offset, "[L%d]", &logLevelInt);
+
+		writeOut(static_cast<LogLevel>(logLevelInt), queueEntry_, length);
+		numEntries++;
 	}
+#endif
+
+	return numEntries;
+}
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void FileLogger::writeOut(LogLevel level, const char *logEntry, unsigned int length)
+{
+	const int levelInt = static_cast<int>(level);
+	const int consoleLevelInt = static_cast<int>(consoleLevel_);
+	const int fileLevelInt = static_cast<int>(fileLevel_);
 
 	if (consoleLevel_ != LogLevel::OFF && levelInt >= consoleLevelInt)
 	{
 #ifndef __ANDROID__
 		if (level == LogLevel::ERROR || level == LogLevel::FATAL)
-			fputs(consoleLogEntry, stderr);
+			fputs(logEntry, stderr);
 		else
-			fputs(consoleLogEntry, stdout);
+			fputs(logEntry, stdout);
 
 	#ifdef _WIN32
-		writeOutputDebug(logEntry_);
+		writeOutputDebug(logEntry);
 	#endif
-
 #else
 		android_LogPriority priority;
 
@@ -199,14 +290,14 @@ unsigned int FileLogger::write(LogLevel level, const char *fmt, ...)
 		}
 		// clang-format on
 
-		__android_log_write(priority, "nCine", logEntry_);
+		__android_log_write(priority, "nCine", logEntry);
 #endif
 	}
 
 	if (fileLevel_ != LogLevel::OFF && levelInt >= fileLevelInt &&
 	    fileHandle_ != nullptr && fileHandle_->isOpened())
 	{
-		fprintf(fileHandle_->ptr(), "%s", logEntry_);
+		fprintf(fileHandle_->ptr(), "%s", logEntry);
 		fflush(fileHandle_->ptr());
 	}
 
@@ -216,7 +307,7 @@ unsigned int FileLogger::write(LogLevel level, const char *fmt, ...)
 		if (length > logString_.capacity() - logString_.length() - 1)
 			logString_.clear();
 
-		logString_.append(logEntry_);
+		logString_.append(logEntry);
 	}
 #endif
 
@@ -238,81 +329,9 @@ unsigned int FileLogger::write(LogLevel level, const char *fmt, ...)
 		}
 		// clang-format on
 
-		TracyMessageC(logEntry_, length, color);
+		TracyMessageC(logEntry, length, color);
 	}
 #endif
-
-	return length;
 }
 
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
-unsigned int FileLogger::writeWithColors(LogLevel level, const char *timeMsg, unsigned int timeMsgLength, const char *logMsg, unsigned int logMsgLength)
-{
-	const int levelInt = static_cast<int>(level);
-
-	logEntryWithColors_[0] = '\0';
-	logEntryWithColors_[MaxEntryLength - 1] = '\0';
-	unsigned int length = 0;
-
-	length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, "%s", Faint);
-
-	nctl::strncpy(logEntryWithColors_ + length, timeMsg, timeMsgLength);
-	length += timeMsgLength;
-
-	length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, " %s", Reset);
-
-	const char *levelColor = BrightGreen;
-	switch (level)
-	{
-
-		case LogLevel::WARN:
-			levelColor = BrightYellow;
-			break;
-		case LogLevel::ERROR:
-			levelColor = BrightRed;
-			break;
-		case LogLevel::FATAL:
-			levelColor = Black;
-			break;
-		default:
-			levelColor = BrightGreen;
-			break;
-	}
-
-	if (level == LogLevel::FATAL)
-		length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, "%s", BrightRedBg);
-
-	length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, "%s[L%d]%s", levelColor, levelInt, Reset);
-	length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, " %s- ", Faint);
-
-	unsigned int logMsgFuncLength = 0;
-	while (logMsg[logMsgFuncLength] != '>' && logMsg[logMsgFuncLength] != '\0')
-		logMsgFuncLength++;
-	logMsgFuncLength++; // skip '>' character
-
-	nctl::strncpy(logEntryWithColors_ + length, logMsg, nctl::min(logMsgFuncLength, MaxEntryLength - length - 1));
-	length += logMsgFuncLength;
-
-	length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, "%s", Reset);
-
-	if (level == LogLevel::WARN || level == LogLevel::ERROR || level == LogLevel::FATAL)
-		length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, "%s", Bold);
-
-	nctl::strncpy(logEntryWithColors_ + length, logMsg + logMsgFuncLength, nctl::min(logMsgLength - logMsgFuncLength, MaxEntryLength - length - 1));
-	length += logMsgLength - logMsgFuncLength;
-
-	if (level == LogLevel::WARN || level == LogLevel::ERROR || level == LogLevel::FATAL)
-		length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, "%s", Reset);
-
-	if (length < MaxEntryLength - 2)
-	{
-		logEntryWithColors_[length++] = '\n';
-		logEntryWithColors_[length] = '\0';
-	}
-
-	return length;
-}
 }
