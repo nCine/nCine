@@ -1,9 +1,12 @@
 #ifndef CLASS_NCINE_FILELOGGER
 #define CLASS_NCINE_FILELOGGER
 
-#include <cstdio>
 #include "ILogger.h"
 #include "IFile.h"
+
+#ifdef WITH_THREADS
+	#include "LogEntryQueue.h"
+#endif
 
 namespace ncine {
 
@@ -20,6 +23,8 @@ class FileLogger : public ILogger
 	bool openLogFile(const char *filename);
 
 	unsigned int write(LogLevel level, const char *fmt, ...) override;
+
+	unsigned int consumeQueue() override;
 
 #ifdef WITH_IMGUI
 	inline const char *logString() const override { return logString_.data(); }
@@ -38,9 +43,15 @@ class FileLogger : public ILogger
 	LogLevel fileLevel_;
 	bool canUseColors_;
 
+#ifdef WITH_THREADS
+	static const unsigned int MaxEntryLength = LogEntryQueue::MaxEntryLength;
+	static thread_local char logEntry_[MaxEntryLength];
+	LogEntryQueue logEntryQueue_;
+	char queueEntry_[MaxEntryLength];
+#else
 	static const unsigned int MaxEntryLength = 1024;
 	char logEntry_[MaxEntryLength];
-	char logEntryWithColors_[MaxEntryLength];
+#endif
 
 #ifdef WITH_IMGUI
 	static const unsigned int LogStringCapacity = 16 * 1024;
@@ -50,7 +61,8 @@ class FileLogger : public ILogger
 	// Declared at the end to prevent a `heap-use-after-free` AddressSanitizer error
 	nctl::UniquePtr<IFile> fileHandle_;
 
-	unsigned int writeWithColors(LogLevel level, const char *timeMsg, unsigned int timeMsgLength, const char *logMsg, unsigned int logMsgLength);
+	/// The method that actually writes a message to the console and/or to the file
+	void writeOut(LogLevel level, const char *logEntry, unsigned int length);
 
 	/// Deleted copy constructor
 	FileLogger(const FileLogger &) = delete;

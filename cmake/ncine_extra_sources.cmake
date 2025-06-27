@@ -191,6 +191,7 @@ if(Threads_FOUND AND NCINE_WITH_THREADS)
 	list(APPEND PRIVATE_HEADERS
 		${NCINE_ROOT}/src/include/Thread.h
 		${NCINE_ROOT}/src/include/ThreadSync.h
+		${NCINE_ROOT}/src/include/LogEntryQueue.h
 	)
 
 	if(WIN32)
@@ -223,6 +224,7 @@ if(Threads_FOUND AND NCINE_WITH_THREADS)
 		${NCINE_ROOT}/src/threading/JobQueue.cpp
 		${NCINE_ROOT}/src/threading/IJobSystem.cpp
 		${NCINE_ROOT}/src/threading/JobSystem.cpp
+		${NCINE_ROOT}/src/threading/LogEntryQueue.cpp
 	)
 
 endif()
