@@ -213,6 +213,7 @@ if(Threads_FOUND AND NCINE_WITH_THREADS)
 		${NCINE_ROOT}/src/include/Job.h
 		${NCINE_ROOT}/src/include/JobQueue.h
 		${NCINE_ROOT}/src/include/JobSystem.h
+		${NCINE_ROOT}/src/include/LogEntryQueue.h
 		${NCINE_ROOT}/src/include/ThreadPool.h
 		${NCINE_ROOT}/src/include/ThreadCommands.h
 	)
@@ -220,6 +221,7 @@ if(Threads_FOUND AND NCINE_WITH_THREADS)
 		${NCINE_ROOT}/src/threading/ThreadPool.cpp
 		${NCINE_ROOT}/src/threading/JobQueue.cpp
 		${NCINE_ROOT}/src/threading/JobSystem.cpp
+		${NCINE_ROOT}/src/threading/LogEntryQueue.cpp
 	)
 endif()
 
