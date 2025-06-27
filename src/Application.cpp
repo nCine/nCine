@@ -443,6 +443,11 @@ void Application::step()
 	if (debugOverlay_)
 		debugOverlay_->updateFrameTimings();
 
+#ifdef WITH_THREADS
+	if (theServiceLocator().jobSystem().numThreads() > 1)
+		theServiceLocator().logger().consumeQueue();
+#endif
+
 	gfxDevice_->update();
 	FrameMark;
 	TracyGpuCollect;
