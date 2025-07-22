@@ -400,7 +400,7 @@ void ImGuiDebugOverlay::guiConfigureGui()
 
 			const float MinScaling = 0.5f;
 			const float MaxScaling = 2.0f;
-			static float scaling = ImGui::GetIO().FontGlobalScale;
+			static float scaling = ImGui::GetStyle().FontScaleMain;
 			ImGui::SliderFloat("Scaling", &scaling, MinScaling, MaxScaling, "%.1f");
 			ImGui::SameLine();
 			if (ImGui::Button("Reset"))
@@ -410,7 +410,7 @@ void ImGuiDebugOverlay::guiConfigureGui()
 				scaling = MinScaling;
 			if (scaling > MaxScaling)
 				scaling = MaxScaling;
-			ImGui::GetIO().FontGlobalScale = scaling;
+			ImGui::GetStyle().FontScaleMain = scaling;
 
 			ImGui::TreePop();
 		}

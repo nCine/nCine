@@ -203,7 +203,7 @@ void ImGuiQt5Input::init(Qt5Widget *widget)
 	io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos; // We can honor io.WantSetMousePos requests (optional, rarely used)
 	io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
 
-	ImGuiPlatformIO& platformIo = ImGui::GetPlatformIO();
+	ImGuiPlatformIO &platformIo = ImGui::GetPlatformIO();
 	platformIo.Platform_SetClipboardTextFn = setClipboardText;
 	platformIo.Platform_GetClipboardTextFn = clipboardText;
 	platformIo.Platform_ClipboardUserData = nullptr;
@@ -238,7 +238,6 @@ void ImGuiQt5Input::shutdown()
 void ImGuiQt5Input::newFrame()
 {
 	ImGuiIO &io = ImGui::GetIO();
-	IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! Missing call to ImGuiDrawing::buildFonts() function?");
 	io.DeltaTime = theApplication().frameTime();
 
 	io.DisplaySize = ImVec2(theApplication().width(), theApplication().height());

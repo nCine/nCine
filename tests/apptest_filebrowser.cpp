@@ -1,4 +1,5 @@
 #include <ncine/imgui.h>
+#include <ncine/imgui_internal.h>
 
 #include "apptest_filebrowser.h"
 #include <nctl/Array.h>
@@ -70,6 +71,8 @@ struct DragPinnedDirectoryPayload
 const float PinnedDirectoriesColumnWeight = 0.25f;
 const nc::DropEvent *dropEvent = nullptr;
 unsigned int dropUpdateFrames = 0;
+// When navigating the history, the logical drive selection may be updated
+static int currentComboLogicalDrive = 0;
 
 struct FileDialogConfig
 {
@@ -79,7 +82,9 @@ struct FileDialogConfig
 	const char *windowTitle = "File Browser";
 	const char *okButton = "OK";
 
+	bool showNavigation = true;
 	bool showControls = true;
+	bool showExtraControls = false;
 	bool showPinnedDirectories = true;
 	bool showPermissions = true;
 	bool showSize = true;
@@ -88,7 +93,9 @@ struct FileDialogConfig
 
 	Sorting sorting = Sorting::NAME_ASC;
 
-	nctl::Array<nctl::String> pinnedDirectories;
+	nctl::Array<nctl::String> pinnedDirectories = nctl::Array<nctl::String>(8);
+	nctl::Array<nctl::String> directoryHistory = nctl::Array<nctl::String>(8);
+	int historyIndex = -1;
 
 	bool sortDirectoriesfirst = true;
 	SelectionType selectionType = SelectionType::NEW_FILE;
@@ -123,6 +130,152 @@ bool pinDirectory(FileDialogConfig &config, const char *path)
 	return (alreadyPinned == false);
 }
 
+int searchDriveLetterIndex(FileDialogConfig &config)
+{
+	int newComboLogicalDrive = currentComboLogicalDrive;
+
+	if (nc::fs::logicalDrives())
+	{
+		newComboLogicalDrive = 0;
+		const char *logicalDriveStrings = nc::fs::logicalDriveStrings();
+		const char driveLetter = config.directory[0];
+		unsigned int stringIndex = 0;
+		while (logicalDriveStrings[stringIndex] != 0)
+		{
+			if (logicalDriveStrings[stringIndex] == driveLetter)
+				break;
+			newComboLogicalDrive++;
+			stringIndex += 4;
+		}
+	}
+
+	return newComboLogicalDrive;
+}
+
+void clearDirectoryHistory(FileDialogConfig &config)
+{
+	config.directoryHistory.clear();
+	config.historyIndex = -1;
+}
+
+bool addDirectoryHistory(FileDialogConfig &config, bool addDir)
+{
+	if (addDir == false)
+		return false;
+
+	const bool isDirectory = nc::fs::isDirectory(config.directory.data());
+	const bool sameAsLastDir = (config.directoryHistory.isEmpty() == false &&
+	                            config.directoryHistory[config.historyIndex] == config.directory.data());
+
+	if (isDirectory && sameAsLastDir == false)
+	{
+		config.historyIndex++;
+		config.directoryHistory.setSize(config.historyIndex);
+		config.directoryHistory.pushBack(config.directory);
+		return true;
+	}
+
+	return false;
+}
+
+bool hasPrevDirectoryHistory(FileDialogConfig &config)
+{
+	return (config.directoryHistory.isEmpty() == false && config.historyIndex > 0);
+}
+
+bool prevDirectoryHistory(FileDialogConfig &config)
+{
+	if (hasPrevDirectoryHistory(config))
+	{
+		config.historyIndex--;
+		config.directory = config.directoryHistory[config.historyIndex];
+		currentComboLogicalDrive = searchDriveLetterIndex(config);
+
+		return true;
+	}
+
+	return false;
+}
+
+bool hasNextDirectoryHistory(FileDialogConfig &config)
+{
+	return (config.directoryHistory.isEmpty() == false &&
+	        config.historyIndex < config.directoryHistory.size() - 1);
+}
+
+bool nextDirectoryHistory(FileDialogConfig &config)
+{
+	if (hasNextDirectoryHistory(config))
+	{
+		config.historyIndex++;
+		config.directory = config.directoryHistory[config.historyIndex];
+		currentComboLogicalDrive = searchDriveLetterIndex(config);
+
+		return true;
+	}
+
+	return false;
+}
+
+bool hasParentDirectory(FileDialogConfig &config)
+{
+	if (nc::fs::isDirectory(config.directory.data()))
+	{
+		const nctl::String parentDir = nc::fs::dirName(config.directory.data());
+		if (nc::fs::isDirectory(parentDir.data()) && config.directory != parentDir)
+			return true;
+	}
+
+	return false;
+}
+
+bool parentDirectory(FileDialogConfig &config)
+{
+	bool parentIsValid = false;
+
+	if (nc::fs::isDirectory(config.directory.data()))
+	{
+		const nctl::String parentDir = nc::fs::dirName(config.directory.data());
+		if (nc::fs::isDirectory(parentDir.data()) && config.directory != parentDir)
+		{
+			config.directory = parentDir;
+			parentIsValid = true;
+		}
+	}
+
+	return parentIsValid;
+}
+
+bool changeDirectory(FileDialogConfig &config, const char *path)
+{
+	ASSERT(nc::fs::isDirectory(path) == true);
+	const bool isDirectory = nc::fs::isDirectory(path);
+	const bool sameDirectory = (config.directory == path);
+
+	if (isDirectory && sameDirectory == false)
+	{
+		config.directory = nc::fs::absolutePath(path);
+		return true;
+	}
+
+	return false;
+}
+
+bool changeDirectory(FileDialogConfig &config, const nctl::String &path)
+{
+	ASSERT(nc::fs::isDirectory(path.data()) == true);
+	const bool isDirectory = nc::fs::isDirectory(path.data());
+	const bool sameDirectory = (config.directory == path);
+
+	if (isDirectory && sameDirectory == false)
+	{
+		config.directory = nc::fs::absolutePath(path.data());
+		return true;
+	}
+
+	return false;
+}
+
 bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 {
 #ifdef __ANDROID__
@@ -154,8 +307,20 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 		config.directory = nc::fs::currentDir();
 #endif
 	}
+#ifndef __ANDROID__
 	else
 		config.directory = nc::fs::absolutePath(config.directory.data());
+#endif
+
+	// The starting directory should be the first entry in the history
+	if (config.directoryHistory.isEmpty())
+		addDirectoryHistory(config, true);
+
+	// Navigate directory history with the back and forward mouse buttons
+	if (ImGui::IsMouseClicked(3))
+		prevDirectoryHistory(config);
+	else if (ImGui::IsMouseClicked(4))
+		nextDirectoryHistory(config);
 
 	ImGui::SetNextWindowSize(ImVec2(650.0f * scalingFactor, 500.0f * scalingFactor), ImGuiCond_Once);
 	const ImVec2 windowPos(ImGui::GetMainViewport()->Size.x * 0.5f, ImGui::GetMainViewport()->Size.y * 0.5f);
@@ -174,20 +339,58 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 		ImGui::Begin(config.windowTitle, &config.windowOpen, windowFlags);
 	}
 
+	if (config.showNavigation)
+	{
+		const ImVec2 closeItemSpacing(ImGui::GetStyle().ItemSpacing.x * 0.5f, ImGui::GetStyle().ItemSpacing.y * 0.5f);
+		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, closeItemSpacing);
+		ImGui::BeginDisabled(hasPrevDirectoryHistory(config) == false);
+		if (ImGui::Button("<"))
+			prevDirectoryHistory(config);
+		ImGui::EndDisabled();
+
+		ImGui::SameLine();
+		ImGui::BeginDisabled(hasNextDirectoryHistory(config) == false);
+		if (ImGui::Button(">"))
+			nextDirectoryHistory(config);
+		ImGui::EndDisabled();
+		ImGui::PopStyleVar();
+
+		ImGui::BeginDisabled(hasParentDirectory(config) == false);
+		ImGui::SameLine();
+		if (ImGui::Button("^"))
+		{
+			const bool isValid = parentDirectory(config);
+			addDirectoryHistory(config, isValid);
+		}
+		ImGui::EndDisabled();
+	}
+
 	if (config.showControls)
 	{
+		if (config.showNavigation)
+		{
+			ImGui::SameLine();
+			ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
+			ImGui::SameLine();
+		}
+
 		ImGui::Checkbox("Show Pinned", &config.showPinnedDirectories);
-		ImGui::SameLine();
-		ImGui::Checkbox("Permissions", &config.showPermissions);
-		ImGui::SameLine();
-		ImGui::Checkbox("Size", &config.showSize);
-		ImGui::SameLine();
-		ImGui::Checkbox("Date", &config.showDate);
+		if (config.showExtraControls)
+		{
+			ImGui::SameLine();
+			ImGui::Checkbox("Permissions", &config.showPermissions);
+			ImGui::SameLine();
+			ImGui::Checkbox("Size", &config.showSize);
+			ImGui::SameLine();
+			ImGui::Checkbox("Date", &config.showDate);
+		}
 		ImGui::SameLine();
 		ImGui::Checkbox("Show Hidden", &config.showHidden);
 		ImGui::SameLine();
+		ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
+		ImGui::SameLine();
 		static int currentComboSortingType = 0;
-		ImGui::PushItemWidth(100.0f * scalingFactor);
+		ImGui::PushItemWidth(ImGui::GetFontSize() * 8.0f);
 		ImGui::Combo("Sorting", &currentComboSortingType, sortingStrings, IM_ARRAYSIZE(sortingStrings));
 		ImGui::PopItemWidth();
 		config.sorting = static_cast<Sorting>(currentComboSortingType);
@@ -310,9 +513,9 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 					nctl::String dragPinnedDirectory(nctl::move(pinnedDirectories[dragPayload.index]));
 					pinnedDirectories.removeAt(dragPayload.index);
 					pinnedDirectories.insertAt(i, nctl::move(dragPinnedDirectory));
-
-					ImGui::EndDragDropTarget();
 				}
+
+				ImGui::EndDragDropTarget();
 			}
 		}
 		if (directoryToRemove >= 0)
@@ -326,9 +529,8 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 	if (nc::fs::logicalDrives())
 	{
 		char driveLetter[3] = "C:";
-		static int currentComboLogicalDrive = 0;
 		const char *logicalDriveStrings = nc::fs::logicalDriveStrings();
-		ImGui::PushItemWidth(50.0f);
+		ImGui::PushItemWidth(ImGui::GetFontSize() * 4.0f);
 		if (ImGui::Combo("##LogicalDrives", &currentComboLogicalDrive, logicalDriveStrings))
 		{
 			for (int i = 0; i < currentComboLogicalDrive; i++)
@@ -336,7 +538,8 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 			if (driveLetter[0] != '\0')
 			{
 				driveLetter[0] = logicalDriveStrings[0];
-				config.directory = driveLetter;
+				const bool dirChanged = changeDirectory(config, driveLetter);
+				addDirectoryHistory(config, dirChanged);
 			}
 		}
 		ImGui::PopItemWidth();
@@ -361,7 +564,8 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 		auxString.format("%s##%d", baseNames[i].data(), i);
 		if (ImGui::Button(auxString.data()))
 		{
-			config.directory = dirName;
+			const bool dirChanged = changeDirectory(config, dirName);
+			addDirectoryHistory(config, dirChanged);
 			if (config.selectionType != SelectionType::NEW_FILE)
 				inputTextString.clear();
 		}
@@ -373,11 +577,13 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 
 	if (ImGui::IsWindowHovered() && dropEvent != nullptr)
 	{
+		bool dirChanged = false;
 		// Go to the directory dropped on the file browser
 		if (nc::fs::isDirectory(dropEvent->paths[0]))
-			config.directory = dropEvent->paths[0];
+			dirChanged = changeDirectory(config, dropEvent->paths[0]);
 		else
-			config.directory = nc::fs::dirName(dropEvent->paths[0]);
+			dirChanged = changeDirectory(config, nc::fs::dirName(dropEvent->paths[0]));
+		addDirectoryHistory(config, dirChanged);
 		dropEvent = nullptr;
 	}
 
@@ -413,7 +619,8 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 	}
 	dir.close();
 
-	nctl::quicksort(dirEntries.begin(), dirEntries.end(), [&config](const DirEntry &entry1, const DirEntry &entry2) {
+	nctl::sort(dirEntries.begin(), dirEntries.end(), [&config](const DirEntry &entry1, const DirEntry &entry2)
+	{
 		if (config.sortDirectoriesfirst)
 		{
 			if (entry1.isDirectory == false && entry2.isDirectory)
@@ -510,8 +717,8 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 			{
 				if (entry.isDirectory)
 				{
-					config.directory = nc::fs::joinPath(config.directory, entry.name.data());
-					config.directory = nc::fs::absolutePath(config.directory.data());
+					const bool dirChanged = changeDirectory(config, nc::fs::joinPath(config.directory, entry.name.data()));
+					addDirectoryHistory(config, dirChanged);
 					inputTextString.clear();
 				}
 			}
@@ -521,7 +728,10 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 				selection = nc::fs::joinPath(config.directory, entry.name);
 				inputTextString.clear();
 				if (config.selectionType == SelectionType::DIRECTORY)
-					config.directory = selection;
+				{
+					const bool dirChanged = changeDirectory(config, selection);
+					addDirectoryHistory(config, dirChanged);
+				}
 
 				selected = true;
 				config.windowOpen = false;
@@ -540,8 +750,8 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 			{
 				if (entry.isDirectory)
 				{
-					config.directory = nc::fs::joinPath(config.directory, entry.name.data());
-					config.directory = nc::fs::absolutePath(config.directory.data());
+					const bool dirChanged = changeDirectory(config, nc::fs::joinPath(config.directory, entry.name.data()));
+					addDirectoryHistory(config, dirChanged);
 					if (config.selectionType == SelectionType::FILE)
 						inputTextString.clear();
 				}
@@ -566,7 +776,10 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 		selection = nc::fs::joinPath(config.directory, inputTextString);
 		inputTextString.clear();
 		if (config.selectionType == SelectionType::DIRECTORY)
-			config.directory = selection;
+		{
+			const bool dirChanged = changeDirectory(config, selection);
+			addDirectoryHistory(config, dirChanged);
+		}
 
 		selected = true;
 		config.windowOpen = false;
@@ -583,6 +796,8 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 		if (config.selectionType == SelectionType::DIRECTORY)
 			config.directory = selection;
 
+		clearDirectoryHistory(config);
+
 		selected = true;
 		config.windowOpen = false;
 		if (config.modalPopup)
@@ -593,6 +808,8 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 	{
 		selection.clear();
 		inputTextString.clear();
+
+		clearDirectoryHistory(config);
 
 		config.windowOpen = false;
 		if (config.modalPopup)
@@ -660,8 +877,9 @@ void MyEventHandler::onInit()
 {
 #ifdef __ANDROID__
 	const float scalingFactor = nc::theApplication().gfxDevice().windowScalingFactor();
-	ImGui::GetIO().FontGlobalScale = scalingFactor;
-	ImGui::GetStyle().ScaleAllSizes(scalingFactor);
+	ImGuiStyle &style = ImGui::GetStyle();
+	style.FontScaleMain = scalingFactor;
+	style.ScaleAllSizes(scalingFactor);
 #endif
 }
 

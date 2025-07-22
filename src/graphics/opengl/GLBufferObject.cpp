@@ -160,6 +160,11 @@ void GLBufferObject::setObjectLabel(const char *label)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+GLuint GLBufferObject::boundHandle(GLenum target)
+{
+	return boundBuffers_[target];
+}
+
 bool GLBufferObject::bindHandle(GLenum target, GLuint glHandle)
 {
 	if (boundBuffers_[target] != glHandle)

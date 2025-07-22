@@ -37,11 +37,11 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
-    : withSceneGraph_(withSceneGraph),
+    : withSceneGraph_(withSceneGraph), textures_(32),
       lastFrameWidth_(0), lastFrameHeight_(0), lastLayerValue_(0)
 {
 	ImGuiIO &io = ImGui::GetIO();
-#if defined(WITH_OPENGLES) || defined(__EMSCRIPTEN)
+#if defined(WITH_OPENGLES) || defined(__EMSCRIPTEN__)
 	io.BackendRendererName = "nCine_OpenGL_ES";
 #else
 	io.BackendRendererName = "nCine_OpenGL";
@@ -56,6 +56,7 @@ ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
 #if !(defined(WITH_OPENGLES) && !GL_ES_VERSION_3_2) && !defined(__EMSCRIPTEN__)
 	io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset; // We can honor the ImDrawCmd::VtxOffset field, allowing for large meshes.
 #endif
+	io.BackendFlags |= ImGuiBackendFlags_RendererHasTextures; // We can honor ImGuiPlatformIO::Textures[] requests during render.
 
 	const AppConfiguration &appCfg = theApplication().appConfiguration();
 	const GLShaderProgram::QueryPhase queryPhase = appCfg.deferShaderQueries ? GLShaderProgram::QueryPhase::DEFERRED : GLShaderProgram::QueryPhase::IMMEDIATE;
@@ -79,40 +80,23 @@ ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
 
 	if (withSceneGraph == false)
 		setupBuffersAndShader();
-
-	unsigned char *pixels = nullptr;
-	int width, height;
-	io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 }
 
 ImGuiDrawing::~ImGuiDrawing()
 {
+	// Destroy all textures
+	for (ImTextureData *tex : ImGui::GetPlatformIO().Textures)
+		if (tex->RefCount == 1)
+			destroyTexture(tex);
+
 	ImGuiIO &io = ImGui::GetIO();
-	io.Fonts->SetTexID(static_cast<ImTextureID>(reinterpret_cast<intptr_t>(nullptr)));
 	io.BackendRendererName = nullptr;
-	io.BackendFlags &= ~ImGuiBackendFlags_RendererHasVtxOffset;
+	io.BackendFlags &= ~(ImGuiBackendFlags_RendererHasVtxOffset | ImGuiBackendFlags_RendererHasTextures);
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
-
-bool ImGuiDrawing::buildFonts()
-{
-	ImGuiIO &io = ImGui::GetIO();
-
-	unsigned char *pixels = nullptr;
-	int width, height;
-	io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
-
-	texture_ = nctl::makeUnique<GLTexture>(GL_TEXTURE_2D);
-	texture_->texParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	texture_->texParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	texture_->texImage2D(0, GL_RGBA, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-	io.Fonts->TexID = reinterpret_cast<ImTextureID>(texture_.get());
-
-	return (pixels != nullptr);
-}
 
 void ImGuiDrawing::newFrame()
 {
@@ -163,6 +147,84 @@ void ImGuiDrawing::endFrame()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+void ImGuiDrawing::destroyTexture(ImTextureData *tex)
+{
+	GLTexture *texturePtr = (GLTexture *)(intptr_t)tex->TexID;
+	textures_.remove(texturePtr);
+
+	// Clear identifiers and mark as destroyed (in order to allow e.g. calling InvalidateDeviceObjects while running)
+	tex->SetTexID(ImTextureID_Invalid);
+	tex->SetStatus(ImTextureStatus_Destroyed);
+}
+
+void ImGuiDrawing::updateTexture(ImTextureData *tex)
+{
+	if (tex->Status == ImTextureStatus_WantCreate)
+	{
+		// Create and upload new texture to graphics system
+		//IMGUI_DEBUG_LOG("UpdateTexture #%03d: WantCreate %dx%d\n", tex->UniqueID, tex->Width, tex->Height);
+		IM_ASSERT(tex->TexID == 0 && tex->BackendUserData == nullptr);
+		IM_ASSERT(tex->Format == ImTextureFormat_RGBA32);
+		const void *pixels = tex->GetPixels();
+
+		// Upload texture to graphics system
+		// (Bilinear sampling is required by default. Set 'io.Fonts->Flags |= ImFontAtlasFlags_NoBakedLines' or 'style.AntiAliasedLinesUseTex = false' to allow point/nearest sampling)
+		GLint lastTexture = GLTexture::boundHandle(GL_TEXTURE_2D);
+		nctl::UniquePtr<GLTexture> texture = nctl::makeUnique<GLTexture>(GL_TEXTURE_2D);
+		texture->texParameteri(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		texture->texParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		texture->texParameteri(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		texture->texParameteri(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+#if !defined(WITH_OPENGLES) && !defined(__EMSCRIPTEN__)
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+#endif
+		texture->texImage2D(0, GL_RGBA, tex->Width, tex->Height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+
+		if (textures_.loadFactor() >= 0.8f)
+			textures_.rehash(textures_.capacity() * 2);
+		GLTexture *texturePtr = texture.get();
+		textures_.insert(texturePtr, nctl::move(texture));
+		// Store identifiers
+		tex->SetTexID((ImTextureID)(intptr_t)texturePtr);
+		tex->SetStatus(ImTextureStatus_OK);
+
+		// Restore state
+		GLTexture::bindHandle(GL_TEXTURE_2D, lastTexture);
+	}
+	else if (tex->Status == ImTextureStatus_WantUpdates)
+	{
+		// Update selected blocks. We only ever write to textures regions which have never been used before!
+		// This backend choose to use tex->Updates[] but you can use tex->UpdateRect to upload a single region.
+		GLint lastTexture = GLTexture::boundHandle(GL_TEXTURE_2D);
+
+		GLTexture *texturePtr = (GLTexture *)(intptr_t)tex->TexID;
+		texturePtr->bind();
+
+#if !defined(WITH_OPENGLES) && !defined(__EMSCRIPTEN__)
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, tex->Width);
+		for (ImTextureRect &r : tex->Updates)
+			texturePtr->texSubImage2D(0, r.x, r.y, r.w, r.h, GL_RGBA, GL_UNSIGNED_BYTE, tex->GetPixelsAt(r.x, r.y));
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+#else
+		// GL ES doesn't have GL_UNPACK_ROW_LENGTH, so we need to (A) copy to a contiguous buffer or (B) upload line by line.
+		for (ImTextureRect &r : tex->Updates)
+		{
+			const int srcPitch = r.w * tex->BytesPerPixel;
+			if (tempTexBuffer_.size() < r.h * srcPitch)
+				tempTexBuffer_.setSize(r.h * srcPitch);
+			char *outP = tempTexBuffer_.data();
+			for (int y = 0; y < r.h; y++, outP += srcPitch)
+				memcpy(outP, tex->GetPixelsAt(r.x, r.y + y), srcPitch);
+			texturePtr->texSubImage2D(0, r.x, r.y, r.w, r.h, GL_RGBA, GL_UNSIGNED_BYTE, tempTexBuffer_.data());
+		}
+#endif
+		tex->SetStatus(ImTextureStatus_OK);
+		GLTexture::bindHandle(GL_TEXTURE_2D, lastTexture); // Restore state
+	}
+	else if (tex->Status == ImTextureStatus_WantDestroy && tex->UnusedFrames > 0)
+		destroyTexture(tex);
+}
+
 RenderCommand *ImGuiDrawing::retrieveCommandFromPool()
 {
 	bool commandAdded = false;
@@ -199,13 +261,23 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 
 	const unsigned int numElements = sizeof(ImDrawVert) / sizeof(GLfloat);
 
+	// Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
 	ImGuiIO &io = ImGui::GetIO();
 	const int fbWidth = static_cast<int>(drawData->DisplaySize.x * drawData->FramebufferScale.x);
 	const int fbHeight = static_cast<int>(drawData->DisplaySize.y * drawData->FramebufferScale.y);
 	if (fbWidth <= 0 || fbHeight <= 0)
 		return;
+
+	// Will project scissor/clipping rectangles into framebuffer space
 	const ImVec2 clipOff = drawData->DisplayPos;
 	const ImVec2 clipScale = drawData->FramebufferScale;
+
+	// Catch up with texture updates. Most of the times, the list will have 1 element with an OK status, aka nothing to do.
+	// (This almost always points to ImGui::GetPlatformIO().Textures[] but is part of ImDrawData to allow overriding or disabling texture updates).
+	if (drawData->Textures != nullptr)
+		for (ImTextureData *tex : *drawData->Textures)
+			if (tex->Status != ImTextureStatus_OK)
+				updateTexture(tex);
 
 	unsigned int numCmd = 0;
 	for (int n = 0; n < drawData->CmdListsCount; n++)
@@ -293,12 +365,22 @@ void ImGuiDrawing::draw()
 {
 	ImDrawData *drawData = ImGui::GetDrawData();
 
+	// Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
 	const int fbWidth = static_cast<int>(drawData->DisplaySize.x * drawData->FramebufferScale.x);
 	const int fbHeight = static_cast<int>(drawData->DisplaySize.y * drawData->FramebufferScale.y);
 	if (fbWidth <= 0 || fbHeight <= 0)
 		return;
+
+	// Will project scissor/clipping rectangles into framebuffer space
 	const ImVec2 clipOff = drawData->DisplayPos;
 	const ImVec2 clipScale = drawData->FramebufferScale;
+
+	// Catch up with texture updates. Most of the times, the list will have 1 element with an OK status, aka nothing to do.
+	// (This almost always points to ImGui::GetPlatformIO().Textures[] but is part of ImDrawData to allow overriding or disabling texture updates).
+	if (drawData->Textures != nullptr)
+		for (ImTextureData *tex : *drawData->Textures)
+			if (tex->Status != ImTextureStatus_OK)
+				updateTexture(tex);
 
 	GLBlending::State blendingState = GLBlending::state();
 	GLBlending::enable();
@@ -311,7 +393,9 @@ void ImGuiDrawing::draw()
 	for (int n = 0; n < drawData->CmdListsCount; n++)
 	{
 		const ImDrawList *imDrawList = drawData->CmdLists[n];
+#if (defined(WITH_OPENGLES) && !GL_ES_VERSION_3_2) || defined(__EMSCRIPTEN__)
 		const ImDrawIdx *firstIndex = nullptr;
+#endif
 
 		// Always define vertex format (and bind VAO) before uploading data to buffers
 		imguiShaderProgram_->defineVertexFormat(vbo_.get(), ibo_.get());
@@ -337,11 +421,11 @@ void ImGuiDrawing::draw()
 			GLTexture::bindHandle(GL_TEXTURE_2D, reinterpret_cast<GLTexture *>(imCmd->GetTexID())->glHandle());
 #if (defined(WITH_OPENGLES) && !GL_ES_VERSION_3_2) || defined(__EMSCRIPTEN__)
 			glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(imCmd->ElemCount), sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, firstIndex);
+			firstIndex += imCmd->ElemCount;
 #else
 			glDrawElementsBaseVertex(GL_TRIANGLES, static_cast<GLsizei>(imCmd->ElemCount), sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
 			                         reinterpret_cast<void *>(static_cast<intptr_t>(imCmd->IdxOffset * sizeof(ImDrawIdx))), static_cast<GLint>(imCmd->VtxOffset));
 #endif
-			firstIndex += imCmd->ElemCount;
 		}
 	}
 

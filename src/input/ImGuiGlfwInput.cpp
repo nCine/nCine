@@ -31,10 +31,11 @@
 
 // We gather version tests as define in order to easily see which features are version-dependent.
 #define GLFW_VERSION_COMBINED           (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 + GLFW_VERSION_REVISION)
+#define GLFW_HAS_PER_MONITOR_DPI        (GLFW_VERSION_COMBINED >= 3300) // 3.3+ glfwGetMonitorContentScale
 #ifdef GLFW_RESIZE_NESW_CURSOR          // Let's be nice to people who pulled GLFW between 2019-04-16 (3.4 define) and 2019-11-29 (cursors defines) // FIXME: Remove when GLFW 3.4 is released?
-	#define GLFW_HAS_NEW_CURSORS            (GLFW_VERSION_COMBINED >= 3400) // 3.4+ GLFW_RESIZE_ALL_CURSOR, GLFW_RESIZE_NESW_CURSOR, GLFW_RESIZE_NWSE_CURSOR, GLFW_NOT_ALLOWED_CURSOR
+	#define GLFW_HAS_NEW_CURSORS        (GLFW_VERSION_COMBINED >= 3400) // 3.4+ GLFW_RESIZE_ALL_CURSOR, GLFW_RESIZE_NESW_CURSOR, GLFW_RESIZE_NWSE_CURSOR, GLFW_NOT_ALLOWED_CURSOR
 #else
-	#define GLFW_HAS_NEW_CURSORS            (0)
+	#define GLFW_HAS_NEW_CURSORS        (0)
 #endif
 #define GLFW_HAS_GAMEPAD_API            (GLFW_VERSION_COMBINED >= 3300) // 3.3+ glfwGetGamepadState() new api
 #define GLFW_HAS_GETKEYNAME             (GLFW_VERSION_COMBINED >= 3200) // 3.2+ glfwGetKeyName()
@@ -187,9 +188,8 @@ namespace {
 
 	// X11 does not include current pressed/released modifier key in 'mods' flags submitted by GLFW
 	// See https://github.com/ocornut/imgui/issues/6034 and https://github.com/glfw/glfw/issues/1630
-	void updateKeyModifiers(GLFWwindow *window)
+	void updateKeyModifiers(ImGuiIO &io, GLFWwindow *window)
 	{
-		ImGuiIO &io = ImGui::GetIO();
 		io.AddKeyEvent(ImGuiMod_Ctrl, (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS));
 		io.AddKeyEvent(ImGuiMod_Shift, (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS));
 		io.AddKeyEvent(ImGuiMod_Alt, (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_RIGHT_ALT) == GLFW_PRESS));
@@ -251,7 +251,7 @@ namespace {
 		float wheelX = wheelEvent->deltaX * -multiplier;
 		float wheelY = wheelEvent->deltaY * -multiplier;
 
-		ImGuiIO& io = ImGui::GetIO();
+		ImGuiIO &io = ImGui::GetIO();
 		io.AddMouseWheelEvent(wheelX, wheelY);
 
 		return EM_TRUE;
@@ -273,6 +273,8 @@ namespace {
 
 	LRESULT CALLBACK ImGui_ImplGlfw_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
+		ImGuiIO &io = ImGui::GetIO();
+
 		switch (msg)
 		{
 			case WM_MOUSEMOVE: case WM_NCMOUSEMOVE:
@@ -280,7 +282,7 @@ namespace {
 			case WM_RBUTTONDOWN: case WM_RBUTTONDBLCLK: case WM_RBUTTONUP:
 			case WM_MBUTTONDOWN: case WM_MBUTTONDBLCLK: case WM_MBUTTONUP:
 			case WM_XBUTTONDOWN: case WM_XBUTTONDBLCLK: case WM_XBUTTONUP:
-				ImGui::GetIO().AddMouseSourceEvent(getMouseSourceFromMessageExtraInfo());
+				io.AddMouseSourceEvent(getMouseSourceFromMessageExtraInfo());
 				break;
 		}
 		return ::CallWindowProc(prevWndProc, hWnd, msg, wParam, lParam);
@@ -328,7 +330,7 @@ void ImGuiGlfwInput::init(GLFWwindow *window, bool withCallbacks)
 	window_ = window;
 	time_ = 0.0;
 
-	ImGuiPlatformIO& platformIo = ImGui::GetPlatformIO();
+	ImGuiPlatformIO &platformIo = ImGui::GetPlatformIO();
 	platformIo.Platform_SetClipboardTextFn = [](ImGuiContext *context, const char *text) { glfwSetClipboardString(nullptr, text); };
 	platformIo.Platform_GetClipboardTextFn = [](ImGuiContext *context) { return glfwGetClipboardString(nullptr); };
 #ifdef __EMSCRIPTEN__
@@ -392,7 +394,7 @@ void ImGuiGlfwInput::init(GLFWwindow *window, bool withCallbacks)
 	#if EMSCRIPTEN_USE_PORT_CONTRIB_GLFW3 >= 34020240817
 	if (emscripten::glfw3::IsRuntimePlatformApple())
 	{
-		ImGui::GetIO().ConfigMacOSXBehaviors = true;
+		io.ConfigMacOSXBehaviors = true;
 
 		// Due to how the browser (poorly) handles the Meta Key, this line essentially disables repeats when used.
 		// This means that Meta + V only registers a single key-press, even if the keys are held.
@@ -403,8 +405,6 @@ void ImGuiGlfwInput::init(GLFWwindow *window, bool withCallbacks)
 	#endif
 #endif
 }
-
-
 
 void ImGuiGlfwInput::shutdown()
 {
@@ -420,7 +420,7 @@ void ImGuiGlfwInput::shutdown()
 	for (ImGuiMouseCursor i = 0; i < ImGuiMouseCursor_COUNT; i++)
 		glfwDestroyCursor(mouseCursors_[i]);
 
-		// Windows: restore our WndProc hook
+	// Windows: restore our WndProc hook
 #ifdef _WIN32
 	ImGuiViewport *mainViewport = ImGui::GetMainViewport();
 	::SetWindowLongPtr((HWND)mainViewport->PlatformHandleRaw, GWLP_WNDPROC, (LONG_PTR)prevWndProc);
@@ -436,16 +436,9 @@ void ImGuiGlfwInput::shutdown()
 void ImGuiGlfwInput::newFrame()
 {
 	ImGuiIO &io = ImGui::GetIO();
-	IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! Missing call to ImGuiDrawing::buildFonts() function?");
 
-	// Setup display size (every frame to accommodate for window resizing)
-	int w, h;
-	int displayW, displayH;
-	glfwGetWindowSize(window_, &w, &h);
-	glfwGetFramebufferSize(window_, &displayW, &displayH);
-	io.DisplaySize = ImVec2(static_cast<float>(w), static_cast<float>(h));
-	if (w > 0 && h > 0)
-		io.DisplayFramebufferScale = ImVec2(static_cast<float>(displayW) / w, static_cast<float>(displayH) / h);
+	// Setup main viewport size (every frame to accommodate for window resizing)
+	getWindowSizeAndFramebufferScale(window_, &io.DisplaySize, &io.DisplayFramebufferScale);
 
 	// Setup time step
 	// (Accept glfwGetTime() not returning a monotonically increasing value. Seems to happens on disconnecting peripherals and probably on VMs and Emscripten, see #6491, #6189, #6114, #3644)
@@ -474,8 +467,8 @@ void ImGuiGlfwInput::mouseButtonCallback(GLFWwindow *window, int button, int act
 	if (inputEnabled_ == false)
 		return;
 
-	updateKeyModifiers(window);
 	ImGuiIO &io = ImGui::GetIO();
+	updateKeyModifiers(io, window);
 	if (button >= 0 && button < ImGuiMouseButton_COUNT)
 		io.AddMouseButtonEvent(button, action == GLFW_PRESS);
 }
@@ -505,11 +498,11 @@ void ImGuiGlfwInput::keyCallback(GLFWwindow *window, int keycode, int scancode, 
 	if (inputEnabled_ == false)
 		return;
 
-	updateKeyModifiers(window);
+	ImGuiIO &io = ImGui::GetIO();
+	updateKeyModifiers(io, window);
 
 	keycode = translateUntranslatedKey(keycode, scancode);
 
-	ImGuiIO &io = ImGui::GetIO();
 	ImGuiKey imguiKey = glfwKeyToImGuiKey(keycode, scancode);
 	io.AddKeyEvent(imguiKey, (action == GLFW_PRESS));
 	io.SetKeyEventNativeData(imguiKey, keycode, scancode); // To support legacy indexing (<1.87 user code)
@@ -665,7 +658,7 @@ void ImGuiGlfwInput::updateMouseCursor()
 void ImGuiGlfwInput::updateGamepads()
 {
 	ImGuiIO &io = ImGui::GetIO();
-	if ((io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad) == 0) // FIXME: Technically feeding gamepad shouldn't depend on this now that they are regular inputs.
+	if ((io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad) == 0) // FIXME: Technically feeding gamepad shouldn't depend on this now that they are regular inputs, but see #8075
 		return;
 
 	const bool joyMappedInput = imGuiJoyMappedInput();
@@ -723,6 +716,49 @@ void ImGuiGlfwInput::updateGamepads()
 		#undef MAP_BUTTON
 		#undef MAP_ANALOG
 		// clang-format on
+	}
+}
+
+// - On Windows the process needs to be marked DPI-aware!! SDL2 doesn't do it by default. You can call ::SetProcessDPIAware() or call ImGui_ImplWin32_EnableDpiAwareness() from Win32 backend.
+// - Apple platforms use FramebufferScale so we always return 1.0f.
+// - Some accessibility applications are declaring virtual monitors with a DPI of 0.0f, see #7902. We preserve this value for caller to handle.
+float ImGuiGlfwInput::getContentScaleForWindow(GLFWwindow *window)
+{
+#if GLFW_HAS_PER_MONITOR_DPI && !(defined(__APPLE__) || defined(__EMSCRIPTEN__) || defined(__ANDROID__))
+	float xScale, yScale;
+	glfwGetWindowContentScale(window, &xScale, &yScale);
+	return xScale;
+#else
+	IM_UNUSED(window);
+	return 1.0f;
+#endif
+}
+
+float ImGuiGlfwInput::getContentScaleForMonitor(GLFWmonitor *monitor)
+{
+#if GLFW_HAS_PER_MONITOR_DPI && !(defined(__APPLE__) || defined(__EMSCRIPTEN__) || defined(__ANDROID__))
+	float xScale, yScale;
+	glfwGetMonitorContentScale(monitor, &xScale, &yScale);
+	return xScale;
+#else
+	IM_UNUSED(monitor);
+	return 1.0f;
+#endif
+}
+
+void ImGuiGlfwInput::getWindowSizeAndFramebufferScale(GLFWwindow *window, ImVec2 *outSize, ImVec2 *outFramebufferScale)
+{
+	int w, h;
+	int displayW, displayH;
+	glfwGetWindowSize(window, &w, &h);
+	glfwGetFramebufferSize(window, &displayW, &displayH);
+	if (outSize != nullptr)
+		*outSize = ImVec2((float)w, (float)h);
+	if (outFramebufferScale != nullptr)
+	{
+		*outFramebufferScale = (w > 0 && h > 0) ? ImVec2(static_cast<float>(displayW) / static_cast<float>(w),
+		                                                 static_cast<float>(displayH) / static_cast<float>(h))
+		                                        : ImVec2(1.0f, 1.0f);
 	}
 }
 

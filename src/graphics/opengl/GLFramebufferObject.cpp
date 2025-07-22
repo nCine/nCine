@@ -146,6 +146,16 @@ void GLFramebufferObject::setObjectLabel(const char *label)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+GLuint GLFramebufferObject::boundHandle(GLenum target)
+{
+	FATAL_ASSERT(target == GL_FRAMEBUFFER || target == GL_READ_FRAMEBUFFER || target == GL_DRAW_FRAMEBUFFER);
+
+	if (target == GL_FRAMEBUFFER || target == GL_READ_FRAMEBUFFER)
+		return readBoundBuffer_;
+	else
+		return drawBoundBuffer_;
+}
+
 bool GLFramebufferObject::bindHandle(GLenum target, GLuint glHandle)
 {
 	FATAL_ASSERT(target == GL_FRAMEBUFFER || target == GL_READ_FRAMEBUFFER || target == GL_DRAW_FRAMEBUFFER);

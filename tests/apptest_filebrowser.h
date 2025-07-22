@@ -3,7 +3,6 @@
 
 #include <ncine/IAppEventHandler.h>
 #include <ncine/IInputEventHandler.h>
-#include <nctl/String.h>
 
 namespace ncine {
 

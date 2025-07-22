@@ -6,6 +6,7 @@
 struct SDL_Window;
 union SDL_Event;
 struct SDL_Cursor;
+struct SDL_Renderer;
 typedef struct _SDL_GameController SDL_GameController;
 
 namespace ncine {
@@ -42,6 +43,7 @@ class ImGuiSdlInput
 	static SDL_Cursor *mouseLastCursor_;
 	static unsigned int mouseLastLeaveFrame_;
 	static bool mouseCanUseGlobalState_;
+	static bool mouseCanUseCapture_;
 
 	// Gamepad handling
 	static ImVector<SDL_GameController *> gamepads_;
@@ -51,9 +53,12 @@ class ImGuiSdlInput
 	static const char *clipboardText(ImGuiContext *context);
 	static void updateMouseData();
 	static void updateMouseCursor();
+	static float getContentScaleForWindow(SDL_Window *window);
+	static float getContentScaleForDisplay(int displayIndex);
 	static void closeGamepads();
 	static void setGamepadMode(GamepadMode mode, SDL_GameController **manualGamepadsArray, unsigned int manualGamepadsCount);
 	static void updateGamepads();
+	static void getWindowSizeAndFramebufferScale(SDL_Window *window, SDL_Renderer *renderer, ImVec2 *outSize, ImVec2 *outFramebufferScale);
 };
 
 }

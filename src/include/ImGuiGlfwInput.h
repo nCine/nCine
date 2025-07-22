@@ -44,6 +44,10 @@ class ImGuiGlfwInput
 	static void updateMouseData();
 	static void updateMouseCursor();
 	static void updateGamepads();
+
+	static float getContentScaleForWindow(GLFWwindow *window);
+	static float getContentScaleForMonitor(GLFWmonitor *monitor);
+	static void getWindowSizeAndFramebufferScale(GLFWwindow *window, ImVec2 *outSize, ImVec2 *outFramebufferScale);
 };
 
 }

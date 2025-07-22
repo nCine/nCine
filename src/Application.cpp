@@ -287,10 +287,8 @@ void Application::initCommon()
 		LOGI("IAppEventHandler::onInit() invoked");
 	}
 
-	// Give user code a chance to add custom GUI fonts
-#ifdef WITH_IMGUI
-	imguiDrawing_->buildFonts();
-#endif
+	// ImGui fonts may now be added, removed, reconfigured at any time (since v1.92.0).
+	// Give user code a chance to add custom Nuklear fonts
 #ifdef WITH_NUKLEAR
 	nuklearDrawing_->bakeFonts();
 #endif
