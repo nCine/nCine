@@ -395,15 +395,16 @@ if(NCINE_WITH_IMGUI)
 	# For external projects compiling using an nCine build directory
 	set(IMGUI_INCLUDE_ONLY_DIR ${IMGUI_SOURCE_DIR}/include_only)
 	file(COPY ${IMGUI_SOURCE_DIR}/imgui.h DESTINATION ${IMGUI_INCLUDE_ONLY_DIR}/ncine)
+	file(COPY ${IMGUI_SOURCE_DIR}/imgui_internal.h DESTINATION ${IMGUI_INCLUDE_ONLY_DIR}/ncine)
 	file(COPY ${IMGUI_SOURCE_DIR}/imconfig.h DESTINATION ${IMGUI_INCLUDE_ONLY_DIR}/ncine)
 
 	list(APPEND HEADERS
 		${IMGUI_INCLUDE_ONLY_DIR}/ncine/imgui.h
+		${IMGUI_INCLUDE_ONLY_DIR}/ncine/imgui_internal.h
 		${IMGUI_INCLUDE_ONLY_DIR}/ncine/imconfig.h
 	)
 
 	list(APPEND PRIVATE_HEADERS
-		${IMGUI_SOURCE_DIR}/imgui_internal.h
 		${IMGUI_SOURCE_DIR}/imstb_rectpack.h
 		${IMGUI_SOURCE_DIR}/imstb_textedit.h
 		${IMGUI_SOURCE_DIR}/imstb_truetype.h

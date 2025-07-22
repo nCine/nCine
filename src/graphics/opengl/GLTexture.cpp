@@ -121,6 +121,12 @@ void GLTexture::setObjectLabel(const char *label)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+GLuint GLTexture::boundHandle(GLenum target, unsigned int textureUnit)
+{
+	FATAL_ASSERT(textureUnit < MaxTextureUnits);
+	return boundTextures_[textureUnit][target];
+}
+
 bool GLTexture::bindHandle(GLenum target, GLuint glHandle, unsigned int textureUnit)
 {
 	FATAL_ASSERT(textureUnit < MaxTextureUnits);

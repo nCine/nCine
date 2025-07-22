@@ -3,7 +3,14 @@
 
 #include <cstdint>
 #include <nctl/UniquePtr.h>
+#include <nctl/HashMap.h>
 #include "Matrix4x4.h"
+
+#if defined(WITH_OPENGLES) || defined(__EMSCRIPTEN__)
+	#include <nctl/Array.h>
+#endif
+
+struct ImTextureData;
 
 namespace ncine {
 
@@ -21,9 +28,6 @@ class ImGuiDrawing
 	explicit ImGuiDrawing(bool withSceneGraph);
 	~ImGuiDrawing();
 
-	/// Builds the ImGui font atlas and uploads it to a texture
-	bool buildFonts();
-
 	void newFrame();
 	/// Renders ImGui with render commands
 	void endFrame(RenderQueue &renderQueue);
@@ -32,7 +36,10 @@ class ImGuiDrawing
 
   private:
 	bool withSceneGraph_;
-	nctl::UniquePtr<GLTexture> texture_;
+	nctl::HashMap<GLTexture *, nctl::UniquePtr<GLTexture>> textures_;
+#if defined(WITH_OPENGLES) || defined(__EMSCRIPTEN__)
+	nctl::Array<char> tempTexBuffer_;
+#endif
 	nctl::UniquePtr<GLShaderProgram> imguiShaderProgram_;
 
 	nctl::UniquePtr<GLBufferObject> vbo_;
@@ -46,6 +53,9 @@ class ImGuiDrawing
 	int lastFrameHeight_;
 	Matrix4x4f projectionMatrix_;
 	uint16_t lastLayerValue_;
+
+	void destroyTexture(ImTextureData *tex);
+	void updateTexture(ImTextureData *tex);
 
 	RenderCommand *retrieveCommandFromPool();
 	void setupRenderCmd(RenderCommand &cmd);

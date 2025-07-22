@@ -84,8 +84,10 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 void MyEventHandler::onInit()
 {
 #ifdef __ANDROID__
-	ImGuiIO &io = ImGui::GetIO();
-	io.FontGlobalScale = 3.0f;
+	const float scalingFactor = nc::theApplication().gfxDevice().windowScalingFactor();
+	ImGuiStyle &style = ImGui::GetStyle();
+	style.FontScaleMain = scalingFactor;
+	style.ScaleAllSizes(scalingFactor);
 #endif
 }
 
@@ -232,7 +234,7 @@ void MyEventHandler::onFrameStart()
 		ImDrawList *drawList = ImGui::GetWindowDrawList();
 
 		const float rectHeight = 4.0f * ImGui::GetFontSize();
-		const float thickness = 2.0f * ImGui::GetIO().FontGlobalScale;
+		const float thickness = 2.0f * ImGui::GetStyle().FontScaleMain;
 		const ImVec2 minRect(cursorScreenPos.x, cursorScreenPos.y);
 		const ImVec2 maxRect(minRect.x + ImGui::GetContentRegionAvail().x, minRect.y + rectHeight);
 		const float width = maxRect.x - minRect.x;
@@ -440,7 +442,7 @@ void MyEventHandler::onFrameStart()
 			ImGui::SameLine();
 			static int currentComboFitStrategy = 0;
 			currentComboFitStrategy = static_cast<int>(flAlloc.fitStrategy());
-			ImGui::PushItemWidth(100.0f * ImGui::GetIO().FontGlobalScale);
+			ImGui::PushItemWidth(ImGui::GetFontSize() * 8.0f);
 			ImGui::Combo("Fit Strategy", &currentComboFitStrategy, fitStrategyStrings, IM_ARRAYSIZE(fitStrategyStrings));
 			ImGui::PopItemWidth();
 			nctl::FreeListAllocator::FitStrategy fitStrategy = static_cast<nctl::FreeListAllocator::FitStrategy>(currentComboFitStrategy);

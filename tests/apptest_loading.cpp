@@ -384,7 +384,7 @@ void MyEventHandler::onFrameStart()
 	#if NCINE_WITH_WEBP
 						const char *formats[] = { "Png", "WebP" };
 						ImGui::SameLine();
-						ImGui::PushItemWidth(60.0f);
+						ImGui::PushItemWidth(ImGui::GetFontSize() * 5.0f);
 						ImGui::Combo("##SaveFormat", &selectedFormat, formats, IM_ARRAYSIZE(formats));
 						ImGui::PopItemWidth();
 	#endif

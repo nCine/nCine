@@ -269,7 +269,7 @@ void MyEventHandler::onFrameStart()
 				rootNode.setVisitOrderState(nc::SceneNode::VisitOrderState::DISABLED);
 
 			ImGui::TextUnformatted("Layer order:");
-			ImGui::PushItemWidth(95.0f);
+			ImGui::PushItemWidth(ImGui::GetFontSize() * 7.0f);
 			for (unsigned int i = 0; i < NumSprites; i++)
 			{
 				auxString.format("##LayerOrder%d", i);
@@ -328,7 +328,7 @@ void MyEventHandler::onFrameStart()
 				}
 			}
 
-			ImGui::PushItemWidth(150.0f);
+			ImGui::PushItemWidth(ImGui::GetFontSize() * 12.0f);
 			int imguiLayer = nc::theApplication().guiSettings().imguiLayer;
 			ImGui::InputInt("ImGui layer", &imguiLayer);
 			if (imguiLayer < 0)

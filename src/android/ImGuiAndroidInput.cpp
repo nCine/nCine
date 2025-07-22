@@ -163,7 +163,7 @@ void ImGuiAndroidInput::init(ANativeWindow *window)
 	ImGuiIO &io = ImGui::GetIO();
 	io.BackendPlatformName = "nCine_Android";
 
-	ImGuiPlatformIO& platformIo = ImGui::GetPlatformIO();
+	ImGuiPlatformIO &platformIo = ImGui::GetPlatformIO();
 	platformIo.Platform_SetClipboardTextFn = setClipboardText;
 	platformIo.Platform_GetClipboardTextFn = clipboardText;
 }
@@ -179,7 +179,6 @@ void ImGuiAndroidInput::shutdown()
 void ImGuiAndroidInput::newFrame()
 {
 	ImGuiIO &io = ImGui::GetIO();
-	IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! Missing call to ImGuiDrawing::buildFonts() function?");
 	io.DeltaTime = theApplication().frameTime();
 
 	// Setup display size (every frame to accommodate for window resizing)

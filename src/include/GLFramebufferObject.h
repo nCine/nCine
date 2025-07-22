@@ -59,7 +59,9 @@ class GLFramebufferObject
 	/// Deleted assignment operator
 	GLFramebufferObject &operator=(const GLFramebufferObject &) = delete;
 
+	static GLuint boundHandle(GLenum target);
 	static bool bindHandle(GLenum target, GLuint glHandle);
+
 	static void setBoundHandle(GLenum target, GLuint glHandle);
 
 	friend class Qt5GfxDevice;

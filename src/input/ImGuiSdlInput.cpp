@@ -18,6 +18,7 @@
 #else
 	#define SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE 0
 #endif
+#define SDL_HAS_PER_MONITOR_DPI SDL_VERSION_ATLEAST(2,0,4)
 #define SDL_HAS_VULKAN SDL_VERSION_ATLEAST(2, 0, 6)
 #define SDL_HAS_OPEN_URL SDL_VERSION_ATLEAST(2,0,14)
 #if SDL_HAS_VULKAN
@@ -247,6 +248,7 @@ SDL_Cursor *ImGuiSdlInput::mouseCursors_[ImGuiMouseCursor_COUNT] = {};
 SDL_Cursor *ImGuiSdlInput::mouseLastCursor_ = nullptr;
 unsigned int ImGuiSdlInput::mouseLastLeaveFrame_ = 0;
 bool ImGuiSdlInput::mouseCanUseGlobalState_ = false;
+bool ImGuiSdlInput::mouseCanUseCapture_ = false;
 
 ImVector<SDL_GameController *> ImGuiSdlInput::gamepads_;
 ImGuiSdlInput::GamepadMode ImGuiSdlInput::gamepadMode_ = ImGuiSdlInput::GamepadMode::AUTO_FIRST;
@@ -265,24 +267,29 @@ void ImGuiSdlInput::init(SDL_Window *window)
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 
-	ImGuiIO &io = ImGui::GetIO();
+	// Obtain compiled and runtime versions
+	SDL_version ver_compiled;
+	SDL_version ver_runtime;
+	SDL_VERSION(&ver_compiled);
+	SDL_GetVersion(&ver_runtime);
 
-	// Check and store if we are on a SDL backend that supports global mouse position
+	// Check and store if we are on a SDL backend that supports SDL_GetGlobalMouseState() and SDL_CaptureMouse()
 	// ("wayland" and "rpi" don't support it, but we chose to use a white-list instead of a black-list)
-	mouseCanUseGlobalState_ = false;
 #if SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE
 	const char *sdlBackend = SDL_GetCurrentVideoDriver();
-	const char *globalMouseWhitelist[] = { "windows", "cocoa", "x11", "DIVE", "VMAN" };
-	for (int n = 0; n < IM_ARRAYSIZE(globalMouseWhitelist); n++)
+	const char *captureAndGlobalStateWhitelist[] = { "windows", "cocoa", "x11", "DIVE", "VMAN" };
+	for (const char *item : captureAndGlobalStateWhitelist)
 	{
-		if (strncmp(sdlBackend, globalMouseWhitelist[n], strlen(globalMouseWhitelist[n])) == 0)
+		if (strncmp(sdlBackend, item, strlen(item)) == 0)
 		{
 			mouseCanUseGlobalState_ = true;
+			mouseCanUseCapture_ = true;
 			break;
 		}
 	}
 #endif
 
+	ImGuiIO &io = ImGui::GetIO();
 	// Setup backend capabilities flags
 	io.BackendPlatformName = "nCine_SDL2";
 	io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors; // We can honor GetMouseCursor() values (optional)
@@ -290,7 +297,7 @@ void ImGuiSdlInput::init(SDL_Window *window)
 
 	window_ = window;
 
-	ImGuiPlatformIO& platformIo = ImGui::GetPlatformIO();
+	ImGuiPlatformIO &platformIo = ImGui::GetPlatformIO();
 	platformIo.Platform_SetClipboardTextFn = setClipboardText;
 	platformIo.Platform_GetClipboardTextFn = clipboardText;
 	platformIo.Platform_ClipboardUserData = nullptr;
@@ -379,23 +386,9 @@ void ImGuiSdlInput::shutdown()
 void ImGuiSdlInput::newFrame()
 {
 	ImGuiIO &io = ImGui::GetIO();
-	IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! Missing call to ImGuiDrawing::buildFonts() function?");
 
-	// Setup display size (every frame to accommodate for window resizing)
-	int w, h;
-	int displayW, displayH;
-	SDL_GetWindowSize(window_, &w, &h);
-	if (SDL_GetWindowFlags(window_) & SDL_WINDOW_MINIMIZED)
-		w = h = 0;
-#if SDL_HAS_VULKAN
-	else if (SDL_GetWindowFlags(window_) & SDL_WINDOW_VULKAN)
-		SDL_Vulkan_GetDrawableSize(window_, &displayW, &displayH);
-	else
-#endif
-	SDL_GL_GetDrawableSize(window_, &displayW, &displayH);
-	io.DisplaySize = ImVec2(static_cast<float>(w), static_cast<float>(h));
-	if (w > 0 && h > 0)
-		io.DisplayFramebufferScale = ImVec2(static_cast<float>(displayW) / w, static_cast<float>(displayH) / h);
+	// Setup main viewport size (every frame to accommodate for window resizing)
+	getWindowSizeAndFramebufferScale(window_, nullptr, &io.DisplaySize, &io.DisplayFramebufferScale);
 
 	// Setup time step (we don't use SDL_GetTicks() because it is using millisecond resolution)
 	// (Accept SDL_GetPerformanceCounter() not returning a monotonically increasing value. Happens in VMs and Emscripten, see #6189, #6114, #3644)
@@ -499,7 +492,7 @@ bool ImGuiSdlInput::processEvent(const SDL_Event *event)
 			const ImGuiKey key = sdlKeycodeToImGuiKey(event->key.keysym.sym, event->key.keysym.scancode);
 			io.AddKeyEvent(key, (event->type == SDL_KEYDOWN));
 			// To support legacy indexing (<1.87 user code). Legacy backend uses SDLK_*** as indices to IsKeyXXX() functions.
-			io.SetKeyEventNativeData(key, event->key.keysym.sym, event->key.keysym.scancode, event->key.keysym.scancode);
+			io.SetKeyEventNativeData(key, static_cast<int>(event->key.keysym.sym), static_cast<int>(event->key.keysym.scancode), static_cast<int>(event->key.keysym.scancode));
 			return true;
 		}
 		case SDL_WINDOWEVENT:
@@ -554,19 +547,23 @@ void ImGuiSdlInput::updateMouseData()
 	// We forward mouse input when hovered or captured (via SDL_MOUSEMOTION) or when focused (below)
 #if SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE
 	// - SDL_CaptureMouse() let the OS know e.g. that our drags can extend outside of parent boundaries (we want updated position) and shouldn't trigger other operations outside.
-	// - Debuggers under Linux tends to leave captured mouse on break, which may be very inconvenient, so to migitate the issue we wait until mouse has moved to begin capture.
-	bool wantCapture = false;
-	for (int buttonN = 0; buttonN < ImGuiMouseButton_COUNT && !wantCapture; buttonN++)
-		if (ImGui::IsMouseDragging(buttonN, 1.0f))
-			wantCapture = true;
-	SDL_CaptureMouse(wantCapture ? SDL_TRUE : SDL_FALSE);
+	// - Debuggers under Linux tends to leave captured mouse on break, which may be very inconvenient, so to mitigate the issue we wait until mouse has moved to begin capture.
+	if (mouseCanUseCapture_)
+	{
+		bool wantCapture = false;
+		for (int buttonN = 0; buttonN < ImGuiMouseButton_COUNT && !wantCapture; buttonN++)
+		{
+			if (ImGui::IsMouseDragging(buttonN, 1.0f))
+				wantCapture = true;
+		}
+		SDL_CaptureMouse(wantCapture ? SDL_TRUE : SDL_FALSE);
+	}
 
 	SDL_Window *focusedWindow = SDL_GetKeyboardFocus();
 	const bool isAppFocused = (window_ == focusedWindow);
 #else
 	const bool isAppFocused = (SDL_GetWindowFlags(window_) & SDL_WINDOW_INPUT_FOCUS) != 0; // SDL 2.0.3 and non-windowed systems: single-viewport only
 #endif
-
 	if (isAppFocused)
 	{
 		// (Optional) Set OS mouse position from Dear ImGui if requested (rarely used, only when io.ConfigNavMoveSetMousePos is enabled by user)
@@ -608,6 +605,27 @@ void ImGuiSdlInput::updateMouseCursor()
 			mouseLastCursor_ = expectedCursor;
 		}
 	}
+}
+
+// - On Windows the process needs to be marked DPI-aware!! SDL2 doesn't do it by default. You can call ::SetProcessDPIAware() or call ImGui_ImplWin32_EnableDpiAwareness() from Win32 backend.
+// - Apple platforms use FramebufferScale so we always return 1.0f.
+// - Some accessibility applications are declaring virtual monitors with a DPI of 0.0f, see #7902. We preserve this value for caller to handle.
+float ImGuiSdlInput::getContentScaleForWindow(SDL_Window *window)
+{
+	return getContentScaleForDisplay(SDL_GetWindowDisplayIndex(window));
+}
+
+float ImGuiSdlInput::getContentScaleForDisplay(int displayIndex)
+{
+#if SDL_HAS_PER_MONITOR_DPI
+	#if !defined(__APPLE__) && !defined(__EMSCRIPTEN__) && !defined(__ANDROID__)
+	float dpi = 0.0f;
+	if (SDL_GetDisplayDPI(displayIndex, &dpi, nullptr, nullptr) == 0)
+		return dpi / 96.0f;
+	#endif
+#endif
+	IM_UNUSED(displayIndex);
+	return 1.0f;
 }
 
 void ImGuiSdlInput::closeGamepads()
@@ -699,6 +717,27 @@ void ImGuiSdlInput::updateGamepads()
 	updateGamepadAnalog(gamepads_, io, ImGuiKey_GamepadRStickUp,    SDL_CONTROLLER_AXIS_RIGHTY, -thumbDeadZone, -32768);
 	updateGamepadAnalog(gamepads_, io, ImGuiKey_GamepadRStickDown,  SDL_CONTROLLER_AXIS_RIGHTY, +thumbDeadZone, +32767);
 	// clang-format on
+}
+
+void ImGuiSdlInput::getWindowSizeAndFramebufferScale(SDL_Window *window, SDL_Renderer *renderer, ImVec2 *outSize, ImVec2 *outFramebufferScale)
+{
+	int w, h;
+	int displayW, displayH;
+	SDL_GetWindowSize(window, &w, &h);
+	if (SDL_GetWindowFlags(window) & SDL_WINDOW_MINIMIZED)
+		w = h = 0;
+	if (renderer != nullptr)
+		SDL_GetRendererOutputSize(renderer, &displayW, &displayH);
+#if SDL_HAS_VULKAN
+	else if (SDL_GetWindowFlags(window) & SDL_WINDOW_VULKAN)
+		SDL_Vulkan_GetDrawableSize(window, &displayW, &displayH);
+#endif
+	else
+		SDL_GL_GetDrawableSize(window, &displayW, &displayH);
+	if (outSize != nullptr)
+		*outSize = ImVec2(static_cast<float>(w), static_cast<float>(h));
+	if (outFramebufferScale != nullptr)
+		*outFramebufferScale = (w > 0 && h > 0) ? ImVec2(static_cast<float>(displayW) / w, static_cast<float>(displayH) / h) : ImVec2(1.0f, 1.0f);
 }
 
 }

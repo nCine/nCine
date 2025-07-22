@@ -517,8 +517,9 @@ void MyEventHandler::onInit()
 {
 #ifdef __ANDROID__
 	const float scalingFactor = nc::theApplication().gfxDevice().windowScalingFactor();
-	ImGui::GetIO().FontGlobalScale = scalingFactor;
-	ImGui::GetStyle().ScaleAllSizes(scalingFactor);
+	ImGuiStyle &style = ImGui::GetStyle();
+	style.FontScaleMain = scalingFactor;
+	style.ScaleAllSizes(scalingFactor);
 #endif
 
 	nums = nctl::makeUnique<float[]>(MaxDataElements);

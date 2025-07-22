@@ -51,6 +51,9 @@ class GLTexture
 	/// Deleted assignment operator
 	GLTexture &operator=(const GLTexture &) = delete;
 
+	static GLuint boundHandle(GLenum target, unsigned int textureUnit);
+	static GLuint boundHandle(GLenum target) { return bindHandle(target, 0); }
+
 	static bool bindHandle(GLenum target, GLuint glHandle, unsigned int textureUnit);
 	static bool bindHandle(GLenum target, GLuint glHandle) { return bindHandle(target, glHandle, 0); }
 

@@ -165,11 +165,13 @@ void MyEventHandler::onFrameStart()
 	if (showImGui)
 	{
 		nc::IGfxDevice &gfxDevice = nc::theApplication().gfxDevice();
-		if (ImGui::GetIO().FontGlobalScale != scalingFactor)
+
+		ImGuiStyle &style = ImGui::GetStyle();
+		if (style.FontScaleMain != scalingFactor)
 		{
-			ImGui::GetIO().FontGlobalScale = scalingFactor;
-			ImGui::GetStyle() = ImGuiStyle();
-			ImGui::GetStyle().ScaleAllSizes(scalingFactor);
+			style = ImGuiStyle();
+			style.FontScaleMain = scalingFactor;
+			style.ScaleAllSizes(scalingFactor);
 		}
 		const ImGuiCond conditionFlag = (imguiWindowSizeFrames-- > 0) ? ImGuiCond_Always : ImGuiCond_FirstUseEver;
 		ImGui::SetNextWindowSize(ImVec2(0.0f, 0.0f), conditionFlag);
@@ -305,8 +307,6 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		centerWindow(static_cast<unsigned int>(event.sym) - static_cast<unsigned int>(nc::KeySym::N1));
 	else if (event.sym >= nc::KeySym::N5 && event.sym <= nc::KeySym::N8)
 		goFullScreen(static_cast<unsigned int>(event.sym) - static_cast<unsigned int>(nc::KeySym::N5), 0);
-	else if (event.mod & nc::KeyMod::CTRL && event.sym == nc::KeySym::H)
-		showImGui = !showImGui;
 	else if (event.sym == nc::KeySym::F)
 	{
 		const bool isFullScreen = nc::theApplication().gfxDevice().isFullScreen();
@@ -316,6 +316,8 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		else
 			goFullScreen(monitorIndex, 0);
 	}
+	else if (event.mod & nc::KeyMod::CTRL && event.sym == nc::KeySym::H)
+		showImGui = !showImGui;
 	else if (event.sym == nc::KeySym::ESCAPE)
 		nc::theApplication().quit();
 }

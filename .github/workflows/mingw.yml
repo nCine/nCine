@@ -139,7 +139,7 @@ jobs:
         $env:CXX = "${{ matrix.CXX }}"
         $env:MSYSTEM = "MINGW64"
 
-        $EnableTracy = 'OFF' # Disabled globally until Tracy >= v0.12.0 compilation is fixed
+        $EnableTracy = 'ON'
         if ("${{ matrix.CC }}" -eq "clang")
           { $EnableTracy = 'OFF' }
 

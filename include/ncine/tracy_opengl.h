@@ -11,6 +11,8 @@
 		#define glGetQueryiv glGetQueryivEXT
 		#define glGetQueryObjectiv glGetQueryObjectivEXT
 		#define glGetQueryObjectui64v glGetQueryObjectui64vEXT
+		#define glGenQueries glGenQueriesEXT
+		#define glGetInteger64v glGetInteger64vAPPLE
 	#endif
 
 	#include "tracy/TracyOpenGL.hpp"
