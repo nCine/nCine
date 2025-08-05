@@ -1,11 +1,16 @@
 #include <unistd.h> // for sysconf()
-#include <sched.h> // for sched_yield()
 #include <cstring>
 
 #ifdef __APPLE__
 	#include <mach/thread_act.h>
 #else
+	#include <sched.h> // for sched_yield()
 	#include <sys/resource.h>
+#endif
+
+#ifdef __EMSCRIPTEN__
+	#include <emscripten/emscripten.h>
+	#include <emscripten/threading.h>
 #endif
 
 #include "common_macros.h"
@@ -18,7 +23,9 @@
 namespace ncine {
 
 namespace {
+#ifndef __EMSCRIPTEN__
 	const unsigned int MaxThreadNameLength = 16;
+#endif
 
 #ifndef __APPLE__
 	Thread::Priority priorityImpl(unsigned long int tid)
@@ -114,6 +121,14 @@ namespace {
 		const kern_return_t kr = thread_policy_set(machThread, THREAD_PRECEDENCE_POLICY, (thread_policy_t)&policy, THREAD_PRECEDENCE_POLICY_COUNT);
 		return (kr == KERN_SUCCESS);
 	}
+#endif
+
+#ifdef __EMSCRIPTEN__
+	EM_JS(int, emscripten_get_thread_pool_size, (), {
+		if (typeof PThread !== 'undefined' && PThread.runningWorkers)
+			return PThread.runningWorkers.length;
+		return 1;
+	});
 #endif
 }
 
@@ -249,7 +264,11 @@ bool ThisThread::setPriority(Thread::Priority priority)
 
 void ThisThread::yield()
 {
+#ifdef __APPLE__
+	pthread_yield_np();
+#else
 	sched_yield();
+#endif
 }
 
 [[noreturn]] void ThisThread::exit()
@@ -407,19 +426,28 @@ bool Thread::cancel()
 
 unsigned int Thread::numProcessors()
 {
-	unsigned int numProcs = 0;
+#ifdef __EMSCRIPTEN__
+	// Check if a thread pool is present (only valid when using pthreads)
+	const int poolSize = emscripten_get_thread_pool_size();
+	if (poolSize > 0)
+		return static_cast<unsigned int>(poolSize);
 
+	// If no pool (main-thread-only WASM build), fallback to logical cores
+	const int numCores = emscripten_num_logical_cores();
+	if (numCores > 0)
+		return static_cast<unsigned int>(numCores);
+
+	return 1;
+#else
 	long int confRet = -1;
-#if defined(_SC_NPROCESSORS_ONLN)
+	#if defined(_SC_NPROCESSORS_ONLN)
 	confRet = sysconf(_SC_NPROCESSORS_ONLN);
-#elif defined(_SC_NPROC_ONLN)
+	#elif defined(_SC_NPROC_ONLN)
 	confRet = sysconf(_SC_NPROC_ONLN);
+	#endif
+
+	return (confRet > 0 ? static_cast<unsigned int>(confRet) : 1);
 #endif
-
-	if (confRet > 0)
-		numProcs = static_cast<unsigned int>(confRet);
-
-	return numProcs;
 }
 
 ///////////////////////////////////////////////////////////
