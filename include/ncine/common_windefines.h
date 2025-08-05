@@ -14,6 +14,8 @@
 	#if !defined(NOMINMAX)
 		#define NOMINMAX
 	#endif
+
+	#define _WIN32_WINNT 0x0602 // Windows 8 or newer (needed by `UserSemaphore`)
 #endif
 
 #endif

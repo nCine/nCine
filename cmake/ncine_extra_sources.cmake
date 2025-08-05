@@ -198,6 +198,7 @@ if(Threads_FOUND AND NCINE_WITH_THREADS)
 			${NCINE_ROOT}/src/threading/WindowsThread.cpp
 			${NCINE_ROOT}/src/threading/WindowsThreadSync.cpp
 		)
+		target_link_libraries(ncine PRIVATE synchronization)
 	else()
 		list(APPEND SOURCES
 			${NCINE_ROOT}/src/threading/PosixThread.cpp

@@ -194,7 +194,7 @@ bool ThisThread::setPriority(Thread::Priority priority)
 
 void ThisThread::yield()
 {
-	Sleep(0);
+	SwitchToThread();
 }
 
 [[noreturn]] void ThisThread::exit()
@@ -339,13 +339,8 @@ bool Thread::cancel()
 
 unsigned int Thread::numProcessors()
 {
-	unsigned int numProcs = 0;
-
-	SYSTEM_INFO si;
-	GetSystemInfo(&si);
-	numProcs = si.dwNumberOfProcessors;
-
-	return numProcs;
+	const DWORD count = GetActiveProcessorCount(ALL_PROCESSOR_GROUPS);
+	return (count > 0 ? static_cast<unsigned int>(count) : 1);
 }
 
 ///////////////////////////////////////////////////////////

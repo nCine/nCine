@@ -7,6 +7,20 @@
 	#include <winbase.h>
 #else
 	#include <pthread.h>
+	#include <semaphore.h>
+
+	#if defined(__APPLE__)
+		#include <dispatch/dispatch.h>
+	#endif
+#endif
+
+#if !defined(__EMSCRIPTEN__) && (!defined(_WIN32) || (_WIN32_WINNT >= 0x0602))
+	#define HAVE_USER_SEMAPHORE 1
+	#if !defined(__APPLE__)
+		#include <nctl/Atomic.h>
+	#endif
+#else
+	#define HAVE_USER_SEMAPHORE 0
 #endif
 
 #include "tracy.h"
@@ -56,6 +70,30 @@ class Mutex
 	friend class CondVariable;
 };
 
+/// A mutex wrapper to provide a RAII-style mechanism for owning a mutex for the duration of a scoped block
+class LockGuard
+{
+  public:
+	explicit LockGuard(Mutex &mutex)
+	    : mutex_(mutex)
+	{
+		mutex.lock();
+	}
+
+	~LockGuard()
+	{
+		mutex_.unlock();
+	}
+
+  private:
+	Mutex &mutex_;
+
+	/// Deleted copy constructor
+	LockGuard(const LockGuard &) = delete;
+	// Deleted assignment operator
+	LockGuard &operator=(const LockGuard &) = delete;
+};
+
 /// Condition variable class (threads synchronization)
 class CondVariable
 {
@@ -83,6 +121,64 @@ class CondVariable
 	/// Deleted assignment operator
 	CondVariable &operator=(const CondVariable &) = delete;
 };
+
+class Semaphore
+{
+  public:
+	Semaphore();
+	explicit Semaphore(unsigned int initialCount);
+	~Semaphore();
+
+	void wait();
+	void signal();
+	bool tryWait();
+
+	void wait(unsigned int count);
+	void signal(unsigned int count);
+
+  private:
+#if defined(_WIN32)
+	HANDLE handle_;
+#else
+	sem_t sem_;
+#endif
+
+	/// Deleted copy constructor
+	Semaphore(const Semaphore &) = delete;
+	/// Deleted assignment operator
+	Semaphore &operator=(const Semaphore &) = delete;
+};
+
+#if HAVE_USER_SEMAPHORE
+/// User-space light semaphore class (threads synchronization)
+class UserSemaphore
+{
+  public:
+	UserSemaphore();
+	/*! \warning The initial count value cannot be negative. */
+	explicit UserSemaphore(int initialCount);
+
+	#if !defined(__APPLE__)
+	~UserSemaphore() = default;
+	#else
+	~UserSemaphore();
+	#endif
+
+	void wait();
+	void signal();
+	bool tryWait();
+
+	void wait(unsigned int count);
+	void signal(unsigned int count);
+
+  private:
+	#if !defined(__APPLE__)
+	nctl::Atomic32 count_;
+	#else
+	dispatch_semaphore_t sem_;
+	#endif
+};
+#endif
 
 #if !defined(_WIN32)
 
