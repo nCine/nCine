@@ -8,10 +8,10 @@
 	#include <cstdarg>
 #endif
 
+#include <nctl/UniquePtr.h>
 #include "IIndexer.h"
 #include "ILogger.h"
 #include "IAudioDevice.h"
-#include "IThreadPool.h"
 #include "IJobSystem.h"
 #include "IGfxCapabilities.h"
 
@@ -43,13 +43,6 @@ class DLL_PUBLIC ServiceLocator
 	/// Unregisters the audio device provider and reinstates the null one
 	void unregisterAudioDevice();
 
-	/// Returns a reference to the current thread pool instance
-	IThreadPool &threadPool() { return *threadPool_; }
-	/// Registers a thread pool provider
-	void registerThreadPool(nctl::UniquePtr<IThreadPool> service);
-	/// Unregisters the thread pool provider and reinstates the null one
-	void unregisterThreadPool();
-
 	/// Returns a reference to the current job system instance
 	IJobSystem &jobSystem() { return *jobSystem_; }
 	/// Registers a tjob system provider
@@ -79,10 +72,6 @@ class DLL_PUBLIC ServiceLocator
 	IAudioDevice *audioDevice_;
 	nctl::UniquePtr<IAudioDevice> registeredAudioDevice_;
 	NullAudioDevice nullAudioDevice_;
-
-	IThreadPool *threadPool_;
-	nctl::UniquePtr<IThreadPool> registeredThreadPool_;
-	NullThreadPool nullThreadPool_;
 
 	IJobSystem *jobSystem_;
 	nctl::UniquePtr<IJobSystem> registeredJobSystem_;
