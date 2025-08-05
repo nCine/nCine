@@ -93,8 +93,10 @@ class DLL_PUBLIC AppConfiguration
 	bool withDebugOverlay;
 	/// The flag is `true` if the audio subsystem is enabled
 	bool withAudio;
-	/// The flag is `true` if the threading subsystem is enabled
-	bool withThreads;
+	/// The flag is `true` if the job system is enabled
+	bool withJobSystem;
+	/// The number of threads in the job system pool, or 0 for an automatic value
+	unsigned int numThreads;
 	/// The flag is `true` if the scenegraph based rendering is enabled
 	bool withScenegraph;
 	/// The flag is `true` if the vertical synchronization is enabled
@@ -163,7 +165,8 @@ class DLL_PUBLIC AppConfiguration
 
 		bool withDebugOverlay;
 		bool withAudio;
-		bool withThreads;
+		bool withJobSystem;
+		unsigned int numThreads;
 		bool withScenegraph;
 		bool withVSync;
 		bool withGlDebugContext;

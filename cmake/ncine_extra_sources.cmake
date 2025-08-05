@@ -205,21 +205,25 @@ if(Threads_FOUND AND NCINE_WITH_THREADS)
 		)
 	endif()
 
-	# `IJobSystem.h` and `IJobSystem.cpp` have been already added to headers and sources
-	list(APPEND HEADERS
-		${NCINE_ROOT}/include/ncine/ParallelForJob.h
-	)
-	list(APPEND PRIVATE_HEADERS
-		${NCINE_ROOT}/src/include/Job.h
-		${NCINE_ROOT}/src/include/JobQueue.h
-		${NCINE_ROOT}/src/include/JobSystem.h
-		${NCINE_ROOT}/src/include/LogEntryQueue.h
-	)
-	list(APPEND SOURCES
-		${NCINE_ROOT}/src/threading/JobQueue.cpp
-		${NCINE_ROOT}/src/threading/JobSystem.cpp
-		${NCINE_ROOT}/src/threading/LogEntryQueue.cpp
-	)
+	if(NCINE_WITH_JOBSYSTEM)
+		target_compile_definitions(ncine PRIVATE "WITH_JOBSYSTEM")
+
+		# `IJobSystem.h` and `IJobSystem.cpp` have been already added to headers and sources
+		list(APPEND HEADERS
+			${NCINE_ROOT}/include/ncine/ParallelForJob.h
+		)
+		list(APPEND PRIVATE_HEADERS
+			${NCINE_ROOT}/src/include/Job.h
+			${NCINE_ROOT}/src/include/JobQueue.h
+			${NCINE_ROOT}/src/include/JobSystem.h
+			${NCINE_ROOT}/src/include/LogEntryQueue.h
+		)
+		list(APPEND SOURCES
+			${NCINE_ROOT}/src/threading/JobQueue.cpp
+			${NCINE_ROOT}/src/threading/JobSystem.cpp
+			${NCINE_ROOT}/src/threading/LogEntryQueue.cpp
+		)
+	endif()
 endif()
 
 if(LUA_FOUND)

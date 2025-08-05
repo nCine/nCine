@@ -4,7 +4,7 @@
 #include "ILogger.h"
 #include "IFile.h"
 
-#ifdef WITH_THREADS
+#ifdef WITH_JOBSYSTEM
 	#include "LogEntryQueue.h"
 #endif
 
@@ -43,7 +43,7 @@ class FileLogger : public ILogger
 	LogLevel fileLevel_;
 	bool canUseColors_;
 
-#ifdef WITH_THREADS
+#ifdef WITH_JOBSYSTEM
 	static const unsigned int MaxEntryLength = LogEntryQueue::MaxEntryLength;
 	static thread_local char logEntry_[MaxEntryLength];
 	LogEntryQueue logEntryQueue_;

@@ -81,7 +81,7 @@ namespace {
 ///////////////////////////////////////////////////////////
 
 JobSystem::JobSystem()
-    : JobSystem(static_cast<unsigned char>(Thread::numProcessors()))
+    : JobSystem(0)
 {
 }
 
@@ -92,13 +92,9 @@ JobSystem::JobSystem(unsigned char numThreads)
 	queueMutex_.setTracyName("Job Queue Lock");
 #endif
 
-	ASSERT(numThreads > 0);
-	if (numThreads == 0)
-		numThreads_ = 1; // There is at least the main thread
-
+	// Zero threads means automatic
 	const unsigned char numProcessors = static_cast<unsigned char>(Thread::numProcessors());
-	ASSERT(numThreads <= numProcessors);
-	if (numThreads > numProcessors)
+	if (numThreads_ == 0 || numThreads > numProcessors)
 		numThreads_ = numProcessors;
 
 	jobQueues_.setCapacity(numThreads_);
