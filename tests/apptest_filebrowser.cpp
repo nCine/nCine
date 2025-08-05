@@ -870,7 +870,7 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 
 	config.withAudio = false;
 	config.withDebugOverlay = false;
-	config.withThreads = false;
+	config.withJobSystem = false;
 }
 
 void MyEventHandler::onInit()

@@ -13,7 +13,7 @@
 #include "Application.h"
 #include "tracy.h"
 
-#if WITH_THREADS
+#if WITH_JOBSYSTEM
 	#include "IJobSystem.h"
 #endif
 
@@ -39,7 +39,7 @@ bool enableVirtualTerminalProcessing();
 void writeOutputDebug(const char *logEntry);
 #endif
 
-#ifdef WITH_THREADS
+#ifdef WITH_JOBSYSTEM
 thread_local char FileLogger::logEntry_[MaxEntryLength];
 #endif
 
@@ -180,7 +180,7 @@ unsigned int FileLogger::write(LogLevel level, const char *fmt, ...)
 	if (canUseColors_)
 		length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, " %s", Reset);
 
-#if WITH_THREADS
+#if WITH_JOBSYSTEM
 	const unsigned char numThreads = theServiceLocator().jobSystem().numThreads();
 	// Don't include the thread index in the log entry if there aren't at least two threads in total
 	if (numThreads > 1)
@@ -237,7 +237,7 @@ unsigned int FileLogger::write(LogLevel level, const char *fmt, ...)
 	TracyMessageC(logEntry_, length, tracyMsgColor);
 #endif
 
-#if WITH_THREADS
+#if WITH_JOBSYSTEM
 	// Only enqueue if there are more than two threads in total and if the message is not coming from the main thread
 	if (numThreads > 1 && IJobSystem::isMainThread() == false)
 		logEntryQueue_.enqueue(logEntry_, length);
@@ -254,7 +254,7 @@ unsigned int FileLogger::consumeQueue()
 {
 	unsigned int numEntries = 0;
 
-#if WITH_THREADS
+#if WITH_JOBSYSTEM
 	FATAL_ASSERT_MSG(IJobSystem::isMainThread() == true, "This method should be called by the main thread only");
 	while (unsigned int length = logEntryQueue_.dequeue(queueEntry_, MaxEntryLength))
 	{

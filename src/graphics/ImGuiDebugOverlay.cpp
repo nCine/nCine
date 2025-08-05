@@ -469,6 +469,9 @@ void ImGuiDebugOverlay::guiPreprocessorDefines()
 #ifdef WITH_THREADS
 			ImGui::TextUnformatted("WITH_THREADS");
 #endif
+#ifdef WITH_JOBSYSTEM
+			ImGui::TextUnformatted("WITH_JOBSYSTEM");
+#endif
 #ifdef WITH_OPENGLES
 			ImGui::TextUnformatted("WITH_OPENGLES");
 #endif
@@ -735,7 +738,8 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 		ImGui::Separator();
 		ImGui::Text("Debug Overlay: %s", appCfg.withDebugOverlay ? "true" : "false");
 		ImGui::Text("Audio: %s", appCfg.withAudio ? "true" : "false");
-		ImGui::Text("Threads: %s", appCfg.withThreads ? "true" : "false");
+		ImGui::Text("Job System: %s", appCfg.withJobSystem ? "true" : "false");
+		ImGui::Text("Number of Threads: %u", appCfg.numThreads);
 		ImGui::Text("Scenegraph: %s", appCfg.withScenegraph ? "true" : "false");
 		ImGui::Text("VSync: %s", appCfg.withVSync ? "true" : "false");
 		ImGui::Text("%s Debug Context: %s", openglApiName, appCfg.withGlDebugContext ? "true" : "false");
