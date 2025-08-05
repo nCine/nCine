@@ -1,6 +1,7 @@
 #include "Clock.h"
 
 #if defined(_WIN32)
+	#include "common_windefines.h"
 	#include <winsync.h>
 	#include <profileapi.h>
 #elif defined(__APPLE__)
