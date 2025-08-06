@@ -1,5 +1,4 @@
 #include "JobQueue.h"
-#include <cstring> // for `memset()`
 #include "common_macros.h"
 
 // Based on https://blog.molecular-matters.com/2015/09/25/job-system-2-0-lock-free-work-stealing-part-3-going-lock-free/
@@ -14,17 +13,17 @@ static const unsigned int Mask = MaxNumJobs - 1u;
 ///////////////////////////////////////////////////////////
 
 JobQueue::JobQueue()
-	: top_(0), bottom_(0), allocatedJobs_(0)
+    : top_(0), bottom_(0)
 {
-	memset(jobs_, 0, sizeof(Job *) * MaxNumJobs);
-	memset(jobPool_, 0, sizeof(Job) * MaxNumJobs);
+	for (unsigned int i = 0; i < MaxNumJobs; i++)
+		jobs_[i] = InvalidJobId;
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void JobQueue::push(Job *job)
+void JobQueue::push(JobId jobId)
 {
 	const int32_t b = bottom_.load(nctl::MemoryModel::RELAXED);
 	const int32_t t = top_.load(nctl::MemoryModel::RELAXED);
@@ -35,12 +34,12 @@ void JobQueue::push(Job *job)
 		return;
 	}
 
-	jobs_[b & Mask] = job;
+	jobs_[b & Mask] = jobId;
 
 	bottom_.store(b + 1, nctl::MemoryModel::RELEASE);
 }
 
-Job *JobQueue::pop()
+JobId JobQueue::pop()
 {
 	int32_t b = bottom_.load(nctl::MemoryModel::RELAXED);
 	b = b - 1;
@@ -52,34 +51,35 @@ Job *JobQueue::pop()
 	if (t <= b)
 	{
 		// Non-empty queue
-		Job *job = jobs_[b & Mask];
+		JobId jobId = jobs_[b & Mask];
+
 		if (t != b)
 		{
-			jobs_[b & Mask] = nullptr;
+			jobs_[b & Mask] = InvalidJobId;
 			// There's still more than one item left in the queue
-			return job;
+			return jobId;
 		}
 
 		// This is the last item in the queue
-		if (top_.cmpExchange(t, t + 1, nctl::MemoryModel::ACQUIRE) == false)
+		if (top_.cmpExchange(t, t + 1, nctl::MemoryModel::ACQ_REL) == false)
 		{
 			// Failed race against steal operation
-			job = nullptr;
+			jobId = InvalidJobId;
 		}
 
-		jobs_[b & Mask] = nullptr;
+		jobs_[b & Mask] = InvalidJobId;
 		bottom_.store(t + 1, nctl::MemoryModel::RELAXED);
-		return job;
+		return jobId;
 	}
 	else
 	{
 		// Deque was already empty
 		bottom_.store(t, nctl::MemoryModel::RELAXED);
-		return nullptr;
+		return InvalidJobId;
 	}
 }
 
-Job *JobQueue::steal()
+JobId JobQueue::steal()
 {
 	int32_t t = top_.load(nctl::MemoryModel::ACQUIRE);
 	const int32_t b = bottom_.load(nctl::MemoryModel::ACQUIRE);
@@ -89,27 +89,19 @@ Job *JobQueue::steal()
 		if (top_.cmpExchange(t, t + 1, nctl::MemoryModel::ACQUIRE) == false)
 		{
 			// A concurrent steal or pop operation removed an element from the deque in the meantime.
-			return nullptr;
+			return InvalidJobId;
 		}
 
 		// Non-empty queue
-		Job *job = jobs_[t & Mask];
-
-		jobs_[t & Mask] = nullptr;
-		return job;
+		JobId jobId = jobs_[t & Mask];
+		jobs_[t & Mask] = InvalidJobId;
+		return jobId;
 	}
 	else
 	{
 		// Empty queue
-		return nullptr;
+		return InvalidJobId;
 	}
-}
-
-Job *JobQueue::retrieveJob()
-{
-	const unsigned int index = allocatedJobs_++;
-	Job *job = &jobPool_[index & Mask];
-	return job;
 }
 
 }

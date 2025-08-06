@@ -5,22 +5,22 @@
 namespace ncine {
 
 namespace {
-	Job *getJob(JobQueue *jobQueues, unsigned char numThreads)
+	JobId getJob(JobQueue *jobQueues, unsigned char numThreads)
 	{
 		const unsigned char threadIndex = JobSystem::threadIndex();
 		const unsigned char mainThreadIndex = JobSystem::mainThreadIndex();
 		static thread_local unsigned int lastStealIndex = mainThreadIndex;
 
 		// Try to pop from own queue first
-		Job *job = jobQueues[threadIndex].pop();
-		if (job != nullptr)
-			return job;
+		JobId jobId = jobQueues[threadIndex].pop();
+		if (jobId != InvalidJobId)
+			return jobId;
 
 		// Then try to steal from main thread's queue
 		if (threadIndex != mainThreadIndex)
 		{
-			Job *stolenJob = jobQueues[mainThreadIndex].steal();
-			if (stolenJob != nullptr)
+			JobId stolenJob = jobQueues[mainThreadIndex].steal();
+			if (stolenJob != InvalidJobId)
 				return stolenJob;
 		}
 
@@ -32,8 +32,8 @@ namespace {
 			if (stealIndex == threadIndex || stealIndex == mainThreadIndex)
 				continue;
 
-			Job *stolenJob = jobQueues[stealIndex].steal();
-			if (stolenJob != nullptr)
+			JobId stolenJob = jobQueues[stealIndex].steal();
+			if (stolenJob != InvalidJobId)
 			{
 				lastStealIndex = (stealIndex + 1) % numThreads; // rotate start
 				return stolenJob;
@@ -42,36 +42,42 @@ namespace {
 
 		// No job stolen: always rotate starting index to avoid starvation
 		lastStealIndex = (lastStealIndex + 1) % numThreads;
-		return nullptr;
+		return InvalidJobId;
 	}
 
-	void finish(Job *job, JobQueue *jobQueues)
+	void finish(JobId jobId, JobPool &jobPool, JobQueue *jobQueues)
 	{
-		ASSERT(job != nullptr);
+		ASSERT(jobId != InvalidJobId);
+		if (jobId == InvalidJobId)
+			return;
+
+		Job *job = jobPool.retrieveJob(jobId);
 		if (job == nullptr)
 			return;
 
 		const int32_t unfinishedJobs = job->unfinishedJobs.fetchSub(1, nctl::MemoryModel::RELEASE) - 1;
 		if (unfinishedJobs == 0)
 		{
-			if (job->parent != nullptr)
-				finish(job->parent, jobQueues);
+			if (job->parent != InvalidJobId)
+				finish(job->parent, jobPool, jobQueues);
 
 			// Run follow-up jobs
 			for (int i = 0; i < job->continuationCount; i++)
 				jobQueues[JobSystem::threadIndex()].push(job->continuations[i]);
+
+			jobPool.freeJob(jobId);
 		}
 	}
 
-	void execute(Job *job, JobQueue *jobQueues)
+	void execute(JobId jobId, JobPool &jobPool, JobQueue *jobQueues)
 	{
+		Job *job = jobPool.retrieveJob(jobId);
 		if (job != nullptr)
 		{
-			JobId jobId = reinterpret_cast<JobId>(job);
 			// A job might have no function to execute
 			if (job->function != nullptr)
 				(job->function)(jobId, job->data);
-			finish(job, jobQueues);
+			finish(jobId, jobPool, jobQueues);
 		}
 	}
 }
@@ -86,17 +92,14 @@ JobSystem::JobSystem()
 }
 
 JobSystem::JobSystem(unsigned char numThreads)
-    : IJobSystem(numThreads), commonData_(queueMutex_, queueCV_)
+    : IJobSystem(numThreads), commonData_(jobPool_, queueSem_)
 {
-#ifdef WITH_TRACY
-	queueMutex_.setTracyName("Job Queue Lock");
-#endif
-
 	// Zero threads means automatic
 	const unsigned char numProcessors = static_cast<unsigned char>(Thread::numProcessors());
 	if (numThreads_ == 0 || numThreads > numProcessors)
 		numThreads_ = numProcessors;
 
+	jobPool_.initialize(numThreads_);
 	jobQueues_.setCapacity(numThreads_);
 	for (unsigned char i = 0; i < numThreads_; i++)
 		jobQueues_.emplaceBack();
@@ -128,7 +131,7 @@ JobSystem::~JobSystem()
 {
 	for (unsigned char i = 0; i < numThreads_ - 1; i++)
 		threadStructs_[i].shouldQuit = true;
-	queueCV_.broadcast();
+	queueSem_.signal(numThreads_);
 	for (unsigned char i = 0; i < numThreads_ - 1; i++)
 		threads_[i].join();
 }
@@ -151,17 +154,21 @@ JobId JobSystem::createJobAsChild(JobId parentId, JobFunction function, const vo
 	Job *parent = nullptr;
 	if (parentId != InvalidJobId)
 	{
-		Job *parent = reinterpret_cast<Job *>(parentId);
+		parent = jobPool_.retrieveJob(parentId);
 		if (parent == nullptr)
 			return InvalidJobId;
 	}
 
-	Job *job = jobQueues_[threadIndex()].retrieveJob();
+	JobId jobId = jobPool_.allocateJob();
+	if (jobId == InvalidJobId)
+		return InvalidJobId;
+
+	Job *job = jobPool_.retrieveJob(jobId);
 	if (job == nullptr)
 		return InvalidJobId;
 
 	job->function = function;
-	job->parent = parent;
+	job->parent = parentId;
 	job->unfinishedJobs = 1;
 	job->continuationCount = 0;
 
@@ -174,7 +181,7 @@ JobId JobSystem::createJobAsChild(JobId parentId, JobFunction function, const vo
 	if (parent != nullptr)
 		parent->unfinishedJobs.fetchAdd(1);
 
-	return reinterpret_cast<JobId>(job);
+	return jobId;
 }
 
 bool JobSystem::addContinuation(JobId ancestorId, JobId continuationId)
@@ -182,10 +189,10 @@ bool JobSystem::addContinuation(JobId ancestorId, JobId continuationId)
 	if (ancestorId == InvalidJobId || continuationId == InvalidJobId)
 		return false;
 
-	Job *ancestorJob = reinterpret_cast<Job *>(ancestorId);
+	Job *ancestorJob = jobPool_.retrieveJob(ancestorId);
 	if (ancestorJob == nullptr)
 		return false;
-	Job *continuationJob = reinterpret_cast<Job *>(continuationId);
+	Job *continuationJob = jobPool_.retrieveJob(continuationId);
 	if (continuationJob == nullptr)
 		return false;
 
@@ -193,7 +200,7 @@ bool JobSystem::addContinuation(JobId ancestorId, JobId continuationId)
 	const uint32_t count = ancestorJob->continuationCount.fetchAdd(1);
 	if (count < JobNumContinuations)
 	{
-		ancestorJob->continuations[count] = continuationJob;
+		ancestorJob->continuations[count] = continuationId;
 		continuationAdded = true;
 	}
 	else
@@ -204,20 +211,28 @@ bool JobSystem::addContinuation(JobId ancestorId, JobId continuationId)
 
 void JobSystem::submit(JobId jobId)
 {
-	Job *job = reinterpret_cast<Job *>(jobId);
+	ASSERT(jobId != InvalidJobId);
+	if (jobId == InvalidJobId)
+		return;
+
+	Job *job = jobPool_.retrieveJob(jobId);
 	ASSERT(job != nullptr);
 	if (job == nullptr)
 		return;
 
 	JobQueue &queue = jobQueues_[threadIndex()];
-	queue.push(job);
+	queue.push(jobId);
 
-	queueCV_.broadcast();
+	queueSem_.signal();
 }
 
 void JobSystem::wait(JobId jobId)
 {
-	Job *job = reinterpret_cast<Job *>(jobId);
+	ASSERT(jobId != InvalidJobId);
+	if (jobId == InvalidJobId)
+		return;
+
+	Job *job = jobPool_.retrieveJob(jobId);
 	ASSERT(job != nullptr);
 	if (job == nullptr)
 		return;
@@ -229,10 +244,10 @@ void JobSystem::wait(JobId jobId)
 	// Wait until the job has completed. In the meantime, work on any other job.
 	while (job->unfinishedJobs.load(nctl::MemoryModel::ACQUIRE) > 0)
 	{
-		Job *nextJob = getJob(jobQueues_.data(), numThreads_);
-		if (nextJob != nullptr)
+		JobId nextJob = getJob(jobQueues_.data(), numThreads_);
+		if (nextJob != InvalidJobId)
 		{
-			execute(nextJob, jobQueues_.data());
+			execute(nextJob, jobPool_, jobQueues_.data());
 			spinCount = 0;
 			yieldCount = 0;
 			spinDebugCount = 0;
@@ -250,8 +265,9 @@ void JobSystem::wait(JobId jobId)
 
 			if (++spinDebugCount > 100000)
 			{
-				LOGW_X("Potential deadlock: jobId %u, unfinishedJobs=%d",
-				       jobId, job->unfinishedJobs.load());
+				LOGW_X("Potential deadlock: jobId %u (idx: %u, gen: %u), unfinishedJobs=%d",
+				       jobId, Job::unpackIndex(jobId), Job::unpackGeneration(jobId),
+				       job->unfinishedJobs.load(nctl::MemoryModel::RELAXED));
 				spinDebugCount = 0;
 			}
 		}
@@ -260,7 +276,11 @@ void JobSystem::wait(JobId jobId)
 
 int32_t JobSystem::unfinishedJobs(JobId jobId)
 {
-	Job *job = reinterpret_cast<Job *>(jobId);
+	ASSERT(jobId != InvalidJobId);
+	if (jobId == InvalidJobId)
+		return 0;
+
+	Job *job = jobPool_.retrieveJob(jobId);
 	ASSERT(job != nullptr);
 	if (job == nullptr)
 		return 0;
@@ -270,7 +290,11 @@ int32_t JobSystem::unfinishedJobs(JobId jobId)
 
 int32_t JobSystem::continuationCount(JobId jobId)
 {
-	Job *job = reinterpret_cast<Job *>(jobId);
+	ASSERT(jobId != InvalidJobId);
+	if (jobId == InvalidJobId)
+		return 0;
+
+	Job *job = jobPool_.retrieveJob(jobId);
 	ASSERT(job != nullptr);
 	if (job == nullptr)
 		return 0;
@@ -286,8 +310,8 @@ void JobSystem::workerFunction(void *arg)
 {
 	const ThreadStruct *threadStruct = static_cast<const ThreadStruct *>(arg);
 	const unsigned char numThreads = threadStruct->commonData.numThreads;
-	Mutex &queueMutex = threadStruct->commonData.queueMutex;
-	CondVariable &queueCV = threadStruct->commonData.queueCV;
+	SemType &queueSem = threadStruct->commonData.queueSem;
+	JobPool &jobPool = threadStruct->commonData.jobPool;
 	JobQueue *jobQueues = threadStruct->commonData.jobQueues;
 
 	setThreadIndex(threadStruct->threadIndex);
@@ -303,18 +327,16 @@ void JobSystem::workerFunction(void *arg)
 	while (true)
 	{
 		// Wait until a job is available or we are asked to quit
-		queueMutex.lock();
-		queueCV.wait(queueMutex);
-		queueMutex.unlock();
+		queueSem.wait();
 
 		if (threadStruct->shouldQuit)
 			break;
 
-		Job *job = getJob(jobQueues, numThreads);
-		if (job == nullptr)
+		JobId jobId = getJob(jobQueues, numThreads);
+		if (jobId == InvalidJobId)
 			continue; // Spurious wake-up or nothing to steal, just wait again
 
-		execute(job, jobQueues);
+		execute(jobId, jobPool, jobQueues);
 	}
 
 	LOGI_X("WorkerThread#%02d (id: %lu) is exiting", threadStruct->threadIndex, ThisThread::threadId());

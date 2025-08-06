@@ -2,7 +2,7 @@
 #define CLASS_NCINE_JOBQUEUE
 
 #include <nctl/Atomic.h>
-#include "Job.h"
+#include "IJobSystem.h"
 
 namespace ncine {
 
@@ -12,12 +12,9 @@ class JobQueue
   public:
 	JobQueue();
 
-	void push(Job *job);
-	Job *pop(void);
-	Job *steal(void);
-
-	/// Retrieves the next available job from the pool
-	Job *retrieveJob();
+	void push(JobId jobId);
+	JobId pop(void);
+	JobId steal(void);
 
   private:
 	// Aligned variables will be on separate cache lines to avoid false sharing
@@ -27,10 +24,8 @@ class JobQueue
 	alignas(64) nctl::Atomic32 bottom_;
 	char pad1[64 - sizeof(nctl::Atomic32)];
 
-	uint32_t allocatedJobs_;
+	JobId jobs_[MaxNumJobs];
 
-	Job *jobs_[MaxNumJobs];
-	Job jobPool_[MaxNumJobs];
 
 	/// Deleted copy constructor
 	JobQueue(const JobQueue &) = delete;
