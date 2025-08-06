@@ -3,6 +3,7 @@
 
 #include <nctl/Atomic.h>
 #include "IJobSystem.h"
+#include "jobsystem_debug.h"
 
 namespace ncine {
 
@@ -12,6 +13,18 @@ struct alignas(64) Job
 {
 	static constexpr uint32_t INDEX_BITS = 16;
 	static constexpr uint32_t INDEX_MASK = (1u << INDEX_BITS) - 1;
+
+#if JOB_DEBUG_STATE
+	enum class State : uint32_t
+	{
+		FREE = 0,
+		PUSHED = 1,
+		POPPED = 2,
+		EXECUTING = 3,
+		FINISHED = 4,
+	};
+	nctl::AtomicU32 state; // automatically initialized with 0, `State::FREE`
+#endif
 
 	JobFunction function = nullptr;
 	JobId parent = InvalidJobId;
