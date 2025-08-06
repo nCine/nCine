@@ -4,6 +4,7 @@
 #include "IJobSystem.h"
 #include "Thread.h"
 #include "ThreadSync.h"
+#include "JobPool.h"
 #include <nctl/Array.h>
 
 namespace ncine {
@@ -32,15 +33,21 @@ class JobSystem : public IJobSystem
 	int32_t continuationCount(JobId jobId) override;
 
   private:
+#if HAVE_USER_SEMAPHORE
+	using SemType = UserSemaphore;
+#else
+	using SemType = Semaphore;
+#endif
+
 	struct CommonThreadDataStruct
 	{
-		CommonThreadDataStruct(Mutex &mutex, CondVariable &CV)
-		    : numThreads(0), jobQueues(nullptr), queueMutex(mutex), queueCV(CV) {}
+		CommonThreadDataStruct(JobPool &pool, SemType &sem)
+		    : numThreads(0), jobPool(pool), jobQueues(nullptr), queueSem(sem) {}
 
 		unsigned char numThreads;
+		JobPool &jobPool;
 		JobQueue *jobQueues;
-		Mutex &queueMutex;
-		CondVariable &queueCV;
+		SemType &queueSem;
 	};
 
 	struct ThreadStruct
@@ -53,11 +60,11 @@ class JobSystem : public IJobSystem
 		const CommonThreadDataStruct &commonData;
 	};
 
+	JobPool jobPool_;
 	nctl::Array<JobQueue> jobQueues_;
 	nctl::Array<Thread> threads_;
 	nctl::Array<ThreadStruct> threadStructs_;
-	Mutex queueMutex_;
-	CondVariable queueCV_;
+	SemType queueSem_;
 	CommonThreadDataStruct commonData_;
 
 	static void workerFunction(void *arg);
