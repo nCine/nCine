@@ -1,5 +1,11 @@
 #include "JobQueue.h"
-#include "common_macros.h"
+#include "JobStatistics.h"
+
+#if JOB_DEBUG_STATE
+	#include "JobPool.h"
+#else
+	#include "common_macros.h"
+#endif
 
 // Based on https://blog.molecular-matters.com/2015/09/25/job-system-2-0-lock-free-work-stealing-part-3-going-lock-free/
 
@@ -7,6 +13,10 @@ namespace ncine {
 
 static_assert(MaxNumJobs > 1 && (MaxNumJobs & (MaxNumJobs - 1)) == 0, "The number of jobs needs to be a power of two for the mask to work");
 static const unsigned int Mask = MaxNumJobs - 1u;
+
+namespace {
+	JobPool *jobPool_ = nullptr;
+}
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -35,8 +45,12 @@ void JobQueue::push(JobId jobId)
 	}
 
 	jobs_[b & Mask] = jobId;
+	jobStateFreeToPushed(jobPool_, jobId); // Job debug state transition
 
 	bottom_.store(b + 1, nctl::MemoryModel::RELEASE);
+
+	JOB_LOG_QUEUE_PUSH(jobId, Job::unpackIndex(jobId), Job::unpackGeneration(jobId), bottom_.load());
+	theJobStatistics().jobQueueStatsMut().incrementPushes();
 }
 
 JobId JobQueue::pop()
@@ -55,6 +69,10 @@ JobId JobQueue::pop()
 
 		if (t != b)
 		{
+			jobStatePushedToPopped(jobPool_, jobId); // Job debug state transition
+			JOB_LOG_QUEUE_POP(jobId, Job::unpackIndex(jobId), Job::unpackGeneration(jobId), bottom_.load(), top_.load());
+			theJobStatistics().jobQueueStatsMut().incrementPops();
+
 			jobs_[b & Mask] = InvalidJobId;
 			// There's still more than one item left in the queue
 			return jobId;
@@ -67,12 +85,22 @@ JobId JobQueue::pop()
 			jobId = InvalidJobId;
 		}
 
+		if (jobId != InvalidJobId)
+		{
+			jobStatePushedToPopped(jobPool_, jobId); // Job debug state transition
+			JOB_LOG_QUEUE_POP(jobId, Job::unpackIndex(jobId), Job::unpackGeneration(jobId), bottom_.load(), top_.load());
+			theJobStatistics().jobQueueStatsMut().incrementPops();
+		}
+		else
+			theJobStatistics().jobQueueStatsMut().incrementPopFails();
+
 		jobs_[b & Mask] = InvalidJobId;
 		bottom_.store(t + 1, nctl::MemoryModel::RELAXED);
 		return jobId;
 	}
 	else
 	{
+		theJobStatistics().jobQueueStatsMut().incrementPopFails();
 		// Deque was already empty
 		bottom_.store(t, nctl::MemoryModel::RELAXED);
 		return InvalidJobId;
@@ -88,20 +116,38 @@ JobId JobQueue::steal()
 	{
 		if (top_.cmpExchange(t, t + 1, nctl::MemoryModel::ACQUIRE) == false)
 		{
+			theJobStatistics().jobQueueStatsMut().incrementStealFails();
 			// A concurrent steal or pop operation removed an element from the deque in the meantime.
 			return InvalidJobId;
 		}
 
 		// Non-empty queue
 		JobId jobId = jobs_[t & Mask];
+
+		jobStatePushedToPopped(jobPool_, jobId); // Job debug state transition
+		JOB_LOG_QUEUE_STEAL(jobId, Job::unpackIndex(jobId), Job::unpackGeneration(jobId), bottom_.load(), top_.load());
+		theJobStatistics().jobQueueStatsMut().incrementSteals();
+
 		jobs_[t & Mask] = InvalidJobId;
 		return jobId;
 	}
 	else
 	{
+		theJobStatistics().jobQueueStatsMut().incrementStealFails();
 		// Empty queue
 		return InvalidJobId;
 	}
 }
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+#if JOB_DEBUG_STATE
+void JobQueue::setJobPool(JobPool *jobPool)
+{
+	jobPool_ = jobPool;
+}
+#endif
 
 }

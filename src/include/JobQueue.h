@@ -3,6 +3,7 @@
 
 #include <nctl/Atomic.h>
 #include "IJobSystem.h"
+#include "jobsystem_debug.h"
 
 namespace ncine {
 
@@ -26,6 +27,10 @@ class JobQueue
 
 	JobId jobs_[MaxNumJobs];
 
+#if JOB_DEBUG_STATE
+	void setJobPool(JobPool *jobPool);
+	friend class JobSystem;
+#endif
 
 	/// Deleted copy constructor
 	JobQueue(const JobQueue &) = delete;

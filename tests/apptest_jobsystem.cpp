@@ -4,6 +4,7 @@
 #include "apptest_jobsystem.h"
 #include <ncine/IJobSystem.h>
 #include <ncine/ParallelForJob.h>
+#include <ncine/JobStatistics.h>
 #include <ncine/Application.h>
 #include <ncine/AppConfiguration.h>
 #include <ncine/Timer.h>
@@ -22,6 +23,7 @@ int numSpawnedJobs = 4;
 nc::TimeStamp mainStartTime;
 nc::TimeStamp mainEndTime;
 nctl::StaticString<128> auxString;
+bool autoResetStatistics = true;
 int currentJobType = 1;
 const char *jobTypeComboString = "Empty\0Dummy\0SpawnChildren\0\0";
 bool waitRootJob = true;
@@ -248,6 +250,105 @@ void myDataFunc(MyData *data, unsigned int count)
 	workerStats.end(nc::IJobSystem::threadIndex());
 }
 
+void resetJobSystemStatistics()
+{
+	if (nc::theJobStatistics().isAvailable())
+	{
+		nc::theJobStatistics().resetAllJobSystemStats();
+		nc::theJobStatistics().resetAllJobPoolStats();
+		nc::theJobStatistics().resetAllJobQueueStats();
+	}
+}
+
+void guiJobSystemStatsTable(const nc::JobStatistics::JobSystemStats &systemStats, const char *tableName)
+{
+	if (ImGui::BeginTable(tableName, 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |
+	                      ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp))
+	{
+		ImGui::TableSetupScrollFreeze(0, 1);
+		ImGui::TableSetupColumn("Counter", ImGuiTableColumnFlags_NoReorder | ImGuiTableColumnFlags_NoHide);
+		ImGui::TableSetupColumn("Value");
+		ImGui::TableHeadersRow();
+
+		ImGui::TableNextRow();
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs created");
+		ImGui::TableNextColumn(); ImGui::Text("%u", systemStats.jobsCreated);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Child jobs created");
+		ImGui::TableNextColumn(); ImGui::Text("%u", systemStats.childJobsCreated);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs stolen");
+		ImGui::TableNextColumn(); ImGui::Text("%u", systemStats.jobsStolen);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs executed");
+		ImGui::TableNextColumn(); ImGui::Text("%u", systemStats.jobsExecuted);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs finished");
+		ImGui::TableNextColumn(); ImGui::Text("%u", systemStats.jobsFinished);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Child jobs finished");
+		ImGui::TableNextColumn(); ImGui::Text("%u", systemStats.childJobsFinished);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Continuation jobs pushed");
+		ImGui::TableNextColumn(); ImGui::Text("%u", systemStats.continuationJobsPushed);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Parent jobs finished");
+		ImGui::TableNextColumn(); ImGui::Text("%u", systemStats.parentJobsFinished);
+
+
+		ImGui::EndTable();
+	}
+}
+
+void guiJobPoolStatsTable(const nc::JobStatistics::JobPoolStats &poolStats, const char *tableName)
+{
+	if (ImGui::BeginTable(tableName, 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_RowBg |
+	                      ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp))
+	{
+		ImGui::TableSetupScrollFreeze(0, 1);
+		ImGui::TableSetupColumn("Counter", ImGuiTableColumnFlags_NoReorder | ImGuiTableColumnFlags_NoHide);
+		ImGui::TableSetupColumn("Value");
+		ImGui::TableHeadersRow();
+
+		ImGui::TableNextRow();
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs allocated");
+		ImGui::TableNextColumn(); ImGui::Text("%u", poolStats.jobsAllocated);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs failed to be allocated");
+		ImGui::TableNextColumn(); ImGui::Text("%u", poolStats.jobAllocationFails);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs freed");
+		ImGui::TableNextColumn(); ImGui::Text("%u", poolStats.jobsFreed);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs retrieved");
+		ImGui::TableNextColumn(); ImGui::Text("%u", poolStats.jobsRetrieved);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs failed to be retrieved");
+		ImGui::TableNextColumn(); ImGui::Text("%u", poolStats.jobRetrievalFails);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Thread cache found empty");
+		ImGui::TableNextColumn(); ImGui::Text("%u", poolStats.threadCacheEmpty);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Thread cache found full");
+		ImGui::TableNextColumn(); ImGui::Text("%u", poolStats.threadCacheFull);
+
+		ImGui::EndTable();
+	}
+}
+
+void guiJobQueueStatsTable(const nc::JobStatistics::JobQueueStats &queueStats, const char *tableName)
+{
+	if (ImGui::BeginTable(tableName, 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |
+	                      ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp))
+	{
+		ImGui::TableSetupScrollFreeze(0, 1);
+		ImGui::TableSetupColumn("Counter", ImGuiTableColumnFlags_NoReorder | ImGuiTableColumnFlags_NoHide);
+		ImGui::TableSetupColumn("Value");
+		ImGui::TableHeadersRow();
+
+		ImGui::TableNextRow();
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs pushed");
+		ImGui::TableNextColumn(); ImGui::Text("%u", queueStats.pushes);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs popped");
+		ImGui::TableNextColumn(); ImGui::Text("%u", queueStats.pops);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs failed to be popped");
+		ImGui::TableNextColumn(); ImGui::Text("%u", queueStats.popFails);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs steals");
+		ImGui::TableNextColumn(); ImGui::Text("%u", queueStats.steals);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs failed to be stolen");
+		ImGui::TableNextColumn(); ImGui::Text("%u", queueStats.stealFails);
+
+		ImGui::EndTable();
+	}
+}
+
 }
 
 nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
@@ -287,6 +388,8 @@ void MyEventHandler::onFrameStart()
 			ImGui::Text("Number of threads: %u (main is #%u)", jobSystem.numThreads(), jobSystem.threadIndex());
 			ImGui::SameLine();
 			ImGui::Checkbox("Wait root", &waitRootJob);
+			ImGui::SameLine();
+			ImGui::Checkbox("Auto-reset stats", &autoResetStatistics);
 
 			nc::JobFunction jobFn = &emptyJobWithStatistics;
 			ImGui::Combo("Job's type", &currentJobType, jobTypeComboString);
@@ -308,6 +411,9 @@ void MyEventHandler::onFrameStart()
 			ImGui::EndDisabled();
 			if (ImGui::Button("Enqueue jobs"))
 			{
+				if (autoResetStatistics)
+					resetJobSystemStatistics();
+
 				mainStartTime = nc::TimeStamp::now();
 
 				rootJobId = jobSystem.createJob(nullptr);
@@ -326,6 +432,9 @@ void MyEventHandler::onFrameStart()
 			ImGui::SameLine();
 			if (ImGui::Button("Continuations"))
 			{
+				if (autoResetStatistics)
+					resetJobSystemStatistics();
+
 				mainStartTime = nc::TimeStamp::now();
 				// Avoid an infinite spawning of jobs from continuations
 				const nc::JobFunction contFn = (jobFn != spawnChildrenJob) ? jobFn : emptyJobWithStatistics;
@@ -352,6 +461,9 @@ void MyEventHandler::onFrameStart()
 			ImGui::SliderInt("Count splitter", &countSplitterValue, 1, 1024, "%d", ImGuiSliderFlags_AlwaysClamp);
 			if (ImGui::Button("Parallel for"))
 			{
+				if (autoResetStatistics)
+					resetJobSystemStatistics();
+
 				mainStartTime = nc::TimeStamp::now();
 
 				rootJobId = nc::parallelFor(dataArray, dataArraySize, &myDataFunc, nc::CountSplitter(countSplitterValue));
@@ -365,6 +477,9 @@ void MyEventHandler::onFrameStart()
 			ImGui::SliderInt("Children count", &childrenCount, 1, 32, "%d", ImGuiSliderFlags_AlwaysClamp);
 			if (ImGui::Button("Parent / children"))
 			{
+				if (autoResetStatistics)
+					resetJobSystemStatistics();
+
 				mainStartTime = nc::TimeStamp::now();
 
 				rootJobId = jobSystem.createJob(nullptr);
@@ -452,8 +567,103 @@ void MyEventHandler::onFrameStart()
 
 				ImGui::TreePop();
 			}
+
+			ImGui::End();
 		}
-		ImGui::End();
+
+		if (nc::theJobStatistics().isAvailable())
+		{
+			ImGui::SetNextWindowSize(ImVec2(580.0f, 640.0f), ImGuiCond_FirstUseEver);
+			ImGui::SetNextWindowPos(ImVec2(660.0f, 40.0f), ImGuiCond_FirstUseEver);
+			if (ImGui::Begin("Debug statistics", &showImGui))
+			{
+				if (ImGui::TreeNodeEx("JobSystem statistics", ImGuiTreeNodeFlags_DefaultOpen))
+				{
+					nc::JobStatistics::JobSystemStats systemStats;
+					nc::theJobStatistics().collectAllJobSystemStats(systemStats);
+
+					guiJobSystemStatsTable(systemStats, "JobSystemTable");
+
+					if (ImGui::Button("Reset##JobSystem"))
+						nc::theJobStatistics().resetAllJobSystemStats();
+
+					if (ImGui::TreeNode("Per-thread statistics"))
+					{
+						for (unsigned char i = 0; i < jobSystem.numThreads(); i++)
+						{
+							auxString.format("JobSystemTable#%02d", i);
+							guiJobSystemStatsTable(nc::theJobStatistics().jobSystemStats(i), auxString.data());
+
+							auxString.format("Reset##JobSystem#%02d", i);
+							if (ImGui::Button(auxString.data()))
+								nc::theJobStatistics().resetJobSystemStats(i);
+						}
+
+						ImGui::TreePop();
+					}
+
+					ImGui::TreePop();
+				}
+
+				if (ImGui::TreeNodeEx("JobPool statistics", ImGuiTreeNodeFlags_DefaultOpen))
+				{
+					nc::JobStatistics::JobPoolStats poolStats;
+					nc::theJobStatistics().collectAllJobPoolStats(poolStats);
+
+					guiJobPoolStatsTable(poolStats, "JobPoolTable");
+
+					if (ImGui::Button("Reset##JobPool"))
+						nc::theJobStatistics().resetAllJobPoolStats();
+
+					if (ImGui::TreeNode("Per-thread statistics"))
+					{
+						for (unsigned char i = 0; i < jobSystem.numThreads(); i++)
+						{
+							auxString.format("JobPoolTable#%02d", i);
+							guiJobPoolStatsTable(nc::theJobStatistics().jobPoolStats(i), auxString.data());
+
+							auxString.format("Reset##JobPool#%02d", i);
+							if (ImGui::Button(auxString.data()))
+								nc::theJobStatistics().resetJobPoolStats(i);
+						}
+
+						ImGui::TreePop();
+					}
+
+					ImGui::TreePop();
+				}
+
+				if (ImGui::TreeNodeEx("JobQueue statistics", ImGuiTreeNodeFlags_DefaultOpen))
+				{
+					nc::JobStatistics::JobQueueStats queueStats;
+					nc::theJobStatistics().collectAllJobQueueStats(queueStats);
+
+					guiJobQueueStatsTable(queueStats, "JobQueueTable");
+
+					if (ImGui::Button("Reset##JobQueue"))
+						nc::theJobStatistics().resetAllJobQueueStats();
+
+					if (ImGui::TreeNode("Per-thread statistics"))
+					{
+						for (unsigned char i = 0; i < jobSystem.numThreads(); i++)
+						{
+							auxString.format("JobQueueTable#%02d", i);
+							guiJobQueueStatsTable(nc::theJobStatistics().jobQueueStats(i), auxString.data());
+
+							auxString.format("Reset##JobQueue#%02d", i);
+							if (ImGui::Button(auxString.data()))
+								nc::theJobStatistics().resetJobQueueStats(i);
+						}
+
+						ImGui::TreePop();
+					}
+
+					ImGui::TreePop();
+				}
+
+				ImGui::End();
+			}
+		}
 	}
 }
 
