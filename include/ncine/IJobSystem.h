@@ -6,13 +6,13 @@
 
 namespace ncine {
 
-static const unsigned int MaxNumJobs = 8192;
+static const uint16_t MaxNumJobs = 8192;
 
-using JobId = uintptr_t;
-static const JobId InvalidJobId = reinterpret_cast<uintptr_t>(nullptr);
+using JobId = uint32_t;
+static const JobId InvalidJobId = static_cast<JobId>(~0u);
 using JobFunction = void (*)(JobId, const void *);
-static const uint32_t JobDataSize = 40;
-static const uint32_t JobNumContinuations = 8;
+static const uint32_t JobDataSize = 32;
+static const uint32_t JobNumContinuations = 2;
 static_assert(JobDataSize >= sizeof(uintptr_t), "At least one user pointer should fit the Job structure");
 
 /// The interface for the multi-threaded job system
