@@ -1,10 +1,13 @@
 #include "JobSystem.h"
 #include "JobQueue.h"
+#include "JobStatistics.h"
 #include <nctl/StaticString.h>
 
 namespace ncine {
 
 namespace {
+	JobStatistics::JobSystemStatsHelper *statsHelper = nullptr;
+
 	JobId getJob(JobQueue *jobQueues, unsigned char numThreads)
 	{
 		const unsigned char threadIndex = JobSystem::threadIndex();
@@ -21,7 +24,10 @@ namespace {
 		{
 			JobId stolenJob = jobQueues[mainThreadIndex].steal();
 			if (stolenJob != InvalidJobId)
+			{
+				statsHelper->jobSystemStatsMut().incrementJobsStolen();
 				return stolenJob;
+			}
 		}
 
 		// At the end, try to steal from each other in turn
@@ -35,6 +41,7 @@ namespace {
 			JobId stolenJob = jobQueues[stealIndex].steal();
 			if (stolenJob != InvalidJobId)
 			{
+				statsHelper->jobSystemStatsMut().incrementJobsStolen();
 				lastStealIndex = (stealIndex + 1) % numThreads; // rotate start
 				return stolenJob;
 			}
@@ -59,12 +66,23 @@ namespace {
 		if (unfinishedJobs == 0)
 		{
 			if (job->parent != InvalidJobId)
+			{
+				JOB_LOG_DEP("Child %u finished, decrementing parent", jobId);
+				statsHelper->jobSystemStatsMut().incrementChildJobsFinished();
 				finish(job->parent, jobPool, jobQueues);
+			}
+			else
+				statsHelper->jobSystemStatsMut().incrementParentJobsFinished();
 
 			// Run follow-up jobs
 			for (int i = 0; i < job->continuationCount; i++)
+			{
 				jobQueues[JobSystem::threadIndex()].push(job->continuations[i]);
+				statsHelper->jobSystemStatsMut().incrementContinuationJobsPushed();
+			}
 
+			jobStateExcutingToFinished(job, jobId); // Job debug state transition
+			statsHelper->jobSystemStatsMut().incrementJobsFinished();
 			jobPool.freeJob(jobId);
 		}
 	}
@@ -74,6 +92,9 @@ namespace {
 		Job *job = jobPool.retrieveJob(jobId);
 		if (job != nullptr)
 		{
+			jobStatePoppedToExcuting(job, jobId); // Job debug state transition
+			statsHelper->jobSystemStatsMut().incrementJobsExecuted();
+
 			// A job might have no function to execute
 			if (job->function != nullptr)
 				(job->function)(jobId, job->data);
@@ -99,10 +120,18 @@ JobSystem::JobSystem(unsigned char numThreads)
 	if (numThreads_ == 0 || numThreads > numProcessors)
 		numThreads_ = numProcessors;
 
+	theJobStatistics().initialize(numThreads_);
+	statsHelper = theJobStatistics().jobSystemStatsHelper();
+
 	jobPool_.initialize(numThreads_);
 	jobQueues_.setCapacity(numThreads_);
 	for (unsigned char i = 0; i < numThreads_; i++)
 		jobQueues_.emplaceBack();
+
+#if JOB_DEBUG_STATE
+	for (unsigned char i = 0; i < numThreads_; i++)
+		jobQueues_[i].setJobPool(&jobPool_);
+#endif
 
 	commonData_.numThreads = numThreads_;
 	commonData_.jobQueues = jobQueues_.data();
@@ -179,8 +208,13 @@ JobId JobSystem::createJobAsChild(JobId parentId, JobFunction function, const vo
 	}
 
 	if (parent != nullptr)
+	{
 		parent->unfinishedJobs.fetchAdd(1);
+		statsHelper->jobSystemStatsMut().incrementChildJobsCreated();
+		JOB_LOG_DEP("Child job %u attached to parent %u", jobId, parentId);
+	}
 
+	statsHelper->jobSystemStatsMut().incrementJobsCreated();
 	return jobId;
 }
 
@@ -201,6 +235,9 @@ bool JobSystem::addContinuation(JobId ancestorId, JobId continuationId)
 	if (count < JobNumContinuations)
 	{
 		ancestorJob->continuations[count] = continuationId;
+		JOB_LOG_DEP("Continuation job %u (idx: %u, gen: %u) added to %u (idx: %u, gen: %u)",
+					continuationId, Job::unpackIndex(continuationId), Job::unpackGeneration(continuationId),
+					ancestorId, Job::unpackIndex(ancestorId), Job::unpackGeneration(ancestorId));
 		continuationAdded = true;
 	}
 	else

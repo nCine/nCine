@@ -1,4 +1,5 @@
 #include "JobPool.h"
+#include "JobStatistics.h"
 
 namespace ncine {
 
@@ -30,6 +31,8 @@ JobId JobPool::allocateJob()
 		JobId jobId = Job::makeJobId(index, job.generation);
 		FATAL_ASSERT_MSG(jobId != InvalidJobId, "Generated an invalid job id");
 
+		JOB_LOG_POOL_ALLOC(jobId, index, job.generation);
+		theJobStatistics().jobPoolStatsMut().incrementJobsAllocated();
 		return jobId;
 	}
 
@@ -40,7 +43,10 @@ JobId JobPool::allocateJob()
 		if (ThreadCacheSize < count)
 			count = ThreadCacheSize;
 		if (count == 0)
+		{
+			theJobStatistics().jobPoolStatsMut().incrementJobAllocationFails();
 			return InvalidJobId;
+		}
 
 		for (uint16_t i = 0; i < count; ++i)
 		{
@@ -48,6 +54,7 @@ JobId JobPool::allocateJob()
 			freeList_.popBack();
 		}
 		cache.top = count;
+		theJobStatistics().jobPoolStatsMut().incrementThreadCacheEmpty();
 	}
 
 	// Retry allocation (now cache has items)
@@ -63,6 +70,9 @@ void JobPool::freeJob(JobId jobId)
 	ASSERT(index < MaxNumJobs);
 
 	Job *job = &jobPool_[index];
+	jobStateFinishedToFree(job, jobId); // Job debug state transition
+	JOB_LOG_POOL_FREE(jobId, index, job->generation);
+
 	job->function = nullptr;
 	job->parent = InvalidJobId;
 	job->continuationCount = 0;
@@ -79,7 +89,10 @@ void JobPool::freeJob(JobId jobId)
 			freeList_.pushBack(cache.indices[i]);
 		cache.top = ThreadCacheSize / 2;
 		cache.indices[cache.top++] = index;
+		theJobStatistics().jobPoolStatsMut().incrementThreadCacheFull();
 	}
+
+	theJobStatistics().jobPoolStatsMut().incrementJobsFreed();
 }
 
 Job *JobPool::retrieveJob(JobId jobId)
@@ -89,12 +102,19 @@ Job *JobPool::retrieveJob(JobId jobId)
 
 	const uint16_t index = Job::unpackIndex(jobId);
 	if (jobId == InvalidJobId || index >= MaxNumJobs)
+	{
+		theJobStatistics().jobPoolStatsMut().incrementJobRetrievalFails();
 		return nullptr;
+	}
 
 	Job *job = &jobPool_[index];
 	if (job->generation == Job::unpackGeneration(jobId))
+	{
+		theJobStatistics().jobPoolStatsMut().incrementJobsRetrieved();
 		return job;
+	}
 
+	theJobStatistics().jobPoolStatsMut().incrementJobRetrievalFails();
 	return nullptr;
 }
 

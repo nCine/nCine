@@ -212,8 +212,10 @@ if(Threads_FOUND AND NCINE_WITH_THREADS)
 		# `IJobSystem.h` and `IJobSystem.cpp` have been already added to headers and sources
 		list(APPEND HEADERS
 			${NCINE_ROOT}/include/ncine/ParallelForJob.h
+			${NCINE_ROOT}/include/ncine/JobStatistics.h
 		)
 		list(APPEND PRIVATE_HEADERS
+			${NCINE_ROOT}/src/include/jobsystem_debug.h
 			${NCINE_ROOT}/src/include/Job.h
 			${NCINE_ROOT}/src/include/JobPool.h
 			${NCINE_ROOT}/src/include/JobQueue.h
@@ -221,10 +223,12 @@ if(Threads_FOUND AND NCINE_WITH_THREADS)
 			${NCINE_ROOT}/src/include/LogEntryQueue.h
 		)
 		list(APPEND SOURCES
+			${NCINE_ROOT}/src/threading/jobsystem_debug.cpp
 			${NCINE_ROOT}/src/threading/JobPool.cpp
 			${NCINE_ROOT}/src/threading/JobQueue.cpp
 			${NCINE_ROOT}/src/threading/JobSystem.cpp
 			${NCINE_ROOT}/src/threading/LogEntryQueue.cpp
+			${NCINE_ROOT}/src/threading/JobStatistics.cpp
 		)
 	endif()
 endif()
