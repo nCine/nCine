@@ -116,9 +116,10 @@ JobSystem::JobSystem(unsigned char numThreads)
     : IJobSystem(numThreads), commonData_(jobPool_, queueSem_)
 {
 	// Zero threads means automatic
-	const unsigned char numProcessors = static_cast<unsigned char>(Thread::numProcessors());
-	if (numThreads_ == 0 || numThreads > numProcessors)
-		numThreads_ = numProcessors;
+	if (numThreads_ == 0)
+		numThreads_ = cpuTopology_.numPhysicalCores();
+	if (numThreads > cpuTopology_.numTotalCores())
+		numThreads_ = cpuTopology_.numTotalCores();
 
 	theJobStatistics().initialize(numThreads_);
 	statsHelper = theJobStatistics().jobSystemStatsHelper();
@@ -143,6 +144,7 @@ JobSystem::JobSystem(unsigned char numThreads)
 		const unsigned char threadIndex = i + 1;
 		threadStructs_.emplaceBack(commonData_);
 		threadStructs_.back().threadIndex = threadIndex;
+		threadStructs_.back().cpuId = cpuTopology_.cpuInfo(threadIndex).id;
 
 		threads_.emplaceBack();
 		// Create a thread before setting its name and affinity mask
@@ -152,7 +154,10 @@ JobSystem::JobSystem(unsigned char numThreads)
 	// Setting the affinity mask of the main thread
 #ifndef __EMSCRIPTEN__
 	if (numThreads_ > 1)
-		ThisThread::setAffinityMask(ThreadAffinityMask(threadIndex()));
+	{
+		const unsigned char cpuId = cpuTopology_.cpuInfo(threadIndex()).id;
+		ThisThread::setAffinityMask(ThreadAffinityMask(cpuId));
+	}
 #endif
 }
 
@@ -356,10 +361,10 @@ void JobSystem::workerFunction(void *arg)
 	threadName.format("WorkerThread#%02d", threadStruct->threadIndex);
 #ifndef __EMSCRIPTEN__
 	ThisThread::setName(threadName.data());
-	ThisThread::setAffinityMask(ThreadAffinityMask(threadStruct->threadIndex));
+	ThisThread::setAffinityMask(ThreadAffinityMask(threadStruct->cpuId));
 #endif
 
-	LOGI_X("WorkerThread#%02d (id: %lu) is starting", threadStruct->threadIndex, ThisThread::threadId());
+	LOGI_X("WorkerThread#%02d (id: %lu) is starting on CPU#%02u", threadStruct->threadIndex, ThisThread::threadId(), threadStruct->cpuId);
 
 	while (true)
 	{
@@ -376,7 +381,7 @@ void JobSystem::workerFunction(void *arg)
 		execute(jobId, jobPool, jobQueues);
 	}
 
-	LOGI_X("WorkerThread#%02d (id: %lu) is exiting", threadStruct->threadIndex, ThisThread::threadId());
+	LOGI_X("WorkerThread#%02d (id: %lu) on CPU#%02u is exiting", threadStruct->threadIndex, ThisThread::threadId(), threadStruct->cpuId);
 }
 
 }
