@@ -5,6 +5,7 @@
 #include "Thread.h"
 #include "ThreadSync.h"
 #include "JobPool.h"
+#include "CpuTopology.h"
 #include <nctl/Array.h>
 
 namespace ncine {
@@ -53,9 +54,10 @@ class JobSystem : public IJobSystem
 	struct ThreadStruct
 	{
 		explicit ThreadStruct(const CommonThreadDataStruct &commonThreadData)
-		    : threadIndex(0), shouldQuit(false), commonData(commonThreadData) {}
+		    : threadIndex(0), cpuId(0), shouldQuit(false), commonData(commonThreadData) {}
 
 		unsigned char threadIndex;
+		unsigned char cpuId;
 		unsigned char shouldQuit;
 		const CommonThreadDataStruct &commonData;
 	};
@@ -66,6 +68,7 @@ class JobSystem : public IJobSystem
 	nctl::Array<ThreadStruct> threadStructs_;
 	SemType queueSem_;
 	CommonThreadDataStruct commonData_;
+	CpuTopology cpuTopology_;
 
 	static void workerFunction(void *arg);
 

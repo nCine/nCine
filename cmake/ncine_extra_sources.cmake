@@ -221,6 +221,7 @@ if(Threads_FOUND AND NCINE_WITH_THREADS)
 			${NCINE_ROOT}/src/include/JobQueue.h
 			${NCINE_ROOT}/src/include/JobSystem.h
 			${NCINE_ROOT}/src/include/LogEntryQueue.h
+			${NCINE_ROOT}/src/include/CpuTopology.h
 		)
 		list(APPEND SOURCES
 			${NCINE_ROOT}/src/threading/jobsystem_debug.cpp
@@ -229,7 +230,16 @@ if(Threads_FOUND AND NCINE_WITH_THREADS)
 			${NCINE_ROOT}/src/threading/JobSystem.cpp
 			${NCINE_ROOT}/src/threading/LogEntryQueue.cpp
 			${NCINE_ROOT}/src/threading/JobStatistics.cpp
+			${NCINE_ROOT}/src/threading/CpuTopology.cpp
 		)
+
+		if(WIN32)
+			list(APPEND SOURCES ${NCINE_ROOT}/src/threading/CpuTopologyWindows.cpp)
+		elseif(APPLE)
+			list(APPEND SOURCES ${NCINE_ROOT}/src/threading/CpuTopologyApple.cpp)
+		elseif(NOT EMSCRIPTEN)
+			list(APPEND SOURCES ${NCINE_ROOT}/src/threading/CpuTopologyLinux.cpp)
+		endif()
 	endif()
 endif()
 
