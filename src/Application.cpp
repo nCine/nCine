@@ -23,6 +23,7 @@
 
 #ifdef WITH_JOBSYSTEM
 	#include "JobSystem.h"
+	#include "SerialJobSystem.h"
 #endif
 
 #ifdef WITH_LUA
@@ -237,7 +238,12 @@ void Application::initCommon()
 #endif
 #ifdef WITH_JOBSYSTEM
 	if (appCfg_.withJobSystem)
-		theServiceLocator().registerJobSystem(nctl::makeUnique<JobSystem>(appCfg_.numThreads));
+	{
+		if (appCfg_.numThreads == 1)
+			theServiceLocator().registerJobSystem(nctl::makeUnique<SerialJobSystem>());
+		else
+			theServiceLocator().registerJobSystem(nctl::makeUnique<JobSystem>(appCfg_.numThreads));
+	}
 #endif
 	theServiceLocator().registerGfxCapabilities(nctl::makeUnique<GfxCapabilities>());
 	GLDebug::init(theServiceLocator().gfxCapabilities());

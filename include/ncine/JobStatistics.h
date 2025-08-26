@@ -136,6 +136,7 @@ class DLL_PUBLIC JobStatistics
 
 	friend class JobSystemStatsHelper;
 	friend class JobSystem;
+	friend class SerialJobSystem;
 	friend class JobPool;
 	friend class JobQueue;
 	friend class Application;
