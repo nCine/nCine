@@ -51,6 +51,16 @@ void jobStatePushedToPopped(JobPool *jobPool, JobId jobId)
 	transitionJobState(jobPool, jobId, Job::State::PUSHED, Job::State::POPPED);
 }
 
+void jobStateFreeToPushed(Job *job, JobId jobId)
+{
+	transitionJobState(job, jobId, Job::State::FREE, Job::State::PUSHED);
+}
+
+void jobStatePushedToPopped(Job *job, JobId jobId)
+{
+	transitionJobState(job, jobId, Job::State::PUSHED, Job::State::POPPED);
+}
+
 void jobStateFinishedToFree(Job *job, JobId jobId)
 {
 	transitionJobState(job, jobId, Job::State::FINISHED, Job::State::FREE);
