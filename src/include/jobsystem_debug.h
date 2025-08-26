@@ -61,12 +61,16 @@ struct Job;
 #if JOB_DEBUG_STATE
 void jobStateFreeToPushed(JobPool *jobPool, unsigned int jobId);
 void jobStatePushedToPopped(JobPool *jobPool, unsigned int jobId);
+void jobStateFreeToPushed(Job *job, unsigned int jobId);
+void jobStatePushedToPopped(Job *job, unsigned int jobId);
 void jobStateFinishedToFree(Job *job, unsigned int jobId);
 void jobStatePoppedToExcuting(Job *job, unsigned int jobId);
 void jobStateExcutingToFinished(Job *job, unsigned int jobId);
 #else
 inline void jobStateFreeToPushed(JobPool *jobPool, unsigned int jobId) {}
 inline void jobStatePushedToPopped(JobPool *jobPool, unsigned int jobId) {}
+inline void jobStateFreeToPushed(Job *job, unsigned int jobId) {}
+inline void jobStatePushedToPopped(Job *job, unsigned int jobId) {}
 inline void jobStateFinishedToFree(Job *job, unsigned int jobId) {}
 inline void jobStatePoppedToExcuting(Job *job, unsigned int jobId) {}
 inline void jobStateExcutingToFinished(Job *job, unsigned int jobId) {}
