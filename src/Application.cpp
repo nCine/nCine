@@ -12,7 +12,10 @@
 #include "FrameTimer.h"
 #include "SceneNode.h"
 #include <nctl/StaticString.h>
-#include "IInputManager.h"
+
+#if WITH_ALLOCATORS
+	#include "IInputManager.h"
+#endif
 
 #ifdef WITH_AUDIO
 	#include "ALAudioDevice.h"

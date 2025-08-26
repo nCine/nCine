@@ -53,7 +53,7 @@ T *LuaUntrackedUserData<T>::retrieve(lua_State *L, int index, RetrieveNull unwra
 		type = stateManager->untrackedType(pointer);
 
 	if (type == LuaTypes::UNKNOWN)
-		return nullptr; // TODO: Caller should check return value and abort the call
+		return nullptr;
 
 	T *object = reinterpret_cast<T *>(pointer);
 	ASSERT(object != nullptr && type != LuaTypes::UNKNOWN);

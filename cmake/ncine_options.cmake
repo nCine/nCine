@@ -66,7 +66,7 @@ if(NCINE_WITH_ALLOCATORS)
 	option(NCINE_RECORD_ALLOCATIONS "Record a timestamp of every allocation and deallocation" OFF)
 	option(NCINE_OVERRIDE_NEW "Override global new and delete operators to use custom allocators" OFF)
 	option(NCINE_USE_FREELIST "Use the free list custom allocator instead of malloc()/free()" OFF)
-	set(NCINE_FREELIST_BUFFER "33554432" CACHE STRING "Size in bytes of the free list allocator buffer")
+	set(NCINE_FREELIST_BUFFER "67108864" CACHE STRING "Size in bytes of the free list allocator buffer")
 endif()
 
 if(NCINE_WITH_RENDERDOC)

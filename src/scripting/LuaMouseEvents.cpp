@@ -36,7 +36,6 @@ namespace LuaMouseEvents {
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-// TODO: Don't forget to commit the change in LuaStateManager.cpp
 void LuaMouseEvents::expose(lua_State *L)
 {
 	// Multiple binding classes adding functions to the same field

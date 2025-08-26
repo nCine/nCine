@@ -159,6 +159,17 @@ void ImGuiDrawing::destroyTexture(ImTextureData *tex)
 
 void ImGuiDrawing::updateTexture(ImTextureData *tex)
 {
+	// FIXME: Consider backing up and restoring
+	if (tex->Status == ImTextureStatus_WantCreate || tex->Status == ImTextureStatus_WantUpdates)
+	{
+#ifdef GL_UNPACK_ROW_LENGTH // Not on WebGL/ES
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+#endif
+#ifdef GL_UNPACK_ALIGNMENT
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+#endif
+	}
+
 	if (tex->Status == ImTextureStatus_WantCreate)
 	{
 		// Create and upload new texture to graphics system
@@ -175,9 +186,6 @@ void ImGuiDrawing::updateTexture(ImTextureData *tex)
 		texture->texParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		texture->texParameteri(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		texture->texParameteri(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-#if !defined(WITH_OPENGLES) && !defined(__EMSCRIPTEN__)
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-#endif
 		texture->texImage2D(0, GL_RGBA, tex->Width, tex->Height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
 		if (textures_.loadFactor() >= 0.8f)
@@ -200,7 +208,7 @@ void ImGuiDrawing::updateTexture(ImTextureData *tex)
 		GLTexture *texturePtr = (GLTexture *)(intptr_t)tex->TexID;
 		texturePtr->bind();
 
-#if !defined(WITH_OPENGLES) && !defined(__EMSCRIPTEN__)
+#ifdef GL_UNPACK_ROW_LENGTH // Not on WebGL/ES
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, tex->Width);
 		for (ImTextureRect &r : tex->Updates)
 			texturePtr->texSubImage2D(0, r.x, r.y, r.w, r.h, GL_RGBA, GL_UNSIGNED_BYTE, tex->GetPixelsAt(r.x, r.y));
@@ -280,10 +288,8 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 				updateTexture(tex);
 
 	unsigned int numCmd = 0;
-	for (int n = 0; n < drawData->CmdListsCount; n++)
+	for (const ImDrawList *imDrawList : drawData->CmdLists)
 	{
-		const ImDrawList *imDrawList = drawData->CmdLists[n];
-
 		RenderCommand &firstCmd = *retrieveCommandFromPool();
 		if (lastFrameWidth_ != static_cast<int>(io.DisplaySize.x) ||
 		    lastFrameHeight_ != static_cast<int>(io.DisplaySize.y))
@@ -390,9 +396,8 @@ void ImGuiDrawing::draw()
 	GLDepthTest::State depthTestState = GLDepthTest::state();
 	GLDepthTest::disable();
 
-	for (int n = 0; n < drawData->CmdListsCount; n++)
+	for (const ImDrawList *imDrawList : drawData->CmdLists)
 	{
-		const ImDrawList *imDrawList = drawData->CmdLists[n];
 #if (defined(WITH_OPENGLES) && !GL_ES_VERSION_3_2) || defined(__EMSCRIPTEN__)
 		const ImDrawIdx *firstIndex = nullptr;
 #endif
