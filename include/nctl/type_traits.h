@@ -106,6 +106,18 @@ struct isTriviallyConstructible
 	static constexpr bool value = __is_trivially_constructible(T);
 };
 
+template <typename T>
+struct isMoveConstructible
+{
+	static constexpr bool value = __is_constructible(T, T &&);
+};
+
+template <class T>
+struct isCopyConstructible
+{
+	static constexpr bool value = __is_constructible(T, const T &);
+};
+
 template <class T>
 struct isTriviallyCopyable
 {
@@ -143,6 +155,38 @@ struct isTriviallyDestructible
 	static constexpr bool value = __is_trivially_destructible(T);
 };
 #endif
+
+template <bool B, typename T, typename F>
+struct conditional
+{
+	using type = T;
+};
+template <typename T, typename F>
+struct conditional<false, T, F>
+{
+	using type = F;
+};
+
+template <bool Condition, typename T = void>
+struct enableIf
+{
+};
+template <typename T>
+struct enableIf<true, T>
+{
+	using type = T;
+};
+
+template <typename T, typename U>
+struct isSame
+{
+	static constexpr bool value = false;
+};
+template <typename T>
+struct isSame<T, T>
+{
+	static constexpr bool value = true;
+};
 
 template <class T>
 struct isIntegral

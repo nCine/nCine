@@ -201,6 +201,12 @@ class Array
 	unsigned int capacity_;
 	bool fixedCapacity_;
 
+	/// Implementation of `setCapacity()` based on object policy tag
+	template <class Tag>
+	void setCapacityImpl(unsigned int newCapacity, Tag);
+	/// Implementation of `setCapacity()` for non-movable types
+	void setCapacityImpl(unsigned int newCapacity, detail::NonMovableTag);
+
 	/// Grows the array size by one and returns a pointer to the new element
 	T *extendOne();
 };
@@ -320,54 +326,7 @@ void Array<T>::setSize(unsigned int newSize)
 template <class T>
 void Array<T>::setCapacity(unsigned int newCapacity)
 {
-	// If the call does not come from the constructor
-	if (capacity_ != 0)
-	{
-		// Setting a new capacity is disabled if the array is fixed
-		if (fixedCapacity_)
-		{
-			LOGW_X("Trying to change the capacity of a fixed array, from from %u to %u", capacity_, newCapacity);
-			return;
-		}
-
-		if (newCapacity == capacity_)
-		{
-			LOGW_X("Array capacity already equal to %u", capacity_);
-			return;
-		}
-		else if (newCapacity < capacity_)
-			LOGI_X("Array capacity shrinking from %u to %u", capacity_, newCapacity);
-		else if (newCapacity > capacity_)
-			LOGD_X("Array capacity growing from %u to %u", capacity_, newCapacity);
-	}
-
-	T *newArray = nullptr;
-	if (newCapacity > 0)
-	{
-#if !NCINE_WITH_ALLOCATORS
-		newArray = static_cast<T *>(::operator new(newCapacity * sizeof(T)));
-#else
-		newArray = static_cast<T *>(alloc_.allocate(newCapacity * sizeof(T)));
-#endif
-	}
-
-	if (size_ > 0)
-	{
-		const unsigned int oldSize = size_;
-		if (newCapacity < size_) // shrinking
-			size_ = newCapacity; // cropping last elements
-
-		moveConstructArray(newArray, array_, size_);
-		destructArray(array_, oldSize);
-	}
-
-#if !NCINE_WITH_ALLOCATORS
-	::operator delete(array_);
-#else
-	alloc_.deallocate(array_);
-#endif
-	array_ = newArray;
-	capacity_ = newCapacity;
+	setCapacityImpl(newCapacity, typename detail::ObjectPolicyTag<T>::type{});
 }
 
 template <class T>
@@ -681,6 +640,112 @@ T &Array<T>::operator[](unsigned int index)
 {
 	ASSERT_MSG_X(index < size_, "Index %u is out of bounds (size: %u)", index, size_);
 	return array_[index];
+}
+
+template <class T>
+template <class Tag>
+void Array<T>::setCapacityImpl(unsigned int newCapacity, Tag)
+{
+	// If the call does not come from the constructor
+	if (capacity_ != 0)
+	{
+		if (newCapacity == capacity_)
+		{
+			LOGW_X("Array capacity already equal to %u", capacity_);
+			return;
+		}
+		else
+		{
+			// Setting a new capacity is disabled if the array is fixed
+			FATAL_ASSERT_MSG_X(fixedCapacity_ == false, "Trying to change the capacity of a fixed array, from %u to %u", capacity_, newCapacity);
+
+			if (newCapacity == capacity_)
+			{
+				LOGW_X("Array capacity already equal to %u", capacity_);
+				return;
+			}
+			else if (newCapacity < capacity_)
+				LOGI_X("Array capacity shrinking from %u to %u", capacity_, newCapacity);
+			else // (newCapacity > capacity_)
+				LOGD_X("Array capacity growing from %u to %u", capacity_, newCapacity);
+		}
+	}
+
+	T *newArray = nullptr;
+	if (newCapacity > 0)
+	{
+#if !NCINE_WITH_ALLOCATORS
+		newArray = static_cast<T *>(::operator new(newCapacity * sizeof(T)));
+#else
+		newArray = static_cast<T *>(alloc_.allocate(newCapacity * sizeof(T)));
+#endif
+	}
+
+	if (size_ > 0)
+	{
+		const unsigned int oldSize = size_;
+		if (newCapacity < size_) // shrinking
+			size_ = newCapacity; // cropping last elements
+
+		moveConstructArray(newArray, array_, size_);
+		destructArray(array_, oldSize);
+	}
+
+#if !NCINE_WITH_ALLOCATORS
+	::operator delete(array_);
+#else
+	alloc_.deallocate(array_);
+#endif
+	array_ = newArray;
+	capacity_ = newCapacity;
+}
+
+/*! \note This version can be used to set an initial capacity of arrays with non-movable and non-copyable types */
+template <class T>
+void Array<T>::setCapacityImpl(unsigned int newCapacity, detail::NonMovableTag)
+{
+	// If the call does not come from the constructor
+	if (capacity_ != 0)
+	{
+		if (newCapacity == capacity_)
+		{
+			LOGW_X("Array capacity already equal to %u", capacity_);
+			return;
+		}
+		else
+		{
+			// Setting a new capacity is disabled if the array is fixed
+			FATAL_ASSERT_MSG_X(fixedCapacity_ == false, "Trying to change the capacity of a fixed array, from %u to %u", capacity_, newCapacity);
+
+			if (size_ == 0)
+			{
+				if (newCapacity < capacity_)
+					LOGI_X("Array capacity shrinking from %u to %u", capacity_, newCapacity);
+				else // (newCapacity > capacity_)
+					LOGD_X("Array capacity growing from %u to %u", capacity_, newCapacity);
+			}
+			else
+				FATAL_ASSERT_MSG_X(size_ == 0, "Trying to change the capacity of a non-empty array of non-movable and non-copyable objects, from %u to %u", capacity_, newCapacity);
+		}
+	}
+
+	T *newArray = nullptr;
+	if (newCapacity > 0)
+	{
+#if !NCINE_WITH_ALLOCATORS
+		newArray = static_cast<T *>(::operator new(newCapacity * sizeof(T)));
+#else
+		newArray = static_cast<T *>(alloc_.allocate(newCapacity * sizeof(T)));
+#endif
+	}
+
+#if !NCINE_WITH_ALLOCATORS
+	::operator delete(array_);
+#else
+	alloc_.deallocate(array_);
+#endif
+	array_ = newArray;
+	capacity_ = newCapacity;
 }
 
 template <class T>

@@ -34,8 +34,9 @@ class StaticArray
 	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
 	/// Constructs an empty array with fixed capacity
+	/*! \note Not using a delegating constructor to be able to use non-movable and non-copyable types. */
 	StaticArray()
-	    : StaticArray(StaticArrayMode::ZERO_SIZE) {}
+	    : size_(0), capacity_(C) {}
 	/// Constructs an array with the option for it to have the size match its capacity
 	explicit StaticArray(StaticArrayMode mode)
 	    : size_(0), capacity_(C)

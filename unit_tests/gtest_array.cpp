@@ -173,16 +173,18 @@ TEST_F(ArrayTest, AccessWithPointer)
 		ASSERT_EQ(ptr[i], static_cast<int>(i));
 }
 
+#ifndef __EMSCRIPTEN__
 TEST_F(ArrayTest, SetSizeOnFixed)
 {
 	printf("Trying to extend the size of a fixed capacity array\n");
 	nctl::Array<int> array(1, nctl::ArrayMode::FIXED_CAPACITY);
 	array.pushBack(0);
-	array.setSize(Capacity);
 
 	ASSERT_EQ(array.capacity(), 1);
 	ASSERT_EQ(array.size(), 1);
+	ASSERT_DEATH(array.setSize(Capacity), "");
 }
+#endif
 
 TEST_F(ArrayTest, SetSizeToShrink)
 {
@@ -206,14 +208,16 @@ TEST_F(ArrayTest, SetSizeAsCapacity)
 	ASSERT_EQ(array.size(), Capacity);
 }
 
+#ifndef __EMSCRIPTEN__
 TEST_F(ArrayTest, SetCapacityOnFixed)
 {
 	printf("Setting a new capacity for a fixed capacity array\n");
 	nctl::Array<int> array(Capacity, nctl::ArrayMode::FIXED_CAPACITY);
-	array.setCapacity(Capacity * 2);
 
 	ASSERT_EQ(array.capacity(), Capacity);
+	ASSERT_DEATH(array.setCapacity(Capacity * 2), "");
 }
+#endif
 
 TEST_F(ArrayTest, SetSameCapacity)
 {

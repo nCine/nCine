@@ -86,6 +86,7 @@ TEST_F(ArrayZeroCapacityTest, SetSizeOnFixed)
 	ASSERT_EQ(array.size(), 1);
 }
 
+#ifndef __EMSCRIPTEN__
 TEST_F(ArrayZeroCapacityTest, SetCapacityOnFixed)
 {
 	printf("Setting a new capacity for a fixed capacity array with zero initial capacity\n");
@@ -93,10 +94,10 @@ TEST_F(ArrayZeroCapacityTest, SetCapacityOnFixed)
 	array.setCapacity(Capacity);
 
 	printf("Setting a new capacity for a fixed capacity array\n");
-	array.setCapacity(Capacity * 2);
-
 	ASSERT_EQ(array.capacity(), Capacity);
+	ASSERT_DEATH(array.setCapacity(Capacity * 2), "");
 }
+#endif
 
 TEST_F(ArrayZeroCapacityTest, SetSameCapacity)
 {
