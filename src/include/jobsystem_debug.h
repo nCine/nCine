@@ -11,6 +11,9 @@
 /// Tracy plots of statistics counters
 #define JOB_DEBUG_COUNTERS_TRACY_PLOT (0 && JOB_DEBUG_COUNTERS)
 
+/// Tracy zones for various job system functions
+#define JOB_DEBUG_TRACY_ZONES (0 && NCINE_DEBUG)
+
 /// Queue and pool operations logs
 #define JOB_DEBUG_LIFECYCLE_LOGGING (0 && NCINE_DEBUG)
 
@@ -66,6 +69,7 @@ void jobStatePushedToPopped(Job *job, unsigned int jobId);
 void jobStateFinishedToFree(Job *job, unsigned int jobId);
 void jobStatePoppedToExcuting(Job *job, unsigned int jobId);
 void jobStateExcutingToFinished(Job *job, unsigned int jobId);
+void jobStateForceToFinished(Job *job, unsigned int jobId);
 #else
 inline void jobStateFreeToPushed(JobPool *jobPool, unsigned int jobId) {}
 inline void jobStatePushedToPopped(JobPool *jobPool, unsigned int jobId) {}
@@ -74,6 +78,7 @@ inline void jobStatePushedToPopped(Job *job, unsigned int jobId) {}
 inline void jobStateFinishedToFree(Job *job, unsigned int jobId) {}
 inline void jobStatePoppedToExcuting(Job *job, unsigned int jobId) {}
 inline void jobStateExcutingToFinished(Job *job, unsigned int jobId) {}
+inline void jobStateForceToFinished(Job *job, unsigned int jobId) {}
 #endif
 
 }

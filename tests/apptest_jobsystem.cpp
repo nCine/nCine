@@ -2,8 +2,7 @@
 
 #include <cmath>
 #include "apptest_jobsystem.h"
-#include <ncine/IJobSystem.h>
-#include <ncine/ParallelForJob.h>
+#include <ncine/JobHandle.h>
 #include <ncine/JobStatistics.h>
 #include <ncine/Application.h>
 #include <ncine/AppConfiguration.h>
@@ -23,6 +22,8 @@ int numSpawnedJobs = 4;
 nc::TimeStamp mainStartTime;
 nc::TimeStamp mainEndTime;
 nctl::StaticString<128> auxString;
+bool batchSubmission = true;
+nctl::Array<nc::JobHandle> jobHandles(1024);
 bool autoResetStatistics = true;
 int currentJobType = 1;
 const char *jobTypeComboString = "Empty\0Dummy\0SpawnChildren\0\0";
@@ -404,7 +405,7 @@ void MyEventHandler::onFrameStart()
 			if (dummyIterations < 0)
 				dummyIterations = 0;
 
-			static nc::JobId rootJobId = nc::InvalidJobId;
+			static nc::JobHandle rootJob;
 			ImGui::SliderInt("Number of jobs", &numJobsToQueue, 1, 1024, "%d", ImGuiSliderFlags_AlwaysClamp);
 			ImGui::BeginDisabled(jobFn != spawnChildrenJob);
 			ImGui::SliderInt("Number of spawned jobs", &numSpawnedJobs, 0, 16, "%d", ImGuiSliderFlags_AlwaysClamp);
@@ -416,15 +417,28 @@ void MyEventHandler::onFrameStart()
 
 				mainStartTime = nc::TimeStamp::now();
 
-				rootJobId = jobSystem.createJob(nullptr);
-				for (int i = 0; i < numJobsToQueue; i++)
+				rootJob = nc::JobHandle::createJob(nullptr);
+				if (batchSubmission)
 				{
-					nc::JobId jobId = jobSystem.createJobAsChild(rootJobId, jobFn);
-					jobSystem.submit(jobId);
+					jobHandles.clear();
+					for (int i = 0; i < numJobsToQueue; i++)
+					{
+						nc::JobHandle job = rootJob.createChildJob(jobFn);
+						jobHandles.pushBack(nctl::move(job));
+					}
+					nc::JobHandle::submit(jobHandles.data(), jobHandles.size());
 				}
-				jobSystem.submit(rootJobId);
+				else
+				{
+					for (int i = 0; i < numJobsToQueue; i++)
+					{
+						nc::JobHandle job = rootJob.createChildJob(jobFn);
+						job.submit();
+					}
+				}
+				rootJob.submit();
 				if (waitRootJob)
-					jobSystem.wait(rootJobId);
+					rootJob.wait();
 
 				mainEndTime = nc::TimeStamp::now();
 			}
@@ -439,23 +453,37 @@ void MyEventHandler::onFrameStart()
 				// Avoid an infinite spawning of jobs from continuations
 				const nc::JobFunction contFn = (jobFn != spawnChildrenJob) ? jobFn : emptyJobWithStatistics;
 
-				rootJobId = jobSystem.createJob(nullptr);
-				for (int i = 0; i < numJobsToQueue; i++)
+				rootJob = nc::JobHandle::createJob(nullptr);
+				if (batchSubmission)
 				{
-					nc::JobId jobId = jobSystem.createJobAsChild(rootJobId, jobFn);
-					for (unsigned int j = 0; j < nc::JobNumContinuations; j++)
+					jobHandles.clear();
+					for (int i = 0; i < numJobsToQueue; i++)
 					{
-						nc::JobId contId = jobSystem.createJob(contFn);
-						jobSystem.addContinuation(jobId, contId);
+						nc::JobHandle job = rootJob.createChildJob(jobFn);
+						for (unsigned int j = 0; j < nc::JobNumContinuations; j++)
+							job.createContinuationJob(contFn);
+						jobHandles.pushBack(nctl::move(job));
 					}
-					jobSystem.submit(jobId);
+					nc::JobHandle::submit(jobHandles.data(), jobHandles.size());
 				}
-				jobSystem.submit(rootJobId);
+				else
+				{
+					for (int i = 0; i < numJobsToQueue; i++)
+					{
+						nc::JobHandle job = rootJob.createChildJob(jobFn);
+						for (unsigned int j = 0; j < nc::JobNumContinuations; j++)
+							job.createContinuationJob(contFn);
+						job.submit();
+					}
+				}
+				rootJob.submit();
 				if (waitRootJob)
-					jobSystem.wait(rootJobId);
+					rootJob.wait();
 
 				mainEndTime = nc::TimeStamp::now();
 			}
+			ImGui::SameLine();
+			ImGui::Checkbox("Batch submission", &batchSubmission);
 
 			ImGui::SliderInt("Data array size", &dataArraySize, 1, MaxDataArraySize, "%d", ImGuiSliderFlags_AlwaysClamp);
 			ImGui::SliderInt("Count splitter", &countSplitterValue, 1, 1024, "%d", ImGuiSliderFlags_AlwaysClamp);
@@ -466,10 +494,10 @@ void MyEventHandler::onFrameStart()
 
 				mainStartTime = nc::TimeStamp::now();
 
-				rootJobId = nc::parallelFor(dataArray, dataArraySize, &myDataFunc, nc::CountSplitter(countSplitterValue));
-				jobSystem.submit(rootJobId);
+				rootJob = nc::JobHandle::createParallelForJob(dataArray, dataArraySize, &myDataFunc, nc::CountSplitter(countSplitterValue));
+				rootJob.submit();
 				if (waitRootJob)
-					jobSystem.wait(rootJobId);
+					rootJob.wait();
 
 				mainEndTime = nc::TimeStamp::now();
 			}
@@ -482,25 +510,25 @@ void MyEventHandler::onFrameStart()
 
 				mainStartTime = nc::TimeStamp::now();
 
-				rootJobId = jobSystem.createJob(nullptr);
+				rootJob = nc::JobHandle::createJob(nullptr);
 				for (int i = 0; i < childrenCount; i++)
 				{
-					nc::JobId grandparentId = jobSystem.createJobAsChild(rootJobId, nullptr);
+					nc::JobHandle grandparentJob = rootJob.createChildJob(nullptr);
 					for (int j = 0; j < childrenCount; j++)
 					{
-						nc::JobId parentId = jobSystem.createJobAsChild(grandparentId, nullptr);
+						nc::JobHandle parentJob = grandparentJob.createChildJob(nullptr);
 						for (int k = 0; k < childrenCount; k++)
 						{
-							nc::JobId jobId = jobSystem.createJobAsChild(parentId, jobFn);
-							jobSystem.submit(jobId);
+							nc::JobHandle job = parentJob.createChildJob(jobFn);
+							job.submit();
 						}
-						jobSystem.submit(parentId);
+						parentJob.submit();
 					}
-					jobSystem.submit(grandparentId);
+					grandparentJob.submit();
 				}
-				jobSystem.submit(rootJobId);
+				rootJob.submit();
 				if (waitRootJob)
-					jobSystem.wait(rootJobId);
+					rootJob.wait();
 
 				mainEndTime = nc::TimeStamp::now();
 			}
@@ -510,8 +538,8 @@ void MyEventHandler::onFrameStart()
 
 			if (waitRootJob)
 				ImGui::Text("Total time: %f ms", (mainEndTime - mainStartTime).milliseconds());
-			else if (rootJobId != nc::InvalidJobId)
-				ImGui::Text("Unfinished jobs: %u", jobSystem.unfinishedJobs(rootJobId));
+			else if (rootJob.isValid())
+				ImGui::Text("Unfinished jobs: %u", rootJob.unfinishedJobs());
 
 			if (ImGui::TreeNode("Timestamp statistics"))
 			{
