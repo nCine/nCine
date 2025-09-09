@@ -3,20 +3,37 @@
 #include "JobStatistics.h"
 #include <nctl/StaticString.h>
 
+#if JOB_DEBUG_TRACY_ZONES
+	#include "tracy.h"
+#endif
+
 namespace ncine {
 
 namespace {
 	JobStatistics::JobSystemStatsHelper *statsHelper = nullptr;
+#if JOB_DEBUG_TRACY_ZONES
+	nctl::StaticString<64> zoneTextString;
+#endif
 
 	JobId getJob(JobQueue *jobQueues, unsigned char numThreads)
 	{
+#if JOB_DEBUG_TRACY_ZONES
+		ZoneScoped;
+#endif
+
 		static thread_local unsigned int lastStealIndex = 0;
 		const unsigned char threadIndex = JobSystem::threadIndex();
 
 		// Try to pop from own queue first
 		JobId jobId = jobQueues[threadIndex].pop();
 		if (jobId != InvalidJobId)
+		{
+#if JOB_DEBUG_TRACY_ZONES
+			zoneTextString.format("Popped JobId: %u", jobId);
+			ZoneText(zoneTextString.data(), zoneTextString.length());
+#endif
 			return jobId;
+		}
 
 		// Then try to steal from main thread's queue
 		if (threadIndex != 0)
@@ -24,6 +41,10 @@ namespace {
 			JobId stolenJob = jobQueues[0].steal();
 			if (stolenJob != InvalidJobId)
 			{
+#if JOB_DEBUG_TRACY_ZONES
+				zoneTextString.format("Stolen from main thread's queue, JobId: %u", stolenJob);
+				ZoneText(zoneTextString.data(), zoneTextString.length());
+#endif
 				statsHelper->jobSystemStatsMut().incrementJobsStolen();
 				return stolenJob;
 			}
@@ -40,6 +61,10 @@ namespace {
 			JobId stolenJob = jobQueues[stealIndex].steal();
 			if (stolenJob != InvalidJobId)
 			{
+#if JOB_DEBUG_TRACY_ZONES
+				zoneTextString.format("Stolen from thread #%02d, JobId: %u", stealIndex, stolenJob);
+				ZoneText(zoneTextString.data(), zoneTextString.length());
+#endif
 				statsHelper->jobSystemStatsMut().incrementJobsStolen();
 				lastStealIndex = (stealIndex + 1) % numThreads; // rotate start
 				return stolenJob;
@@ -53,6 +78,10 @@ namespace {
 
 	void finish(JobId jobId, JobPool &jobPool, JobQueue *jobQueues)
 	{
+#if JOB_DEBUG_TRACY_ZONES
+		ZoneScoped;
+#endif
+
 		ASSERT(jobId != InvalidJobId);
 		if (jobId == InvalidJobId)
 			return;
@@ -61,8 +90,9 @@ namespace {
 		if (job == nullptr)
 			return;
 
-		const int32_t unfinishedJobs = job->unfinishedJobs.fetchSub(1, nctl::MemoryModel::RELEASE) - 1;
-		if (unfinishedJobs == 0)
+		job->clearFlag(Job::Flags::RUNNING);
+		const uint16_t prevUnfinishedJobs = job->decrementUnfinishedJobs();
+		if (prevUnfinishedJobs == 1)
 		{
 			if (job->parent != InvalidJobId)
 			{
@@ -74,12 +104,17 @@ namespace {
 				statsHelper->jobSystemStatsMut().incrementParentJobsFinished();
 
 			// Run follow-up jobs
-			for (int i = 0; i < job->continuationCount; i++)
+			const uint16_t continuationCount = job->loadContinuationCount(nctl::MemoryModel::ACQUIRE);
+			for (uint16_t i = 0; i < continuationCount; i++)
 			{
 				jobQueues[JobSystem::threadIndex()].push(job->continuations[i]);
 				statsHelper->jobSystemStatsMut().incrementContinuationJobsPushed();
 			}
 
+#if JOB_DEBUG_TRACY_ZONES
+			zoneTextString.format("JobId: %u", jobId);
+			ZoneText(zoneTextString.data(), zoneTextString.length());
+#endif
 			jobStateExcutingToFinished(job, jobId); // Job debug state transition
 			statsHelper->jobSystemStatsMut().incrementJobsFinished();
 			jobPool.freeJob(jobId);
@@ -88,15 +123,29 @@ namespace {
 
 	void execute(JobId jobId, JobPool &jobPool, JobQueue *jobQueues)
 	{
+#if JOB_DEBUG_TRACY_ZONES
+		ZoneScoped;
+#endif
+
 		Job *job = jobPool.retrieveJob(jobId);
 		if (job != nullptr)
 		{
 			jobStatePoppedToExcuting(job, jobId); // Job debug state transition
 			statsHelper->jobSystemStatsMut().incrementJobsExecuted();
 
-			// A job might have no function to execute
-			if (job->function != nullptr)
-				(job->function)(jobId, job->data);
+			const uint32_t oldFlags = job->setFlag(Job::Flags::RUNNING);
+			// Skip execution if cancellation has been requested for the job
+			if ((oldFlags & Job::Flags::CANCELLED) == 0)
+			{
+				// A job might have no function to execute
+				if (job->function != nullptr)
+					(job->function)(jobId, job->data);
+
+#if JOB_DEBUG_TRACY_ZONES
+				zoneTextString.format("JobId: %u", jobId);
+				ZoneText(zoneTextString.data(), zoneTextString.length());
+#endif
+			}
 			finish(jobId, jobPool, jobQueues);
 		}
 	}
@@ -184,12 +233,25 @@ JobId JobSystem::createJob(JobFunction function, const void *data, unsigned int 
  *  \note The `function` can be `nullptr` for synchronization-only jobs */
 JobId JobSystem::createJobAsChild(JobId parentId, JobFunction function, const void *data, unsigned int dataSize)
 {
+#if JOB_DEBUG_TRACY_ZONES
+	ZoneScoped;
+#endif
+
 	Job *parent = nullptr;
 	if (parentId != InvalidJobId)
 	{
 		parent = jobPool_.retrieveJob(parentId);
 		if (parent == nullptr)
 			return InvalidJobId;
+
+		const uint32_t state = parent->countersAndState.load(nctl::MemoryModel::ACQUIRE);
+		if ((state & Job::Flags::CANCELLED) != 0)
+			return InvalidJobId;
+
+#if JOB_DEBUG_TRACY_ZONES
+		zoneTextString.format("Parent: %u", parentId);
+		ZoneText(zoneTextString.data(), zoneTextString.length());
+#endif
 	}
 
 	JobId jobId = jobPool_.allocateJob();
@@ -202,8 +264,8 @@ JobId JobSystem::createJobAsChild(JobId parentId, JobFunction function, const vo
 
 	job->function = function;
 	job->parent = parentId;
-	job->unfinishedJobs = 1;
-	job->continuationCount = 0;
+	job->countersAndState.store(0, nctl::MemoryModel::RELEASE);
+	job->incrementUnfinishedJobs();
 
 	if (data != nullptr && dataSize > 0)
 	{
@@ -213,7 +275,7 @@ JobId JobSystem::createJobAsChild(JobId parentId, JobFunction function, const vo
 
 	if (parent != nullptr)
 	{
-		parent->unfinishedJobs.fetchAdd(1);
+		parent->incrementUnfinishedJobs();
 		statsHelper->jobSystemStatsMut().incrementChildJobsCreated();
 		JOB_LOG_DEP("Child job %u attached to parent %u", jobId, parentId);
 	}
@@ -224,6 +286,10 @@ JobId JobSystem::createJobAsChild(JobId parentId, JobFunction function, const vo
 
 bool JobSystem::addContinuation(JobId ancestorId, JobId continuationId)
 {
+#if JOB_DEBUG_TRACY_ZONES
+	ZoneScoped;
+#endif
+
 	if (ancestorId == InvalidJobId || continuationId == InvalidJobId)
 		return false;
 
@@ -235,7 +301,11 @@ bool JobSystem::addContinuation(JobId ancestorId, JobId continuationId)
 		return false;
 
 	bool continuationAdded = false;
-	const uint32_t count = ancestorJob->continuationCount.fetchAdd(1);
+	const uint32_t state = ancestorJob->countersAndState.load(nctl::MemoryModel::ACQUIRE);
+	if ((state & Job::Flags::CANCELLED) != 0)
+		return false;
+
+	const uint32_t count = ancestorJob->incrementContinuationCount();
 	if (count < JobNumContinuations)
 	{
 		ancestorJob->continuations[count] = continuationId;
@@ -243,48 +313,139 @@ bool JobSystem::addContinuation(JobId ancestorId, JobId continuationId)
 					continuationId, Job::unpackIndex(continuationId), Job::unpackGeneration(continuationId),
 					ancestorId, Job::unpackIndex(ancestorId), Job::unpackGeneration(ancestorId));
 		continuationAdded = true;
+
+#if JOB_DEBUG_TRACY_ZONES
+		zoneTextString.format("ancestorId: %u, continuationId: %u", ancestorId, continuationId);
+		ZoneText(zoneTextString.data(), zoneTextString.length());
+#endif
 	}
 	else
-		ancestorJob->continuationCount.fetchSub(1);
+		ancestorJob->decrementContinuationCount();
 
 	return continuationAdded;
 }
 
-void JobSystem::submit(JobId jobId)
+bool JobSystem::submit(JobId jobId)
 {
-	ASSERT(jobId != InvalidJobId);
-	if (jobId == InvalidJobId)
-		return;
+	return (submit(&jobId, 1) == 1);
+}
 
-	Job *job = jobPool_.retrieveJob(jobId);
-	ASSERT(job != nullptr);
-	if (job == nullptr)
-		return;
+uint16_t JobSystem::submit(const JobId *jobIds, uint16_t count)
+{
+#if JOB_DEBUG_TRACY_ZONES
+	ZoneScoped;
+#endif
+
+	ASSERT(jobIds != nullptr);
+	ASSERT(count > 0);
 
 	JobQueue &queue = jobQueues_[threadIndex()];
-	queue.push(jobId);
+	uint16_t numSubmitted = 0;
 
-	queueSem_.signal();
+	for (uint16_t i = 0; i < count; i++)
+	{
+		ASSERT(jobIds[i] != InvalidJobId);
+		if (jobIds[i] == InvalidJobId)
+			continue;
+
+		Job *job = jobPool_.retrieveJob(jobIds[i]);
+		if (job == nullptr)
+			continue;
+
+		const uint32_t oldFlags = job->setFlag(Job::Flags::SUBMITTED);
+		if ((oldFlags & (Job::Flags::SUBMITTED | Job::Flags::CANCELLED)) != 0)
+			continue;
+
+#if JOB_DEBUG_TRACY_ZONES
+		zoneTextString.format("Submitted jobId[%u]: %u", i, jobIds[i]);
+		ZoneText(zoneTextString.data(), zoneTextString.length());
+#endif
+
+		queue.push(jobIds[i]);
+		numSubmitted++;
+	}
+
+	if (numSubmitted > 0)
+		queueSem_.signal(numSubmitted);
+
+	return numSubmitted;
+}
+
+bool JobSystem::cancel(JobId jobId)
+{
+#if JOB_DEBUG_TRACY_ZONES
+	ZoneScoped;
+#endif
+
+	ASSERT(jobId != InvalidJobId);
+	if (jobId == InvalidJobId)
+		return false;
+
+	Job *job = jobPool_.retrieveJob(jobId);
+	if (job == nullptr)
+		return false;
+
+	uint32_t oldState = job->countersAndState.load(nctl::MemoryModel::RELAXED);
+	while (true)
+	{
+		// If already running, cannot cancel
+		if ((oldState & Job::Flags::RUNNING) != 0)
+			return false;
+
+		const uint32_t newState = oldState | Job::Flags::CANCELLED;
+		if (job->countersAndState.cmpExchange(oldState, newState, nctl::MemoryModel::ACQ_REL))
+		{
+			// If the job has not been submitted yet, we can free it immediately
+			if ((oldState & Job::Flags::SUBMITTED) == 0)
+			{
+				jobStateForceToFinished(job, jobId); // Job debug state transition
+				jobPool_.freeJob(jobId);
+			}
+
+#if JOB_DEBUG_TRACY_ZONES
+			zoneTextString.format("JobId: %u", jobId);
+			ZoneText(zoneTextString.data(), zoneTextString.length());
+#endif
+			return true;
+		}
+
+		// CAS failed, retry with updated `oldState`
+	}
 }
 
 void JobSystem::wait(JobId jobId)
 {
+#if JOB_DEBUG_TRACY_ZONES
+	ZoneScoped;
+#endif
+
 	ASSERT(jobId != InvalidJobId);
 	if (jobId == InvalidJobId)
 		return;
 
 	Job *job = jobPool_.retrieveJob(jobId);
-	ASSERT(job != nullptr);
+	// Not asserting here as a valid job may complete and be recycled before
+	// the caller reaches `wait()`, so `retrieveJob()` can return `nullptr`.
 	if (job == nullptr)
 		return;
+
+#if JOB_DEBUG_TRACY_ZONES
+	zoneTextString.format("JobId: %u", jobId);
+	ZoneText(zoneTextString.data(), zoneTextString.length());
+#endif
 
 	unsigned int spinCount = 0;
 	unsigned int yieldCount = 0;
 	unsigned int spinDebugCount = 0;
 
 	// Wait until the job has completed. In the meantime, work on any other job.
-	while (job->unfinishedJobs.load(nctl::MemoryModel::ACQUIRE) > 0)
+	while (true)
 	{
+		const uint16_t unfinishedJobs = job->loadUnfinishedJobs(nctl::MemoryModel::ACQUIRE);
+		const uint32_t state = job->countersAndState.load(nctl::MemoryModel::ACQUIRE);
+		if (unfinishedJobs == 0 || (state & Job::Flags::CANCELLED) != 0)
+			break;
+
 		JobId nextJob = getJob(jobQueues_.data(), numThreads_);
 		if (nextJob != InvalidJobId)
 		{
@@ -306,41 +467,33 @@ void JobSystem::wait(JobId jobId)
 
 			if (++spinDebugCount > 100000)
 			{
-				LOGW_X("Potential deadlock: jobId %u (idx: %u, gen: %u), unfinishedJobs=%d",
-				       jobId, Job::unpackIndex(jobId), Job::unpackGeneration(jobId),
-				       job->unfinishedJobs.load(nctl::MemoryModel::RELAXED));
+				LOGW_X("Potential deadlock: jobId %u (idx: %u, gen: %u), unfinishedJobs=%d, flags=%dS%dR%dC",
+				       jobId, Job::unpackIndex(jobId), Job::unpackGeneration(jobId), job->loadUnfinishedJobs(nctl::MemoryModel::RELAXED),
+				       Job::hasFlag(state, Job::Flags::SUBMITTED), Job::hasFlag(state, Job::Flags::RUNNING), Job::hasFlag(state, Job::Flags::CANCELLED));
 				spinDebugCount = 0;
 			}
 		}
 	}
 }
 
-int32_t JobSystem::unfinishedJobs(JobId jobId)
+uint16_t JobSystem::unfinishedJobs(JobId jobId)
 {
 	ASSERT(jobId != InvalidJobId);
 	if (jobId == InvalidJobId)
 		return 0;
 
 	Job *job = jobPool_.retrieveJob(jobId);
-	ASSERT(job != nullptr);
-	if (job == nullptr)
-		return 0;
-
-	return job->unfinishedJobs.load(nctl::MemoryModel::ACQUIRE);
+	return job->loadUnfinishedJobs(nctl::MemoryModel::ACQUIRE);
 }
 
-int32_t JobSystem::continuationCount(JobId jobId)
+uint16_t JobSystem::continuationCount(JobId jobId)
 {
 	ASSERT(jobId != InvalidJobId);
 	if (jobId == InvalidJobId)
 		return 0;
 
 	Job *job = jobPool_.retrieveJob(jobId);
-	ASSERT(job != nullptr);
-	if (job == nullptr)
-		return 0;
-
-	return job->continuationCount.load(nctl::MemoryModel::ACQUIRE);
+	return job->loadContinuationCount(nctl::MemoryModel::ACQUIRE);
 }
 
 ///////////////////////////////////////////////////////////
