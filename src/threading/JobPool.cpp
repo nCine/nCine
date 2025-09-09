@@ -75,7 +75,7 @@ void JobPool::freeJob(JobId jobId)
 
 	job->function = nullptr;
 	job->parent = InvalidJobId;
-	job->continuationCount = 0;
+	job->countersAndState.store(0, nctl::MemoryModel::RELEASE);
 	job->generation++;
 
 	ThreadCache &cache = threadCaches_[threadIndex];

@@ -20,11 +20,13 @@ class SerialJobSystem : public IJobSystem
 
 	bool addContinuation(JobId ancestorId, JobId continuationId) override;
 
-	void submit(JobId jobId) override;
-	void wait(const JobId jobId) override;
+	bool submit(JobId jobId) override;
+	uint16_t submit(const JobId *jobIds, uint16_t count) override;
+	bool cancel(JobId jobId) override;
+	void wait(JobId jobId) override;
 
-	int32_t unfinishedJobs(JobId jobId) override;
-	int32_t continuationCount(JobId jobId) override;
+	uint16_t unfinishedJobs(JobId jobId) override;
+	uint16_t continuationCount(JobId jobId) override;
 
   private:
 	/// The stack of free pool indices
