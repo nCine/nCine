@@ -210,6 +210,7 @@ if(Threads_FOUND AND NCINE_WITH_THREADS)
 		target_compile_definitions(ncine PRIVATE "WITH_JOBSYSTEM")
 
 		list(APPEND HEADERS
+			${NCINE_ROOT}/include/ncine/JobHandle.h
 			${NCINE_ROOT}/include/ncine/IJobSystem.h
 			${NCINE_ROOT}/include/ncine/ParallelForJob.h
 			${NCINE_ROOT}/include/ncine/JobStatistics.h
@@ -226,6 +227,7 @@ if(Threads_FOUND AND NCINE_WITH_THREADS)
 		)
 		list(APPEND SOURCES
 			${NCINE_ROOT}/src/threading/jobsystem_debug.cpp
+			${NCINE_ROOT}/src/threading/JobHandle.cpp
 			${NCINE_ROOT}/src/threading/JobPool.cpp
 			${NCINE_ROOT}/src/threading/JobQueue.cpp
 			${NCINE_ROOT}/src/threading/IJobSystem.cpp

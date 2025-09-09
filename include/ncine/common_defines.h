@@ -31,4 +31,14 @@
 	#define DLL_LOCAL
 #endif
 
+#if defined(__has_cpp_attribute)
+	#if __has_cpp_attribute(nodiscard)
+		#define NODISCARD [[nodiscard]]
+	#else
+		#define NODISCARD
+	#endif
+#else
+	#define NODISCARD
+#endif
+
 #endif
