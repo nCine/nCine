@@ -11,7 +11,7 @@ static const uint16_t MaxNumJobs = 8192;
 using JobId = uint32_t;
 static const JobId InvalidJobId = static_cast<JobId>(~0u);
 using JobFunction = void (*)(JobId, const void *);
-static const uint32_t JobDataSize = 32;
+static const uint32_t JobDataSize = 36;
 static const uint32_t JobNumContinuations = 2;
 static_assert(JobDataSize >= sizeof(uintptr_t), "At least one user pointer should fit the Job structure");
 
@@ -41,14 +41,22 @@ class DLL_PUBLIC IJobSystem
 	virtual bool addContinuation(JobId ancestorId, JobId continuationId) = 0;
 
 	/// Submits the specified job to the calling thread queue
-	virtual void submit(JobId jobId) = 0;
+	/*! \returns True if the job has been submitted. */
+	virtual bool submit(JobId jobId) = 0;
+	/// Submits the jobs in the array to the calling thread queue in one batch
+	/*! \returns The number of jobs that have been submitted. */
+	virtual uint16_t submit(const JobId *jobIds, uint16_t count) = 0;
+	/// Attempts to cancel a job, returning it to the pool
+	/*! \returns True if the job can be cancelled. */
+	virtual bool cancel(JobId jobId) = 0;
 	/// Waits until the specified job has finished, while carrying on other jobs
+	/*! \note If the job has already finished, this method will simply return. */
 	virtual void wait(JobId jobId) = 0;
 
 	/// Returns the number of unfinished jobs for the specified job
-	virtual int32_t unfinishedJobs(JobId jobId) = 0;
+	virtual uint16_t unfinishedJobs(JobId jobId) = 0;
 	/// Returns the number of continuation jobs for the specified job
-	virtual int32_t continuationCount(JobId jobId) = 0;
+	virtual uint16_t continuationCount(JobId jobId) = 0;
 
 	/// Returns the total number of threads executing jobs (workers + main)
 	inline unsigned char numThreads() const { return numThreads_; }
@@ -86,11 +94,13 @@ class DLL_PUBLIC NullJobSystem : public IJobSystem
 
 	inline bool addContinuation(JobId ancestorId, JobId continuationId) override { return false; }
 
-	inline void submit(JobId jobId) override {}
+	inline bool submit(JobId jobId) override { return false; }
+	uint16_t submit(const JobId *jobIds, uint16_t count) override { return 0; }
+	inline bool cancel(JobId jobId) override { return false; }
 	inline void wait(JobId jobId) override {}
 
-	inline int32_t unfinishedJobs(JobId jobId) override { return 0; }
-	inline int32_t continuationCount(JobId jobId) override { return 0; }
+	inline uint16_t unfinishedJobs(JobId jobId) override { return 0; }
+	inline uint16_t continuationCount(JobId jobId) override { return 0; }
 };
 
 }

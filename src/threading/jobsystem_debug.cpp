@@ -64,8 +64,8 @@ void jobStatePushedToPopped(Job *job, JobId jobId)
 void jobStateFinishedToFree(Job *job, JobId jobId)
 {
 	transitionJobState(job, jobId, Job::State::FINISHED, Job::State::FREE);
-	const int32_t unfinishedJobs = job->loadUnfinishedJobs(nctl::MemoryModel::ACQUIRE);
-	ASSERT_MSG_X(unfinishedJobs == 0, "Job %u has still %d unfinished jobs", jobId, unfinishedJobs);
+	const uint16_t unfinishedJobs = job->loadUnfinishedJobs(nctl::MemoryModel::ACQUIRE);
+	ASSERT_MSG_X(unfinishedJobs == 0, "Job %u has still %u unfinished jobs", jobId, unfinishedJobs);
 }
 
 void jobStatePoppedToExcuting(Job *job, JobId jobId)
@@ -76,6 +76,17 @@ void jobStatePoppedToExcuting(Job *job, JobId jobId)
 void jobStateExcutingToFinished(Job *job, unsigned int jobId)
 {
 	transitionJobState(job, jobId, Job::State::EXECUTING, Job::State::FINISHED);
+}
+
+void jobStateForceToFinished(Job *job, unsigned int jobId)
+{
+	ASSERT(job != nullptr);
+	if (job != nullptr)
+	{
+		job->state.store(static_cast<uint32_t>(Job::State::FINISHED), nctl::MemoryModel::RELEASE);
+		while (job->loadUnfinishedJobs(nctl::MemoryModel::ACQUIRE) > 0)
+			job->decrementUnfinishedJobs();
+	}
 }
 
 }

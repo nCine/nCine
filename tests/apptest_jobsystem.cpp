@@ -20,6 +20,8 @@ int dummyIterations = 1024;
 int numSpawnedJobs = 4;
 int numRepetitions = 16;
 nctl::StaticString<128> auxString;
+bool batchSubmission = true;
+nctl::Array<nc::JobId> jobIds(1024);
 bool autoResetStatistics = true;
 bool totalIterationsLocked = false;
 unsigned int totalIterations = 0;
@@ -427,6 +429,18 @@ void MyEventHandler::onFrameStart()
 					totalTimestamp = nc::TimeStamp::now();
 
 					nc::JobId rootJobId = jobSystem.createJob(nullptr);
+					if (batchSubmission)
+					{
+						ZoneScopedN("Job Batch Submission");
+						jobIds.clear();
+						for (int i = 0; i < numJobsToQueue; i++)
+						{
+							nc::JobId jobId = jobSystem.createJobAsChild(rootJobId, jobFn);
+							jobIds.pushBack(jobId);
+						}
+						jobSystem.submit(jobIds.data(), jobIds.size());
+					}
+					else
 					{
 						ZoneScopedN("Job Submission");
 						for (int i = 0; i < numJobsToQueue; i++)
@@ -478,6 +492,23 @@ void MyEventHandler::onFrameStart()
 					totalTimestamp = nc::TimeStamp::now();
 
 					nc::JobId rootJobId = jobSystem.createJob(nullptr);
+					if (batchSubmission)
+					{
+						ZoneScopedN("Job Batch Submission");
+						jobIds.clear();
+						for (int i = 0; i < numJobsToQueue; i++)
+						{
+							nc::JobId jobId = jobSystem.createJobAsChild(rootJobId, jobFn);
+							for (unsigned int j = 0; j < nc::JobNumContinuations; j++)
+							{
+								nc::JobId continuationJobId = jobSystem.createJob(contFn);
+								jobSystem.addContinuation(jobId, continuationJobId);
+							}
+							jobIds.pushBack(jobId);
+						}
+						jobSystem.submit(jobIds.data(), jobIds.size());
+					}
+					else
 					{
 						ZoneScopedN("Job Submission");
 						for (int i = 0; i < numJobsToQueue; i++)
@@ -518,6 +549,8 @@ void MyEventHandler::onFrameStart()
 				ZoneText(auxString.data(), auxString.length());
 #endif
 			}
+			ImGui::SameLine();
+			ImGui::Checkbox("Batch submission", &batchSubmission);
 
 			ImGui::SliderInt("Data array size", &dataArraySize, 1, MaxDataArraySize, "%d", ImGuiSliderFlags_AlwaysClamp);
 			ImGui::SliderInt("Count splitter", &countSplitterValue, 1, 1024, "%d", ImGuiSliderFlags_AlwaysClamp);
@@ -572,6 +605,28 @@ void MyEventHandler::onFrameStart()
 					totalTimestamp = nc::TimeStamp::now();
 
 					nc::JobId rootJobId = jobSystem.createJob(nullptr);
+					if (batchSubmission)
+					{
+						ZoneScopedN("Job Batch Submission");
+						jobIds.clear();
+						for (int i = 0; i < childrenCount; i++)
+						{
+							nc::JobId grandparentJobId = jobSystem.createJobAsChild(rootJobId, nullptr);
+							for (int j = 0; j < childrenCount; j++)
+							{
+								nc::JobId parentJobId = jobSystem.createJobAsChild(grandparentJobId, nullptr);
+								for (int k = 0; k < childrenCount; k++)
+								{
+									nc::JobId jobId = jobSystem.createJobAsChild(parentJobId, jobFn);
+									jobIds.pushBack(jobId);
+								}
+								jobIds.pushBack(parentJobId);
+							}
+							jobIds.pushBack(grandparentJobId);
+						}
+						jobSystem.submit(jobIds.data(), jobIds.size());
+					}
+					else
 					{
 						ZoneScopedN("Job Submission");
 						for (int i = 0; i < childrenCount; i++)
