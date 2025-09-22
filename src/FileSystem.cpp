@@ -115,6 +115,7 @@ namespace {
 	}
 #else
 	wchar_t *wideString = nullptr;
+	WIN32_FIND_DATAA findFileData;
 
 	FileSystem::FileDate nativeTimeToFileDate(const SYSTEMTIME *sysTime)
 	{
@@ -191,6 +192,9 @@ nctl::String FileSystem::cachePath_(MaxPathLength);
 ///////////////////////////////////////////////////////////
 
 FileSystem::Directory::Directory(const char *path)
+#ifdef _WIN32
+    : hFindFile_(INVALID_HANDLE_VALUE)
+#endif
 {
 	open(path);
 }
@@ -205,27 +209,28 @@ bool FileSystem::Directory::open(const char *path)
 	close();
 
 #ifdef _WIN32
-	fileName_[0] = '\0';
-	if (path && isDirectory(path))
+	if (path == nullptr || isDirectory(path) == false)
+		return false;
+
+	const size_t pathLength = nctl::strnlen(path, sizeof(buffer) - 3);
+	if (pathLength + 2 >= sizeof(buffer))
+		return false;
+
+	memcpy(buffer, path, pathLength);
+	// Adding a wildcard to list all files in the directory
+	buffer[pathLength] = '\\';
+	buffer[pathLength + 1] = '*';
+	buffer[pathLength + 2] = '\0';
+
+	hFindFile_ = FindFirstFileExA(buffer, FindExInfoBasic, &findFileData, FindExSearchNameMatch, nullptr, FIND_FIRST_EX_LARGE_FETCH);
+
+	if (hFindFile_ != INVALID_HANDLE_VALUE)
 	{
-		WIN32_FIND_DATA findFileData;
 		firstFile_ = true;
-		nctl::strncpy(buffer, path, MaxPathLength - 1);
-		const unsigned long pathLength = nctl::strnlen(buffer, MaxPathLength);
-
-		if (pathLength + 2 <= MaxPathLength)
-		{
-			// Adding a wildcard to list all files in the directory
-			buffer[pathLength + 0] = '\\';
-			buffer[pathLength + 1] = '*';
-			buffer[pathLength + 2] = '\0';
-
-			hFindFile_ = FindFirstFileA(buffer, &findFileData);
-			if (hFindFile_)
-				nctl::strncpy(fileName_, findFileData.cFileName, MaxPathLength - 1);
-		}
+		return true;
 	}
-	return (hFindFile_ != NULL && hFindFile_ != INVALID_HANDLE_VALUE);
+
+	return false;
 #else
 	#ifdef __ANDROID__
 	const char *assetPath = AssetFile::assetPath(path);
@@ -242,10 +247,10 @@ bool FileSystem::Directory::open(const char *path)
 void FileSystem::Directory::close()
 {
 #ifdef _WIN32
-	if (hFindFile_ != NULL && hFindFile_ != INVALID_HANDLE_VALUE)
+	if (hFindFile_ != INVALID_HANDLE_VALUE)
 	{
 		FindClose(hFindFile_);
-		hFindFile_ = NULL;
+		hFindFile_ = INVALID_HANDLE_VALUE;
 	}
 #else
 	#ifdef __ANDROID__
@@ -267,25 +272,19 @@ void FileSystem::Directory::close()
 const char *FileSystem::Directory::readNext()
 {
 #ifdef _WIN32
-	if (hFindFile_ == NULL || hFindFile_ == INVALID_HANDLE_VALUE)
+	if (hFindFile_ == INVALID_HANDLE_VALUE)
 		return nullptr;
 
 	if (firstFile_)
 	{
 		firstFile_ = false;
-		return fileName_;
+		return findFileData.cFileName;
 	}
-	else
-	{
-		WIN32_FIND_DATA findFileData;
-		const int status = FindNextFileA(hFindFile_, &findFileData);
-		if (status != 0)
-		{
-			strncpy_s(fileName_, findFileData.cFileName, MaxPathLength);
-			return fileName_;
-		}
-		return nullptr;
-	}
+
+	if (FindNextFileA(hFindFile_, &findFileData))
+		return findFileData.cFileName;
+
+	return nullptr;
 #else
 	#ifdef __ANDROID__
 	// It does not return directory names
@@ -582,7 +581,7 @@ bool FileSystem::isDirectory(const char *path)
 
 #ifdef _WIN32
 	const DWORD attrs = GetFileAttributesA(path);
-	return (attrs != INVALID_FILE_ATTRIBUTES && attrs & FILE_ATTRIBUTE_DIRECTORY);
+	return (attrs != INVALID_FILE_ATTRIBUTES && (attrs & FILE_ATTRIBUTE_DIRECTORY));
 #else
 	#ifdef __ANDROID__
 	if (AssetFile::assetPath(path))
@@ -693,7 +692,7 @@ bool FileSystem::isExecutable(const char *path)
 	// Assuming that every file that exists is also executable
 	const DWORD attrs = GetFileAttributesA(path);
 	// Assuming that every existing directory is accessible
-	if (attrs != INVALID_FILE_ATTRIBUTES && attrs & FILE_ATTRIBUTE_DIRECTORY)
+	if (attrs != INVALID_FILE_ATTRIBUTES && (attrs & FILE_ATTRIBUTE_DIRECTORY))
 		return true;
 	// Using some of the Windows executable extensions to detect executable files
 	else if (attrs != INVALID_FILE_ATTRIBUTES &&

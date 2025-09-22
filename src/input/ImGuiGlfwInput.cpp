@@ -4,19 +4,25 @@
 #include "ImGuiJoyMappedInput.h"
 
 #include <GLFW/glfw3.h>
-
 #ifdef _WIN32
 	#undef APIENTRY
-	#ifndef GLFW_EXPOSE_NATIVE_WIN32
+	#ifndef GLFW_EXPOSE_NATIVE_WIN32    // for glfwGetWin32Window()
 		#define GLFW_EXPOSE_NATIVE_WIN32
 	#endif
-	#include <GLFW/glfw3native.h>   // for glfwGetWin32Window()
-#endif
-#ifdef __APPLE__
-	#ifndef GLFW_EXPOSE_NATIVE_COCOA
+	#include <GLFW/glfw3native.h>
+#elif defined(__APPLE__)
+	#ifndef GLFW_EXPOSE_NATIVE_COCOA    // for glfwGetCocoaWindow()
 		#define GLFW_EXPOSE_NATIVE_COCOA
 	#endif
-	#include <GLFW/glfw3native.h>   // for glfwGetCocoaWindow()
+	#include <GLFW/glfw3native.h>
+#elif !defined(__EMSCRIPTEN__)
+	#ifndef GLFW_EXPOSE_NATIVE_X11      // for glfwGetX11Window() on Freedesktop (Linux, BSD, etc.)
+		#define GLFW_EXPOSE_NATIVE_X11
+	#endif
+	#ifndef GLFW_EXPOSE_NATIVE_WAYLAND
+		#define GLFW_EXPOSE_NATIVE_WAYLAND
+	#endif
+	#include <GLFW/glfw3native.h>
 #endif
 
 #ifdef __EMSCRIPTEN__
@@ -40,6 +46,12 @@
 #define GLFW_HAS_GAMEPAD_API            (GLFW_VERSION_COMBINED >= 3300) // 3.3+ glfwGetGamepadState() new api
 #define GLFW_HAS_GETKEYNAME             (GLFW_VERSION_COMBINED >= 3200) // 3.2+ glfwGetKeyName()
 #define GLFW_HAS_GETERROR               (GLFW_VERSION_COMBINED >= 3300) // 3.3+ glfwGetError()
+#define GLFW_HAS_GETPLATFORM            (GLFW_VERSION_COMBINED >= 3400) // 3.4+ glfwGetPlatform()
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
+	#define GLFW_HAS_X11_OR_WAYLAND     1
+#else
+	#define GLFW_HAS_X11_OR_WAYLAND     0
+#endif
 
 namespace ncine {
 
@@ -57,6 +69,24 @@ namespace {
 #ifdef _WIN32
 	WNDPROC prevWndProc = nullptr;
 #endif
+
+	bool isWayland()
+	{
+#if !GLFW_HAS_X11_OR_WAYLAND
+		return false;
+#elif GLFW_HAS_GETPLATFORM
+		return glfwGetPlatform() == GLFW_PLATFORM_WAYLAND;
+#else
+		const char *version = glfwGetVersionString();
+		if (strstr(version, "Wayland") == NULL) // e.g. Ubuntu 22.04 ships with GLFW 3.3.6 compiled without Wayland
+			return false;
+	#ifdef GLFW_EXPOSE_NATIVE_X11
+		if (glfwGetX11Display() != NULL)
+			return false;
+	#endif
+		return true;
+#endif
+	}
 
 	ImGuiKey glfwKeyToImGuiKey(int keycode, int scancode)
 	{
@@ -295,6 +325,7 @@ namespace {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
+bool ImGuiGlfwInput::isWayland_ = false;
 bool ImGuiGlfwInput::inputEnabled_ = true;
 GLFWwindow *ImGuiGlfwInput::window_ = nullptr;
 GLFWwindow *ImGuiGlfwInput::mouseWindow_ = nullptr;
@@ -327,6 +358,7 @@ void ImGuiGlfwInput::init(GLFWwindow *window, bool withCallbacks)
 	io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors; // We can honor GetMouseCursor() values (optional)
 	io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos; // We can honor io.WantSetMousePos requests (optional, rarely used)
 
+	isWayland_ = isWayland();
 	window_ = window;
 	time_ = 0.0;
 
@@ -724,6 +756,10 @@ void ImGuiGlfwInput::updateGamepads()
 // - Some accessibility applications are declaring virtual monitors with a DPI of 0.0f, see #7902. We preserve this value for caller to handle.
 float ImGuiGlfwInput::getContentScaleForWindow(GLFWwindow *window)
 {
+#if GLFW_HAS_X11_OR_WAYLAND
+	if (isWayland_)
+		return 1.0f;
+#endif
 #if GLFW_HAS_PER_MONITOR_DPI && !(defined(__APPLE__) || defined(__EMSCRIPTEN__) || defined(__ANDROID__))
 	float xScale, yScale;
 	glfwGetWindowContentScale(window, &xScale, &yScale);
@@ -736,6 +772,10 @@ float ImGuiGlfwInput::getContentScaleForWindow(GLFWwindow *window)
 
 float ImGuiGlfwInput::getContentScaleForMonitor(GLFWmonitor *monitor)
 {
+#if GLFW_HAS_X11_OR_WAYLAND
+	if (isWayland()) // We can't access our isWayland cache for a monitor.
+		return 1.0f;
+#endif
 #if GLFW_HAS_PER_MONITOR_DPI && !(defined(__APPLE__) || defined(__EMSCRIPTEN__) || defined(__ANDROID__))
 	float xScale, yScale;
 	glfwGetMonitorContentScale(monitor, &xScale, &yScale);
@@ -752,14 +792,16 @@ void ImGuiGlfwInput::getWindowSizeAndFramebufferScale(GLFWwindow *window, ImVec2
 	int displayW, displayH;
 	glfwGetWindowSize(window, &w, &h);
 	glfwGetFramebufferSize(window, &displayW, &displayH);
+	float fbScaleX = (w > 0) ? (float)displayW / w : 1.0f;
+	float fbScaleY = (h > 0) ? (float)displayH / h : 1.0f;
+#if GLFW_HAS_X11_OR_WAYLAND
+	if (isWayland_)
+		fbScaleX = fbScaleY = 1.0f;
+#endif
 	if (outSize != nullptr)
 		*outSize = ImVec2((float)w, (float)h);
 	if (outFramebufferScale != nullptr)
-	{
-		*outFramebufferScale = (w > 0 && h > 0) ? ImVec2(static_cast<float>(displayW) / static_cast<float>(w),
-		                                                 static_cast<float>(displayH) / static_cast<float>(h))
-		                                        : ImVec2(1.0f, 1.0f);
-	}
+		*outFramebufferScale = ImVec2(fbScaleX, fbScaleY);
 }
 
 }

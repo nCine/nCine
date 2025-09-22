@@ -20,6 +20,7 @@ class ImGuiGlfwInput
 	static inline void setInputEnabled(bool inputEnabled) { inputEnabled_ = inputEnabled; }
 
   private:
+	static bool isWayland_;
 	static bool inputEnabled_;
 
 	static GLFWwindow *window_;

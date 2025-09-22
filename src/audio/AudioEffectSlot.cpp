@@ -60,11 +60,14 @@ AudioEffectSlot::AudioEffectSlot(AudioEffectSlot &&other)
 
 AudioEffectSlot &AudioEffectSlot::operator=(AudioEffectSlot &&other)
 {
-	effectSlotId_ = other.effectSlotId_;
-	gain_ = other.gain_;
-	auxSendAuto_ = other.auxSendAuto_;
+	if (this != &other)
+	{
+		effectSlotId_ = other.effectSlotId_;
+		gain_ = other.gain_;
+		auxSendAuto_ = other.auxSendAuto_;
 
-	other.effectSlotId_ = AL_EFFECTSLOT_NULL;
+		other.effectSlotId_ = AL_EFFECTSLOT_NULL;
+	}
 	return *this;
 }
 

@@ -79,27 +79,29 @@ SceneNode::SceneNode(SceneNode &&other)
 
 SceneNode &SceneNode::operator=(SceneNode &&other)
 {
-	Object::operator=(nctl::move(other));
+	if (this != &other)
+	{
+		Object::operator=(nctl::move(other));
 
-	updateEnabled_ = other.updateEnabled_;
-	drawEnabled_ = other.drawEnabled_;
-	parent_ = other.parent_;
-	children_ = nctl::move(other.children_);
-	visitOrderState_ = other.visitOrderState_;
-	position_ = other.position_;
-	anchorPoint_ = other.anchorPoint_;
-	scaleFactor_ = other.scaleFactor_;
-	rotation_ = other.rotation_;
-	color_ = other.color_;
-	layer_ = other.layer_;
-	shouldDeleteChildrenOnDestruction_ = other.shouldDeleteChildrenOnDestruction_;
-	dirtyBits_ = other.dirtyBits_;
-	lastFrameUpdated_ = other.lastFrameUpdated_;
+		updateEnabled_ = other.updateEnabled_;
+		drawEnabled_ = other.drawEnabled_;
+		parent_ = other.parent_;
+		children_ = nctl::move(other.children_);
+		visitOrderState_ = other.visitOrderState_;
+		position_ = other.position_;
+		anchorPoint_ = other.anchorPoint_;
+		scaleFactor_ = other.scaleFactor_;
+		rotation_ = other.rotation_;
+		color_ = other.color_;
+		layer_ = other.layer_;
+		shouldDeleteChildrenOnDestruction_ = other.shouldDeleteChildrenOnDestruction_;
+		dirtyBits_ = other.dirtyBits_;
+		lastFrameUpdated_ = other.lastFrameUpdated_;
 
-	swapChildPointer(this, &other);
-	for (SceneNode *child : children_)
-		child->parent_ = this;
-
+		swapChildPointer(this, &other);
+		for (SceneNode *child : children_)
+			child->parent_ = this;
+	}
 	return *this;
 }
 

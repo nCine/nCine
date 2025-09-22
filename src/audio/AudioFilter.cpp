@@ -69,9 +69,12 @@ AudioFilter::AudioFilter(AudioFilter &&other)
 
 AudioFilter &AudioFilter::operator=(AudioFilter &&other)
 {
-	filterId_ = other.filterId_;
+	if (this != &other)
+	{
+		filterId_ = other.filterId_;
 
-	other.filterId_ = AL_FILTER_NULL;
+		other.filterId_ = AL_FILTER_NULL;
+	}
 	return *this;
 }
 

@@ -617,6 +617,9 @@ float ImGuiSdlInput::getContentScaleForWindow(SDL_Window *window)
 
 float ImGuiSdlInput::getContentScaleForDisplay(int displayIndex)
 {
+	const char *sdlDriver = SDL_GetCurrentVideoDriver();
+	if (sdlDriver && strcmp(sdlDriver, "wayland") == 0)
+		return 1.0f;
 #if SDL_HAS_PER_MONITOR_DPI
 	#if !defined(__APPLE__) && !defined(__EMSCRIPTEN__) && !defined(__ANDROID__)
 	float dpi = 0.0f;

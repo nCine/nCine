@@ -140,7 +140,7 @@ else() # GCC and LLVM
 	endif()
 
 	if(NCINE_WITH_TRACY OR NCINE_WITH_CRASHPAD)
-		target_compile_options(ncine PUBLIC $<$<CONFIG:Release>:-g -fno-omit-frame-pointer>)
+		target_compile_options(ncine PUBLIC $<$<CONFIG:Release>:-g -fno-omit-frame-pointer -fno-optimize-sibling-calls>)
 		if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang" AND NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND (MINGW OR MSYS)))
 			target_compile_options(ncine PUBLIC $<$<CONFIG:Release>:-rdynamic>)
 		endif()
@@ -169,7 +169,7 @@ else() # GCC and LLVM
 		target_compile_options(ncine PRIVATE $<$<CONFIG:Debug>:-fvar-tracking-assignments>)
 
 		# Extra optimizations in release
-		target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-Ofast -funsafe-loop-optimizations -ftree-loop-if-convert-stores>)
+		target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-funsafe-loop-optimizations -ftree-loop-if-convert-stores>)
 
 		if(NCINE_LINKTIME_OPTIMIZATION AND NOT (MINGW OR MSYS OR ANDROID))
 			target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-flto=auto>)
@@ -195,11 +195,6 @@ else() # GCC and LLVM
 
 		if(NCINE_DYNAMIC_LIBRARY)
 			target_link_options(ncine PRIVATE -Wl,-undefined,error)
-		endif()
-
-		# Extra optimizations in release
-		if(NOT EMSCRIPTEN)
-			target_compile_options(ncine PRIVATE $<$<CONFIG:Release>:-Ofast>)
 		endif()
 
 		# Enabling ThinLTO of Clang 4

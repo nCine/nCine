@@ -25,12 +25,12 @@ class AndroidJniHelper
 	static void detachJVM();
 	static void initClasses();
 
-	/// Static class, no constructor
-	AndroidJniHelper();
-	/// Static class, no copy constructor
-	AndroidJniHelper(const AndroidJniHelper &other);
-	/// Static class, no assignement operator
-	AndroidJniHelper &operator=(const AndroidJniHelper &other);
+	/// Deleted constructor
+	AndroidJniHelper() = delete;
+	/// Deleted copy constructor
+	AndroidJniHelper(const AndroidJniHelper &other) = delete;
+	/// Deleted assignement operator
+	AndroidJniHelper &operator=(const AndroidJniHelper &other) = delete;
 
 	friend class AndroidApplication;
 };

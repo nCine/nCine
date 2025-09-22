@@ -62,7 +62,6 @@ class DLL_PUBLIC FileSystem
 #ifdef _WIN32
 		bool firstFile_ = true;
 		HANDLE hFindFile_ = NULL;
-		char fileName_[260];
 #else
 	#ifdef __ANDROID__
 		AAssetDir *assetDir_ = nullptr;

@@ -73,16 +73,19 @@ AudioBuffer::AudioBuffer(AudioBuffer &&other)
 
 AudioBuffer &AudioBuffer::operator=(AudioBuffer &&other)
 {
-	Object::operator=(nctl::move(other));
+	if (this != &other)
+	{
+		Object::operator=(nctl::move(other));
 
-	bufferId_ = other.bufferId_;
-	bytesPerSample_ = other.bytesPerSample_;
-	numChannels_ = other.numChannels_;
-	frequency_ = other.frequency_;
-	numSamples_ = other.numSamples_;
-	duration_ = other.duration_;
+		bufferId_ = other.bufferId_;
+		bytesPerSample_ = other.bytesPerSample_;
+		numChannels_ = other.numChannels_;
+		frequency_ = other.frequency_;
+		numSamples_ = other.numSamples_;
+		duration_ = other.duration_;
 
-	other.bufferId_ = 0;
+		other.bufferId_ = 0;
+	}
 	return *this;
 }
 

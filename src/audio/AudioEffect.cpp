@@ -79,9 +79,12 @@ AudioEffect::AudioEffect(AudioEffect &&other)
 
 AudioEffect &AudioEffect::operator=(AudioEffect &&other)
 {
-	effectId_ = other.effectId_;
+	if (this != &other)
+	{
+		effectId_ = other.effectId_;
 
-	other.effectId_ = AL_EFFECT_NULL;
+		other.effectId_ = AL_EFFECT_NULL;
+	}
 	return *this;
 }
 

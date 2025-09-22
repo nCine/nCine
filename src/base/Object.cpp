@@ -34,12 +34,15 @@ Object::Object(Object &&other)
 
 Object &Object::operator=(Object &&other)
 {
-	type_ = other.type_;
-	theServiceLocator().indexer().removeObject(id_);
-	id_ = other.id_;
-	name_ = other.name_;
+	if (this != &other)
+	{
+		type_ = other.type_;
+		theServiceLocator().indexer().removeObject(id_);
+		id_ = other.id_;
+		name_ = other.name_;
 
-	other.id_ = 0;
+		other.id_ = 0;
+	}
 	return *this;
 }
 
