@@ -189,12 +189,12 @@ class DLL_PUBLIC String
 	inline bool operator>=(const char *cString) const { return compare(cString) >= 0; }
 	inline bool operator<=(const char *cString) const { return compare(cString) <= 0; }
 
-	friend inline bool operator==(const char *cString, String string) { return string.compare(cString) == 0; }
-	friend inline bool operator!=(const char *cString, String string) { return string.compare(cString) != 0; }
-	friend inline bool operator>(const char *cString, String string) { return string.compare(cString) <= 0; }
-	friend inline bool operator<(const char *cString, String string) { return string.compare(cString) >= 0; }
-	friend inline bool operator>=(const char *cString, String string) { return string.compare(cString) < 0; }
-	friend inline bool operator<=(const char *cString, String string) { return string.compare(cString) > 0; }
+	friend inline bool operator==(const char *cString, const String &string) { return string.compare(cString) == 0; }
+	friend inline bool operator!=(const char *cString, const String &string) { return string.compare(cString) != 0; }
+	friend inline bool operator>(const char *cString, const String &string) { return string.compare(cString) <= 0; }
+	friend inline bool operator<(const char *cString, const String &string) { return string.compare(cString) >= 0; }
+	friend inline bool operator>=(const char *cString, const String &string) { return string.compare(cString) < 0; }
+	friend inline bool operator<=(const char *cString, const String &string) { return string.compare(cString) > 0; }
 
 	/// Read-only access to the specified element (with bounds checking)
 	const char &at(unsigned int index) const;

@@ -18,7 +18,7 @@ struct IteratorTraits<StringIterator<false>>
 	/// Reference to the type of the values deferenced by the iterator
 	using Reference = char &;
 	/// Type trait for iterator category
-	static inline RandomAccessIteratorTag IteratorCategory() { return RandomAccessIteratorTag(); }
+	using IteratorCategory = RandomAccessIteratorTag;
 };
 
 /// Iterator traits structure specialization for constant `StringIterator` class
@@ -32,7 +32,7 @@ struct IteratorTraits<StringIterator<true>>
 	/// Reference to the type of the values deferenced by the iterator
 	using Reference = const char &;
 	/// Type trait for iterator category
-	static inline RandomAccessIteratorTag IteratorCategory() { return RandomAccessIteratorTag(); }
+	using IteratorCategory = RandomAccessIteratorTag;
 };
 
 /// A String iterator

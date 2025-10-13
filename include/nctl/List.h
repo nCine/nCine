@@ -163,23 +163,23 @@ class List
 	/// Removes the last element in constant time
 	inline void popBack() { removeNode(sentinel_.previous_); }
 	/// Inserts a new element after the node pointed by the constant iterator
-	ConstIterator insertAfter(const Iterator position, const T &element);
+	ConstIterator insertAfter(Iterator position, const T &element);
 	/// Move inserts a new element after the node pointed by the constant iterator
-	ConstIterator insertAfter(const Iterator position, T &&element);
+	ConstIterator insertAfter(Iterator position, T &&element);
 	/// Constructs a new element after the node pointed by the constant iterator
-	template <typename... Args> ConstIterator emplaceAfter(const Iterator position, Args &&... args);
+	template <typename... Args> ConstIterator emplaceAfter(Iterator position, Args &&... args);
 	/// Inserts a new element before the node pointed by the constant iterator
-	ConstIterator insertBefore(const Iterator position, const T &element);
+	ConstIterator insertBefore(Iterator position, const T &element);
 	/// Move inserts a new element before the node pointed by the constant iterator
-	ConstIterator insertBefore(const Iterator position, T &&element);
+	ConstIterator insertBefore(Iterator position, T &&element);
 	/// Constructs a new element before the node pointed by the constant iterator
-	template <typename... Args> ConstIterator emplaceBefore(const Iterator position, Args &&... args);
+	template <typename... Args> ConstIterator emplaceBefore(Iterator position, Args &&... args);
 	/// Inserts new elements from a source range after the node pointed by the constant iterator, last not included
-	ConstIterator insert(const Iterator position, Iterator first, const Iterator last);
+	ConstIterator insert(Iterator position, Iterator first, Iterator last);
 	/// Removes the node pointed by the constant iterator in constant time
 	ConstIterator erase(ConstIterator position);
 	/// Removes the range of nodes pointed by the iterators in constant time
-	ConstIterator erase(ConstIterator first, const ConstIterator last);
+	ConstIterator erase(ConstIterator first, ConstIterator last);
 	/// Removes a specified element in linear time
 	void remove(const T &element);
 	/// Removes all the elements that fulfill the condition
@@ -190,7 +190,7 @@ class List
 	/// Transfers one element at `it` from the source list in front of `position`
 	void splice(Iterator position, List &source, Iterator it);
 	/// Transfers a range of elements from the source list, `last` not included, in front of `position`
-	void splice(Iterator position, List &source, Iterator first, Iterator last);
+	void splice(Iterator position, List &source, Iterator first, ConstIterator last);
 
   private:
 #if NCINE_WITH_ALLOCATORS
@@ -344,45 +344,45 @@ T &List<T>::back()
 }
 
 template <class T>
-typename List<T>::ConstIterator List<T>::insertAfter(const Iterator position, const T &element)
+typename List<T>::ConstIterator List<T>::insertAfter(Iterator position, const T &element)
 {
 	return ConstIterator(insertAfterNode(position.node_, element));
 }
 
 template <class T>
-typename List<T>::ConstIterator List<T>::insertAfter(const Iterator position, T &&element)
+typename List<T>::ConstIterator List<T>::insertAfter(Iterator position, T &&element)
 {
 	return ConstIterator(insertAfterNode(position.node_, nctl::move(element)));
 }
 
 template <class T>
 template <typename... Args>
-typename List<T>::ConstIterator List<T>::emplaceAfter(const Iterator position, Args &&... args)
+typename List<T>::ConstIterator List<T>::emplaceAfter(Iterator position, Args &&... args)
 {
 	return ConstIterator(emplaceAfterNode(position.node_, nctl::forward<Args>(args)...));
 }
 
 template <class T>
-typename List<T>::ConstIterator List<T>::insertBefore(const Iterator position, const T &element)
+typename List<T>::ConstIterator List<T>::insertBefore(Iterator position, const T &element)
 {
 	return ConstIterator(insertBeforeNode(position.node_, element));
 }
 
 template <class T>
-typename List<T>::ConstIterator List<T>::insertBefore(const Iterator position, T &&element)
+typename List<T>::ConstIterator List<T>::insertBefore(Iterator position, T &&element)
 {
 	return ConstIterator(insertBeforeNode(position.node_, nctl::move(element)));
 }
 
 template <class T>
 template <typename... Args>
-typename List<T>::ConstIterator List<T>::emplaceBefore(const Iterator position, Args &&... args)
+typename List<T>::ConstIterator List<T>::emplaceBefore(Iterator position, Args &&... args)
 {
 	return ConstIterator(emplaceBeforeNode(position.node_, nctl::forward<Args>(args)...));
 }
 
 template <class T>
-typename List<T>::ConstIterator List<T>::insert(Iterator position, Iterator first, const Iterator last)
+typename List<T>::ConstIterator List<T>::insert(Iterator position, Iterator first, Iterator last)
 {
 	ListNode<T> *node = position.node_;
 	while (first != last)
@@ -404,7 +404,7 @@ typename List<T>::ConstIterator List<T>::erase(ConstIterator position)
 
 /*! \note The first iterator cannot be used after on. */
 template <class T>
-typename List<T>::ConstIterator List<T>::erase(ConstIterator first, const ConstIterator last)
+typename List<T>::ConstIterator List<T>::erase(ConstIterator first, ConstIterator last)
 {
 	ListNode<T> *nextNode = removeRange(first.node_, last.node_);
 	return ConstIterator(nextNode);
@@ -451,12 +451,12 @@ void List<T>::splice(Iterator position, List &source)
 template <class T>
 void List<T>::splice(Iterator position, List &source, Iterator it)
 {
-	Iterator next = it;
+	ConstIterator next = it;
 	splice(position, source, it, ++next);
 }
 
 template <class T>
-void List<T>::splice(Iterator position, List &source, Iterator first, Iterator last)
+void List<T>::splice(Iterator position, List &source, Iterator first, ConstIterator last)
 {
 	// Early-out if the source list is empty
 	if (source.isEmpty())

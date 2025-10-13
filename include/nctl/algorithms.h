@@ -222,7 +222,7 @@ inline T LogicalNot(const T &a)
 
 /// Returns true if all elements in range satisfy the condition
 template <class Iterator, class UnaryPredicate>
-inline bool allOf(Iterator first, const Iterator last, UnaryPredicate pred)
+inline bool allOf(Iterator first, Iterator last, UnaryPredicate pred)
 {
 	for (; first != last; ++first)
 	{
@@ -235,7 +235,7 @@ inline bool allOf(Iterator first, const Iterator last, UnaryPredicate pred)
 
 /// Returns true if no element in range satisfies the condition
 template <class Iterator, class UnaryPredicate>
-inline bool noneOf(Iterator first, const Iterator last, UnaryPredicate pred)
+inline bool noneOf(Iterator first, Iterator last, UnaryPredicate pred)
 {
 	for (; first != last; ++first)
 	{
@@ -248,7 +248,7 @@ inline bool noneOf(Iterator first, const Iterator last, UnaryPredicate pred)
 
 /// Returns true if any of the elements in range satisfies the condition
 template <class Iterator, class UnaryPredicate>
-inline bool anyOf(Iterator first, const Iterator last, UnaryPredicate pred)
+inline bool anyOf(Iterator first, Iterator last, UnaryPredicate pred)
 {
 	for (; first != last; ++first)
 	{
@@ -261,7 +261,7 @@ inline bool anyOf(Iterator first, const Iterator last, UnaryPredicate pred)
 
 /// Applies a function to each element in range
 template <class Iterator, class Function>
-inline Function forEach(Iterator first, const Iterator last, Function fn)
+inline Function forEach(Iterator first, Iterator last, Function fn)
 {
 	for (; first != last; ++first)
 		fn(*first);
@@ -271,7 +271,7 @@ inline Function forEach(Iterator first, const Iterator last, Function fn)
 
 /// Returns an iterator to the first element in range equal to value, last element otherwise
 template <class Iterator, class T>
-inline Iterator find(Iterator first, const Iterator last, const T &value)
+inline Iterator find(Iterator first, Iterator last, const T &value)
 {
 	for (; first != last; ++first)
 	{
@@ -284,7 +284,7 @@ inline Iterator find(Iterator first, const Iterator last, const T &value)
 
 /// Returns an iterator to the first element in range satisfying the condition, last element otherwise
 template <class Iterator, class UnaryPredicate>
-inline Iterator findIf(Iterator first, const Iterator last, UnaryPredicate pred)
+inline Iterator findIf(Iterator first, Iterator last, UnaryPredicate pred)
 {
 	for (; first != last; ++first)
 	{
@@ -297,7 +297,7 @@ inline Iterator findIf(Iterator first, const Iterator last, UnaryPredicate pred)
 
 /// Returns an iterator to the first element in range not satisfying the condition, last element otherwise
 template <class Iterator, class UnaryPredicate>
-inline Iterator findIfNot(Iterator first, const Iterator last, UnaryPredicate pred)
+inline Iterator findIfNot(Iterator first, Iterator last, UnaryPredicate pred)
 {
 	for (; first != last; ++first)
 	{
@@ -310,7 +310,7 @@ inline Iterator findIfNot(Iterator first, const Iterator last, UnaryPredicate pr
 
 /// Returns the number of elements in range equal to value
 template <class Iterator, class T>
-inline int count(Iterator first, const Iterator last, const T &value)
+inline int count(Iterator first, Iterator last, const T &value)
 {
 	int counter = 0;
 
@@ -325,7 +325,7 @@ inline int count(Iterator first, const Iterator last, const T &value)
 
 /// Returns the number of elements in range that satisfy the condition
 template <class Iterator, class UnaryPredicate>
-inline int countIf(Iterator first, const Iterator last, UnaryPredicate pred)
+inline int countIf(Iterator first, Iterator last, UnaryPredicate pred)
 {
 	int counter = 0;
 
@@ -340,7 +340,7 @@ inline int countIf(Iterator first, const Iterator last, UnaryPredicate pred)
 
 /// Returns true if the elements in the two ranges are equal
 template <class Iterator1, class Iterator2>
-inline bool equal(Iterator1 first1, const Iterator1 last1, Iterator2 first2)
+inline bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2)
 {
 	while (first1 != last1)
 	{
@@ -355,7 +355,7 @@ inline bool equal(Iterator1 first1, const Iterator1 last1, Iterator2 first2)
 
 /// Returns the minimum element in the range
 template <class Iterator>
-inline Iterator minElement(Iterator first, const Iterator last)
+inline Iterator minElement(Iterator first, Iterator last)
 {
 	if (first == last)
 		return last;
@@ -374,7 +374,7 @@ inline Iterator minElement(Iterator first, const Iterator last)
 
 /// Returns the maximum element in the range
 template <class Iterator>
-inline Iterator maxElement(Iterator first, const Iterator last)
+inline Iterator maxElement(Iterator first, Iterator last)
 {
 	if (first == last)
 		return last;
@@ -393,7 +393,7 @@ inline Iterator maxElement(Iterator first, const Iterator last)
 
 /// Clamp the value of all elements in the range
 template <class Iterator, class T>
-inline void clampElements(Iterator first, const Iterator last, const T &minValue, const T &maxValue)
+inline void clampElements(Iterator first, Iterator last, const T &minValue, const T &maxValue)
 {
 	for (; first != last; ++first)
 		*first = min(max(*first, minValue), maxValue);
@@ -411,7 +411,7 @@ inline void iterSwap(Iterator1 a, Iterator2 b)
 
 /// Copies the elements from the first range into the one beginning at result
 template <class IteratorIn, class IteratorOut>
-inline IteratorOut copy(IteratorIn first, const IteratorIn last, IteratorOut result)
+inline IteratorOut copy(IteratorIn first, IteratorIn last, IteratorOut result)
 {
 	while (first != last)
 	{
@@ -440,7 +440,7 @@ inline IteratorOut copyN(IteratorIn first, unsigned int n, IteratorOut result)
 
 /// Copies the elements from the first range into the one beginning at result for elements that satisfies the predicate
 template <class IteratorIn, class IteratorOut, class UnaryPredicate>
-inline IteratorOut copyIf(IteratorIn first, const IteratorIn last, IteratorOut result, UnaryPredicate pred)
+inline IteratorOut copyIf(IteratorIn first, IteratorIn last, IteratorOut result, UnaryPredicate pred)
 {
 	while (first != last)
 	{
@@ -457,7 +457,7 @@ inline IteratorOut copyIf(IteratorIn first, const IteratorIn last, IteratorOut r
 
 /// Applies an operation sequentially to the elements of one range storing the result at the result iterator
 template <class IteratorIn, class IteratorOut, class UnaryOperation>
-inline IteratorOut transform(IteratorIn first1, const IteratorIn last1, IteratorOut result, UnaryOperation op)
+inline IteratorOut transform(IteratorIn first1, IteratorIn last1, IteratorOut result, UnaryOperation op)
 {
 	while (first1 != last1)
 	{
@@ -471,7 +471,7 @@ inline IteratorOut transform(IteratorIn first1, const IteratorIn last1, Iterator
 
 /// Applies an operation sequentially to the elements of two ranges storing the result at the result iterator
 template <class IteratorIn1, class IteratorIn2, class IteratorOut, class BinaryOperation>
-inline IteratorOut transform(IteratorIn1 first1, const IteratorIn1 last1, IteratorIn2 first2,
+inline IteratorOut transform(IteratorIn1 first1, IteratorIn1 last1, IteratorIn2 first2,
                              IteratorOut result, BinaryOperation binaryOp)
 {
 	while (first1 != last1)
@@ -486,7 +486,7 @@ inline IteratorOut transform(IteratorIn1 first1, const IteratorIn1 last1, Iterat
 
 /// Assigns the new value to all elements of the range that are equal to the specified value
 template <class Iterator, class T>
-inline void replace(Iterator first, const Iterator last, const T &oldValue, const T &newValue)
+inline void replace(Iterator first, Iterator last, const T &oldValue, const T &newValue)
 {
 	while (first != last)
 	{
@@ -498,7 +498,7 @@ inline void replace(Iterator first, const Iterator last, const T &oldValue, cons
 
 /// Assigns the new value to all elements of the range that are equal to the specified value
 template <class Iterator, class UnaryPredicate, class T>
-inline void replaceIf(Iterator first, const Iterator last, UnaryPredicate pred, const T &newValue)
+inline void replaceIf(Iterator first, Iterator last, UnaryPredicate pred, const T &newValue)
 {
 	while (first != last)
 	{
@@ -510,7 +510,7 @@ inline void replaceIf(Iterator first, const Iterator last, UnaryPredicate pred, 
 
 /// Copies the elements from the first range into the one beginning at result, replacing the appearances of the specified value with the new one
 template <class IteratorIn, class IteratorOut, class T>
-inline IteratorOut replaceCopy(IteratorIn first, const IteratorIn last, IteratorOut result, const T &oldValue, const T &newValue)
+inline IteratorOut replaceCopy(IteratorIn first, IteratorIn last, IteratorOut result, const T &oldValue, const T &newValue)
 {
 	while (first != last)
 	{
@@ -524,7 +524,7 @@ inline IteratorOut replaceCopy(IteratorIn first, const IteratorIn last, Iterator
 
 /// Copies the elements from the first range into the one beginning at result, replacing those that satisfy the predicate with the new value
 template <class IteratorIn, class IteratorOut, class UnaryPredicate, class T>
-inline IteratorOut replaceCopyIf(IteratorIn first, const IteratorIn last, IteratorOut result, UnaryPredicate pred, const T &newValue)
+inline IteratorOut replaceCopyIf(IteratorIn first, IteratorIn last, IteratorOut result, UnaryPredicate pred, const T &newValue)
 {
 	while (first != last)
 	{
@@ -538,7 +538,7 @@ inline IteratorOut replaceCopyIf(IteratorIn first, const IteratorIn last, Iterat
 
 /// Fill a range with value
 template <class Iterator, class T>
-inline void fill(Iterator first, const Iterator last, const T &value)
+inline void fill(Iterator first, Iterator last, const T &value)
 {
 	for (; first != last; ++first)
 		*first = value;
@@ -554,7 +554,7 @@ inline void fillN(Iterator first, unsigned int n, const T &value)
 
 /// Assigns the values returned by the generator to the elements in the range
 template <class Iterator, class Generator>
-inline void generate(Iterator first, const Iterator last, Generator gen)
+inline void generate(Iterator first, Iterator last, Generator gen)
 {
 	while (first != last)
 	{
@@ -577,7 +577,7 @@ inline void generateN(Iterator first, unsigned int n, Generator gen)
 
 /// Removes all the elements equal to the value, and returns an iterator to the new end of that range
 template <class Iterator, class T>
-inline Iterator remove(Iterator first, const Iterator last, const T &val)
+inline Iterator remove(Iterator first, Iterator last, const T &val)
 {
 	Iterator result = first;
 
@@ -596,7 +596,7 @@ inline Iterator remove(Iterator first, const Iterator last, const T &val)
 
 /// Removes all the elements in the range for which the predicate is true, and returns an iterator to the new end of that range
 template <class Iterator, class UnaryPredicate>
-inline Iterator removeIf(Iterator first, const Iterator last, UnaryPredicate pred)
+inline Iterator removeIf(Iterator first, Iterator last, UnaryPredicate pred)
 {
 	Iterator result = first;
 
@@ -640,7 +640,7 @@ inline IteratorOut reverseCopy(IteratorIn first, IteratorIn last, IteratorOut re
 
 /// Returns true if the range is sorted into ascending order
 template <class Iterator>
-inline bool isSorted(Iterator first, const Iterator last)
+inline bool isSorted(Iterator first, Iterator last)
 {
 	if (first == last)
 		return true;
@@ -658,7 +658,7 @@ inline bool isSorted(Iterator first, const Iterator last)
 
 /// Returns true if the range is sorted, using a custom comparison
 template <class Iterator, class Compare>
-inline bool isSorted(Iterator first, const Iterator last, Compare comp)
+inline bool isSorted(Iterator first, Iterator last, Compare comp)
 {
 	if (first == last)
 		return true;
@@ -676,7 +676,7 @@ inline bool isSorted(Iterator first, const Iterator last, Compare comp)
 
 /// Returns an iterator to the first element in the range which does not follow an ascending order, or last if sorted
 template <class Iterator>
-inline const Iterator isSortedUntil(Iterator first, const Iterator last)
+inline Iterator isSortedUntil(Iterator first, Iterator last)
 {
 	if (first == last)
 		return first;
@@ -694,7 +694,7 @@ inline const Iterator isSortedUntil(Iterator first, const Iterator last)
 
 /// Returns an iterator to the first element in the range which does not follow the custom comparison, or last if sorted
 template <class Iterator, class Compare>
-inline const Iterator isSortedUntil(Iterator first, const Iterator last, Compare comp)
+inline Iterator isSortedUntil(Iterator first, Iterator last, Compare comp)
 {
 	if (first == last)
 		return first;
@@ -712,33 +712,41 @@ inline const Iterator isSortedUntil(Iterator first, const Iterator last, Compare
 
 namespace {
 
-	/// Partition function for quicksort with iterators and custom compare function
+	/// Chooses the median between three values, to avoid unbalanced partitions with already sorted arrays
+	template <class Iterator, class Compare>
+	Iterator medianOfThree(Iterator a, Iterator b, Iterator c, Compare comp)
+	{
+		if (comp(*a, *b))
+		{
+			if (comp(*b, *c)) return b; // a < b < c
+			else if (comp(*a, *c)) return c; // a < c <= b
+			else return a; // c <= a < b
+		}
+		else
+		{
+			if (comp(*a, *c)) return a; // b <= a < c
+			else if (comp(*b, *c)) return c; // b < c <= a
+			else return b; // c <= b <= a
+		}
+	}
+
+	/// Lomuto partition function for quicksort with iterators and custom compare function
 	template <class Iterator, class Compare>
 	inline Iterator partition(Iterator first, Iterator last, Compare comp)
 	{
-		const Iterator pivot = last;
-
-		while (first != last)
+		Iterator pivot = last;
+		Iterator i = first;
+		for (Iterator j = first; j != last; ++j)
 		{
-			while (comp(*first, *pivot))
+			if (comp(*j, *pivot))
 			{
-				++first;
-				if (first == last)
-					return first;
+				swap(*i, *j);
+				++i;
 			}
-
-			do
-			{
-				--last;
-				if (first == last)
-					return first;
-			} while (!comp(*last, *pivot));
-
-			swap(*first, *last);
-			++first;
 		}
 
-		return first;
+		swap(*i, *pivot);
+		return i;
 	}
 
 	/// Quicksort implementation with random access iterators and custom compare function
@@ -748,10 +756,12 @@ namespace {
 		const int size = distance(first, last);
 		if (size > 1)
 		{
-			Iterator p = prev(last);
-			swap(*next(first, size / 2), *p);
-			Iterator q = partition(first, p, comp);
-			swap(*q, *p);
+			Iterator lastElem = prev(last);
+			Iterator mid = next(first, size / 2);
+			Iterator pivot = medianOfThree(first, mid, lastElem, comp);
+			swap(*pivot, *lastElem);
+			Iterator q = partition(first, lastElem, comp);
+
 			quicksort(first, q, RandomAccessIteratorTag(), comp);
 			quicksort(next(q), last, RandomAccessIteratorTag(), comp);
 		}
@@ -767,6 +777,7 @@ namespace {
 			swap(*first, *p);
 			Iterator q = partition(first, p, comp);
 			swap(*q, *p);
+
 			quicksort(first, q, BidirectionalIteratorTag(), comp);
 			quicksort(next(q), last, BidirectionalIteratorTag(), comp);
 		}
@@ -778,21 +789,21 @@ namespace {
 template <class Iterator, class Compare>
 inline void quicksort(Iterator first, Iterator last, Compare comp)
 {
-	quicksort(first, last, IteratorTraits<Iterator>::IteratorCategory(), comp);
+	quicksort(first, last, typename IteratorTraits<Iterator>::IteratorCategory(), comp);
 }
 
 /// Quicksort implementation with iterators, ascending order
 template <class Iterator>
 inline void quicksort(Iterator first, Iterator last)
 {
-	quicksort(first, last, IteratorTraits<Iterator>::IteratorCategory(), IsLess<typename IteratorTraits<Iterator>::ValueType>);
+	quicksort(first, last, typename IteratorTraits<Iterator>::IteratorCategory(), IsLess<typename IteratorTraits<Iterator>::ValueType>);
 }
 
 /// Quicksort implementation with iterators, descending order
 template <class Iterator>
 inline void quicksortDesc(Iterator first, Iterator last)
 {
-	quicksort(first, last, IteratorTraits<Iterator>::IteratorCategory(), IsNotLess<typename IteratorTraits<Iterator>::ValueType>);
+	quicksort(first, last, typename IteratorTraits<Iterator>::IteratorCategory(), IsNotLess<typename IteratorTraits<Iterator>::ValueType>);
 }
 
 namespace {
@@ -810,7 +821,7 @@ template <class Iterator, class Compare>
 inline void heapsort(Iterator first, Iterator last, Compare comp)
 {
 	const int size = distance(first, last);
-	int start = floor(size / 2);
+	int start = size / 2;
 	int end = size;
 
 	while (end > 1)
@@ -861,18 +872,17 @@ inline void insertionsort(Iterator first, Iterator last, Compare comp)
 {
 	const int size = distance(first, last);
 
-	int i = 1;
-	while (i < size)
+	for (int i = 1; i < size; i++)
 	{
-		auto x = *(first + i);
+		const auto x = *(first + i);
 		int j = i;
+
 		while (j > 0 && comp(x, *(first + j - 1)))
 		{
 			*(first + j) = *(first + j - 1);
 			j--;
 		}
 		*(first + j) = x;
-		i++;
 	}
 }
 
@@ -903,10 +913,12 @@ namespace {
 			heapsort(first, last, comp);
 		else
 		{
-			Iterator p = prev(last);
-			swap(*next(first, size / 2), *p);
-			Iterator q = partition(first, p, comp);
-			swap(*q, *p);
+			Iterator lastElem = prev(last);
+			Iterator mid = next(first, size / 2);
+			Iterator p = medianOfThree(first, mid, lastElem, comp);
+			swap(*p, *lastElem);
+			Iterator q = partition(first, lastElem, comp);
+
 			introsort(first, q, comp, maxDepth - 1);
 			introsort(next(q), last, comp, maxDepth - 1);
 		}
@@ -918,7 +930,7 @@ namespace {
 template <class Iterator, class Compare>
 inline void sort(Iterator first, Iterator last, Compare comp)
 {
-	const unsigned int maxDepth = log(distance(first, last)) * 2;
+	const unsigned int maxDepth = floor(log2(max(1, distance(first, last)))) * 2;
 	introsort(first, last, comp, maxDepth);
 }
 
@@ -926,7 +938,7 @@ inline void sort(Iterator first, Iterator last, Compare comp)
 template <class Iterator>
 inline void sort(Iterator first, Iterator last)
 {
-	const unsigned int maxDepth = log(distance(first, last)) * 2;
+	const unsigned int maxDepth = floor(log2(max(1, distance(first, last)))) * 2;
 	introsort(first, last, IsLess<typename IteratorTraits<Iterator>::ValueType>, maxDepth);
 }
 
@@ -934,7 +946,7 @@ inline void sort(Iterator first, Iterator last)
 template <class Iterator>
 inline void sortDesc(Iterator first, Iterator last)
 {
-	const unsigned int maxDepth = log(distance(first, last)) * 2;
+	const unsigned int maxDepth = floor(log2(max(1, distance(first, last)))) * 2;
 	introsort(first, last, IsNotLess<typename IteratorTraits<Iterator>::ValueType>, maxDepth);
 }
 

@@ -58,7 +58,7 @@ struct IteratorTraits<SparseSetIterator<T>>
 	/// Reference to the type of the values deferenced by the iterator
 	using Reference = const T &;
 	/// Type trait for iterator category
-	static inline BidirectionalIteratorTag IteratorCategory() { return BidirectionalIteratorTag(); }
+	using IteratorCategory = BidirectionalIteratorTag;
 };
 
 template <class T>

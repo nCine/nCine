@@ -134,7 +134,7 @@ class StaticArray
 	/// Removes the element pointed by the iterator (shifting elements around)
 	Iterator erase(Iterator position);
 	/// Removes the elements in the range, last not included (shifting elements around)
-	Iterator erase(Iterator first, const Iterator last);
+	Iterator erase(Iterator first, Iterator last);
 
 	/// Removes the specified range of elements, last not included (moving tail elements in place)
 	T *unorderedRemoveRange(unsigned int firstIndex, unsigned int lastIndex);
@@ -143,7 +143,7 @@ class StaticArray
 	/// Removes the element pointed by the iterator (moving the last element in place)
 	Iterator unorderedErase(Iterator position);
 	/// Removes the elements in the range, last not included (moving tail elements in place)
-	Iterator unorderedErase(Iterator first, const Iterator last);
+	Iterator unorderedErase(Iterator first, Iterator last);
 
 	/// Read-only access to the specified element (with bounds checking)
 	const T &at(unsigned int index) const;
@@ -460,7 +460,7 @@ typename StaticArray<T, C>::Iterator StaticArray<T, C>::erase(Iterator position)
 }
 
 template <class T, unsigned int C>
-typename StaticArray<T, C>::Iterator StaticArray<T, C>::erase(Iterator first, const Iterator last)
+typename StaticArray<T, C>::Iterator StaticArray<T, C>::erase(Iterator first, Iterator last)
 {
 	const unsigned int firstIndex = static_cast<unsigned int>(&(*first) - array_);
 	const unsigned int lastIndex = static_cast<unsigned int>(&(*last) - array_);
@@ -497,7 +497,7 @@ typename StaticArray<T, C>::Iterator StaticArray<T, C>::unorderedErase(Iterator 
 
 /*! \note This method is faster than `erase()` but it will not preserve the array order */
 template <class T, unsigned int C>
-typename StaticArray<T, C>::Iterator StaticArray<T, C>::unorderedErase(Iterator first, const Iterator last)
+typename StaticArray<T, C>::Iterator StaticArray<T, C>::unorderedErase(Iterator first, Iterator last)
 {
 	const unsigned int firstIndex = static_cast<unsigned int>(&(*first) - array_);
 	const unsigned int lastIndex = static_cast<unsigned int>(&(*last) - array_);

@@ -104,7 +104,7 @@ struct IteratorTraits<ReverseIterator<Iterator>>
 	/// Reference to the type of the values deferenced by the iterator
 	using Reference = typename Iterator::Reference;
 	/// Type trait for iterator category
-	static inline decltype(Iterator::IteratorCategory()) IteratorCategory() { return Iterator::IteratorCategory(); }
+	using IteratorCategory = typename Iterator::IteratorCategory;
 };
 
 template <class Iterator>

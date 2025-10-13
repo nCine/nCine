@@ -18,53 +18,69 @@ template <class Iterator>
 struct IteratorTraits
 {};
 
+/// Partial specialization for raw pointers
+template <class T>
+struct IteratorTraits<T *>
+{
+	using ValueType = T;
+	using Pointer = T *;
+	using Reference = T &;
+	using IteratorCategory = RandomAccessIteratorTag;
+};
+
+/// Partial specialization for const raw pointers
+template <class T>
+struct IteratorTraits<const T *>
+{
+	using ValueType = T;
+	using Pointer = const T *;
+	using Reference = const T &;
+	using IteratorCategory = RandomAccessIteratorTag;
+};
+
 ///////////////////////////////////////////////////////////
 // OPERATIONS
 ///////////////////////////////////////////////////////////
 
-namespace {
+/// Increments an iterator by n elements, for random access iterators
+template <class Iterator>
+inline void advance(Iterator &it, int n, RandomAccessIteratorTag)
+{
+	it += n;
+}
 
-	/// Increments an iterator by n elements, for random access iterators
-	template <class Iterator>
-	inline void advance(Iterator &it, int n, RandomAccessIteratorTag)
+/// Increments an iterator by n elements, for bidirectional iterators
+template <class Iterator>
+inline void advance(Iterator &it, int n, BidirectionalIteratorTag)
+{
+	if (n < 0)
 	{
-		it += n;
+		while (n++)
+			--it;
 	}
-
-	/// Increments an iterator by n elements, for bidirectional iterators
-	template <class Iterator>
-	inline void advance(Iterator &it, int n, BidirectionalIteratorTag)
+	else
 	{
-		if (n < 0)
-		{
-			while (n++)
-				--it;
-		}
-		else
-		{
-			while (n--)
-				++it;
-		}
+		while (n--)
+			++it;
 	}
+}
 
-	/// Increments an iterator by n elements, for forward iterators
-	template <class Iterator>
-	inline void advance(Iterator &it, int n, ForwardIteratorTag)
+/// Increments an iterator by n elements, for forward iterators
+template <class Iterator>
+inline void advance(Iterator &it, int n, ForwardIteratorTag)
+{
+	if (n > 0)
 	{
-		if (n > 0)
-		{
-			while (n--)
-				++it;
-		}
+		while (n--)
+			++it;
 	}
-
 }
 
 /// Increments an iterator by n elements
 template <class Iterator>
 inline void advance(Iterator &it, int n)
 {
-	advance(it, n, IteratorTraits<Iterator>::IteratorCategory());
+	advance(it, n, typename IteratorTraits<Iterator>::IteratorCategory());
 }
 
 /// Return the nth successor of an iterator
@@ -99,34 +115,30 @@ inline Iterator prev(Iterator it)
 	return it;
 }
 
-namespace {
+/// Returns the distance between two random access iterators with a pointer subtraction
+template <class RandomAccessIterator>
+inline int distance(RandomAccessIterator first, RandomAccessIterator last, RandomAccessIteratorTag)
+{
+	return last - first;
+}
 
-	/// Returns the distance between two random access iterators with a pointer subtraction
-	template <class RandomAccessIterator>
-	inline int distance(RandomAccessIterator &first, const RandomAccessIterator &last, RandomAccessIteratorTag)
-	{
-		return last - first;
-	}
+/// Returns the distance in number of increments between two forward iterators
+template <class ForwardIterator>
+inline int distance(ForwardIterator first, ForwardIterator last, ForwardIteratorTag)
+{
+	int counter = 0;
 
-	/// Returns the distance in number of increments between two forward iterators
-	template <class ForwardIterator>
-	inline int distance(ForwardIterator &first, const ForwardIterator &last, ForwardIteratorTag)
-	{
-		int counter = 0;
+	for (; first != last; ++first)
+		counter++;
 
-		for (; first != last; ++first)
-			counter++;
-
-		return counter;
-	}
-
+	return counter;
 }
 
 /// Returns the distance between two iterators
 template <class Iterator>
-inline int distance(Iterator first, const Iterator last)
+inline int distance(Iterator first, Iterator last)
 {
-	return distance(first, last, IteratorTraits<Iterator>::IteratorCategory());
+	return distance(first, last, typename IteratorTraits<Iterator>::IteratorCategory());
 }
 
 ///////////////////////////////////////////////////////////

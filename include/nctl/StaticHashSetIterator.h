@@ -104,7 +104,7 @@ struct IteratorTraits<StaticHashSetIterator<K, HashFunc, Capacity>>
 	/// Reference to the type of the values deferenced by the iterator
 	using Reference = const K &;
 	/// Type trait for iterator category
-	static inline BidirectionalIteratorTag IteratorCategory() { return BidirectionalIteratorTag(); }
+	using IteratorCategory = BidirectionalIteratorTag;
 };
 
 template <class K, class HashFunc, unsigned int Capacity>

@@ -165,7 +165,7 @@ class Array
 	/// Removes the element pointed by the iterator (shifting elements around)
 	Iterator erase(Iterator position);
 	/// Removes the elements in the range, last not included (shifting elements around)
-	Iterator erase(Iterator first, const Iterator last);
+	Iterator erase(Iterator first, Iterator last);
 
 	/// Removes the specified range of elements, last not included (moving tail elements in place)
 	T *unorderedRemoveRange(unsigned int firstIndex, unsigned int lastIndex);
@@ -174,7 +174,7 @@ class Array
 	/// Removes the element pointed by the iterator (moving the last element in place)
 	Iterator unorderedErase(Iterator position);
 	/// Removes the elements in the range, last not included (moving tail elements in place)
-	Iterator unorderedErase(Iterator first, const Iterator last);
+	Iterator unorderedErase(Iterator first, Iterator last);
 
 	/// Read-only access to the specified element (with bounds checking)
 	const T &at(unsigned int index) const;
@@ -568,7 +568,7 @@ typename Array<T>::Iterator Array<T>::erase(Iterator position)
 }
 
 template <class T>
-typename Array<T>::Iterator Array<T>::erase(Iterator first, const Iterator last)
+typename Array<T>::Iterator Array<T>::erase(Iterator first, Iterator last)
 {
 	const unsigned int firstIndex = static_cast<unsigned int>(&(*first) - array_);
 	const unsigned int lastIndex = static_cast<unsigned int>(&(*last) - array_);
@@ -605,7 +605,7 @@ typename Array<T>::Iterator Array<T>::unorderedErase(Iterator position)
 
 /*! \note This method is faster than `erase()` but it will not preserve the array order */
 template <class T>
-typename Array<T>::Iterator Array<T>::unorderedErase(Iterator first, const Iterator last)
+typename Array<T>::Iterator Array<T>::unorderedErase(Iterator first, Iterator last)
 {
 	const unsigned int firstIndex = static_cast<unsigned int>(&(*first) - array_);
 	const unsigned int lastIndex = static_cast<unsigned int>(&(*last) - array_);

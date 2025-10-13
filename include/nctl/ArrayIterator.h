@@ -84,7 +84,7 @@ struct IteratorTraits<ArrayIterator<T, false>>
 	/// Reference to the type of the values deferenced by the iterator
 	using Reference = T &;
 	/// Type trait for iterator category
-	static inline RandomAccessIteratorTag IteratorCategory() { return RandomAccessIteratorTag(); }
+	using IteratorCategory = RandomAccessIteratorTag;
 };
 
 /// Iterator traits structure specialization for constant `ArrayIterator` class
@@ -98,7 +98,7 @@ struct IteratorTraits<ArrayIterator<T, true>>
 	/// Reference to the type of the values deferenced by the iterator
 	using Reference = const T &;
 	/// Type trait for iterator category
-	static inline RandomAccessIteratorTag IteratorCategory() { return RandomAccessIteratorTag(); }
+	using IteratorCategory = RandomAccessIteratorTag;
 };
 
 template <class T, bool IsConst>

@@ -148,7 +148,7 @@ struct IteratorTraits<HashMapListIterator<K, T, HashFunc, false>>
 	/// Reference to the type of the values deferenced by the iterator
 	using Reference = T &;
 	/// Type trait for iterator category
-	static inline BidirectionalIteratorTag IteratorCategory() { return BidirectionalIteratorTag(); }
+	using IteratorCategory = BidirectionalIteratorTag;
 };
 
 /// Iterator traits structure specialization for constant `HashMapListIterator` class
@@ -162,7 +162,7 @@ struct IteratorTraits<HashMapListIterator<K, T, HashFunc, true>>
 	/// Reference to the type of the values deferenced by the iterator
 	using Reference = const T &;
 	/// Type trait for iterator category
-	static inline BidirectionalIteratorTag IteratorCategory() { return BidirectionalIteratorTag(); }
+	using IteratorCategory = BidirectionalIteratorTag;
 };
 
 template <class K, class T, class HashFunc, bool IsConst>

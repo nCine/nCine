@@ -61,7 +61,7 @@ struct IteratorTraits<ListIterator<T, false>>
 	/// Reference to the type of the values deferenced by the iterator
 	using Reference = T &;
 	/// Type trait for iterator category
-	static inline BidirectionalIteratorTag IteratorCategory() { return BidirectionalIteratorTag(); }
+	using IteratorCategory = BidirectionalIteratorTag;
 };
 
 /// Iterator traits structure specialization for constant `ListIterator` class
@@ -75,7 +75,7 @@ struct IteratorTraits<ListIterator<T, true>>
 	/// Reference to the type of the values deferenced by the iterator
 	using Reference = const T &;
 	/// Type trait for iterator category
-	static inline BidirectionalIteratorTag IteratorCategory() { return BidirectionalIteratorTag(); }
+	using IteratorCategory = BidirectionalIteratorTag;
 };
 
 template <class T, bool IsConst>
