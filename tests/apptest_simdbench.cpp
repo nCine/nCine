@@ -10,6 +10,7 @@
 #include <ncine/Vector4.h>
 #include <ncine/Quaternion.h>
 #include "apptest_datapath.h"
+#include "Statistics.h"
 
 #ifdef __EMSCRIPTEN__
 	#include <ncine/EmscriptenLocalFile.h>
@@ -23,11 +24,16 @@ const char *testName = "name";
 const char *testIterations = "iterations";
 const char *testTimings = "timings";
 const char *testTotalTime = "total_time";
-const char *testMaxTime = "max_time";
-const char *testMinTime = "min_time";
 const char *testAverage = "average";
+const char *testMedian = "median";
+const char *testMode = "mode";
+const char *testPercentile75 = "percentile_75";
+const char *testPercentile90 = "percentile_90";
 const char *testStdDeviation = "standard_deviation";
 const char *testRelStdDeviation = "relative_standard_deviation";
+const char *testMinTime = "min_time";
+const char *testMaxTime = "max_time";
+const char *testRangeTime = "range_time";
 
 };
 
@@ -61,20 +67,12 @@ static_assert(MaxDataElements <= MaxIterations, "It's useless to have more eleme
 struct TestInfo
 {
 	TestInfo()
-	    : func(nullptr), totalTime(0.0f),
-	      maxTime(0.0f), minTime(0.0f), average(0.0f), stdDeviation(0.0f),
-	      numRepetitions(0), numIterations(0) {}
+	    : func(nullptr), numIterations(0), stats(MaxRepetitions) {}
 
 	nctl::StaticString<128> name;
 	TestFunction func;
-	float times[MaxRepetitions];
-	float totalTime;
-	float maxTime;
-	float minTime;
-	float average;
-	float stdDeviation;
-	unsigned int numRepetitions;
 	unsigned int numIterations;
+	Statistics stats;
 };
 
 struct TestRun
@@ -89,6 +87,7 @@ const char *testNames[Tests::Count];
 TestRun testRuns[MaxTestRuns];
 int currentTestRun = 0;
 const unsigned int MaxStringLength = 128;
+char const * const SaveDirectory = "apptest_simdbench";
 char loadingFilename[MaxStringLength] = "timings.lua";
 char savingFilename[MaxStringLength] = "timings.lua";
 bool includeStatsWhenSaving = false;
@@ -129,45 +128,20 @@ const char *system()
 #endif
 }
 
-void calculateStats(TestInfo &t)
-{
-	t.maxTime = t.times[0];
-	t.minTime = t.times[0];
-	for (unsigned int i = 1; i < t.numRepetitions; i++)
-	{
-		if (t.times[i] > t.maxTime)
-			t.maxTime = t.times[i];
-		else if (t.times[i] < t.minTime)
-			t.minTime = t.times[i];
-	}
-
-	t.totalTime = 0.0f;
-	for (unsigned int i = 0; i < t.numRepetitions; i++)
-		t.totalTime += t.times[i];
-	t.average = t.totalTime / static_cast<float>(t.numRepetitions);
-
-	t.stdDeviation = 0.0f;
-	if (t.numRepetitions > 1)
-	{
-		for (unsigned int i = 0; i < t.numRepetitions; i++)
-			t.stdDeviation += (t.times[i] - t.average) * (t.times[i] - t.average);
-		t.stdDeviation /= static_cast<float>(t.numRepetitions - 1);
-		t.stdDeviation = sqrtf(t.stdDeviation);
-	}
-}
-
 void runTest(TestInfo &t, unsigned int numRepetitions, unsigned int numIterations)
 {
 	ASSERT(numRepetitions > 0);
 	ASSERT(numIterations > 0);
 	FATAL_ASSERT(t.func != nullptr);
 
-	t.numRepetitions = numRepetitions;
-	t.numIterations = numIterations;
-	for (unsigned int i = 0; i < t.numRepetitions; i++)
-		t.times[i] = t.func(t.numIterations) * 1000;
+	t.stats.clearValues();
+	t.stats.resetStats();
 
-	calculateStats(t);
+	t.numIterations = numIterations;
+	for (unsigned int i = 0; i < numRepetitions; i++)
+		t.stats.addValue(t.func(t.numIterations));
+
+	t.stats.calculateStats();
 }
 
 void resetVecs(unsigned int iterations)
@@ -220,7 +194,7 @@ float benchVector4Add(unsigned int iterations)
 		vecsC[index] = vecsA[index] + vecsB[index];
 	}
 
-	return testStartTime.secondsSince();
+	return testStartTime.millisecondsSince();
 }
 
 float benchVector4Sub(unsigned int iterations)
@@ -234,7 +208,7 @@ float benchVector4Sub(unsigned int iterations)
 		vecsC[index] = vecsA[index] - vecsB[index];
 	}
 
-	return testStartTime.secondsSince();
+	return testStartTime.millisecondsSince();
 }
 
 float benchVector4Mul(unsigned int iterations)
@@ -248,7 +222,7 @@ float benchVector4Mul(unsigned int iterations)
 		vecsC[index] = vecsA[index] * vecsB[index];
 	}
 
-	return testStartTime.secondsSince();
+	return testStartTime.millisecondsSince();
 }
 
 float benchVector4Div(unsigned int iterations)
@@ -262,7 +236,7 @@ float benchVector4Div(unsigned int iterations)
 		vecsC[index] = vecsA[index] / vecsB[index];
 	}
 
-	return testStartTime.secondsSince();
+	return testStartTime.millisecondsSince();
 }
 
 float benchVector4Length(unsigned int iterations)
@@ -276,7 +250,7 @@ float benchVector4Length(unsigned int iterations)
 		nums[index] = vecsA[index].length();
 	}
 
-	return testStartTime.secondsSince();
+	return testStartTime.millisecondsSince();
 }
 
 float benchVector4SqrLength(unsigned int iterations)
@@ -290,7 +264,7 @@ float benchVector4SqrLength(unsigned int iterations)
 		nums[index] = vecsA[index].sqrLength();
 	}
 
-	return testStartTime.secondsSince();
+	return testStartTime.millisecondsSince();
 }
 
 float benchVector4Normalize(unsigned int iterations)
@@ -304,7 +278,7 @@ float benchVector4Normalize(unsigned int iterations)
 		vecsC[index] = vecsA[index].normalize();
 	}
 
-	return testStartTime.secondsSince();
+	return testStartTime.millisecondsSince();
 }
 
 float benchVector4Dot(unsigned int iterations)
@@ -318,7 +292,7 @@ float benchVector4Dot(unsigned int iterations)
 		nums[index] = nc::dot(vecsA[index], vecsB[index]);
 	}
 
-	return testStartTime.secondsSince();
+	return testStartTime.millisecondsSince();
 }
 
 float benchQuaternionMult(unsigned int iterations)
@@ -332,7 +306,7 @@ float benchQuaternionMult(unsigned int iterations)
 		quats[index] = quats[index] * quats[index + 1];
 	}
 
-	return testStartTime.secondsSince();
+	return testStartTime.millisecondsSince();
 }
 
 float benchMatrixMult(unsigned int iterations)
@@ -346,7 +320,7 @@ float benchMatrixMult(unsigned int iterations)
 		mats[index] = mats[index] * mats[index + 1];
 	}
 
-	return testStartTime.secondsSince();
+	return testStartTime.millisecondsSince();
 }
 
 float benchMatrixTrans(unsigned int iterations)
@@ -360,7 +334,7 @@ float benchMatrixTrans(unsigned int iterations)
 		mats[index] = mats[index].transpose();
 	}
 
-	return testStartTime.secondsSince();
+	return testStartTime.millisecondsSince();
 }
 
 float benchMatrixVecMult(unsigned int iterations)
@@ -375,7 +349,7 @@ float benchMatrixVecMult(unsigned int iterations)
 		vecsC[index] = mats[index] * vecsA[index];
 	}
 
-	return testStartTime.secondsSince();
+	return testStartTime.millisecondsSince();
 }
 
 nctl::String &indent(nctl::String &string, int amount)
@@ -419,31 +393,28 @@ bool loadTestRun(const char *filename, unsigned int index)
 		t.name = nc::LuaUtils::retrieveField<const char *>(L, -1, Names::testName);
 
 		nc::LuaUtils::retrieveFieldTable(L, -1, Names::testTimings);
-		t.numRepetitions = nc::LuaUtils::rawLen(L, -1);
-		for (unsigned int repIndex = 0; repIndex < t.numRepetitions; repIndex++)
+		const unsigned int numReps = nc::LuaUtils::rawLen(L, -1);
+		for (unsigned int repIndex = 0; repIndex < numReps; repIndex++)
 		{
 			nc::LuaUtils::rawGeti(L, -1, repIndex + 1);
-			t.times[repIndex] = nc::LuaUtils::retrieve<float>(L, -1);
+			const float value = nc::LuaUtils::retrieve<float>(L, -1);
+			t.stats.addValue(value);
 			nc::LuaUtils::pop(L);
 		}
 		nc::LuaUtils::pop(L);
 
 		nc::LuaUtils::pop(L);
-		calculateStats(t);
+		t.stats.calculateStats();
 	}
 
 	nc::LuaUtils::pop(L);
 
+	LOGI_X("Loaded file \"%s\" for index %u", filename, index);
 	return true;
 }
 
 void saveTestRun(const char *filename, bool includeStatistics)
 {
-	nc::LuaStateManager luaState(
-	    nc::LuaStateManager::ApiType::NONE,
-	    nc::LuaStateManager::StatisticsTracking::DISABLED,
-	    nc::LuaStateManager::StandardLibraries::NOT_LOADED);
-
 	nctl::String file(8192);
 	int amount = 0;
 
@@ -454,7 +425,7 @@ void saveTestRun(const char *filename, bool includeStatistics)
 
 	for (unsigned int testIndex = 0; testIndex < Tests::Count; testIndex++)
 	{
-		if (testInfos[testIndex].numRepetitions == 0)
+		if (testInfos[testIndex].stats.isEmpty())
 			continue;
 
 		const TestInfo &t = testInfos[testIndex];
@@ -464,18 +435,23 @@ void saveTestRun(const char *filename, bool includeStatistics)
 		indent(file, amount).formatAppend("%s = \"%s\",\n", Names::testName, t.name.data());
 		indent(file, amount).formatAppend("%s = %d,\n", Names::testIterations, t.numIterations);
 		indent(file, amount).formatAppend("%s = {", Names::testTimings);
-		for (unsigned int i = 0; i < t.numRepetitions; i++)
-			file.formatAppend(" %f%s", t.times[i], (i < t.numRepetitions - 1) ? "," : " ");
+		for (unsigned int i = 0; i < t.stats.size(); i++)
+			file.formatAppend(" %f%s", t.stats.value(i), (i < t.stats.size() - 1) ? "," : " ");
 		file.formatAppend("}%s\n", includeStatistics ? "," : "");
 
 		if (includeStatistics)
 		{
-			indent(file, amount).formatAppend("%s = %f,\n", Names::testTotalTime, t.totalTime);
-			indent(file, amount).formatAppend("%s = %f,\n", Names::testMaxTime, t.maxTime);
-			indent(file, amount).formatAppend("%s = %f,\n", Names::testMinTime, t.minTime);
-			indent(file, amount).formatAppend("%s = %f,\n", Names::testAverage, t.average);
-			indent(file, amount).formatAppend("%s = %f,\n", Names::testStdDeviation, t.stdDeviation);
-			indent(file, amount).formatAppend("%s = %f\n", Names::testRelStdDeviation, t.average > 0.0f ? 100.0f * t.stdDeviation / t.average : 0.0f);
+			indent(file, amount).formatAppend("%s = %f,\n", Names::testTotalTime, t.stats.sum());
+			indent(file, amount).formatAppend("%s = %f,\n", Names::testAverage, t.stats.mean());
+			indent(file, amount).formatAppend("%s = %f,\n", Names::testMedian, t.stats.median());
+			indent(file, amount).formatAppend("%s = %f,\n", Names::testMode, t.stats.mode());
+			indent(file, amount).formatAppend("%s = %f,\n", Names::testPercentile75, t.stats.percentile(0.75f));
+			indent(file, amount).formatAppend("%s = %f,\n", Names::testPercentile90, t.stats.percentile(0.9f));
+			indent(file, amount).formatAppend("%s = %f,\n", Names::testStdDeviation, t.stats.sigma());
+			indent(file, amount).formatAppend("%s = %f,\n", Names::testRelStdDeviation, t.stats.relativeSigma());
+			indent(file, amount).formatAppend("%s = %f,\n", Names::testMinTime, t.stats.minimum());
+			indent(file, amount).formatAppend("%s = %f,\n", Names::testMaxTime, t.stats.maximum());
+			indent(file, amount).formatAppend("%s = %f,\n", Names::testRangeTime, t.stats.range());
 		}
 
 		amount--;
@@ -495,6 +471,7 @@ void saveTestRun(const char *filename, bool includeStatistics)
 	localFileSave.write(file.data(), file.length());
 	localFileSave.save(filename);
 #endif
+	LOGI_X("Saved file \"%s\"", filename);
 }
 
 }
@@ -509,7 +486,6 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 	setDataPath(config);
 
 	config.withAudio = false;
-	config.withDebugOverlay = false;
 	config.withThreads = false;
 }
 
@@ -594,8 +570,8 @@ void MyEventHandler::onFrameStart()
 
 	const ImVec2 windowPos(ImGui::GetMainViewport()->Size.x * 0.5f, ImGui::GetMainViewport()->Size.y * 0.5f);
 	ImGui::SetNextWindowPos(windowPos, ImGuiCond_FirstUseEver, ImVec2(0.5f, 0.5f));
-	ImGui::SetNextWindowSize(ImVec2(370.0f * scalingFactor, 520.0f * scalingFactor), ImGuiCond_FirstUseEver);
-	if (ImGui::Begin("Benchmark"))
+	ImGui::SetNextWindowSize(ImVec2(400.0f * scalingFactor, 560.0f * scalingFactor), ImGuiCond_FirstUseEver);
+	if (ImGui::Begin("apptest_simdbench"))
 	{
 		if (ImGui::CollapsingHeader("Load Test Runs"))
 		{
@@ -606,7 +582,7 @@ void MyEventHandler::onFrameStart()
 				currentTestRun++;
 			if (currentTestRun < 0)
 				currentTestRun = 0;
-			else if (currentTestRun > MaxTestRuns - 1)
+			else if (currentTestRun > static_cast<int>(MaxTestRuns - 1))
 				currentTestRun = MaxTestRuns - 1;
 			ImGui::SameLine();
 			ImGui::Text("Index: %d", currentTestRun);
@@ -616,7 +592,8 @@ void MyEventHandler::onFrameStart()
 			ImGui::SameLine();
 			if (ImGui::Button("Load"))
 			{
-				nctl::String filepath = nc::fs::joinPath(nc::fs::dataPath(), loadingFilename);
+				nctl::String filepath =  nc::fs::joinPath(nc::fs::savePath(), SaveDirectory);
+				filepath =  nc::fs::joinPath(filepath, loadingFilename);
 				if (nc::fs::isReadableFile(filepath.data()))
 					loadTestRun(filepath.data(), currentTestRun);
 				else
@@ -667,7 +644,10 @@ void MyEventHandler::onFrameStart()
 				ImGui::SameLine();
 				if (ImGui::Button("Save"))
 				{
-					nctl::String filepath = nc::fs::joinPath(nc::fs::dataPath(), savingFilename);
+					nctl::String filepath =  nc::fs::joinPath(nc::fs::savePath(), SaveDirectory);
+					if (nc::fs::isDirectory(filepath.data()) == false)
+						nc::fs::createDir(filepath.data());
+					filepath =  nc::fs::joinPath(filepath, savingFilename);
 					saveTestRun(filepath.data(), includeStatsWhenSaving);
 				}
 				ImGui::Checkbox("Include Statistics", &includeStatsWhenSaving);
@@ -690,7 +670,7 @@ void MyEventHandler::onFrameStart()
 
 			const TestRun &tr = testRuns[currentTestRun];
 			const TestInfo &tri = tr.testInfos[currentTest];
-			const bool canCompare = (tri.totalTime > 0.0f && t.totalTime > 0.0f);
+			const bool canCompare = (tri.stats.sum() > 0.0f && t.stats.sum() > 0.0f);
 
 			ImGui::Text("Iterations: %u", t.numIterations);
 			if (canCompare && tri.numIterations != t.numIterations)
@@ -703,46 +683,84 @@ void MyEventHandler::onFrameStart()
 					ImGui::Text("(Test run loaded with %u iterations)", tri.numIterations);
 			}
 
-			ImGui::Text("Total Time: %f ms", t.totalTime);
+			ImGui::Text("Total Time: %.3f ms", t.stats.sum());
 			if (canCompare)
 			{
 				ImGui::SameLine();
-				const ImVec4 color = (tri.totalTime > t.totalTime) ? Green : Red;
-				ImGui::TextColored(color, "(%f ms, %.2fx)", tri.totalTime, t.totalTime / tri.totalTime);
+				const ImVec4 color = (tri.stats.sum() > t.stats.sum()) ? Green : Red;
+				ImGui::TextColored(color, "(%.3f ms, %.2fx)", tri.stats.sum(), t.stats.sum() / tri.stats.sum());
 			}
-			ImGui::PlotHistogram("Times", t.times, t.numRepetitions, 0, nullptr, 0.0f, FLT_MAX, ImVec2(0.0f, 100.0f));
-			ImGui::Text("Max Time: %f ms", t.maxTime);
+			static bool sorted = false;
+			ImGui::PlotHistogram("Times", t.stats.values(sorted), t.stats.size(), 0, nullptr, 0.0f, t.stats.maximum() * 1.1f, ImVec2(0.0f, 50.0f));
+			ImGui::SameLine();
+			ImGui::Checkbox("Sorted", &sorted);
+			ImGui::Text("Average: %.3f ms", t.stats.mean());
 			if (canCompare)
 			{
 				ImGui::SameLine();
-				const ImVec4 color = (tri.maxTime > t.maxTime) ? Green : Red;
-				ImGui::TextColored(color, "(%f ms, %.2fx)", tri.maxTime, t.maxTime / tri.maxTime);
+				const ImVec4 color = (tri.stats.mean() > t.stats.mean()) ? Green : Red;
+				ImGui::TextColored(color, "(%.3f ms, %.2fx)", tri.stats.mean(), t.stats.mean() / tri.stats.mean());
 			}
-			ImGui::Text("Min Time: %f ms", t.minTime);
+			ImGui::Text("Median: %.3f ms", t.stats.mean());
 			if (canCompare)
 			{
 				ImGui::SameLine();
-				const ImVec4 color = (tri.minTime > t.minTime) ? Green : Red;
-				ImGui::TextColored(color, "(%f ms, %.2fx)", tri.minTime, t.minTime / tri.minTime);
+				const ImVec4 color = (tri.stats.median() > t.stats.median()) ? Green : Red;
+				ImGui::TextColored(color, "(%.3f ms, %.2fx)", tri.stats.median(), t.stats.median() / tri.stats.median());
 			}
-			ImGui::Text("Average: %f ms", t.average);
+			ImGui::Text("Mode: %.3f ms", t.stats.mode());
 			if (canCompare)
 			{
 				ImGui::SameLine();
-				const ImVec4 color = (tri.average > t.average) ? Green : Red;
-				ImGui::TextColored(color, "(%f ms, %.2fx)", tri.average, t.average / tri.average);
+				const ImVec4 color = (tri.stats.mode() > t.stats.mode()) ? Green : Red;
+				ImGui::TextColored(color, "(%.3f ms, %.2fx)", tri.stats.mode(), t.stats.mode() / tri.stats.mode());
 			}
-			ImGui::Text("Std. Deviation: %f ms", t.stdDeviation);
+			ImGui::Text("P75: %.3f ms", t.stats.percentile(0.75f));
 			if (canCompare)
 			{
 				ImGui::SameLine();
-				ImGui::Text("(%f ms)", tri.stdDeviation);
+				const ImVec4 color = (tri.stats.percentile(0.75f) > t.stats.percentile(0.75f)) ? Green : Red;
+				ImGui::TextColored(color, "(%.3f ms, %.2fx)", tri.stats.percentile(0.75f), t.stats.percentile(0.75f) / tri.stats.percentile(0.75f));
 			}
-			ImGui::Text("Relative S.D.: %.2f %%", t.average > 0.0f ? 100.0f * t.stdDeviation / t.average : 0.0f);
+			ImGui::Text("P90: %.3f ms", t.stats.percentile(0.9f));
 			if (canCompare)
 			{
 				ImGui::SameLine();
-				ImGui::Text("(%.2f %%)", tri.average > 0.0f ? 100.0f * tri.stdDeviation / tri.average : 0.0f);
+				const ImVec4 color = (tri.stats.percentile(0.9f) > t.stats.percentile(0.9f)) ? Green : Red;
+				ImGui::TextColored(color, "(%.3f ms, %.2fx)", tri.stats.percentile(0.9f), t.stats.percentile(0.9f) / tri.stats.percentile(0.9f));
+			}
+			ImGui::Text("Std. Deviation: %.3f ms", t.stats.sigma());
+			if (canCompare)
+			{
+				ImGui::SameLine();
+				ImGui::Text("(%.3f ms)", tri.stats.sigma());
+			}
+			ImGui::Text("Relative S.D.: %.2f %%", t.stats.relativeSigma());
+			if (canCompare)
+			{
+				ImGui::SameLine();
+				ImGui::Text("(%.2f %%)", tri.stats.relativeSigma());
+			}
+			ImGui::Text("Min Time: %.3f ms", t.stats.minimum());
+			if (canCompare)
+			{
+				ImGui::SameLine();
+				const ImVec4 color = (tri.stats.minimum() > t.stats.minimum()) ? Green : Red;
+				ImGui::TextColored(color, "(%.3f ms, %.2fx)", tri.stats.minimum(), t.stats.minimum() / tri.stats.minimum());
+			}
+			ImGui::Text("Max Time: %.3f ms", t.stats.maximum());
+			if (canCompare)
+			{
+				ImGui::SameLine();
+				const ImVec4 color = (tri.stats.maximum() > t.stats.maximum()) ? Green : Red;
+				ImGui::TextColored(color, "(%.3f ms, %.2fx)", tri.stats.maximum(), t.stats.maximum() / tri.stats.maximum());
+			}
+			ImGui::Text("Range Time: %.3f ms", t.stats.range());
+			if (canCompare)
+			{
+				ImGui::SameLine();
+				const ImVec4 color = (tri.stats.range() > t.stats.range()) ? Green : Red;
+				ImGui::TextColored(color, "(%.3f ms, %.2fx)", tri.stats.range(), t.stats.range() / tri.stats.range());
 			}
 		}
 	}
