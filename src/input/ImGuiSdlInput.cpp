@@ -562,6 +562,7 @@ void ImGuiSdlInput::updateMouseData()
 	SDL_Window *focusedWindow = SDL_GetKeyboardFocus();
 	const bool isAppFocused = (window_ == focusedWindow);
 #else
+	SDL_Window *focusedWindow = window_;
 	const bool isAppFocused = (SDL_GetWindowFlags(window_) & SDL_WINDOW_INPUT_FOCUS) != 0; // SDL 2.0.3 and non-windowed systems: single-viewport only
 #endif
 	if (isAppFocused)
@@ -570,15 +571,20 @@ void ImGuiSdlInput::updateMouseData()
 		if (io.WantSetMousePos)
 			SDL_WarpMouseInWindow(window_, static_cast<int>(io.MousePos.x), static_cast<int>(io.MousePos.y));
 
-		// (Optional) Fallback to provide mouse position when focused (SDL_MOUSEMOTION already provides this when hovered or captured)
+		// (Optional) Fallback to provide unclamped mouse position when focused but not hovered (SDL_MOUSEMOTION already provides this when hovered or captured)
+		// Note that SDL_GetGlobalMouseState() is in theory slow on X11, but this only runs on rather specific cases. If a problem we may provide a way to opt-out this feature.
+		SDL_Window *hoveredWindow = SDL_GetMouseFocus();
 		const bool isRelativeMouseMode = SDL_GetRelativeMouseMode() != 0;
-		if (mouseCanUseGlobalState_ && mouseButtonsDown_ == 0 && !isRelativeMouseMode)
+		if (hoveredWindow == nullptr && mouseCanUseGlobalState_ && mouseButtonsDown_ == 0 && !isRelativeMouseMode)
 		{
 			// Single-viewport mode: mouse position in client window coordinates (io.MousePos is (0,0) when the mouse is on the upper-left corner of the app window)
-			int windowX, windowY, mouseXGlobal, mouseYGlobal;
-			SDL_GetGlobalMouseState(&mouseXGlobal, &mouseYGlobal);
-			SDL_GetWindowPosition(window_, &windowX, &windowY);
-			io.AddMousePosEvent(static_cast<float>(mouseXGlobal - windowX), static_cast<float>(mouseYGlobal - windowY));
+			int mouseX, mouseY;
+			int windowX, windowY;
+			SDL_GetGlobalMouseState(&mouseX, &mouseY);
+			SDL_GetWindowPosition(focusedWindow, &windowX, &windowY);
+			mouseX -= windowX;
+			mouseY -= windowY;
+			io.AddMousePosEvent(static_cast<float>(mouseX), static_cast<float>(mouseY));
 		}
 	}
 }

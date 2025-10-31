@@ -65,7 +65,16 @@ target_link_libraries(ncine PRIVATE ${PRIVATE_LINK_LIBRARIES})
 add_library(native_app_glue STATIC ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c)
 target_link_libraries(native_app_glue PRIVATE android log)
 
-add_library(game SHARED ${NCINE_ROOT}/tests/${NCINE_STARTUP_TEST}.cpp)
+list(LENGTH NCINE_STARTUP_TEST_EXTRA_SOURCES NUM_EXTRA_SOURCES)
+if(NUM_EXTRA_SOURCES GREATER 0)
+	# More complex AppTests can define multiple additional sources
+	foreach(APPTEST_EXTRA_SOURCE ${NCINE_STARTUP_TEST_EXTRA_SOURCES})
+		list(APPEND GAME_LIBRARY_SOURCES ${NCINE_ROOT}/tests/${APPTEST_EXTRA_SOURCE})
+	endforeach()
+endif()
+list(APPEND GAME_LIBRARY_SOURCES ${NCINE_ROOT}/tests/${NCINE_STARTUP_TEST}.cpp)
+
+add_library(game SHARED ${GAME_LIBRARY_SOURCES})
 set(JNICALL_FUNCTIONS_LINKER_OPTIONS -Wl,--whole-archive jnicall_functions -Wl,--no-whole-archive)
 target_link_libraries(game PRIVATE native_app_glue ${JNICALL_FUNCTIONS_LINKER_OPTIONS} ncine_main ncine)
 target_include_directories(game PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue)
@@ -77,15 +86,6 @@ if(NOT NCINE_DYNAMIC_LIBRARY)
 	target_include_directories(game PRIVATE ${NCINE_ROOT}/include/ncine)
 endif()
 target_compile_definitions(game PRIVATE ${ANDROID_GENERATED_FLAGS})
-
-#if(NCINE_WITH_CRASHPAD)
-#	set(CRASHPAD_HANDLER_LIB ${PROJECT_SOURCE_DIR}/crashpad/lib/${ANDROID_ABI}/libcrashpad_handler.so)
-#	if(EXISTS ${CRASHPAD_HANDLER_LIB})
-#		add_library(crashpad_handler SHARED IMPORTED)
-#		set_property(TARGET crashpad_handler PROPERTY IMPORTED_LOCATION ${CRASHPAD_HANDLER_LIB})
-#		target_link_libraries(game PRIVATE crashpad_handler)
-#	endif()
-#endif()
 
 # Export ANativeActivity_onCreate() - https://github.com/android-ndk/ndk/issues/381
 set_property(TARGET game APPEND_STRING PROPERTY LINK_FLAGS "-u ANativeActivity_onCreate")
