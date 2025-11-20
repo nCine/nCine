@@ -68,8 +68,7 @@ endif()
 
 if(Threads_FOUND)
 	list(APPEND TESTS
-		gtest_atomic32 gtest_atomic64
-		gtest_sharedptr_threads
+		gtest_atomic gtest_sharedptr_threads
 	)
 endif()
 

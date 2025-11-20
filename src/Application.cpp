@@ -21,8 +21,9 @@
 	#include "ALAudioDevice.h"
 #endif
 
-#ifdef WITH_THREADS
-	#include "ThreadPool.h"
+#ifdef WITH_JOBSYSTEM
+	#include "JobSystem.h"
+	#include "SerialJobSystem.h"
 #endif
 
 #ifdef WITH_LUA
@@ -111,6 +112,9 @@ namespace {
 		LOGD("nCine preprocessor defines:");
 #ifdef WITH_THREADS
 		LOGD("WITH_THREADS");
+#endif
+#ifdef WITH_JOBSYSTEM
+		LOGD("WITH_JOBSYSTEM");
 #endif
 #ifdef WITH_OPENGLES
 		LOGD("WITH_OPENGLES");
@@ -232,9 +236,14 @@ void Application::initCommon()
 	if (appCfg_.withAudio)
 		theServiceLocator().registerAudioDevice(nctl::makeUnique<ALAudioDevice>(appCfg_));
 #endif
-#ifdef WITH_THREADS
-	if (appCfg_.withThreads)
-		theServiceLocator().registerThreadPool(nctl::makeUnique<ThreadPool>());
+#ifdef WITH_JOBSYSTEM
+	if (appCfg_.withJobSystem)
+	{
+		if (appCfg_.numThreads == 1)
+			theServiceLocator().registerJobSystem(nctl::makeUnique<SerialJobSystem>());
+		else
+			theServiceLocator().registerJobSystem(nctl::makeUnique<JobSystem>(appCfg_.numThreads));
+	}
 #endif
 	theServiceLocator().registerGfxCapabilities(nctl::makeUnique<GfxCapabilities>());
 	GLDebug::init(theServiceLocator().gfxCapabilities());
@@ -438,6 +447,11 @@ void Application::step()
 
 	if (debugOverlay_)
 		debugOverlay_->updateFrameTimings();
+
+#ifdef WITH_JOBSYSTEM
+	if (theServiceLocator().jobSystem().numThreads() > 1)
+		theServiceLocator().logger().consumeQueue();
+#endif
 
 	gfxDevice_->update();
 	FrameMark;

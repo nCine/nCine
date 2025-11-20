@@ -2,6 +2,7 @@
 #define NCINE_CONFIG_H
 
 #cmakedefine01 NCINE_WITH_THREADS
+#cmakedefine01 NCINE_WITH_JOBSYSTEM
 
 #cmakedefine01 NCINE_WITH_OPENGLES
 #cmakedefine01 NCINE_WITH_ANGLE

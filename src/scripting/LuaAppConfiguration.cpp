@@ -46,7 +46,8 @@ namespace AppConfiguration {
 
 	static const char *withDebugOverlay = "debug_overlay";
 	static const char *withAudio = "audio";
-	static const char *withThreads = "threads";
+	static const char *withJobSystem = "jobsystem";
+	static const char *numThreads = "num_threads";
 	static const char *withScenegraph = "scenegraph";
 	static const char *withVSync = "vsync";
 	static const char *withGlDebugContext = "gl_debug_context";
@@ -73,7 +74,7 @@ void LuaAppConfiguration::exposeConstants(lua_State *L)
 
 void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 {
-	lua_createtable(L, 0, 40);
+	lua_createtable(L, 0, 41);
 
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::dataPath, appCfg.dataPath().data());
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::logFile, appCfg.logFile.data());
@@ -109,7 +110,8 @@ void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::withDebugOverlay, appCfg.withDebugOverlay);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::withAudio, appCfg.withAudio);
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::withThreads, appCfg.withThreads);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::withJobSystem, appCfg.withJobSystem);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::numThreads, appCfg.numThreads);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::withScenegraph, appCfg.withScenegraph);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::withVSync, appCfg.withVSync);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::withGlDebugContext, appCfg.withGlDebugContext);
@@ -205,8 +207,10 @@ void LuaAppConfiguration::retrieveAndSet(lua_State *L, AppConfiguration &appCfg)
 	appCfg.withDebugOverlay = withDebugOverlay;
 	const bool withAudio = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::withAudio);
 	appCfg.withAudio = withAudio;
-	const bool withThreads = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::withThreads);
-	appCfg.withThreads = withThreads;
+	const bool withJobSystem = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::withJobSystem);
+	appCfg.withJobSystem = withJobSystem;
+	const unsigned int numThreads = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::AppConfiguration::numThreads);
+	appCfg.numThreads = numThreads;
 	const bool withScenegraph = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::withScenegraph);
 	appCfg.withScenegraph = withScenegraph;
 	const bool withVSync = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::withVSync);

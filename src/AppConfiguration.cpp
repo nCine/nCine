@@ -48,7 +48,8 @@ namespace {
 
 	const char *EnvVariableDebugOverlay = "DEBUG_OVERLAY";
 	const char *EnvVariableAudio = "AUDIO";
-	const char *EnvVariableThreads = "THREADS";
+	const char *EnvVariableJobSystem = "JOBSYSTEM";
+	const char *EnvVariableNumThreads = "NUM_THREADS";
 	const char *EnvVariableScenegraph = "SCENEGRAPH";
 	const char *EnvVariableVSync = "VSYNC";
 	const char *EnvVariableGlDebugContext = "GL_DEBUG_CONTEXT";
@@ -191,7 +192,8 @@ AppConfiguration::OldValues::OldValues(const AppConfiguration &appCfg)
 
       withDebugOverlay(appCfg.withDebugOverlay),
       withAudio(appCfg.withAudio),
-      withThreads(appCfg.withThreads),
+      withJobSystem(appCfg.withJobSystem),
+      numThreads(appCfg.numThreads),
       withScenegraph(appCfg.withScenegraph),
       withVSync(appCfg.withVSync),
       withGlDebugContext(appCfg.withGlDebugContext),
@@ -260,7 +262,8 @@ AppConfiguration::AppConfiguration()
 
       withDebugOverlay(false),
       withAudio(true),
-      withThreads(false),
+      withJobSystem(true),
+      numThreads(0),
       withScenegraph(true),
       withVSync(true),
       withGlDebugContext(false),
@@ -392,7 +395,8 @@ void AppConfiguration::logFields() const
 
 	LOGD_X("Debug Overlay: %s", withDebugOverlay ? "true" : "false");
 	LOGD_X("Audio: %s", withAudio ? "true" : "false");
-	LOGD_X("Threads: %s", withThreads ? "true" : "false");
+	LOGD_X("Job System: %s", withJobSystem ? "true" : "false");
+	LOGD_X("Number of Threads: %u", numThreads);
 	LOGD_X("Scenegraph: %s", withScenegraph ? "true" : "false");
 	LOGD_X("VSync: %s", withVSync ? "true" : "false");
 	LOGD_X("GL Debug Context: %s", withGlDebugContext ? "true" : "false");
@@ -596,11 +600,17 @@ void AppConfiguration::readEnvVariables()
 	old.withAudio = withAudio;
 	withAudio = readBoolEnvVar(varName.data(), withAudio);
 
-	// NCINE_APPCFG_THREADS
+	// NCINE_APPCFG_JOBSYSTEM
 	varName = EnvVariablePrefix;
-	varName.append(EnvVariableThreads);
-	old.withThreads = withThreads;
-	withThreads = readBoolEnvVar(varName.data(), withThreads);
+	varName.append(EnvVariableJobSystem);
+	old.withJobSystem = withJobSystem;
+	withJobSystem = readBoolEnvVar(varName.data(), withJobSystem);
+
+	// NCINE_APPCFG_NUM_THREADS
+	varName = EnvVariablePrefix;
+	varName.append(EnvVariableNumThreads);
+	old.numThreads = numThreads;
+	numThreads = readUintEnvVar(varName.data(), numThreads);
 
 	// NCINE_APPCFG_SCENEGRAPH
 	varName = EnvVariablePrefix;
@@ -817,10 +827,16 @@ void AppConfiguration::logEnvVariables() const
 		       EnvVariablePrefix, EnvVariableAudio, withAudio, old.withAudio);
 	}
 
-	if (withThreads != old.withThreads)
+	if (withJobSystem != old.withJobSystem)
 	{
 		LOGI_X("%s%s=%d overrides compiled value %d",
-		       EnvVariablePrefix, EnvVariableThreads, withThreads, old.withThreads);
+		       EnvVariablePrefix, EnvVariableJobSystem, withJobSystem, old.withJobSystem);
+	}
+
+	if (numThreads != old.numThreads)
+	{
+		LOGI_X("%s%s=%u overrides compiled value %u",
+		       EnvVariablePrefix, EnvVariableNumThreads, numThreads, old.numThreads);
 	}
 
 	if (withScenegraph != old.withScenegraph)

@@ -22,6 +22,7 @@ set(SOURCES
 	${NCINE_ROOT}/src/StandardFile.cpp
 	${NCINE_ROOT}/src/input/IInputManager.cpp
 	${NCINE_ROOT}/src/input/JoyMapping.cpp
+	${NCINE_ROOT}/src/threading/IJobSystem.cpp
 	${NCINE_ROOT}/src/graphics/Color.cpp
 	${NCINE_ROOT}/src/graphics/Colorf.cpp
 	${NCINE_ROOT}/src/graphics/ColorHdr.cpp

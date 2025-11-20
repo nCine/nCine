@@ -1,4 +1,3 @@
-#define _WIN32_WINNT 0x0500
 #define NOGDI
 
 #define INVALID_HANDLE_VALUE (HANDLE(LONG_PTR(-1)))
