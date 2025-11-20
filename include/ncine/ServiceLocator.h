@@ -8,10 +8,11 @@
 	#include <cstdarg>
 #endif
 
+#include <nctl/UniquePtr.h>
 #include "IIndexer.h"
 #include "ILogger.h"
 #include "IAudioDevice.h"
-#include "IThreadPool.h"
+#include "IJobSystem.h"
 #include "IGfxCapabilities.h"
 
 namespace ncine {
@@ -42,12 +43,12 @@ class DLL_PUBLIC ServiceLocator
 	/// Unregisters the audio device provider and reinstates the null one
 	void unregisterAudioDevice();
 
-	/// Returns a reference to the current thread pool instance
-	IThreadPool &threadPool() { return *threadPool_; }
-	/// Registers a thread pool provider
-	void registerThreadPool(nctl::UniquePtr<IThreadPool> service);
-	/// Unregisters the thread pool provider and reinstates the null one
-	void unregisterThreadPool();
+	/// Returns a reference to the current job system instance
+	IJobSystem &jobSystem() { return *jobSystem_; }
+	/// Registers a tjob system provider
+	void registerJobSystem(nctl::UniquePtr<IJobSystem> service);
+	/// Unregisters the job system provider and reinstates the null one
+	void unregisterJobSystem();
 
 	/// Returns a reference to the current graphics capabilities instance
 	const IGfxCapabilities &gfxCapabilities() { return *gfxCapabilities_; }
@@ -72,9 +73,10 @@ class DLL_PUBLIC ServiceLocator
 	nctl::UniquePtr<IAudioDevice> registeredAudioDevice_;
 	NullAudioDevice nullAudioDevice_;
 
-	IThreadPool *threadPool_;
-	nctl::UniquePtr<IThreadPool> registeredThreadPool_;
-	NullThreadPool nullThreadPool_;
+	IJobSystem *jobSystem_;
+	nctl::UniquePtr<IJobSystem> registeredJobSystem_;
+	nctl::UniquePtr<IJobSystem> serialJobSystem_;
+	NullJobSystem nullJobSystem_;
 
 	IGfxCapabilities *gfxCapabilities_;
 	nctl::UniquePtr<IGfxCapabilities> registeredGfxCapabilities_;

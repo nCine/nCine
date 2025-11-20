@@ -13,6 +13,10 @@
 #include "Application.h"
 #include "tracy.h"
 
+#if WITH_JOBSYSTEM
+	#include "IJobSystem.h"
+#endif
+
 namespace {
 
 const char *Reset = "\033[0m";
@@ -35,6 +39,10 @@ bool enableVirtualTerminalProcessing();
 void writeOutputDebug(const char *logEntry);
 #endif
 
+#ifdef WITH_JOBSYSTEM
+thread_local char FileLogger::logEntry_[MaxEntryLength];
+#endif
+
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
@@ -47,8 +55,7 @@ FileLogger::FileLogger(LogLevel consoleLevel)
 FileLogger::FileLogger(LogLevel consoleLevel, LogLevel fileLevel, const char *filename)
     : consoleLevel_(LogLevel::OFF), fileLevel_(fileLevel), canUseColors_(true)
 #ifdef WITH_IMGUI
-      ,
-      logString_(LogStringCapacity)
+      , logString_(LogStringCapacity)
 #endif
 {
 	// The setter will create the console on Windows, if needed
@@ -125,144 +132,18 @@ bool FileLogger::openLogFile(const char *filename)
 
 unsigned int FileLogger::write(LogLevel level, const char *fmt, ...)
 {
-	// Early-out if logging is completely disabled
-	if (consoleLevel_ == LogLevel::OFF && fileLevel_ == LogLevel::OFF)
-		return 0;
-
-	ASSERT(fmt);
-
 	const int levelInt = static_cast<int>(level);
 	const int consoleLevelInt = static_cast<int>(consoleLevel_);
 	const int fileLevelInt = static_cast<int>(fileLevel_);
 
-	time_t now;
-	struct tm *ts;
-	now = time(nullptr);
-	ts = localtime(&now);
+	const bool shouldLogToConsole = (consoleLevel_ != LogLevel::OFF && levelInt >= consoleLevelInt);
+	const bool shouldLogToFile = (fileLevel_ != LogLevel::OFF && levelInt >= fileLevelInt);
 
-	logEntry_[0] = '\0';
-	logEntry_[MaxEntryLength - 1] = '\0';
-	unsigned int length = 0;
+	// Early-out if this message does not need to be logged
+	if (shouldLogToConsole == false && shouldLogToFile == false)
+		return 0;
 
-	const unsigned int timeMsgStart = length;
-	const unsigned int timeMsgLength = strftime(logEntry_ + length, MaxEntryLength - length - 1, "- %H:%M:%S ", ts);
-	length += timeMsgLength;
-
-	length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, "[L%d] - ", levelInt);
-
-	const unsigned int logMsgStart = length;
-	va_list args;
-	va_start(args, fmt);
-	const unsigned int logMsgLength = vsnprintf(logEntry_ + length, MaxEntryLength - length - 1, fmt, args);
-	va_end(args);
-	length += logMsgLength;
-
-	if (length < MaxEntryLength - 2)
-	{
-		logEntry_[length++] = '\n';
-		logEntry_[length] = '\0';
-	}
-
-	const char *consoleLogEntry = logEntry_;
-	if (canUseColors_)
-	{
-		writeWithColors(level, logEntry_ + timeMsgStart, timeMsgLength, logEntry_ + logMsgStart, logMsgLength);
-		consoleLogEntry = logEntryWithColors_;
-	}
-
-	if (consoleLevel_ != LogLevel::OFF && levelInt >= consoleLevelInt)
-	{
-#ifndef __ANDROID__
-		if (level == LogLevel::ERROR || level == LogLevel::FATAL)
-			fputs(consoleLogEntry, stderr);
-		else
-			fputs(consoleLogEntry, stdout);
-
-	#ifdef _WIN32
-		writeOutputDebug(logEntry_);
-	#endif
-
-#else
-		android_LogPriority priority;
-
-		// clang-format off
-		switch (level)
-		{
-			case LogLevel::FATAL:		priority = ANDROID_LOG_FATAL; break;
-			case LogLevel::ERROR:		priority = ANDROID_LOG_ERROR; break;
-			case LogLevel::WARN:		priority = ANDROID_LOG_WARN; break;
-			case LogLevel::INFO:		priority = ANDROID_LOG_INFO; break;
-			case LogLevel::DEBUG:		priority = ANDROID_LOG_DEBUG; break;
-			case LogLevel::VERBOSE:		priority = ANDROID_LOG_VERBOSE; break;
-			case LogLevel::UNKNOWN:		priority = ANDROID_LOG_UNKNOWN; break;
-			default:					priority = ANDROID_LOG_UNKNOWN; break;
-		}
-		// clang-format on
-
-		__android_log_write(priority, "nCine", logEntry_);
-#endif
-	}
-
-	if (fileLevel_ != LogLevel::OFF && levelInt >= fileLevelInt &&
-	    fileHandle_ != nullptr && fileHandle_->isOpened())
-	{
-		fprintf(fileHandle_->ptr(), "%s", logEntry_);
-		fflush(fileHandle_->ptr());
-	}
-
-#ifdef WITH_IMGUI
-	if (levelInt >= consoleLevelInt || levelInt >= fileLevelInt)
-	{
-		if (length > logString_.capacity() - logString_.length() - 1)
-			logString_.clear();
-
-		logString_.append(logEntry_);
-	}
-#endif
-
-#ifdef WITH_TRACY
-	if (levelInt >= consoleLevelInt || levelInt >= fileLevelInt)
-	{
-		uint32_t color = 0x999999;
-		// clang-format off
-		switch (level)
-		{
-			case LogLevel::FATAL:		color = 0xec3e40; break;
-			case LogLevel::ERROR:		color = 0xff9b2b; break;
-			case LogLevel::WARN:		color = 0xf5d800; break;
-			case LogLevel::INFO:		color = 0x01a46d; break;
-			case LogLevel::DEBUG:		color = 0x377fc7; break;
-			case LogLevel::VERBOSE:		color = 0x73a5d7; break;
-			case LogLevel::UNKNOWN:		color = 0x999999; break;
-			default:					color = 0x999999; break;
-		}
-		// clang-format on
-
-		TracyMessageC(logEntry_, length, color);
-	}
-#endif
-
-	return length;
-}
-
-///////////////////////////////////////////////////////////
-// PRIVATE FUNCTIONS
-///////////////////////////////////////////////////////////
-
-unsigned int FileLogger::writeWithColors(LogLevel level, const char *timeMsg, unsigned int timeMsgLength, const char *logMsg, unsigned int logMsgLength)
-{
-	const int levelInt = static_cast<int>(level);
-
-	logEntryWithColors_[0] = '\0';
-	logEntryWithColors_[MaxEntryLength - 1] = '\0';
-	unsigned int length = 0;
-
-	length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, "%s", Faint);
-
-	nctl::strncpy(logEntryWithColors_ + length, timeMsg, timeMsgLength);
-	length += timeMsgLength;
-
-	length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, " %s", Reset);
+	ASSERT(fmt);
 
 	const char *levelColor = BrightGreen;
 	switch (level)
@@ -282,37 +163,174 @@ unsigned int FileLogger::writeWithColors(LogLevel level, const char *timeMsg, un
 			break;
 	}
 
-	if (level == LogLevel::FATAL)
-		length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, "%s", BrightRedBg);
+	time_t now;
+	struct tm *ts;
+	now = time(nullptr);
+	ts = localtime(&now);
 
-	length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, "%s[L%d]%s", levelColor, levelInt, Reset);
-	length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, " %s- ", Faint);
+	logEntry_[0] = '\0';
+	logEntry_[MaxEntryLength - 1] = '\0';
+	unsigned int length = 0;
 
-	unsigned int logMsgFuncLength = 0;
-	while (logMsg[logMsgFuncLength] != '>' && logMsg[logMsgFuncLength] != '\0')
-		logMsgFuncLength++;
-	logMsgFuncLength++; // skip '>' character
+	if (canUseColors_)
+		length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, "%s", Faint);
 
-	nctl::strncpy(logEntryWithColors_ + length, logMsg, nctl::min(logMsgFuncLength, MaxEntryLength - length - 1));
-	length += logMsgFuncLength;
+	length += strftime(logEntry_ + length, MaxEntryLength - length - 1, "- %H:%M:%S ", ts);
 
-	length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, "%s", Reset);
+	if (canUseColors_)
+		length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, " %s", Reset);
 
-	if (level == LogLevel::WARN || level == LogLevel::ERROR || level == LogLevel::FATAL)
-		length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, "%s", Bold);
+#if WITH_JOBSYSTEM
+	const unsigned char numThreads = theServiceLocator().jobSystem().numThreads();
+	// Don't include the thread index in the log entry if there aren't at least two threads in total
+	if (numThreads > 1)
+		length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, "[T%02u] ", IJobSystem::threadIndex());
+#endif
 
-	nctl::strncpy(logEntryWithColors_ + length, logMsg + logMsgFuncLength, nctl::min(logMsgLength - logMsgFuncLength, MaxEntryLength - length - 1));
-	length += logMsgLength - logMsgFuncLength;
+	if (canUseColors_)
+	{
+		if (level == LogLevel::FATAL)
+			length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, "%s", BrightRedBg);
 
-	if (level == LogLevel::WARN || level == LogLevel::ERROR || level == LogLevel::FATAL)
-		length += snprintf(logEntryWithColors_ + length, MaxEntryLength - length - 1, "%s", Reset);
+		length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, "%s[L%d]%s", levelColor, levelInt, Reset);
+		length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, " %s- ", Faint);
+		length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, "%s", Reset);
+	}
+	else
+		length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, "[L%d] - ", levelInt);
+
+	if (canUseColors_ && (level == LogLevel::WARN || level == LogLevel::ERROR || level == LogLevel::FATAL))
+		length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, "%s", Bold);
+
+	va_list args;
+	va_start(args, fmt);
+	const unsigned int logMsgLength = vsnprintf(logEntry_ + length, MaxEntryLength - length - 1, fmt, args);
+	va_end(args);
+	length += logMsgLength;
+
+	if (canUseColors_ && (level == LogLevel::WARN || level == LogLevel::ERROR || level == LogLevel::FATAL))
+		length += snprintf(logEntry_ + length, MaxEntryLength - length - 1, "%s", Reset);
 
 	if (length < MaxEntryLength - 2)
 	{
-		logEntryWithColors_[length++] = '\n';
-		logEntryWithColors_[length] = '\0';
+		logEntry_[length++] = '\n';
+		logEntry_[length] = '\0';
 	}
+
+#ifdef WITH_TRACY
+	// Tracy messages can come from all threads, pushing to the queue is not needed
+	uint32_t tracyMsgColor = 0x999999;
+	// clang-format off
+	switch (level)
+	{
+		case LogLevel::FATAL:       tracyMsgColor = 0xec3e40; break;
+		case LogLevel::ERROR:       tracyMsgColor = 0xff9b2b; break;
+		case LogLevel::WARN:        tracyMsgColor = 0xf5d800; break;
+		case LogLevel::INFO:        tracyMsgColor = 0x01a46d; break;
+		case LogLevel::DEBUG:       tracyMsgColor = 0x377fc7; break;
+		case LogLevel::VERBOSE:     tracyMsgColor = 0x73a5d7; break;
+		case LogLevel::UNKNOWN:     tracyMsgColor = 0x999999; break;
+		default:                    tracyMsgColor = 0x999999; break;
+	}
+	// clang-format on
+
+	TracyMessageC(logEntry_, length, tracyMsgColor);
+#endif
+
+#if WITH_JOBSYSTEM
+	// Only enqueue if there are more than two threads in total and if the message is not coming from the main thread
+	if (numThreads > 1 && IJobSystem::isMainThread() == false)
+		logEntryQueue_.enqueue(logEntry_, length);
+	else
+		writeOut(level, logEntry_, length);
+#else
+	writeOut(level, logEntry_, length);
+#endif
 
 	return length;
 }
+
+unsigned int FileLogger::consumeQueue()
+{
+	unsigned int numEntries = 0;
+
+#if WITH_JOBSYSTEM
+	FATAL_ASSERT_MSG(IJobSystem::isMainThread() == true, "This method should be called by the main thread only");
+	while (unsigned int length = logEntryQueue_.dequeue(queueEntry_, MaxEntryLength))
+	{
+		const char *offset = strstr(queueEntry_, "[L");
+		int logLevelInt = static_cast<int>(LogLevel::OFF);
+		if (offset != nullptr)
+			sscanf(offset, "[L%d]", &logLevelInt);
+
+		writeOut(static_cast<LogLevel>(logLevelInt), queueEntry_, length);
+		numEntries++;
+	}
+#endif
+
+	return numEntries;
+}
+
+///////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+///////////////////////////////////////////////////////////
+
+void FileLogger::writeOut(LogLevel level, const char *logEntry, unsigned int length)
+{
+	const int levelInt = static_cast<int>(level);
+	const int consoleLevelInt = static_cast<int>(consoleLevel_);
+	const int fileLevelInt = static_cast<int>(fileLevel_);
+
+	const bool shouldLogToConsole = (consoleLevel_ != LogLevel::OFF && levelInt >= consoleLevelInt);
+	const bool shouldLogToFile = (fileLevel_ != LogLevel::OFF && levelInt >= fileLevelInt);
+
+	if (shouldLogToConsole)
+	{
+#ifndef __ANDROID__
+		if (level == LogLevel::ERROR || level == LogLevel::FATAL)
+			fputs(logEntry, stderr);
+		else
+			fputs(logEntry, stdout);
+
+	#ifdef _WIN32
+		writeOutputDebug(logEntry);
+	#endif
+#else
+		android_LogPriority priority;
+
+		// clang-format off
+		switch (level)
+		{
+			case LogLevel::FATAL:		priority = ANDROID_LOG_FATAL; break;
+			case LogLevel::ERROR:		priority = ANDROID_LOG_ERROR; break;
+			case LogLevel::WARN:		priority = ANDROID_LOG_WARN; break;
+			case LogLevel::INFO:		priority = ANDROID_LOG_INFO; break;
+			case LogLevel::DEBUG:		priority = ANDROID_LOG_DEBUG; break;
+			case LogLevel::VERBOSE:		priority = ANDROID_LOG_VERBOSE; break;
+			case LogLevel::UNKNOWN:		priority = ANDROID_LOG_UNKNOWN; break;
+			default:					priority = ANDROID_LOG_UNKNOWN; break;
+		}
+		// clang-format on
+
+		__android_log_write(priority, "nCine", logEntry);
+#endif
+	}
+
+	if (shouldLogToFile && fileHandle_ != nullptr && fileHandle_->isOpened())
+	{
+		fprintf(fileHandle_->ptr(), "%s", logEntry);
+		fflush(fileHandle_->ptr());
+	}
+
+#ifdef WITH_IMGUI
+	if (shouldLogToConsole || shouldLogToFile)
+	{
+		if (length > logString_.capacity() - logString_.length() - 1)
+			logString_.clear();
+
+		logString_.append(logEntry);
+	}
+#endif
+}
+
 }

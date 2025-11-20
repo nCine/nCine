@@ -28,6 +28,13 @@
 	#include "LuaStatistics.h"
 #endif
 
+#ifdef WITH_JOBSYSTEM
+	#include "jobsystem_debug.h"
+	#if JOB_DEBUG_COUNTERS
+		#include "JobStatistics.h"
+	#endif
+#endif
+
 #ifdef WITH_RENDERDOC
 	#include "RenderDocCapture.h"
 #endif
@@ -298,6 +305,7 @@ void ImGuiDebugOverlay::guiWindow()
 	guiAudioPlayers();
 	guiInputState();
 	guiBinaryShaderCache();
+	guiJobSystem();
 	guiRenderDoc();
 	guiAllocators();
 	if (appCfg.withScenegraph)
@@ -468,6 +476,9 @@ void ImGuiDebugOverlay::guiPreprocessorDefines()
 		{
 #ifdef WITH_THREADS
 			ImGui::TextUnformatted("WITH_THREADS");
+#endif
+#ifdef WITH_JOBSYSTEM
+			ImGui::TextUnformatted("WITH_JOBSYSTEM");
 #endif
 #ifdef WITH_OPENGLES
 			ImGui::TextUnformatted("WITH_OPENGLES");
@@ -735,7 +746,8 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 		ImGui::Separator();
 		ImGui::Text("Debug Overlay: %s", appCfg.withDebugOverlay ? "true" : "false");
 		ImGui::Text("Audio: %s", appCfg.withAudio ? "true" : "false");
-		ImGui::Text("Threads: %s", appCfg.withThreads ? "true" : "false");
+		ImGui::Text("Job System: %s", appCfg.withJobSystem ? "true" : "false");
+		ImGui::Text("Number of Threads: %u", appCfg.numThreads);
 		ImGui::Text("Scenegraph: %s", appCfg.withScenegraph ? "true" : "false");
 		ImGui::Text("VSync: %s", appCfg.withVSync ? "true" : "false");
 		ImGui::Text("%s Debug Context: %s", openglApiName, appCfg.withGlDebugContext ? "true" : "false");
@@ -1333,6 +1345,206 @@ void ImGuiDebugOverlay::guiBinaryShaderCache()
 			ImGui::EndDisabled();
 		}
 	}
+}
+
+#if JOB_DEBUG_COUNTERS
+void guiJobSystemStatsTable(const JobStatistics::JobSystemStats &systemStats, const char *tableName)
+{
+	if (ImGui::BeginTable(tableName, 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |
+	                      ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp))
+	{
+		ImGui::TableSetupScrollFreeze(0, 1);
+		ImGui::TableSetupColumn("Counter", ImGuiTableColumnFlags_NoReorder | ImGuiTableColumnFlags_NoHide);
+		ImGui::TableSetupColumn("Value");
+		ImGui::TableHeadersRow();
+
+		ImGui::TableNextRow();
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs created");
+		ImGui::TableNextColumn(); ImGui::Text("%u", systemStats.jobsCreated);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Child jobs created");
+		ImGui::TableNextColumn(); ImGui::Text("%u", systemStats.childJobsCreated);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs stolen");
+		ImGui::TableNextColumn(); ImGui::Text("%u", systemStats.jobsStolen);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs executed");
+		ImGui::TableNextColumn(); ImGui::Text("%u", systemStats.jobsExecuted);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs finished");
+		ImGui::TableNextColumn(); ImGui::Text("%u", systemStats.jobsFinished);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Child jobs finished");
+		ImGui::TableNextColumn(); ImGui::Text("%u", systemStats.childJobsFinished);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Continuation jobs pushed");
+		ImGui::TableNextColumn(); ImGui::Text("%u", systemStats.continuationJobsPushed);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Parent jobs finished");
+		ImGui::TableNextColumn(); ImGui::Text("%u", systemStats.parentJobsFinished);
+
+
+		ImGui::EndTable();
+	}
+}
+
+void guiJobPoolStatsTable(const JobStatistics::JobPoolStats &poolStats, const char *tableName)
+{
+	if (ImGui::BeginTable(tableName, 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_RowBg |
+	                      ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp))
+	{
+		ImGui::TableSetupScrollFreeze(0, 1);
+		ImGui::TableSetupColumn("Counter", ImGuiTableColumnFlags_NoReorder | ImGuiTableColumnFlags_NoHide);
+		ImGui::TableSetupColumn("Value");
+		ImGui::TableHeadersRow();
+
+		ImGui::TableNextRow();
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs allocated");
+		ImGui::TableNextColumn(); ImGui::Text("%u", poolStats.jobsAllocated);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs failed to be allocated");
+		ImGui::TableNextColumn(); ImGui::Text("%u", poolStats.jobAllocationFails);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs freed");
+		ImGui::TableNextColumn(); ImGui::Text("%u", poolStats.jobsFreed);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs retrieved");
+		ImGui::TableNextColumn(); ImGui::Text("%u", poolStats.jobsRetrieved);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs failed to be retrieved");
+		ImGui::TableNextColumn(); ImGui::Text("%u", poolStats.jobRetrievalFails);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Thread cache found empty");
+		ImGui::TableNextColumn(); ImGui::Text("%u", poolStats.threadCacheEmpty);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Thread cache found full");
+		ImGui::TableNextColumn(); ImGui::Text("%u", poolStats.threadCacheFull);
+
+		ImGui::EndTable();
+	}
+}
+
+void guiJobQueueStatsTable(const JobStatistics::JobQueueStats &queueStats, const char *tableName)
+{
+	if (ImGui::BeginTable(tableName, 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |
+	                      ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp))
+	{
+		ImGui::TableSetupScrollFreeze(0, 1);
+		ImGui::TableSetupColumn("Counter", ImGuiTableColumnFlags_NoReorder | ImGuiTableColumnFlags_NoHide);
+		ImGui::TableSetupColumn("Value");
+		ImGui::TableHeadersRow();
+
+		ImGui::TableNextRow();
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs pushed");
+		ImGui::TableNextColumn(); ImGui::Text("%u", queueStats.pushes);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs popped");
+		ImGui::TableNextColumn(); ImGui::Text("%u", queueStats.pops);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs failed to be popped");
+		ImGui::TableNextColumn(); ImGui::Text("%u", queueStats.popFails);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs steals");
+		ImGui::TableNextColumn(); ImGui::Text("%u", queueStats.steals);
+		ImGui::TableNextColumn(); ImGui::TextUnformatted("Jobs failed to be stolen");
+		ImGui::TableNextColumn(); ImGui::Text("%u", queueStats.stealFails);
+
+		ImGui::EndTable();
+	}
+}
+#endif
+
+void ImGuiDebugOverlay::guiJobSystem()
+{
+#if JOB_DEBUG_COUNTERS
+	if (theJobStatistics().isAvailable() == false)
+		return;
+
+	static bool resetStatsEveryFrame = true;
+	IJobSystem &jobSystem = theServiceLocator().jobSystem();
+
+	if (resetStatsEveryFrame)
+	{
+		theJobStatistics().resetAllJobSystemStats();
+		theJobStatistics().resetAllJobPoolStats();
+		theJobStatistics().resetAllJobQueueStats();
+	}
+
+	if (ImGui::CollapsingHeader("Job System"))
+	{
+		ImGui::Text("Number of threads: %u (main is #%u)", jobSystem.numThreads(), jobSystem.threadIndex());
+		ImGui::SameLine();
+		ImGui::Checkbox("Reset every frame", &resetStatsEveryFrame);
+
+		if (ImGui::TreeNode("JobSystem statistics"))
+		{
+			JobStatistics::JobSystemStats systemStats;
+			theJobStatistics().collectAllJobSystemStats(systemStats);
+
+			guiJobSystemStatsTable(systemStats, "JobSystemTable");
+
+			if (ImGui::Button("Reset##JobSystem"))
+				theJobStatistics().resetAllJobSystemStats();
+
+			if (ImGui::TreeNode("Per-thread statistics"))
+			{
+				for (unsigned char i = 0; i < jobSystem.numThreads(); i++)
+				{
+					widgetName_.format("JobSystemTable#%02d", i);
+					guiJobSystemStatsTable(theJobStatistics().jobSystemStats(i), widgetName_.data());
+
+					widgetName_.format("Reset##JobSystem#%02d", i);
+					if (ImGui::Button(widgetName_.data()))
+						theJobStatistics().resetJobSystemStats(i);
+				}
+
+				ImGui::TreePop();
+			}
+
+			ImGui::TreePop();
+		}
+
+		if (ImGui::TreeNode("JobPool statistics"))
+		{
+			JobStatistics::JobPoolStats poolStats;
+			theJobStatistics().collectAllJobPoolStats(poolStats);
+
+			guiJobPoolStatsTable(poolStats, "JobPoolTable");
+
+			if (ImGui::Button("Reset##JobPool"))
+				theJobStatistics().resetAllJobPoolStats();
+
+			if (ImGui::TreeNode("Per-thread statistics"))
+			{
+				for (unsigned char i = 0; i < jobSystem.numThreads(); i++)
+				{
+					widgetName_.format("JobPoolTable#%02d", i);
+					guiJobPoolStatsTable(theJobStatistics().jobPoolStats(i), widgetName_.data());
+
+					widgetName_.format("Reset##JobPool#%02d", i);
+					if (ImGui::Button(widgetName_.data()))
+						theJobStatistics().resetJobPoolStats(i);
+				}
+
+				ImGui::TreePop();
+			}
+
+			ImGui::TreePop();
+		}
+
+		if (ImGui::TreeNode("JobQueue statistics"))
+		{
+			JobStatistics::JobQueueStats queueStats;
+			theJobStatistics().collectAllJobQueueStats(queueStats);
+
+			guiJobQueueStatsTable(queueStats, "JobQueueTable");
+
+			if (ImGui::Button("Reset##JobQueue"))
+				theJobStatistics().resetAllJobQueueStats();
+
+			if (ImGui::TreeNode("Per-thread statistics"))
+			{
+				for (unsigned char i = 0; i < jobSystem.numThreads(); i++)
+				{
+					widgetName_.format("JobQueueTable#%02d", i);
+					guiJobQueueStatsTable(theJobStatistics().jobQueueStats(i), widgetName_.data());
+
+					widgetName_.format("Reset##JobQueue#%02d", i);
+					if (ImGui::Button(widgetName_.data()))
+						theJobStatistics().resetJobQueueStats(i);
+				}
+
+				ImGui::TreePop();
+			}
+
+			ImGui::TreePop();
+		}
+	}
+#endif
 }
 
 void ImGuiDebugOverlay::guiRenderDoc()
