@@ -103,7 +103,7 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 {
 	config.withScenegraph = false;
 	config.withAudio = false;
-	config.withThreads = false;
+	config.withJobSystem = false;
 	config.vaoPoolSize = 2;
 
 	setDataPath(config);

@@ -29,9 +29,6 @@ if(NCINE_WITH_CRASHPAD AND EXISTS ${CRASHPAD_HANDLER_EXE})
 endif()
 
 list(APPEND SRCAPPTESTS glapptest_fbo_cube)
-if(Threads_FOUND)
-	list(APPEND SRCAPPTESTS apptest_threads apptest_threadpool)
-endif()
 
 foreach(SRCAPPTEST ${SRCAPPTESTS})
 	add_executable(${SRCAPPTEST} WIN32 ${SRCAPPTEST}.cpp ${RESOURCE_RC_FILE})
