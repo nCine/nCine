@@ -7,7 +7,7 @@ namespace ncine {
 
 /// A quaternion class based on templates
 template <class T>
-class Quaternion
+class alignas(StorageAlign<T>::value) Quaternion
 {
   public:
 	T x, y, z, w;
@@ -69,6 +69,8 @@ class Quaternion
 };
 
 using Quaternionf = Quaternion<float>;
+static_assert(sizeof(Quaternionf) == 16, "Quaternionf should be 16 bytes");
+static_assert(alignof(Quaternionf) == 16, "Quaternionf should be 16-byte aligned");
 
 template <class T>
 inline Quaternion<T> &Quaternion<T>::operator=(const Quaternion<T> &other)
@@ -311,7 +313,7 @@ inline Matrix4x4<T> Quaternion<T>::toMatrix4x4() const
 template <class T>
 inline Quaternion<T> Quaternion<T>::fromAxisAngle(T xx, T yy, T zz, T degrees)
 {
-	const T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(Pi) / 180);
+	const T halfRadians = static_cast<T>(degrees * 0.5) * (static_cast<T>(Pi) / 180);
 	const T sinus = sin(halfRadians);
 
 	return Quaternion<T>(xx * sinus,
@@ -329,21 +331,21 @@ inline Quaternion<T> Quaternion<T>::fromAxisAngle(const Vector3<T> &axis, T degr
 template <class T>
 inline Quaternion<T> Quaternion<T>::fromXAxisAngle(T degrees)
 {
-	const T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(Pi) / 180);
+	const T halfRadians = static_cast<T>(degrees * 0.5) * (static_cast<T>(Pi) / 180);
 	return Quaternion<T>(sin(halfRadians), 0, 0, cos(halfRadians));
 }
 
 template <class T>
 inline Quaternion<T> Quaternion<T>::fromYAxisAngle(T degrees)
 {
-	const T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(Pi) / 180);
+	const T halfRadians = static_cast<T>(degrees * 0.5) * (static_cast<T>(Pi) / 180);
 	return Quaternion<T>(0, sin(halfRadians), 0, cos(halfRadians));
 }
 
 template <class T>
 inline Quaternion<T> Quaternion<T>::fromZAxisAngle(T degrees)
 {
-	const T halfRadians = static_cast<T>(degrees * 0.5f) * (static_cast<T>(Pi) / 180);
+	const T halfRadians = static_cast<T>(degrees * 0.5) * (static_cast<T>(Pi) / 180);
 	return Quaternion<T>(0, 0, sin(halfRadians), cos(halfRadians));
 }
 
