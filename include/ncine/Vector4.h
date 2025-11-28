@@ -6,9 +6,16 @@
 
 namespace ncine {
 
+template<class T>
+struct StorageAlign { static constexpr size_t value = alignof(T); };
+
+// Float version aligned to 16 bytes to make compiler auto-vectorization more predictable
+template<>
+struct StorageAlign<float> { static constexpr size_t value = 16; };
+
 /// A four component vector based on templates
 template <class T>
-class Vector4
+class alignas(StorageAlign<T>::value) Vector4
 {
   public:
 	T x, y, z, w;
@@ -90,6 +97,9 @@ class Vector4
 
 using Vector4f = Vector4<float>;
 using Vector4i = Vector4<int>;
+static_assert(sizeof(Vector4f) == 16, "Vector4f should be 16 bytes");
+static_assert(alignof(Vector4f) == 16, "Vector4f should be 16-byte aligned");
+static_assert(alignof(Vector4i) == alignof(int), "Vector4i should not be 16-byte aligned");
 
 template <class T>
 inline Vector4<T> &Vector4<T>::operator=(const Vector4<T> &other)
