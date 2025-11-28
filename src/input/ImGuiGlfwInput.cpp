@@ -24,11 +24,13 @@
 	#ifndef GLFW_EXPOSE_NATIVE_X11      // for glfwGetX11Display(), glfwGetX11Window() on Freedesktop (Linux, BSD, etc.)
 		#define GLFW_EXPOSE_NATIVE_X11
 	#endif
-	#ifndef GLFW_EXPOSE_NATIVE_WAYLAND
-		#define GLFW_EXPOSE_NATIVE_WAYLAND
-	#endif
 	#include <GLFW/glfw3native.h>
 #endif
+#undef Status                   // X11 headers are leaking this.
+#ifndef _WIN32
+	#include <unistd.h>             // for usleep()
+#endif
+#include <stdio.h>              // for snprintf()
 
 #ifdef __EMSCRIPTEN__
 	#include <emscripten.h>
@@ -44,19 +46,15 @@
 #define GLFW_VERSION_COMBINED           (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 + GLFW_VERSION_REVISION)
 #define GLFW_HAS_PER_MONITOR_DPI        (GLFW_VERSION_COMBINED >= 3300) // 3.3+ glfwGetMonitorContentScale
 #ifdef GLFW_RESIZE_NESW_CURSOR          // Let's be nice to people who pulled GLFW between 2019-04-16 (3.4 define) and 2019-11-29 (cursors defines) // FIXME: Remove when GLFW 3.4 is released?
-	#define GLFW_HAS_NEW_CURSORS        (GLFW_VERSION_COMBINED >= 3400) // 3.4+ GLFW_RESIZE_ALL_CURSOR, GLFW_RESIZE_NESW_CURSOR, GLFW_RESIZE_NWSE_CURSOR, GLFW_NOT_ALLOWED_CURSOR
+#define GLFW_HAS_NEW_CURSORS            (GLFW_VERSION_COMBINED >= 3400) // 3.4+ GLFW_RESIZE_ALL_CURSOR, GLFW_RESIZE_NESW_CURSOR, GLFW_RESIZE_NWSE_CURSOR, GLFW_NOT_ALLOWED_CURSOR
 #else
-	#define GLFW_HAS_NEW_CURSORS        (0)
+#define GLFW_HAS_NEW_CURSORS            (0)
 #endif
+#define GLFW_HAS_CREATECURSOR           (GLFW_VERSION_COMBINED >= 3100) // 3.1+ glfwCreateCursor()
 #define GLFW_HAS_GAMEPAD_API            (GLFW_VERSION_COMBINED >= 3300) // 3.3+ glfwGetGamepadState() new api
 #define GLFW_HAS_GETKEYNAME             (GLFW_VERSION_COMBINED >= 3200) // 3.2+ glfwGetKeyName()
 #define GLFW_HAS_GETERROR               (GLFW_VERSION_COMBINED >= 3300) // 3.3+ glfwGetError()
 #define GLFW_HAS_GETPLATFORM            (GLFW_VERSION_COMBINED >= 3400) // 3.4+ glfwGetPlatform()
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
-	#define GLFW_HAS_X11_OR_WAYLAND     1
-#else
-	#define GLFW_HAS_X11_OR_WAYLAND     0
-#endif
 
 namespace ncine {
 
@@ -360,7 +358,9 @@ void ImGuiGlfwInput::init(GLFWwindow *window, bool withCallbacks)
 
 	// Setup backend capabilities flags
 	io.BackendPlatformName = "nCine_GLFW";
+#if GLFW_HAS_CREATECURSOR
 	io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors; // We can honor GetMouseCursor() values (optional)
+#endif
 	io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos; // We can honor io.WantSetMousePos requests (optional, rarely used)
 
 	isWayland_ = isWayland();
@@ -378,24 +378,26 @@ void ImGuiGlfwInput::init(GLFWwindow *window, bool withCallbacks)
 	// (By design, on X11 cursors are user configurable and some cursors may be missing. When a cursor doesn't exist,
 	// GLFW will emit an error which will often be printed by the app, so we temporarily disable error reporting.
 	// Missing cursors will return NULL and our _UpdateMouseCursor() function will use the Arrow cursor instead.)
+#if GLFW_HAS_CREATECURSOR
 	const GLFWerrorfun prevErrorCallback = glfwSetErrorCallback(nullptr);
 	mouseCursors_[ImGuiMouseCursor_Arrow] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
 	mouseCursors_[ImGuiMouseCursor_TextInput] = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
 	mouseCursors_[ImGuiMouseCursor_ResizeNS] = glfwCreateStandardCursor(GLFW_VRESIZE_CURSOR);
 	mouseCursors_[ImGuiMouseCursor_ResizeEW] = glfwCreateStandardCursor(GLFW_HRESIZE_CURSOR);
 	mouseCursors_[ImGuiMouseCursor_Hand] = glfwCreateStandardCursor(GLFW_HAND_CURSOR);
-#if GLFW_HAS_NEW_CURSORS
+	#if GLFW_HAS_NEW_CURSORS
 	mouseCursors_[ImGuiMouseCursor_ResizeAll] = glfwCreateStandardCursor(GLFW_RESIZE_ALL_CURSOR);
 	mouseCursors_[ImGuiMouseCursor_ResizeNESW] = glfwCreateStandardCursor(GLFW_RESIZE_NESW_CURSOR);
 	mouseCursors_[ImGuiMouseCursor_ResizeNWSE] = glfwCreateStandardCursor(GLFW_RESIZE_NWSE_CURSOR);
 	mouseCursors_[ImGuiMouseCursor_NotAllowed] = glfwCreateStandardCursor(GLFW_NOT_ALLOWED_CURSOR);
-#else
+	#else
 	mouseCursors_[ImGuiMouseCursor_ResizeAll] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
 	mouseCursors_[ImGuiMouseCursor_ResizeNESW] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
 	mouseCursors_[ImGuiMouseCursor_ResizeNWSE] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
 	mouseCursors_[ImGuiMouseCursor_NotAllowed] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
-#endif
+	#endif
 	glfwSetErrorCallback(prevErrorCallback);
+#endif
 #if GLFW_HAS_GETERROR && !defined(__EMSCRIPTEN__) // Eat errors (see #5908)
 	(void)glfwGetError(nullptr);
 #endif
@@ -454,8 +456,10 @@ void ImGuiGlfwInput::shutdown()
 	emscripten_set_wheel_callback(EMSCRIPTEN_EVENT_TARGET_DOCUMENT, nullptr, false, nullptr);
 #endif
 
+#if GLFW_HAS_CREATECURSOR
 	for (ImGuiMouseCursor i = 0; i < ImGuiMouseCursor_COUNT; i++)
 		glfwDestroyCursor(mouseCursors_[i]);
+#endif
 
 	// Windows: restore our WndProc hook
 #ifdef _WIN32
@@ -686,7 +690,9 @@ void ImGuiGlfwInput::updateMouseCursor()
 		{
 			// Show OS mouse cursor
 			// FIXME-PLATFORM: Unfocused windows seems to fail changing the mouse cursor with GLFW 3.2, but 3.3 works here.
+#if GLFW_HAS_CREATECURSOR
 			glfwSetCursor(window_, mouseCursors_[imguiCursor] ? mouseCursors_[imguiCursor] : mouseCursors_[ImGuiMouseCursor_Arrow]);
+#endif
 			glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		}
 	}
@@ -797,8 +803,8 @@ void ImGuiGlfwInput::getWindowSizeAndFramebufferScale(GLFWwindow *window, ImVec2
 	int displayW, displayH;
 	glfwGetWindowSize(window, &w, &h);
 	glfwGetFramebufferSize(window, &displayW, &displayH);
-	float fbScaleX = (w > 0) ? (float)displayW / w : 1.0f;
-	float fbScaleY = (h > 0) ? (float)displayH / h : 1.0f;
+	float fbScaleX = (w > 0) ? (float)displayW / (float)w : 1.0f;
+	float fbScaleY = (h > 0) ? (float)displayH / (float)h : 1.0f;
 #if GLFW_HAS_X11_OR_WAYLAND
 	if (isWayland_)
 		fbScaleX = fbScaleY = 1.0f;

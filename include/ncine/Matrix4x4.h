@@ -9,7 +9,7 @@ namespace ncine {
 
 /// A four by four matrix based on templates
 template <class T>
-class Matrix4x4
+class alignas(StorageAlign<T>::value) Matrix4x4
 {
   public:
 	Matrix4x4()
@@ -81,9 +81,9 @@ class Matrix4x4
 	static Matrix4x4 scaling(const Vector3<T> &v);
 	static Matrix4x4 scaling(T s);
 
-	static Matrix4x4 ortho(T left, T right, T bottom, T top, T near, T far);
-	static Matrix4x4 frustum(T left, T right, T bottom, T top, T near, T far);
-	static Matrix4x4 perspective(T fovY, T aspect, T near, T far);
+	static Matrix4x4 ortho(T left, T right, T bottom, T top, T zNear, T zFar);
+	static Matrix4x4 frustum(T left, T right, T bottom, T top, T zNear, T zFar);
+	static Matrix4x4 perspective(T fovY, T aspect, T zNear, T zFar);
 
 	/// A matrix with all zero elements
 	static const Matrix4x4 Zero;
@@ -95,6 +95,8 @@ class Matrix4x4
 };
 
 using Matrix4x4f = Matrix4x4<float>;
+static_assert(sizeof(Matrix4x4f) == sizeof(Vector4f) * 4, "Matrix4x4f should be 16*4 bytes");
+static_assert(alignof(Matrix4x4f) == 16, "Matrix4x4f should be 16-byte aligned");
 
 template <class T>
 inline Matrix4x4<T>::Matrix4x4(const Vector4<T> &v0, const Vector4<T> &v1, const Vector4<T> &v2, const Vector4<T> &v3)
@@ -298,14 +300,13 @@ template <class T>
 inline Matrix4x4<T> Matrix4x4<T>::operator*(const Matrix4x4 &m2) const
 {
 	const Matrix4x4 &m1 = *this;
-	Matrix4x4 result;
 
-	result[0] = m1[0] * m2[0][0] + m1[1] * m2[0][1] + m1[2] * m2[0][2] + m1[3] * m2[0][3];
-	result[1] = m1[0] * m2[1][0] + m1[1] * m2[1][1] + m1[2] * m2[1][2] + m1[3] * m2[1][3];
-	result[2] = m1[0] * m2[2][0] + m1[1] * m2[2][1] + m1[2] * m2[2][2] + m1[3] * m2[2][3];
-	result[3] = m1[0] * m2[3][0] + m1[1] * m2[3][1] + m1[2] * m2[3][2] + m1[3] * m2[3][3];
+	Vector4<T> r0(m1[0] * m2[0][0] + m1[1] * m2[0][1] + m1[2] * m2[0][2] + m1[3] * m2[0][3]);
+	Vector4<T> r1(m1[0] * m2[1][0] + m1[1] * m2[1][1] + m1[2] * m2[1][2] + m1[3] * m2[1][3]);
+	Vector4<T> r2(m1[0] * m2[2][0] + m1[1] * m2[2][1] + m1[2] * m2[2][2] + m1[3] * m2[2][3]);
+	Vector4<T> r3(m1[0] * m2[3][0] + m1[1] * m2[3][1] + m1[2] * m2[3][2] + m1[3] * m2[3][3]);
 
-	return result;
+	return Matrix4x4(r0, r1, r2, r3);
 }
 
 template <class T>
@@ -366,29 +367,12 @@ template <class T>
 inline Matrix4x4<T> Matrix4x4<T>::transposed() const
 {
 	const Matrix4x4 &m = *this;
-	Matrix4x4 result;
 
-	result[0][0] = m[0][0];
-	result[0][1] = m[1][0];
-	result[0][2] = m[2][0];
-	result[0][3] = m[3][0];
-
-	result[1][0] = m[0][1];
-	result[1][1] = m[1][1];
-	result[1][2] = m[2][1];
-	result[1][3] = m[3][1];
-
-	result[2][0] = m[0][2];
-	result[2][1] = m[1][2];
-	result[2][2] = m[2][2];
-	result[2][3] = m[3][2];
-
-	result[3][0] = m[0][3];
-	result[3][1] = m[1][3];
-	result[3][2] = m[2][3];
-	result[3][3] = m[3][3];
-
-	return result;
+	return Matrix4x4<T>(
+		Vector4<T>(m[0].x, m[1].x, m[2].x, m[3].x),
+		Vector4<T>(m[0].y, m[1].y, m[2].y, m[3].y),
+		Vector4<T>(m[0].z, m[1].z, m[2].z, m[3].z),
+		Vector4<T>(m[0].w, m[1].w, m[2].w, m[3].w));
 }
 
 template <class T>
@@ -473,10 +457,7 @@ template <class T>
 inline Matrix4x4<T> &Matrix4x4<T>::translate(T xx, T yy, T zz)
 {
 	Matrix4x4 &m = *this;
-
-	m[3][0] += xx * m[0][0] + yy * m[1][0] + zz * m[2][0];
-	m[3][1] += xx * m[0][1] + yy * m[1][1] + zz * m[2][1];
-	m[3][2] += xx * m[0][2] + yy * m[1][2] + zz * m[2][2];
+	m[3] = m[3] + m[0] * xx + m[1] * yy + m[2] * zz;
 
 	return *this;
 }
@@ -685,32 +666,32 @@ inline Matrix4x4<T> Matrix4x4<T>::scaling(T s)
 }
 
 template <class T>
-inline Matrix4x4<T> Matrix4x4<T>::ortho(T left, T right, T bottom, T top, T near, T far)
+inline Matrix4x4<T> Matrix4x4<T>::ortho(T left, T right, T bottom, T top, T zNear, T zFar)
 {
 	return Matrix4x4(Vector4<T>(2 / (right - left), 0, 0, 0),
 	                 Vector4<T>(0, 2 / (top - bottom), 0, 0),
-	                 Vector4<T>(0, 0, -2 / (far - near), 0),
-	                 Vector4<T>(-(right + left) / (right - left), -(top + bottom) / (top - bottom), -(far + near) / (far - near), 1));
+	                 Vector4<T>(0, 0, -2 / (zFar - zNear), 0),
+	                 Vector4<T>(-(right + left) / (right - left), -(top + bottom) / (top - bottom), -(zFar + zNear) / (zFar - zNear), 1));
 }
 
 template <class T>
-inline Matrix4x4<T> Matrix4x4<T>::frustum(T left, T right, T bottom, T top, T near, T far)
+inline Matrix4x4<T> Matrix4x4<T>::frustum(T left, T right, T bottom, T top, T zNear, T zFar)
 {
-	return Matrix4x4(Vector4<T>((2 * near) / (right - left), 0, 0, 0),
-	                 Vector4<T>(0, (2 * near) / (top - bottom), 0, 0),
-	                 Vector4<T>((right + left) / (right - left), (top + bottom) / (top - bottom), -(far + near) / (far - near), -1),
-	                 Vector4<T>(0, 0, (-2 * far * near) / (far - near), 0));
+	return Matrix4x4(Vector4<T>((2 * zNear) / (right - left), 0, 0, 0),
+	                 Vector4<T>(0, (2 * zNear) / (top - bottom), 0, 0),
+	                 Vector4<T>((right + left) / (right - left), (top + bottom) / (top - bottom), -(zFar + zNear) / (zFar - zNear), -1),
+	                 Vector4<T>(0, 0, (-2 * zFar * zNear) / (zFar - zNear), 0));
 }
 
 template <class T>
-inline Matrix4x4<T> Matrix4x4<T>::perspective(T fovY, T aspect, T near, T far)
+inline Matrix4x4<T> Matrix4x4<T>::perspective(T fovY, T aspect, T zNear, T zFar)
 {
-	const T yMax = near * tan(fovY * static_cast<T>(Pi) / 360);
+	const T yMax = zNear * tan(fovY * static_cast<T>(Pi) / 360);
 	const T yMin = -yMax;
 	const T xMin = yMin * aspect;
 	const T xMax = yMax * aspect;
 
-	return frustum(xMin, xMax, yMin, yMax, near, far);
+	return frustum(xMin, xMax, yMin, yMax, zNear, zFar);
 }
 
 template <class T>
