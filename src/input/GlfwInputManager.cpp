@@ -1,6 +1,7 @@
 #include <cstring> // for memset() and memcpy()
 #include <cmath> // for fabsf()
 #include <nctl/CString.h>
+#include <nctl/Utf8.h>
 #include "GlfwInputManager.h"
 #include "IInputEventHandler.h"
 #include "IAppEventHandler.h"

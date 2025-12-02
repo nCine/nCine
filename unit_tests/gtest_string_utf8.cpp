@@ -1,4 +1,5 @@
 #include "gtest_string.h"
+#include <nctl/Utf8.h>
 
 namespace {
 

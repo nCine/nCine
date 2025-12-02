@@ -2,6 +2,7 @@
 #include <nctl/CString.h>
 #include <nctl/String.h>
 #include <nctl/algorithms.h>
+#include <nctl/Utf8.h>
 
 #ifdef WITH_ALLOCATORS
 	#include <nctl/AllocManager.h>
@@ -10,18 +11,21 @@
 
 namespace nctl {
 
+/// Needed to satisfy the One Definition Rule in unit tests
+constexpr unsigned int String::SmallBufferSize;
+
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
 String::String()
-    : length_(0), capacity_(SmallBufferSize), fixedCapacity_(false)
+    : length_(0), capacity_(SmallBufferSize)
 {
 	array_.local_[0] = '\0';
 }
 
-String::String(unsigned int capacity, StringMode mode)
-    : length_(0), capacity_(capacity), fixedCapacity_(mode == StringMode::FIXED_CAPACITY)
+String::String(unsigned int capacity)
+    : length_(0), capacity_(capacity)
 {
 	array_.local_[0] = '\0';
 
@@ -38,8 +42,8 @@ String::String(unsigned int capacity, StringMode mode)
 	}
 }
 
-String::String(const char *cString, StringMode mode)
-    : length_(0), capacity_(0), fixedCapacity_(mode == StringMode::FIXED_CAPACITY)
+String::String(const char *cString)
+    : length_(0), capacity_(0)
 {
 	ASSERT(cString);
 
@@ -74,7 +78,7 @@ String::~String()
 }
 
 String::String(const String &other)
-    : length_(other.length_), capacity_(other.capacity_), fixedCapacity_(other.fixedCapacity_)
+    : length_(other.length_), capacity_(other.capacity_)
 {
 	if (capacity_ > SmallBufferSize)
 	{
@@ -90,7 +94,7 @@ String::String(const String &other)
 }
 
 String::String(String &&other)
-    : length_(0), capacity_(0), fixedCapacity_(false)
+    : length_(0), capacity_(0)
 {
 	swap(*this, other);
 }
@@ -137,13 +141,6 @@ unsigned int String::setLength(unsigned int newLength)
 
 void String::setCapacity(unsigned int newCapacity)
 {
-	// Setting a new capacity is disabled if the array is fixed
-	if (fixedCapacity_)
-	{
-		LOGW_X("Trying to change the capacity of a fixed string, from from %u to %u", capacity_, newCapacity);
-		return;
-	}
-
 	if (newCapacity == capacity_)
 	{
 		LOGW_X("String capacity already equal to %u", capacity_);
@@ -235,8 +232,7 @@ unsigned int String::replace(const String &source, unsigned int srcChar, unsigne
 	const unsigned int clampedDestChar = min(destChar, length_);
 
 	// Cannot copy more characters than the source has left until its length or more than the destination has until its capacity (if fixed)
-	const unsigned int charsToCopy = fixedCapacity_ ? min(min(numChar, source.length_ - clampedSrcChar), capacity_ - clampedDestChar - 1)
-	                                                : min(numChar, source.length_ - clampedSrcChar);
+	const unsigned int charsToCopy = min(numChar, source.length_ - clampedSrcChar);
 
 	if (charsToCopy > 0)
 	{
@@ -261,8 +257,7 @@ unsigned int String::replace(const char *source, unsigned int numChar, unsigned 
 
 	const unsigned int sourceLength = nctl::strnlen(source, MaxCStringLength);
 	// Cannot copy more characters than the source has left until its length or more than the destination has until its capacity (if fixed)
-	const unsigned int charsToCopy = fixedCapacity_ ? min(min(numChar, sourceLength), capacity_ - clampedDestChar - 1)
-	                                                : min(numChar, sourceLength);
+	const unsigned int charsToCopy = min(numChar, sourceLength);
 
 	if (charsToCopy > 0)
 	{
@@ -419,7 +414,7 @@ String &String::format(const char *fmt, ...)
 			extended = extendCapacity(capacity_ * 2);
 		else
 #endif
-		if (formattedLength > capacity_ - 1)
+		if (static_cast<unsigned int>(formattedLength) > capacity_ - 1)
 			extended = extendCapacity(formattedLength + 1);
 	} while (extended);
 
@@ -456,7 +451,7 @@ String &String::formatAppend(const char *fmt, ...)
 			extended = extendCapacity(capacity_ * 2);
 		else
 #endif
-		if (formattedLength > capacity_ - length_ - 1)
+		if (static_cast<unsigned int>(formattedLength) > capacity_ - length_ - 1)
 			extended = extendCapacity(length_ + formattedLength + 1);
 	} while (extended);
 
@@ -584,7 +579,7 @@ int String::utf8ToCodePoint(unsigned int position, unsigned int &codePoint) cons
 
 bool String::extendCapacity(unsigned int minimum)
 {
-	if (fixedCapacity_ == false && capacity_ < minimum)
+	if (capacity_ < minimum)
 	{
 		// Double the capacity until it can contain the required minimum
 		unsigned int newCapacity_ = capacity_ * 2;

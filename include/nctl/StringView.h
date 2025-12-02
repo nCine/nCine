@@ -1,5 +1,5 @@
-#ifndef CLASS_NCTL_STRING
-#define CLASS_NCTL_STRING
+#ifndef CLASS_NCTL_STRINGVIEW
+#define CLASS_NCTL_STRINGVIEW
 
 #include <ncine/common_macros.h>
 #include "StringIterator.h"
@@ -8,8 +8,8 @@
 
 namespace nctl {
 
-/// A basic string class made of chars
-class DLL_PUBLIC String
+/// A string view class over an array of chars
+class DLL_PUBLIC StringView
 {
   public:
 	/// Iterator type
@@ -21,34 +21,31 @@ class DLL_PUBLIC String
 	/// Reverse constant iterator type
 	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
-	/// Size of the local buffer
-	static constexpr unsigned int SmallBufferSize = 24;
-
-	/// Maximum length when creating an object from C-style strings
+	/// Maximum length when creating an view from a C-style string with no specified capacity
 	static constexpr unsigned int MaxCStringLength = 512 - 1;
 
-	/// Default constructor
-	String();
-	/// Constructs an empty string with explicit size
-	explicit String(unsigned int capacity);
-	/// Constructs a string object from a C string
-	/*! \note This constructor is not explicit to allow for automatic conversion. */
-	String(const char *cString);
-	~String();
+	/// Constructs a string view that needs to be set before use
+	StringView();
+	/// Constructs a string view over an array of chars
+	StringView(char *array);
+	/// Constructs a string view over an array of chars of the specified capacity
+	StringView(char *array, unsigned int capacity);
+	/// Constructs a string view over an array of chars of the specified capacity and length
+	StringView(char *array, unsigned int capacity, unsigned int length);
 
 	/// Copy constructor
-	String(const String &other);
+	StringView(const StringView &other);
 	/// Move constructor
-	String(String &&other);
+	StringView(StringView &&other);
 	/// Assignment operator (it might extend or truncate the original text)
-	String &operator=(const String &other);
+	StringView &operator=(const StringView &other);
 	/// Move assignment operator
-	String &operator=(String &&other);
-	/// Assigns a constant C string to the string object
-	String &operator=(const char *cString);
+	StringView &operator=(StringView &&other);
+	/// Assigns a constant C string to the string view object
+	StringView &operator=(const char *cString);
 
 	/// Swaps two strings without copying their data
-	inline void swap(String &first, String &second)
+	inline void swap(StringView &first, StringView &second)
 	{
 		nctl::swap(first.array_, second.array_);
 		nctl::swap(first.length_, second.length_);
@@ -58,11 +55,21 @@ class DLL_PUBLIC String
 	/// Returns an iterator to the first character
 	inline Iterator begin() { return Iterator(data()); }
 	/// Returns a reverse iterator to the last character
-	inline ReverseIterator rBegin() { return ReverseIterator(Iterator(data() + length_ - 1)); }
+	inline ReverseIterator rBegin()
+	{
+		if (length_ == 0)
+			return ReverseIterator(end());
+		return ReverseIterator(Iterator(data() + length_ - 1));
+	}
 	/// Returns an iterator to the termination character
 	inline Iterator end() { return Iterator(data() + length_); }
 	/// Returns a reverse iterator to the byte preceding the first character
-	inline ReverseIterator rEnd() { return ReverseIterator(Iterator(data() - 1)); }
+	inline ReverseIterator rEnd()
+	{
+		if (length_ == 0)
+			return ReverseIterator(end());
+		return ReverseIterator(Iterator(data() - 1));
+	}
 
 	/// Returns a constant iterator to the first character
 	inline ConstIterator begin() const { return ConstIterator(data()); }
@@ -76,42 +83,59 @@ class DLL_PUBLIC String
 	/// Returns a constant iterator to the first character
 	inline ConstIterator cBegin() const { return ConstIterator(data()); }
 	/// Returns a constant reverse iterator to the last character
-	inline ConstReverseIterator crBegin() const { return ConstReverseIterator(ConstIterator(data() + length_ - 1)); }
+	inline ConstReverseIterator crBegin() const
+	{
+		if (length_ == 0)
+			return ConstReverseIterator(end());
+		return ConstReverseIterator(ConstIterator(data() + length_ - 1));
+	}
 	/// Returns a constant iterator to the termination character
 	inline ConstIterator cEnd() const { return ConstIterator(data() + length_); }
 	/// Returns a constant reverse iterator to the byte preceding the first character
-	inline ConstReverseIterator crEnd() const { return ConstReverseIterator(ConstIterator(data() - 1)); }
+	inline ConstReverseIterator crEnd() const
+	{
+		if (length_ == 0)
+			return ConstReverseIterator(end());
+		return ConstReverseIterator(ConstIterator(data() - 1));
+	}
 
-	/// Returns true if the string is empty
+	/// Returns true if the string view is empty
 	inline bool isEmpty() const { return length_ == 0; }
-	/// Returns the string length
+	/// Returns the string view length
 	inline unsigned int length() const { return length_; }
-	/// Returns the string capacity
+	/// Returns the array capacity
 	inline unsigned int capacity() const { return capacity_; }
-	/// Sets the string length
+	/// Sets the string view length
 	unsigned int setLength(unsigned int newLength);
-	/// Sets a new capacity for the string (can be bigger or smaller than the current one)
-	void setCapacity(unsigned int newCapacity);
-	/// Decreases the capacity to match the current length of the string
-	void shrinkToFit();
 
-	/// Clears the string
+	/// Sets the string view over an array of chars
+	void set(char *array);
+	/// Sets the string view over an array of chars of the specified capacity
+	void set(char *array, unsigned int capacity);
+	/// Sets the string view over an array of chars of the specified capacity and length
+	void set(char *array, unsigned int capacity, unsigned int length);
+	/// Clears the string view
 	void clear();
 
 	/// Returns a pointer to the internal array
-	inline char *data() { return (capacity_ > SmallBufferSize) ? array_.begin_ : array_.local_; }
+	inline char *data() { return array_; }
 	/// Returns a constant pointer to the internal array
-	inline const char *data() const { return (capacity_ > SmallBufferSize) ? array_.begin_ : array_.local_; }
+	inline const char *data() const { return array_; }
 
-	/// Replaces characters from somewhere in the other string to somewhere in this one (no truncation)
-	unsigned int replace(const String &source, unsigned int srcChar, unsigned int numChar, unsigned int destChar);
+	/// Moves the start of the view forward by the specified number of characters
+	void removePrefix(unsigned int num);
+	/// Moves the end of the view back by the specified number of characters
+	void removeSuffix(unsigned int num);
+
+	/// Replaces characters from somewhere in the other string view to somewhere in this one (no truncation)
+	unsigned int replace(const StringView &source, unsigned int srcChar, unsigned int numChar, unsigned int destChar);
 	/// Replaces characters from a C string to somewhere in this one (no truncation)
 	unsigned int replace(const char *source, unsigned int numChar, unsigned int destChar);
 
-	/// Copies characters from somewhere in the other string to the beginning of this one
-	unsigned int assign(const String &source, unsigned int srcChar, unsigned int numChar);
-	/// Copies all characters from the other string to the beginning of this one
-	unsigned int assign(const String &source);
+	/// Copies characters from somewhere in the other string view to the beginning of this one
+	unsigned int assign(const StringView &source, unsigned int srcChar, unsigned int numChar);
+	/// Copies all characters from the other string view to the beginning of this one
+	unsigned int assign(const StringView &source);
 	/// Copies characters from a C string to the beginning of this one
 	unsigned int assign(const char *source, unsigned int numChar);
 
@@ -120,13 +144,13 @@ class DLL_PUBLIC String
 	/// Copies all characters from this string to a C string
 	unsigned int copy(char *dest) const;
 
-	/// Appends all the characters from the other string to the end of this one
-	unsigned int append(const String &other);
+	/// Appends all the characters from the other string view to the end of this one
+	unsigned int append(const StringView &other);
 	/// Appends all the characters from the C string to the end of this one
 	unsigned int append(const char *cString);
 
-	/// Compares the string with another one in lexicographical order
-	int compare(const String &other) const;
+	/// Compares the string view with another one in lexicographical order
+	int compare(const StringView &other) const;
 	/// Compares the string with a constant C string in lexicographical order
 	int compare(const char *cString) const;
 
@@ -137,34 +161,27 @@ class DLL_PUBLIC String
 	/// Finds the first occurrence of a character after the character at the index
 	int findFirstCharAfterIndex(char c, unsigned int index) const;
 
-	/// Finds the first occurrence of the given string
-	int find(const String &other) const;
+	/// Finds the first occurrence of the given string view
+	int find(const StringView &other) const;
 	/// Finds the first occurrence of the given constant C string
 	int find(const char *cString) const;
 
-	/// Replaces the string with the formatted result
-	String &format(const char *fmt, ...);
-	/// Append the formatted result to the string
-	String &formatAppend(const char *fmt, ...);
+	/// Replaces the string view with the formatted result
+	StringView &format(const char *fmt, ...);
+	/// Append the formatted result to the string view
+	StringView &formatAppend(const char *fmt, ...);
 
-	/// Appends another string to this one
-	String &operator+=(const String &other);
-	/// Appends a constant C string to the string object
-	String &operator+=(const char *cString);
-	/// Concatenate two strings together to create a third one
-	String operator+(const String &other) const;
-	/// Concatenates a string with a constant C string to create a third one
-	String operator+(const char *cString) const;
+	/// Appends another string view to this one
+	StringView &operator+=(const StringView &other);
+	/// Appends a constant C string to the string view obejct
+	StringView &operator+=(const char *cString);
 
-	/// Friend operator to concatenate a constant C string with a string to create a third one
-	friend DLL_PUBLIC String operator+(const char *cString, const String &string);
-
-	inline bool operator==(const String &other) const { return (length_ != other.length_) ? false : (compare(other) == 0); }
-	inline bool operator!=(const String &other) const { return (length_ != other.length_) ? true : (compare(other) != 0); }
-	inline bool operator>(const String &other) const { return compare(other) > 0; }
-	inline bool operator<(const String &other) const { return compare(other) < 0; }
-	inline bool operator>=(const String &other) const { return compare(other) >= 0; }
-	inline bool operator<=(const String &other) const { return compare(other) <= 0; }
+	inline bool operator==(const StringView &other) const { return (length_ != other.length_) ? false : (compare(other) == 0); }
+	inline bool operator!=(const StringView &other) const { return (length_ != other.length_) ? true : (compare(other) != 0); }
+	inline bool operator>(const StringView &other) const { return compare(other) > 0; }
+	inline bool operator<(const StringView &other) const { return compare(other) < 0; }
+	inline bool operator>=(const StringView &other) const { return compare(other) >= 0; }
+	inline bool operator<=(const StringView &other) const { return compare(other) <= 0; }
 
 	inline bool operator==(const char *cString) const { return compare(cString) == 0; }
 	inline bool operator!=(const char *cString) const { return compare(cString) != 0; }
@@ -173,12 +190,12 @@ class DLL_PUBLIC String
 	inline bool operator>=(const char *cString) const { return compare(cString) >= 0; }
 	inline bool operator<=(const char *cString) const { return compare(cString) <= 0; }
 
-	friend inline bool operator==(const char *cString, const String &string) { return string.compare(cString) == 0; }
-	friend inline bool operator!=(const char *cString, const String &string) { return string.compare(cString) != 0; }
-	friend inline bool operator>(const char *cString, const String &string) { return string.compare(cString) <= 0; }
-	friend inline bool operator<(const char *cString, const String &string) { return string.compare(cString) >= 0; }
-	friend inline bool operator>=(const char *cString, const String &string) { return string.compare(cString) < 0; }
-	friend inline bool operator<=(const char *cString, const String &string) { return string.compare(cString) > 0; }
+	friend inline bool operator==(const char *cString, const StringView &string) { return string.compare(cString) == 0; }
+	friend inline bool operator!=(const char *cString, const StringView &string) { return string.compare(cString) != 0; }
+	friend inline bool operator>(const char *cString, const StringView &string) { return string.compare(cString) <= 0; }
+	friend inline bool operator<(const char *cString, const StringView &string) { return string.compare(cString) >= 0; }
+	friend inline bool operator>=(const char *cString, const StringView &string) { return string.compare(cString) < 0; }
+	friend inline bool operator<=(const char *cString, const StringView &string) { return string.compare(cString) > 0; }
 
 	/// Read-only access to the specified element (with bounds checking)
 	const char &at(unsigned int index) const;
@@ -198,24 +215,12 @@ class DLL_PUBLIC String
 	int utf8ToCodePoint(unsigned int position, unsigned int &codePoint) const;
 
   private:
-	/// Union used for small buffer optimization
-	union Buffer
-	{
-		char *begin_;
-		char local_[SmallBufferSize];
-	};
-
-	Buffer array_;
+	char *array_;
 	unsigned int length_;
 	unsigned int capacity_;
-
-	/// Doubling current capacity until the required minimum can be contained
-	bool extendCapacity(unsigned int minimum);
 };
 
-static_assert(sizeof(String) == 32, "String object size should be exactly half a cache line");
-
-DLL_PUBLIC String operator+(const char *cString, const String &string);
+DLL_PUBLIC StringView operator+(const char *cString, const StringView &string);
 
 }
 
