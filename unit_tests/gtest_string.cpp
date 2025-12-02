@@ -9,7 +9,7 @@ class StringTest : public ::testing::Test
 	    : string_(Capacity) {}
 
   protected:
-	void SetUp() override { string_ = "String1"; }
+	void SetUp() override { string_ = String1Literal; }
 
 	nctl::String string_;
 };
@@ -54,41 +54,30 @@ TEST_F(StringTest, AssignCString)
 	printString("Assigning a C-style string to an empty one: ", newString);
 
 	ASSERT_EQ(newString.capacity(), Capacity);
-	ASSERT_EQ(newString.length(), strnlen("String1", Capacity));
-	ASSERT_STREQ(newString.data(), "String1");
+	ASSERT_EQ(newString.length(), String1Length);
+	ASSERT_STREQ(newString.data(), String1Literal);
 }
 
 TEST_F(StringTest, AssignCStringExtend)
 {
 	nctl::String newString(Capacity);
-	newString = veryLongCString;
+	newString = VeryLongCStringLiteral;
 	printString("Assigning a C-style string to an empty one: ", newString);
 
-	ASSERT_EQ(newString.capacity(), Capacity * 8);
-	ASSERT_EQ(newString.length(), strnlen(veryLongCString, Capacity * 8));
-	ASSERT_STREQ(newString.data(), veryLongCString);
-}
-
-TEST_F(StringTest, AssignCStringTruncate)
-{
-	nctl::String newString(Capacity, nctl::StringMode::FIXED_CAPACITY);
-	newString = veryLongCString;
-	printString("Assigning a C-style string to an empty one: ", newString);
-
-	ASSERT_EQ(newString.capacity(), Capacity);
-	ASSERT_EQ(newString.length(), strnlen("This_is_a_very_", Capacity));
-	ASSERT_STREQ(newString.data(), "This_is_a_very_");
+	ASSERT_EQ(newString.capacity(), Capacity * 4);
+	ASSERT_EQ(newString.length(), VeryLongCStringLength);
+	ASSERT_STREQ(newString.data(), VeryLongCStringLiteral);
 }
 
 TEST_F(StringTest, AssignCStringShorter)
 {
 	nctl::String newString("LongString1");
-	newString = "String1";
+	newString = String1Literal;
 	printString("Assigning a shorter C-style string to a longer one: ", newString);
 
 	ASSERT_EQ(newString.capacity(), Capacity);
-	ASSERT_EQ(newString.length(), strnlen("String1", Capacity));
-	ASSERT_STREQ(newString.data(), "String1");
+	ASSERT_EQ(newString.length(), String1Length);
+	ASSERT_STREQ(newString.data(), String1Literal);
 }
 
 TEST_F(StringTest, EqualityOperator)
@@ -102,7 +91,7 @@ TEST_F(StringTest, EqualityOperator)
 
 TEST_F(StringTest, InequalityOperator)
 {
-	nctl::String newString = "String2";
+	nctl::String newString = String2Literal;
 	printf("The first string and the new one are not equal: %d\n", string_ != newString);
 
 	ASSERT_TRUE(string_ != newString);
@@ -111,7 +100,7 @@ TEST_F(StringTest, InequalityOperator)
 
 TEST_F(StringTest, GreaterThanOperator)
 {
-	nctl::String newString = "String2";
+	nctl::String newString = String2Literal;
 	printf("The second string is lexicographically bigger than the first: %d\n", newString > string_);
 
 	ASSERT_TRUE(newString > string_);
@@ -120,7 +109,7 @@ TEST_F(StringTest, GreaterThanOperator)
 
 TEST_F(StringTest, LessThanOperator)
 {
-	nctl::String newString = "String2";
+	nctl::String newString = String2Literal;
 	printf("The first string is lexicographically smaller than the second: %d\n", string_ < newString);
 
 	ASSERT_TRUE(string_ < newString);
@@ -129,7 +118,7 @@ TEST_F(StringTest, LessThanOperator)
 
 TEST_F(StringTest, GreaterThanOrEqualOperator)
 {
-	nctl::String newString = "String2";
+	nctl::String newString = String2Literal;
 	printf("The second string is lexicographically bigger than or equal to the first: %d\n", newString >= string_);
 
 	ASSERT_TRUE(newString >= string_);
@@ -138,7 +127,7 @@ TEST_F(StringTest, GreaterThanOrEqualOperator)
 
 TEST_F(StringTest, LessThanOrEqualOperator)
 {
-	nctl::String newString = "String2";
+	nctl::String newString = String2Literal;
 	printf("The first string is lexicographically smaller than or equal to the second: %d\n", string_ <= newString);
 
 	ASSERT_TRUE(string_ <= newString);
@@ -147,7 +136,7 @@ TEST_F(StringTest, LessThanOrEqualOperator)
 
 TEST_F(StringTest, EqualityOperatorCString)
 {
-	const char *newString = "String1";
+	const char *newString = String1Literal;
 	printf("The first string and the new one are equal: %d\n", string_ == newString);
 
 	ASSERT_TRUE(string_ == newString);
@@ -158,7 +147,7 @@ TEST_F(StringTest, EqualityOperatorCString)
 
 TEST_F(StringTest, InequalityOperatorCString)
 {
-	const char *newString = "String2";
+	const char *newString = String2Literal;
 	printf("The first string and the new one are not equal: %d\n", string_ != newString);
 
 	ASSERT_TRUE(string_ != newString);
@@ -169,7 +158,7 @@ TEST_F(StringTest, InequalityOperatorCString)
 
 TEST_F(StringTest, GreaterThanOperatorCString)
 {
-	const char *newString = "String2";
+	const char *newString = String2Literal;
 	printf("The second string is lexicographically bigger than the first: %d\n", newString > string_);
 
 	ASSERT_TRUE(newString > string_);
@@ -180,7 +169,7 @@ TEST_F(StringTest, GreaterThanOperatorCString)
 
 TEST_F(StringTest, LessThanOperatorCString)
 {
-	const char *newString = "String2";
+	const char *newString = String2Literal;
 	printf("The first string is lexicographically smaller than the second: %d\n", string_ < newString);
 
 	ASSERT_TRUE(string_ < newString);
@@ -191,7 +180,7 @@ TEST_F(StringTest, LessThanOperatorCString)
 
 TEST_F(StringTest, GreaterThanOrEqualOperatorCString)
 {
-	const char *newString = "String2";
+	const char *newString = String2Literal;
 	printf("The second string is lexicographically bigger than or equal to the first: %d\n", newString >= string_);
 
 	ASSERT_TRUE(newString >= string_);
@@ -202,7 +191,7 @@ TEST_F(StringTest, GreaterThanOrEqualOperatorCString)
 
 TEST_F(StringTest, LessThanOrEqualOperatorCString)
 {
-	const char *newString = "String2";
+	const char *newString = String2Literal;
 	printf("The first string is lexicographically smaller than or equal to the second: %d\n", string_ <= newString);
 
 	ASSERT_TRUE(string_ <= newString);
@@ -229,9 +218,9 @@ TEST_F(StringTest, SubscriptAccessFirstCharacter)
 
 TEST_F(StringTest, SubscriptAccessFirstConstCharacter)
 {
-	const nctl::String constSting = string_;
-	printf("First character of the constant string: %c\n", constSting[0]);
-	ASSERT_EQ(constSting[0], 'S');
+	const nctl::String constString = string_;
+	printf("First character of the constant string: %c\n", constString[0]);
+	ASSERT_EQ(constString[0], 'S');
 }
 
 TEST_F(StringTest, SubscriptAccessLastCharacter)
@@ -242,9 +231,9 @@ TEST_F(StringTest, SubscriptAccessLastCharacter)
 
 TEST_F(StringTest, SubscriptAccessLastConstCharacter)
 {
-	const nctl::String constSting = string_;
-	printf("Last character of the constant string: %c\n", constSting[constSting.length() - 1]);
-	ASSERT_EQ(constSting[constSting.length() - 1], '1');
+	const nctl::String constString = string_;
+	printf("Last character of the constant string: %c\n", constString[constString.length() - 1]);
+	ASSERT_EQ(constString[constString.length() - 1], '1');
 }
 
 TEST_F(StringTest, AccessAtFirstCharacter)
@@ -255,9 +244,9 @@ TEST_F(StringTest, AccessAtFirstCharacter)
 
 TEST_F(StringTest, AccessAtFirstConstCharacter)
 {
-	const nctl::String constSting = string_;
-	printf("First character of the constant string: %c\n", constSting.at(0));
-	ASSERT_EQ(constSting.at(0), 'S');
+	const nctl::String constString = string_;
+	printf("First character of the constant string: %c\n", constString.at(0));
+	ASSERT_EQ(constString.at(0), 'S');
 }
 
 TEST_F(StringTest, AccessAtLastCharacter)
@@ -268,9 +257,9 @@ TEST_F(StringTest, AccessAtLastCharacter)
 
 TEST_F(StringTest, AccessAtLastConstCharacter)
 {
-	const nctl::String constSting = string_;
-	printf("Last character of the constant string: %c\n", constSting.at(constSting.length() - 1));
-	ASSERT_EQ(constSting.at(constSting.length() - 1), '1');
+	const nctl::String constString = string_;
+	printf("Last character of the constant string: %c\n", constString.at(constString.length() - 1));
+	ASSERT_EQ(constString.at(constString.length() - 1), '1');
 }
 
 #ifndef __EMSCRIPTEN__

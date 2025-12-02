@@ -72,6 +72,7 @@ set(NCTL_HEADERS
 	${NCINE_ROOT}/include/nctl/String.h
 	${NCINE_ROOT}/include/nctl/StaticString.h
 	${NCINE_ROOT}/include/nctl/StringIterator.h
+	${NCINE_ROOT}/include/nctl/StringView.h
 	${NCINE_ROOT}/include/nctl/HashFunctions.h
 	${NCINE_ROOT}/include/nctl/HashMap.h
 	${NCINE_ROOT}/include/nctl/HashMapIterator.h

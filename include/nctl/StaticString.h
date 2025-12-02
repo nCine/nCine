@@ -25,7 +25,7 @@ class StaticString
 	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
 	/// Maximum length when creating an object from C-style strings
-	static const unsigned int MaxCStringLength = 512 - 1;
+	static constexpr unsigned int MaxCStringLength = 512 - 1;
 
 	/// Default constructor
 	StaticString();

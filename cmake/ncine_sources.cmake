@@ -6,6 +6,7 @@ set(SOURCES
 	${NCINE_ROOT}/src/base/CString.cpp
 	${NCINE_ROOT}/src/base/Utf8.cpp
 	${NCINE_ROOT}/src/base/String.cpp
+	${NCINE_ROOT}/src/base/StringView.cpp
 	${NCINE_ROOT}/src/base/Clock.cpp
 	${NCINE_ROOT}/src/ServiceLocator.cpp
 	${NCINE_ROOT}/src/FileLogger.cpp
