@@ -133,7 +133,7 @@ TEST_F(StringIteratorTest, SubtractIndexToIterator)
 TEST_F(StringIteratorTest, SubtractIndexToIteratorInPlace)
 {
 	printf("Accessing characters with an iterator and a negative index\n");
-	for (unsigned int i = 1; i <= static_cast<int>(string_.length()); i++)
+	for (unsigned int i = 1; i <= string_.length(); i++)
 	{
 		nctl::String::ConstIterator it = string_.end();
 

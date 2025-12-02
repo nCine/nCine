@@ -5,7 +5,7 @@ namespace {
 class StaticStringTest : public ::testing::Test
 {
   protected:
-	void SetUp() override { string_ = "String1"; }
+	void SetUp() override { string_ = String1Literal; }
 
 	nctl::StaticString<Capacity> string_;
 };
@@ -23,18 +23,18 @@ TEST_F(StaticStringTest, EmptyString)
 TEST_F(StaticStringTest, AssignCString)
 {
 	nctl::StaticString<Capacity> newString;
-	newString = "String1";
+	newString = String1Literal;
 	printString("Assigning a C-style string to an empty one: ", newString);
 
 	ASSERT_EQ(newString.capacity(), Capacity);
-	ASSERT_EQ(newString.length(), strnlen("String1", Capacity));
-	ASSERT_STREQ(newString.data(), "String1");
+	ASSERT_EQ(newString.length(), String1Length);
+	ASSERT_STREQ(newString.data(), String1Literal);
 }
 
 TEST_F(StaticStringTest, AssignCStringTruncate)
 {
 	nctl::StaticString<Capacity> newString;
-	newString = veryLongCString;
+	newString = VeryLongCStringLiteral;
 	printString("Assigning a C-style string to an empty one: ", newString);
 
 	ASSERT_EQ(newString.capacity(), Capacity);
@@ -45,12 +45,12 @@ TEST_F(StaticStringTest, AssignCStringTruncate)
 TEST_F(StaticStringTest, AssignCStringShorter)
 {
 	nctl::StaticString<Capacity> newString("LongString1");
-	newString = "String1";
+	newString = String1Literal;
 	printString("Assigning a shorter C-style string to a longer one: ", newString);
 
 	ASSERT_EQ(newString.capacity(), Capacity);
-	ASSERT_EQ(newString.length(), strnlen("String1", Capacity));
-	ASSERT_STREQ(newString.data(), "String1");
+	ASSERT_EQ(newString.length(), String1Length);
+	ASSERT_STREQ(newString.data(), String1Literal);
 }
 
 TEST_F(StaticStringTest, EqualityOperator)
@@ -73,7 +73,7 @@ TEST_F(StaticStringTest, EqualityOperatorDifferentCapacity)
 
 TEST_F(StaticStringTest, InequalityOperator)
 {
-	nctl::StaticString<Capacity> newString = "String2";
+	nctl::StaticString<Capacity> newString = String2Literal;
 	printf("The first string and the new one are not equal: %d\n", string_ != newString);
 
 	ASSERT_TRUE(string_ != newString);
@@ -82,7 +82,7 @@ TEST_F(StaticStringTest, InequalityOperator)
 
 TEST_F(StaticStringTest, InequalityOperatorDifferentCapacity)
 {
-	nctl::StaticString<Capacity * 2> newString = "String2";
+	nctl::StaticString<Capacity * 2> newString = String2Literal;
 	printf("The first string and the new one are not equal: %d\n", string_ != newString);
 
 	ASSERT_TRUE(string_ != newString);
@@ -91,7 +91,7 @@ TEST_F(StaticStringTest, InequalityOperatorDifferentCapacity)
 
 TEST_F(StaticStringTest, GreaterThanOperator)
 {
-	nctl::StaticString<Capacity> newString = "String2";
+	nctl::StaticString<Capacity> newString = String2Literal;
 	printf("The second string is lexicographically bigger than the first: %d\n", newString > string_);
 
 	ASSERT_TRUE(newString > string_);
@@ -100,7 +100,7 @@ TEST_F(StaticStringTest, GreaterThanOperator)
 
 TEST_F(StaticStringTest, GreaterThanOperatorDifferentCapacity)
 {
-	nctl::StaticString<Capacity * 2> newString = "String2";
+	nctl::StaticString<Capacity * 2> newString = String2Literal;
 	printf("The second string is lexicographically bigger than the first: %d\n", newString > string_);
 
 	ASSERT_TRUE(newString > string_);
@@ -109,7 +109,7 @@ TEST_F(StaticStringTest, GreaterThanOperatorDifferentCapacity)
 
 TEST_F(StaticStringTest, LessThanOperator)
 {
-	nctl::StaticString<Capacity> newString = "String2";
+	nctl::StaticString<Capacity> newString = String2Literal;
 	printf("The first string is lexicographically smaller than the second: %d\n", string_ < newString);
 
 	ASSERT_TRUE(string_ < newString);
@@ -118,7 +118,7 @@ TEST_F(StaticStringTest, LessThanOperator)
 
 TEST_F(StaticStringTest, LessThanOperatorDifferentCapacity)
 {
-	nctl::StaticString<Capacity * 2> newString = "String2";
+	nctl::StaticString<Capacity * 2> newString = String2Literal;
 	printf("The first string is lexicographically smaller than the second: %d\n", string_ < newString);
 
 	ASSERT_TRUE(string_ < newString);
@@ -127,7 +127,7 @@ TEST_F(StaticStringTest, LessThanOperatorDifferentCapacity)
 
 TEST_F(StaticStringTest, GreaterThanOrEqualOperator)
 {
-	nctl::StaticString<Capacity> newString = "String2";
+	nctl::StaticString<Capacity> newString = String2Literal;
 	printf("The second string is lexicographically bigger than or equal to the first: %d\n", newString >= string_);
 
 	ASSERT_TRUE(newString >= string_);
@@ -136,7 +136,7 @@ TEST_F(StaticStringTest, GreaterThanOrEqualOperator)
 
 TEST_F(StaticStringTest, GreaterThanOrEqualOperatorDifferentCapacity)
 {
-	nctl::StaticString<Capacity * 2> newString = "String2";
+	nctl::StaticString<Capacity * 2> newString = String2Literal;
 	printf("The second string is lexicographically bigger than or equal to the first: %d\n", newString >= string_);
 
 	ASSERT_TRUE(newString >= string_);
@@ -145,7 +145,7 @@ TEST_F(StaticStringTest, GreaterThanOrEqualOperatorDifferentCapacity)
 
 TEST_F(StaticStringTest, LessThanOrEqualOperator)
 {
-	nctl::StaticString<Capacity> newString = "String2";
+	nctl::StaticString<Capacity> newString = String2Literal;
 	printf("The first string is lexicographically smaller than or equal to the second: %d\n", string_ <= newString);
 
 	ASSERT_TRUE(string_ <= newString);
@@ -154,7 +154,7 @@ TEST_F(StaticStringTest, LessThanOrEqualOperator)
 
 TEST_F(StaticStringTest, LessThanOrEqualOperatorDifferentCapacity)
 {
-	nctl::StaticString<Capacity * 2> newString = "String2";
+	nctl::StaticString<Capacity * 2> newString = String2Literal;
 	printf("The first string is lexicographically smaller than or equal to the second: %d\n", string_ <= newString);
 
 	ASSERT_TRUE(string_ <= newString);
@@ -163,7 +163,7 @@ TEST_F(StaticStringTest, LessThanOrEqualOperatorDifferentCapacity)
 
 TEST_F(StaticStringTest, EqualityOperatorCString)
 {
-	const char *newString = "String1";
+	const char *newString = String1Literal;
 	printf("The first string and the new one are equal: %d\n", string_ == newString);
 
 	ASSERT_TRUE(string_ == newString);
@@ -174,7 +174,7 @@ TEST_F(StaticStringTest, EqualityOperatorCString)
 
 TEST_F(StaticStringTest, InequalityOperatorCString)
 {
-	const char *newString = "String2";
+	const char *newString = String2Literal;
 	printf("The first string and the new one are not equal: %d\n", string_ != newString);
 
 	ASSERT_TRUE(string_ != newString);
@@ -185,7 +185,7 @@ TEST_F(StaticStringTest, InequalityOperatorCString)
 
 TEST_F(StaticStringTest, GreaterThanOperatorCString)
 {
-	const char *newString = "String2";
+	const char *newString = String2Literal;
 	printf("The second string is lexicographically bigger than the first: %d\n", newString > string_);
 
 	ASSERT_TRUE(newString > string_);
@@ -196,7 +196,7 @@ TEST_F(StaticStringTest, GreaterThanOperatorCString)
 
 TEST_F(StaticStringTest, LessThanOperatorCString)
 {
-	const char *newString = "String2";
+	const char *newString = String2Literal;
 	printf("The first string is lexicographically smaller than the second: %d\n", string_ < newString);
 
 	ASSERT_TRUE(string_ < newString);
@@ -207,7 +207,7 @@ TEST_F(StaticStringTest, LessThanOperatorCString)
 
 TEST_F(StaticStringTest, GreaterThanOrEqualOperatorCString)
 {
-	const char *newString = "String2";
+	const char *newString = String2Literal;
 	printf("The second string is lexicographically bigger than or equal to the first: %d\n", newString >= string_);
 
 	ASSERT_TRUE(newString >= string_);
@@ -218,7 +218,7 @@ TEST_F(StaticStringTest, GreaterThanOrEqualOperatorCString)
 
 TEST_F(StaticStringTest, LessThanOrEqualOperatorCString)
 {
-	const char *newString = "String2";
+	const char *newString = String2Literal;
 	printf("The first string is lexicographically smaller than or equal to the second: %d\n", string_ <= newString);
 
 	ASSERT_TRUE(string_ <= newString);
@@ -245,9 +245,9 @@ TEST_F(StaticStringTest, SubscriptAccessFirstCharacter)
 
 TEST_F(StaticStringTest, SubscriptAccessFirstConstCharacter)
 {
-	const nctl::StaticString<Capacity> constSting = string_;
-	printf("First character of the constant string: %c\n", constSting[0]);
-	ASSERT_EQ(constSting[0], 'S');
+	const nctl::StaticString<Capacity> constString = string_;
+	printf("First character of the constant string: %c\n", constString[0]);
+	ASSERT_EQ(constString[0], 'S');
 }
 
 TEST_F(StaticStringTest, SubscriptAccessLastCharacter)
@@ -258,9 +258,9 @@ TEST_F(StaticStringTest, SubscriptAccessLastCharacter)
 
 TEST_F(StaticStringTest, SubscriptAccessLastConstCharacter)
 {
-	const nctl::StaticString<Capacity> constSting = string_;
-	printf("Last character of the constant string: %c\n", constSting[constSting.length() - 1]);
-	ASSERT_EQ(constSting[constSting.length() - 1], '1');
+	const nctl::StaticString<Capacity> constString = string_;
+	printf("Last character of the constant string: %c\n", constString[constString.length() - 1]);
+	ASSERT_EQ(constString[constString.length() - 1], '1');
 }
 
 TEST_F(StaticStringTest, AccessAtFirstCharacter)
@@ -271,9 +271,9 @@ TEST_F(StaticStringTest, AccessAtFirstCharacter)
 
 TEST_F(StaticStringTest, AccessAtFirstConstCharacter)
 {
-	const nctl::StaticString<Capacity> constSting = string_;
-	printf("First character of the constant string: %c\n", constSting.at(0));
-	ASSERT_EQ(constSting.at(0), 'S');
+	const nctl::StaticString<Capacity> constString = string_;
+	printf("First character of the constant string: %c\n", constString.at(0));
+	ASSERT_EQ(constString.at(0), 'S');
 }
 
 TEST_F(StaticStringTest, AccessAtLastCharacter)
@@ -284,9 +284,9 @@ TEST_F(StaticStringTest, AccessAtLastCharacter)
 
 TEST_F(StaticStringTest, AccessAtLastConstCharacter)
 {
-	const nctl::StaticString<Capacity> constSting = string_;
-	printf("Last character of the constant string: %c\n", constSting.at(constSting.length() - 1));
-	ASSERT_EQ(constSting.at(constSting.length() - 1), '1');
+	const nctl::StaticString<Capacity> constString = string_;
+	printf("Last character of the constant string: %c\n", constString.at(constString.length() - 1));
+	ASSERT_EQ(constString.at(constString.length() - 1), '1');
 }
 
 #ifndef __EMSCRIPTEN__

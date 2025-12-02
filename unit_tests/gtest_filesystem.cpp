@@ -237,26 +237,28 @@ TEST_F(FileSystemTest, FixExtension)
 	ASSERT_STREQ(file.data(), "my.document.txt");
 
 	// The file string capacity needs to be extended by `fixExtension` (initially equal to SmallBufferSize`)
-	file.setCapacity(16);
-	file = "important_docu.";
-	ASSERT_EQ(file.capacity(), 16);
-	ASSERT_EQ(file.length(), 15);
+	file.setCapacity(nctl::String::SmallBufferSize);
+	file = "my_important_document.a";
+	ASSERT_EQ(file.capacity(), nctl::String::SmallBufferSize);
+	ASSERT_EQ(file.length(), nctl::String::SmallBufferSize - 1);
 	ASSERT_TRUE(nc::fs::fixExtension(file, extension));
 	printf("File \"%s\" had a string capacity that needed to be extended\n", file.data());
-	ASSERT_EQ(file.capacity(), 19);
-	ASSERT_EQ(file.length(), 18);
-	ASSERT_STREQ(file.data(), "important_docu.txt");
-
-	// The file string capacity needs to be extended by `fixExtension` (initially bigger than SmallBufferSize`)
-	file.setCapacity(25);
-	file = "my_important_document.aa";
-	ASSERT_EQ(file.capacity(), 25);
-	ASSERT_EQ(file.length(), 24);
-	ASSERT_TRUE(nc::fs::fixExtension(file, extension));
-	printf("File \"%s\" had a string capacity that needed to be extended\n", file.data());
+	ASSERT_GT(file.capacity(), nctl::String::SmallBufferSize);
 	ASSERT_EQ(file.capacity(), 26);
 	ASSERT_EQ(file.length(), 25);
 	ASSERT_STREQ(file.data(), "my_important_document.txt");
+
+	// The file string capacity needs to be extended by `fixExtension` (initially bigger than SmallBufferSize`)
+	file.setCapacity(30);
+	file = "my_very_important_document.aa";
+	ASSERT_GT(file.capacity(), nctl::String::SmallBufferSize);
+	ASSERT_EQ(file.capacity(), 30);
+	ASSERT_EQ(file.length(), 29);
+	ASSERT_TRUE(nc::fs::fixExtension(file, extension));
+	printf("File \"%s\" had a string capacity that needed to be extended\n", file.data());
+	ASSERT_EQ(file.capacity(), 31);
+	ASSERT_EQ(file.length(), 30);
+	ASSERT_STREQ(file.data(), "my_very_important_document.txt");
 
 	// The file string capacity does not need to be extended by `fixExtension`
 	file.setCapacity(26);

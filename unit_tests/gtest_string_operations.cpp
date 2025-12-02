@@ -2,21 +2,20 @@
 
 namespace {
 
+const char *LongStringLiteral = "String2...String2...String2";
+const unsigned int LongStringLength = 27;
+static_assert(LongStringLength > nctl::String::SmallBufferSize, "The string should be longer than the small buffer size");
+
 class StringOperationsTest : public ::testing::Test
 {
   public:
 	StringOperationsTest()
-	    : string_(Capacity), fixedString_(Capacity, nctl::StringMode::FIXED_CAPACITY) {}
+	    : string_(Capacity) {}
 
   protected:
-	void SetUp() override
-	{
-		string_ = "String1";
-		fixedString_ = "String1";
-	}
+	void SetUp() override { string_ = String1Literal; }
 
 	nctl::String string_;
-	nctl::String fixedString_;
 };
 
 TEST_F(StringOperationsTest, AppendString)
@@ -34,28 +33,15 @@ TEST_F(StringOperationsTest, AppendString)
 
 TEST_F(StringOperationsTest, AppendStringExtend)
 {
-	nctl::String newString = veryLongCString;
+	nctl::String newString = VeryLongCStringLiteral;
 	printString("Creating a new string: ", newString);
 
 	string_.append(newString);
 	printString("Appending a new string to the first one: ", string_);
 
-	ASSERT_EQ(string_.capacity(), Capacity * 8);
-	ASSERT_EQ(string_.length(), strnlen("String1", 8) + strnlen(veryLongCString, 78));
+	ASSERT_EQ(string_.capacity(), Capacity * 4);
+	ASSERT_EQ(string_.length(), String1Length + VeryLongCStringLength);
 	ASSERT_STREQ(string_.data(), "String1This_is_a_very_long_string_which_goes_beyond_the_default_capacity_of_a_string");
-}
-
-TEST_F(StringOperationsTest, AppendStringTruncate)
-{
-	nctl::String newString = veryLongCString;
-	printString("Creating a new string: ", newString);
-
-	fixedString_.append(newString);
-	printString("Appending a new string to the first one: ", fixedString_);
-
-	ASSERT_EQ(fixedString_.capacity(), Capacity);
-	ASSERT_EQ(fixedString_.length(), strnlen("String1This_is_", Capacity));
-	ASSERT_STREQ(fixedString_.data(), "String1This_is_");
 }
 
 TEST_F(StringOperationsTest, AppendCString)
@@ -73,26 +59,14 @@ TEST_F(StringOperationsTest, AppendCString)
 
 TEST_F(StringOperationsTest, AppendCStringExtend)
 {
-	printf("Using a very long C string: %s\n", veryLongCString);
+	printf("Using a very long C string: %s\n", VeryLongCStringLiteral);
 
-	string_.append(veryLongCString);
+	string_.append(VeryLongCStringLiteral);
 	printString("Appending a C string to the first one: ", string_);
 
-	ASSERT_EQ(string_.capacity(), Capacity * 8);
-	ASSERT_EQ(string_.length(), strnlen("String1", 8) + strnlen(veryLongCString, 78));
+	ASSERT_EQ(string_.capacity(), Capacity * 4);
+	ASSERT_EQ(string_.length(), String1Length + VeryLongCStringLength);
 	ASSERT_STREQ(string_.data(), "String1This_is_a_very_long_string_which_goes_beyond_the_default_capacity_of_a_string");
-}
-
-TEST_F(StringOperationsTest, AppendCStringTruncate)
-{
-	printf("Using a very long C string: %s\n", veryLongCString);
-
-	fixedString_.append(veryLongCString);
-	printString("Appending a C string to the first one: ", fixedString_);
-
-	ASSERT_EQ(fixedString_.capacity(), Capacity);
-	ASSERT_EQ(fixedString_.length(), strnlen("String1This_is_", Capacity));
-	ASSERT_STREQ(fixedString_.data(), "String1This_is_");
 }
 
 TEST_F(StringOperationsTest, Clear)
@@ -106,26 +80,27 @@ TEST_F(StringOperationsTest, Clear)
 
 TEST_F(StringOperationsTest, ImplicitCStringConstructorShort)
 {
-	nctl::String newString = "String2";
+	nctl::String newString = String2Literal;
 	printString("Creating a new string from a C-style string assignment: ", newString);
 
 	// Termination character is taken into account for capacity
 	ASSERT_EQ(newString.capacity(), Capacity);
-	ASSERT_EQ(newString.length(), strnlen("String2", 8));
-	ASSERT_STREQ(newString.data(), "String2");
+	ASSERT_EQ(newString.length(), String2Length);
+	ASSERT_STREQ(newString.data(), String2Literal);
 }
 
 TEST_F(StringOperationsTest, ImplicitCStringConstructorLong)
 {
 	// The string is longer than `SmallBufferSize`
-	nctl::String newString = "String2...String2";
+	nctl::String newString = LongStringLiteral;
+	ASSERT_GT(newString.length(), nctl::String::SmallBufferSize);
 	printString("Creating a new string from a C-style string assignment: ", newString);
 
 	// Termination character is taken into account for capacity
 	ASSERT_EQ(newString.length() + 1, newString.capacity());
-	ASSERT_EQ(newString.capacity(), strnlen("String2...String2", 18) + 1);
-	ASSERT_EQ(newString.length(), strnlen("String2...String2", 18));
-	ASSERT_STREQ(newString.data(), "String2...String2");
+	ASSERT_EQ(newString.capacity(), LongStringLength + 1);
+	ASSERT_EQ(newString.length(), LongStringLength);
+	ASSERT_STREQ(newString.data(), LongStringLiteral);
 }
 
 TEST_F(StringOperationsTest, CopyConstruction)
@@ -138,29 +113,11 @@ TEST_F(StringOperationsTest, CopyConstruction)
 	ASSERT_STREQ(newString.data(), string_.data());
 
 	printf("Appending a very long string to the first and the second string\n");
-	string_.append(veryLongCString);
-	newString.append(veryLongCString);
+	string_.append(VeryLongCStringLiteral);
+	newString.append(VeryLongCStringLiteral);
 	ASSERT_EQ(newString.capacity(), string_.capacity());
 	ASSERT_EQ(newString.length(), string_.length());
 	ASSERT_STREQ(newString.data(), string_.data());
-}
-
-TEST_F(StringOperationsTest, CopyConstructionFixed)
-{
-	nctl::String newString(fixedString_);
-	printString("Creating a new string as a copy of the first one (fixed): ", newString);
-
-	ASSERT_EQ(newString.capacity(), fixedString_.capacity());
-	ASSERT_EQ(newString.length(), fixedString_.length());
-	ASSERT_STREQ(newString.data(), fixedString_.data());
-
-	printf("Appending a very long string to the first and the second string\n");
-	fixedString_.append(veryLongCString);
-	newString.append(veryLongCString);
-	ASSERT_EQ(newString.capacity(), Capacity);
-	ASSERT_EQ(newString.capacity(), fixedString_.capacity());
-	ASSERT_EQ(newString.length(), fixedString_.length());
-	ASSERT_STREQ(newString.data(), fixedString_.data());
 }
 
 TEST_F(StringOperationsTest, MoveConstruction)
@@ -169,34 +126,16 @@ TEST_F(StringOperationsTest, MoveConstruction)
 	printString("Creating a new string moving from the first one: ", newString);
 
 	ASSERT_EQ(newString.capacity(), Capacity);
-	ASSERT_EQ(newString.length(), strnlen("String1", 8));
-	ASSERT_STREQ(newString.data(), "String1");
+	ASSERT_EQ(newString.length(), String1Length);
+	ASSERT_STREQ(newString.data(), String1Literal);
 	ASSERT_EQ(string_.capacity(), 0);
 	ASSERT_EQ(string_.length(), 0);
 
 	printf("Appending a very long string to the second string\n");
-	newString.append(veryLongCString);
+	newString.append(VeryLongCStringLiteral);
 
-	ASSERT_EQ(newString.capacity(), Capacity * 8);
-	ASSERT_GT(newString.length(), strnlen("String1", 8));
-}
-
-TEST_F(StringOperationsTest, MoveConstructionFixed)
-{
-	nctl::String newString(nctl::move(fixedString_));
-	printString("Creating a new string moving from the first one (fixed): ", newString);
-
-	ASSERT_EQ(newString.capacity(), Capacity);
-	ASSERT_EQ(newString.length(), strnlen("String1", 8));
-	ASSERT_STREQ(newString.data(), "String1");
-	ASSERT_EQ(fixedString_.capacity(), 0);
-	ASSERT_EQ(fixedString_.length(), 0);
-
-	printf("Appending a very long string to the second string\n");
-	newString.append(veryLongCString);
-
-	ASSERT_EQ(newString.capacity(), Capacity);
-	ASSERT_EQ(newString.length(), Capacity - 1);
+	ASSERT_EQ(newString.capacity(), Capacity * 4);
+	ASSERT_GT(newString.length(), String1Length);
 }
 
 TEST_F(StringOperationsTest, AssignmentOperator)
@@ -212,37 +151,25 @@ TEST_F(StringOperationsTest, AssignmentOperator)
 
 TEST_F(StringOperationsTest, AssignmentOperatorExtend)
 {
-	nctl::String longString(veryLongCString);
+	nctl::String longString(VeryLongCStringLiteral);
 	string_ = longString;
 	printString("Extending a string with the assignment operator: ", string_);
 
-	ASSERT_EQ(string_.capacity(), Capacity * 8);
+	ASSERT_EQ(string_.capacity(), Capacity * 4);
 	ASSERT_EQ(string_.length(), longString.length());
 	ASSERT_STREQ(string_.data(), longString.data());
 }
 
-TEST_F(StringOperationsTest, AssignmentOperatorTruncate)
-{
-	nctl::String longString(veryLongCString);
-	fixedString_ = longString;
-	printString("Filling a fixed string with the assignment operator: ", fixedString_);
-
-	// The assignment operator does not copy the `fixedCapacity` value
-	ASSERT_EQ(fixedString_.capacity(), Capacity);
-	ASSERT_EQ(fixedString_.length(), fixedString_.capacity() - 1);
-	ASSERT_STREQ(fixedString_.data(), "This_is_a_very_");
-}
-
 TEST_F(StringOperationsTest, AssignmentOperatorShorter)
 {
-	nctl::String newString("String1");
+	nctl::String newString(String1Literal);
 	string_ = "LongString1";
 	string_ = newString;
 	printString("Shrinking a string with the assignment operator: ", string_);
 
 	ASSERT_EQ(string_.capacity(), Capacity);
 	ASSERT_EQ(string_.length(), newString.length());
-	ASSERT_STREQ(string_.data(), "String1");
+	ASSERT_STREQ(string_.data(), String1Literal);
 }
 
 TEST_F(StringOperationsTest, MoveAssignmentOperator)
@@ -252,15 +179,15 @@ TEST_F(StringOperationsTest, MoveAssignmentOperator)
 	printString("Creating a new string with the move assignment operator: ", newString);
 
 	ASSERT_EQ(newString.capacity(), Capacity);
-	ASSERT_EQ(newString.length(), strnlen("String1", 8));
-	ASSERT_STREQ(newString.data(), "String1");
+	ASSERT_EQ(newString.length(), String1Length);
+	ASSERT_STREQ(newString.data(), String1Literal);
 	ASSERT_EQ(string_.capacity(), Capacity);
 	ASSERT_EQ(string_.length(), 0);
 }
 
 TEST_F(StringOperationsTest, MoveAssignmentOperatorExtend)
 {
-	nctl::String longString(veryLongCString);
+	nctl::String longString(VeryLongCStringLiteral);
 	nctl::String newString(Capacity);
 	newString = nctl::move(longString);
 	printString("Extending a string with the move assignment operator: ", newString);
@@ -271,30 +198,16 @@ TEST_F(StringOperationsTest, MoveAssignmentOperatorExtend)
 	ASSERT_EQ(longString.length(), 0);
 }
 
-TEST_F(StringOperationsTest, MoveAssignmentOperatorTruncate)
-{
-	nctl::String longString(veryLongCString);
-	nctl::String newString(Capacity, nctl::StringMode::FIXED_CAPACITY);
-	newString = nctl::move(longString);
-	printString("Filling a fixed string with the move assignment operator: ", newString);
-
-	// The move assignment operator also moves the `fixedCapacity` value
-	ASSERT_GT(newString.capacity(), Capacity);
-	ASSERT_GT(newString.length(), Capacity);
-	ASSERT_EQ(longString.capacity(), Capacity);
-	ASSERT_EQ(longString.length(), 0);
-}
-
 TEST_F(StringOperationsTest, MoveAssignmentOperatorShorter)
 {
-	nctl::String shortString("String1");
+	nctl::String shortString(String1Literal);
 	nctl::String newString("LongString1");
 	newString = nctl::move(shortString);
 	printString("Shrinking a string with the move assignment operator: ", newString);
 
 	ASSERT_EQ(newString.capacity(), Capacity);
-	ASSERT_EQ(newString.length(), strnlen("String1", 8));
-	ASSERT_STREQ(newString.data(), "String1");
+	ASSERT_EQ(newString.length(), String1Length);
+	ASSERT_STREQ(newString.data(), String1Literal);
 }
 
 TEST_F(StringOperationsTest, SelfAssignment)
@@ -303,39 +216,28 @@ TEST_F(StringOperationsTest, SelfAssignment)
 	printString("Assigning the string to itself with the assignment operator: ", string_);
 
 	ASSERT_EQ(string_.capacity(), Capacity);
-	ASSERT_EQ(string_.length(), strnlen("String1", 8));
-	ASSERT_STREQ(string_.data(), "String1");
+	ASSERT_EQ(string_.length(), String1Length);
+	ASSERT_STREQ(string_.data(), String1Literal);
 }
 
 TEST_F(StringOperationsTest, AssignLongCStringExtend)
 {
 	nctl::String newString;
-	// The C-style string is longer than default string capacity
-	newString = "String2...String2";
+	// The C-style string is longer than `SmallBufferSize`
+	newString = LongStringLiteral;
+	ASSERT_GT(newString.length(), nctl::String::SmallBufferSize);
 	printString("Creating a new string with the assignment operator from a C-style string: ", newString);
 
 	ASSERT_EQ(newString.capacity(), Capacity * 2);
-	ASSERT_EQ(newString.length(), strnlen("String2...String2", 17));
-	ASSERT_STREQ(newString.data(), "String2...String2");
-}
-
-TEST_F(StringOperationsTest, AssignLongCStringTruncate)
-{
-	nctl::String newString(nctl::StringMode::FIXED_CAPACITY);
-	// The C-style string is longer than default string capacity
-	newString = "String2...String2";
-	printString("Creating a new string with the assignment operator from a C-style string: ", newString);
-
-	// Termination character is taken into account for capacity
-	ASSERT_EQ(newString.capacity(), Capacity);
-	ASSERT_EQ(newString.length() + 1, Capacity);
-	ASSERT_STREQ(newString.data(), "String2...Strin");
+	ASSERT_EQ(newString.length(), LongStringLength);
+	ASSERT_STREQ(newString.data(), LongStringLiteral);
 }
 
 TEST_F(StringOperationsTest, ConstructByConcatenation)
 {
 	// The string is longer than `SmallBufferSize`
-	nctl::String secondString = "String2...String2";
+	nctl::String secondString = LongStringLiteral;
+	ASSERT_GT(secondString.length(), nctl::String::SmallBufferSize);
 	printString("Creating a second string: ", secondString);
 
 	nctl::String thirdString = secondString + string_;
@@ -343,15 +245,16 @@ TEST_F(StringOperationsTest, ConstructByConcatenation)
 
 	// Termination character is taken into account for capacity
 	ASSERT_EQ(thirdString.length() + 1, thirdString.capacity());
-	ASSERT_EQ(thirdString.capacity(), strnlen("String2...String2String1", 25) + 1);
-	ASSERT_EQ(thirdString.length(), strnlen("String2...String2String1", 25));
-	ASSERT_STREQ(thirdString.data(), "String2...String2String1");
+	ASSERT_EQ(thirdString.capacity(), LongStringLength + String1Length + 1);
+	ASSERT_EQ(thirdString.length(), LongStringLength + String1Length);
+	ASSERT_STREQ(thirdString.data(), "String2...String2...String2String1");
 }
 
 TEST_F(StringOperationsTest, ConstructByConcatenationWithCStringAsFirst)
 {
 	// The string is longer than `SmallBufferSize`
-	const char *secondString = "String2...String2";
+	const char *secondString = LongStringLiteral;
+	ASSERT_GT(strnlen(secondString, LongStringLength + 1), nctl::String::SmallBufferSize);
 	printf("Creating a second string: %s\n", secondString);
 
 	// using `friend String operator+(const char *cString, const String &string)`
@@ -360,15 +263,16 @@ TEST_F(StringOperationsTest, ConstructByConcatenationWithCStringAsFirst)
 
 	// Termination character is taken into account for capacity
 	ASSERT_EQ(thirdString.length() + 1, thirdString.capacity());
-	ASSERT_EQ(thirdString.capacity(), strnlen("String2...String2String1", 25) + 1);
-	ASSERT_EQ(thirdString.length(), strnlen("String2...String2String1", 25));
-	ASSERT_STREQ(thirdString.data(), "String2...String2String1");
+	ASSERT_EQ(thirdString.capacity(), LongStringLength + String1Length + 1);
+	ASSERT_EQ(thirdString.length(), LongStringLength + String1Length);
+	ASSERT_STREQ(thirdString.data(), "String2...String2...String2String1");
 }
 
 TEST_F(StringOperationsTest, ConstructByConcatenationWithCStringAsSecond)
 {
 	// The string is longer than `SmallBufferSize`
-	const char *secondString = "String2...String2";
+	const char *secondString = LongStringLiteral;
+	ASSERT_GT(strnlen(secondString, LongStringLength + 1), nctl::String::SmallBufferSize);
 	printf("Creating a second string: %s\n", secondString);
 
 	// using `String String::operator+(const char *cString) const`
@@ -377,9 +281,9 @@ TEST_F(StringOperationsTest, ConstructByConcatenationWithCStringAsSecond)
 
 	// Termination character is taken into account for capacity
 	ASSERT_EQ(thirdString.length() + 1, thirdString.capacity());
-	ASSERT_EQ(thirdString.capacity(), strnlen("String1String2...String2", 25) + 1);
-	ASSERT_EQ(thirdString.length(), strnlen("String1String2...String2", 25));
-	ASSERT_STREQ(thirdString.data(), "String1String2...String2");
+	ASSERT_EQ(thirdString.capacity(), LongStringLength + String1Length + 1);
+	ASSERT_EQ(thirdString.length(), LongStringLength + String1Length);
+	ASSERT_STREQ(thirdString.data(), "String1String2...String2...String2");
 }
 
 TEST_F(StringOperationsTest, Format)
@@ -402,16 +306,6 @@ TEST_F(StringOperationsTest, FormatAndExtend)
 	ASSERT_STREQ(string_.data(), "VeryLongStringFormatting2");
 }
 
-TEST_F(StringOperationsTest, FormatAndTruncate)
-{
-	fixedString_.format("VeryLongStringFormatting%d", 2);
-	printString("Resetting the string to a long formatted one with truncation: ", fixedString_);
-
-	ASSERT_EQ(fixedString_.capacity(), Capacity);
-	ASSERT_EQ(fixedString_.length(), strnlen("VeryLongStringF", Capacity));
-	ASSERT_STREQ(fixedString_.data(), "VeryLongStringF");
-}
-
 TEST_F(StringOperationsTest, FormatAppend)
 {
 	string_.formatAppend("String%d", 2);
@@ -427,19 +321,9 @@ TEST_F(StringOperationsTest, FormatAppendAndExtend)
 	string_.formatAppend("VeryLongStringFormatting%d", 2);
 	printString("Appending a long formatted string to the first one with truncation: ", string_);
 
-	ASSERT_EQ(string_.capacity(), Capacity * 4);
+	ASSERT_EQ(string_.capacity(), Capacity * 2);
 	ASSERT_EQ(string_.length(), strnlen("String1VeryLongStringFormatting2", 33));
 	ASSERT_STREQ(string_.data(), "String1VeryLongStringFormatting2");
-}
-
-TEST_F(StringOperationsTest, FormatAppendAndTruncate)
-{
-	fixedString_.formatAppend("VeryLongStringFormatting%d", 2);
-	printString("Appending a long formatted string to the first one with truncation: ", fixedString_);
-
-	ASSERT_EQ(fixedString_.capacity(), Capacity);
-	ASSERT_EQ(fixedString_.length(), strnlen("String1VeryLong", 15));
-	ASSERT_STREQ(fixedString_.data(), "String1VeryLong");
 }
 
 TEST_F(StringOperationsTest, SetLengthShrink)
@@ -478,20 +362,20 @@ TEST_F(StringOperationsTest, SetLengthBeyondCapacity)
 	ASSERT_EQ(string_.capacity(), Capacity);
 	ASSERT_EQ(string_.length(), Capacity - 1);
 	ASSERT_EQ(newLength, Capacity - 1);
-	ASSERT_STREQ(string_.data(), "String1");
+	ASSERT_STREQ(string_.data(), String1Literal);
 }
 
 TEST_F(StringOperationsTest, SetCapacityExtendFromDynamicToDynamic)
 {
 	nctl::String newString(Capacity * 2);
-	newString = "String1";
+	newString = String1Literal;
 	const unsigned int length = newString.length();
 	newString.setCapacity(Capacity * 4);
 	printString("Extending string capacity when already on a dynamic buffer: ", newString);
 
 	ASSERT_EQ(newString.capacity(), Capacity * 4);
 	ASSERT_EQ(newString.length(), length);
-	ASSERT_STREQ(newString.data(), "String1");
+	ASSERT_STREQ(newString.data(), String1Literal);
 }
 
 TEST_F(StringOperationsTest, SetCapacityExtendFromLocalToDynamic)
@@ -502,33 +386,33 @@ TEST_F(StringOperationsTest, SetCapacityExtendFromLocalToDynamic)
 
 	ASSERT_EQ(string_.capacity(), Capacity * 2);
 	ASSERT_EQ(string_.length(), length);
-	ASSERT_STREQ(string_.data(), "String1");
+	ASSERT_STREQ(string_.data(), String1Literal);
 }
 
 TEST_F(StringOperationsTest, SetCapacityShrinkFromDynamicToDynamic)
 {
 	nctl::String newString(Capacity * 4);
-	newString = "String1";
+	newString = String1Literal;
 	const unsigned int length = newString.length();
 	newString.setCapacity(Capacity * 2);
 	printString("Shrinking string capacity when already on a dynamic buffer: ", newString);
 
 	ASSERT_EQ(newString.capacity(), Capacity * 2);
 	ASSERT_EQ(newString.length(), length);
-	ASSERT_STREQ(newString.data(), "String1");
+	ASSERT_STREQ(newString.data(), String1Literal);
 }
 
 TEST_F(StringOperationsTest, SetCapacityShrinkFromDynamicToLocal)
 {
 	nctl::String newString(Capacity * 2);
-	newString = "String1";
+	newString = String1Literal;
 	const unsigned int length = newString.length();
 	newString.setCapacity(Capacity);
 	printString("Shrinking string capacity to go from a dynamic buffer to a local one: ", newString);
 
 	ASSERT_EQ(newString.capacity(), Capacity);
 	ASSERT_EQ(newString.length(), length);
-	ASSERT_STREQ(newString.data(), "String1");
+	ASSERT_STREQ(newString.data(), String1Literal);
 }
 
 TEST_F(StringOperationsTest, SetCapacityShrinkFromLocalToLocal)
@@ -539,44 +423,35 @@ TEST_F(StringOperationsTest, SetCapacityShrinkFromLocalToLocal)
 
 	ASSERT_EQ(string_.capacity(), Capacity);
 	ASSERT_EQ(string_.length(), length);
-	ASSERT_STREQ(string_.data(), "String1");
-}
-
-TEST_F(StringOperationsTest, SetCapacityOnFixed)
-{
-	const unsigned int length = fixedString_.length();
-	fixedString_.setCapacity(Capacity * 2);
-	printString("Trying to extend the capacity of a fixed string: ", fixedString_);
-
-	ASSERT_EQ(fixedString_.capacity(), Capacity);
-	ASSERT_EQ(fixedString_.length(), length);
-	ASSERT_STREQ(fixedString_.data(), "String1");
+	ASSERT_STREQ(string_.data(), String1Literal);
 }
 
 TEST_F(StringOperationsTest, ShrinkToFitFromDynamicToDynamic)
 {
 	nctl::String newString(Capacity * 2);
-	newString = "String1String1String1";
+	newString = "String1String1String1String1";
 	const unsigned int length = newString.length();
 	newString.shrinkToFit();
 	printString("Shrinking string to fit its content: ", newString);
 
+	ASSERT_GT(newString.capacity(), nctl::String::SmallBufferSize);
 	ASSERT_EQ(newString.capacity(), length + 1);
 	ASSERT_EQ(newString.length(), length);
-	ASSERT_STREQ(newString.data(), "String1String1String1");
+	ASSERT_STREQ(newString.data(), "String1String1String1String1");
 }
 
 TEST_F(StringOperationsTest, ShrinkToFitFromDynamicToLocal)
 {
 	nctl::String newString(Capacity * 2);
-	newString = "String1";
+	newString = String1Literal;
 	const unsigned int length = newString.length();
 	newString.shrinkToFit();
 	printString("Shrinking string to fit its content: ", newString);
 
+	ASSERT_LE(newString.capacity(), nctl::String::SmallBufferSize);
 	ASSERT_EQ(newString.capacity(), Capacity);
 	ASSERT_EQ(newString.length(), length);
-	ASSERT_STREQ(newString.data(), "String1");
+	ASSERT_STREQ(newString.data(), String1Literal);
 }
 
 TEST_F(StringOperationsTest, ShrinkToFitFromLocalToLocal)
@@ -587,12 +462,12 @@ TEST_F(StringOperationsTest, ShrinkToFitFromLocalToLocal)
 
 	ASSERT_EQ(string_.capacity(), Capacity);
 	ASSERT_EQ(string_.length(), length);
-	ASSERT_STREQ(string_.data(), "String1");
+	ASSERT_STREQ(string_.data(), String1Literal);
 }
 
 TEST_F(StringOperationsTest, FindFirstCharacter)
 {
-	string_ += "String2";
+	string_ += String2Literal;
 	printString("Appending a string to the first one: ", string_);
 
 	const char character = 'S';
@@ -615,7 +490,7 @@ TEST_F(StringOperationsTest, FindFirstNonExistentCharacter)
 
 TEST_F(StringOperationsTest, FindLastCharacter)
 {
-	string_ += "String2";
+	string_ += String2Literal;
 	printString("Appending a string to the first one: ", string_);
 
 	const char character = 'S';
@@ -638,7 +513,7 @@ TEST_F(StringOperationsTest, FindLastNonExistentCharacter)
 
 TEST_F(StringOperationsTest, FindFirstCharacterAfterIndex)
 {
-	string_ += "String2";
+	string_ += String2Literal;
 	printString("Appending a string to the first one: ", string_);
 
 	const char character = 't';
@@ -675,7 +550,7 @@ TEST_F(StringOperationsTest, FindString)
 {
 	const unsigned int oldLength = string_.length();
 
-	nctl::String newString = "String2";
+	nctl::String newString = String2Literal;
 	printString("Creating a new string: ", newString);
 	string_ += newString;
 	printString("Appending the new string to the first one: ", string_);
@@ -687,7 +562,7 @@ TEST_F(StringOperationsTest, FindString)
 
 TEST_F(StringOperationsTest, FindNonExistentString)
 {
-	nctl::String newString = "String2";
+	nctl::String newString = String2Literal;
 	printString("Creating a new string: ", newString);
 
 	const int position = string_.find(newString);
@@ -699,7 +574,7 @@ TEST_F(StringOperationsTest, FindCString)
 {
 	const unsigned int oldLength = string_.length();
 
-	const char *newString = "String2";
+	const char *newString = String2Literal;
 	printf("Creating a new string: %s\n", newString);
 	string_ += newString;
 	printString("Appending the new string to the first one: ", string_);
@@ -711,7 +586,7 @@ TEST_F(StringOperationsTest, FindCString)
 
 TEST_F(StringOperationsTest, FindNonExistentCString)
 {
-	const char *newString = "String2";
+	const char *newString = String2Literal;
 	printf("Creating a new string: %s\n", newString);
 
 	const int position = string_.find(newString);
@@ -792,7 +667,7 @@ TEST_F(StringOperationsTest, CopyCharactersFromBeyondEnd)
 
 TEST_F(StringOperationsTest, CopyCharactersToBeyondEndExtend)
 {
-	nctl::String srcString = "0123456";
+	nctl::String srcString = "01234567890123456";
 	printString("Creating a new source string: ", srcString);
 	nctl::String destString = "abcdefghilmn";
 	printString("Creating a new destination string: ", destString);
@@ -800,7 +675,8 @@ TEST_F(StringOperationsTest, CopyCharactersToBeyondEndExtend)
 	const unsigned int numAvailable = destString.capacity() - destString.length() - 1;
 
 	const unsigned int srcChar = 0;
-	const unsigned int numChar = 6; // more than available in destination
+	const unsigned int numChar = 17; // more than available in destination
+	ASSERT_GT(numChar, numAvailable);
 	const unsigned int destChar = destString.length() + 1; // beyond the end of destination
 	const unsigned int numCopied = destString.replace(srcString, srcChar, numChar, destChar);
 	printString("Trying to copy a character from the source string to beyond the end of the destination one: ", destString);
@@ -809,27 +685,6 @@ TEST_F(StringOperationsTest, CopyCharactersToBeyondEndExtend)
 	ASSERT_NE(srcString.length(), destString.length()); // no truncation
 	ASSERT_GT(numCopied, numAvailable);
 	ASSERT_EQ(numCopied, numChar);
-}
-
-TEST_F(StringOperationsTest, CopyCharactersToBeyondEndFixed)
-{
-	nctl::String srcString = "0123456";
-	printString("Creating a new source string: ", srcString);
-	nctl::String destString("abcdefghilmn", nctl::StringMode::FIXED_CAPACITY);
-	printString("Creating a new destination string: ", destString);
-
-	const unsigned int numAvailable = destString.capacity() - destString.length() - 1;
-
-	const unsigned int srcChar = 0;
-	const unsigned int numChar = 6; // more than available in destination
-	const unsigned int destChar = destString.length() + 1; // beyond the end of destination
-	const unsigned int numCopied = destString.replace(srcString, srcChar, numChar, destChar);
-	printString("Trying to copy a character from the source string to beyond the end of the destination one: ", destString);
-
-	ASSERT_EQ(destString.capacity(), Capacity);
-	ASSERT_NE(srcString.length(), destString.length()); // no truncation
-	ASSERT_EQ(numCopied, numAvailable);
-	ASSERT_NE(numCopied, numChar);
 }
 
 TEST_F(StringOperationsTest, CopyMoreCharactersThanSourceLength)
