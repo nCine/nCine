@@ -23,23 +23,27 @@ TEST_F(StaticHashMapCStringTest, RetrieveElements)
 
 TEST_F(StaticHashMapCStringTest, InsertElements)
 {
-	printf("Inserting elements\n");
-	nctl::String newKey(32);
-	nctl::String newValue(32);
-	for (unsigned int i = Size; i < Size * 2; i++)
+	char localKeysCopy[Size][KeyCapacity + 2]; // Plus "_2"
+	char localValuesCopy[Size][ValueCapacity + 2]; // Plus "_2"
+	for (unsigned int i = 0; i < Size; i++)
 	{
-		newKey.format("%s_2", KeysCopy[i % Size]);
-		newValue.format("%s_2", Values[i % Size]);
-		cstrHashmap_.insert(newKey.data(), newValue.data());
+		strncpy(localKeysCopy[i], Keys[i], KeyCapacity + 2);
+		const unsigned int keyLength = strnlen(localKeysCopy[i], KeyCapacity + 2);
+		strncpy(&localKeysCopy[i][keyLength], "_2", KeyCapacity + 2 - keyLength);
+
+		strncpy(localValuesCopy[i], Keys[i], ValueCapacity + 2);
+		const unsigned int valueLength = strnlen(localValuesCopy[i], ValueCapacity + 2);
+		strncpy(&localValuesCopy[i][valueLength], "_2", ValueCapacity + 2 - valueLength);
 	}
 
+	printf("Inserting elements\n");
 	for (unsigned int i = 0; i < Size; i++)
-		ASSERT_STREQ(cstrHashmap_[KeysCopy[i]], Values[i]);
-	for (unsigned int i = Size; i < Size * 2; i++)
+		cstrHashmap_.insert(localKeysCopy[i], localValuesCopy[i]);
+
+	for (unsigned int i = 0; i < Size; i++)
 	{
-		newKey.format("%s_2", KeysCopy[i % Size]);
-		newValue.format("%s_2", Values[i % Size]);
-		ASSERT_STREQ(cstrHashmap_[newKey.data()], newValue.data());
+		ASSERT_STREQ(cstrHashmap_[KeysCopy[i]], Values[i]);
+		ASSERT_STREQ(cstrHashmap_[localKeysCopy[i]], localValuesCopy[i]);
 	}
 
 	ASSERT_EQ(cstrHashmap_.size(), Size * 2);
@@ -48,23 +52,27 @@ TEST_F(StaticHashMapCStringTest, InsertElements)
 
 TEST_F(StaticHashMapCStringTest, EmplaceElements)
 {
-	printf("Emplacing elements\n");
-	nctl::String newKey(32);
-	nctl::String newValue(32);
-	for (unsigned int i = Size; i < Size * 2; i++)
+	char localKeysCopy[Size][KeyCapacity + 2]; // Plus "_2"
+	char localValuesCopy[Size][ValueCapacity + 2]; // Plus "_2"
+	for (unsigned int i = 0; i < Size; i++)
 	{
-		newKey.format("%s_2", KeysCopy[i % Size]);
-		newValue.format("%s_2", Values[i % Size]);
-		cstrHashmap_.emplace(newKey.data(), newValue.data());
+		strncpy(localKeysCopy[i], Keys[i], KeyCapacity + 2);
+		const unsigned int keyLength = strnlen(localKeysCopy[i], KeyCapacity + 2);
+		strncpy(&localKeysCopy[i][keyLength], "_2", KeyCapacity + 2 - keyLength);
+
+		strncpy(localValuesCopy[i], Keys[i], ValueCapacity + 2);
+		const unsigned int valueLength = strnlen(localValuesCopy[i], ValueCapacity + 2);
+		strncpy(&localValuesCopy[i][valueLength], "_2", ValueCapacity + 2 - valueLength);
 	}
 
+	printf("Emplacing elements\n");
 	for (unsigned int i = 0; i < Size; i++)
-		ASSERT_STREQ(cstrHashmap_[KeysCopy[i]], Values[i]);
-	for (unsigned int i = Size; i < Size * 2; i++)
+		cstrHashmap_.emplace(localKeysCopy[i], localValuesCopy[i]);
+
+	for (unsigned int i = 0; i < Size; i++)
 	{
-		newKey.format("%s_2", KeysCopy[i % Size]);
-		newValue.format("%s_2", Values[i % Size]);
-		ASSERT_STREQ(cstrHashmap_[newKey.data()], newValue.data());
+		ASSERT_STREQ(cstrHashmap_[KeysCopy[i]], Values[i]);
+		ASSERT_STREQ(cstrHashmap_[localKeysCopy[i]], localValuesCopy[i]);
 	}
 
 	ASSERT_EQ(cstrHashmap_.size(), Size * 2);

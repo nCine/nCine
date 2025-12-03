@@ -111,7 +111,7 @@ jobs:
         cmake $CMAKE_ARGS
         make -j $(getconf _NPROCESSORS_ONLN) -C ../nCine-buildtests-${{ matrix.BuildType }}
         cd ../nCine-buildtests-${{ matrix.BuildType }}
-        ctest -j $(getconf _NPROCESSORS_ONLN) --build-config ${{ matrix.BuildType }}
+        ctest -j $(getconf _NPROCESSORS_ONLN) --build-config ${{ matrix.BuildType }} --output-on-failure
 
     - name: 'CMake Configuration'
       run: |
