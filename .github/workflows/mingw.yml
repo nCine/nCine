@@ -129,7 +129,7 @@ jobs:
         C:\msys64\usr\bin\bash.exe -lc "cmake -G 'MSYS Makefiles' -B ../nCine-buildtests-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=UnitTests"
         C:\msys64\usr\bin\bash.exe -lc 'make -j $NUMBER_OF_PROCESSORS -C ../nCine-buildtests-${{ matrix.BuildType }}'
         cd ..\nCine-buildtests-${{ matrix.BuildType }}
-        C:\msys64\usr\bin\bash.exe -lc 'ctest -j $NUMBER_OF_PROCESSORS --build-config ${{ matrix.BuildType }}'
+        C:\msys64\usr\bin\bash.exe -lc 'ctest -j $NUMBER_OF_PROCESSORS --build-config ${{ matrix.BuildType }} --output-on-failure'
 
     - name: 'CMake Configuration'
       env:

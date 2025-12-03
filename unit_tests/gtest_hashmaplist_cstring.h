@@ -3,7 +3,6 @@
 
 #include <nctl/HashMapList.h>
 #include <nctl/HashMapListIterator.h>
-#include <nctl/String.h>
 #include "gtest/gtest.h"
 
 namespace {
@@ -11,17 +10,18 @@ namespace {
 const unsigned int Capacity = 32;
 const unsigned int Size = 6;
 const char *Keys[Size] = { "A", "a", "B", "C", "AB", "BA" };
+const unsigned int KeyCapacity = 3;
 const char *Values[Size] = { "AAAA", "aaaa", "BBBB", "CCCC", "ABABABAB", "BABABABA" };
+const unsigned int ValueCapacity = 9;
 /// A new set of C-style string keys, same in content but different in memory address
-const unsigned int MaxLength = 3;
-char KeysCopy[Size][MaxLength];
+char KeysCopy[Size][KeyCapacity];
 
 void initHashMap(nctl::HashMapList<const char *, const char *> &cstrHashmap)
 {
 	for (unsigned int i = 0; i < Size; i++)
 	{
 		cstrHashmap[Keys[i]] = Values[i];
-		strncpy(KeysCopy[i], Keys[i], 5);
+		strncpy(KeysCopy[i], Keys[i], KeyCapacity);
 	}
 }
 

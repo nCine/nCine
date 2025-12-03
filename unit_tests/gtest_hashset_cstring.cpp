@@ -16,20 +16,22 @@ class HashSetCStringTest : public ::testing::Test
 
 TEST_F(HashSetCStringTest, InsertElements)
 {
-	printf("Inserting elements\n");
-	nctl::String newKey(32);
-	for (unsigned int i = Size; i < Size * 2; i++)
+	char localKeysCopy[Size][KeyCapacity + 2]; // Plus "_2"
+	for (unsigned int i = 0; i < Size; i++)
 	{
-		newKey.format("%s_2", KeysCopy[i % Size]);
-		cstrHashset_.insert(newKey.data());
+		strncpy(localKeysCopy[i], Keys[i], KeyCapacity + 2);
+		const unsigned int keyLength = strnlen(localKeysCopy[i], KeyCapacity + 2);
+		strncpy(&localKeysCopy[i][keyLength], "_2", KeyCapacity + 2 - keyLength);
 	}
 
+	printf("Inserting elements\n");
 	for (unsigned int i = 0; i < Size; i++)
-		ASSERT_TRUE(cstrHashset_.contains(KeysCopy[i]));
-	for (unsigned int i = Size; i < Size * 2; i++)
+		cstrHashset_.insert(localKeysCopy[i]);
+
+	for (unsigned int i = 0; i < Size; i++)
 	{
-		newKey.format("%s_2", KeysCopy[i % Size]);
-		ASSERT_TRUE(cstrHashset_.contains(newKey.data()));
+		ASSERT_TRUE(cstrHashset_.contains(KeysCopy[i]));
+		ASSERT_TRUE(cstrHashset_.contains(localKeysCopy[i]));
 	}
 
 	ASSERT_EQ(cstrHashset_.size(), Size * 2);

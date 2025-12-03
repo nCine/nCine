@@ -81,7 +81,7 @@ jobs:
         cmake -G "Visual Studio 17 2022" -A x64 -B ../nCine-buildtests-${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=UnitTests
         cmake --build ../nCine-buildtests-${{ matrix.BuildType }} --config ${{ matrix.BuildType }} -j $env:NUMBER_OF_PROCESSORS
         cd ../nCine-buildtests-${{ matrix.BuildType }}
-        ctest -j $env:NUMBER_OF_PROCESSORS --build-config ${{ matrix.BuildType }}
+        ctest -j $env:NUMBER_OF_PROCESSORS --build-config ${{ matrix.BuildType }} --output-on-failure
 
     - name: 'CMake Configuration'
       run: |
