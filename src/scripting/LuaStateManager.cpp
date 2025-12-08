@@ -467,6 +467,7 @@ void LuaStateManager::releaseTrackedMemory()
 
 		switch (type)
 		{
+	#ifdef WITH_SCENEGRAPH
 			case LuaTypes::VIEWPORT:
 			{
 				LuaViewport::release(object);
@@ -524,6 +525,13 @@ void LuaStateManager::releaseTrackedMemory()
 				break;
 			}
 
+			case LuaTypes::PARTICLE_SYSTEM:
+			{
+				LuaParticleSystem::release(object);
+				break;
+			}
+	#endif
+
 	#ifdef WITH_AUDIO
 			case LuaTypes::AUDIOBUFFER:
 			{
@@ -563,12 +571,6 @@ void LuaStateManager::releaseTrackedMemory()
 			}
 		#endif
 	#endif
-
-			case LuaTypes::PARTICLE_SYSTEM:
-			{
-				LuaParticleSystem::release(object);
-				break;
-			}
 			case LuaTypes::UNKNOWN:
 			default:
 				FATAL_MSG("Unsupported Lua wrapped userdata");
@@ -624,6 +626,7 @@ void LuaStateManager::exposeApi()
 	LuaFileSystem::expose(L_);
 	LuaApplication::expose(L_);
 	LuaIGfxDevice::expose(L_);
+	#ifdef WITH_SCENEGRAPH
 	if (appCfg.withScenegraph)
 	{
 		LuaViewport::expose(this);
@@ -641,6 +644,7 @@ void LuaStateManager::exposeApi()
 		LuaParticleSystem::expose(this);
 		LuaParticleAffector::expose(this);
 	}
+	#endif
 
 	#ifdef WITH_AUDIO
 	if (appCfg.withAudio)
@@ -674,6 +678,7 @@ void LuaStateManager::exposeConstants()
 
 	LuaFileSystem::exposeConstants(L_);
 	LuaAppConfiguration::exposeConstants(L_);
+	#ifdef WITH_SCENEGRAPH
 	if (appCfg.withScenegraph)
 	{
 		LuaViewport::exposeConstants(L_);
@@ -687,6 +692,7 @@ void LuaStateManager::exposeConstants()
 		LuaFont::exposeConstants(L_);
 		LuaTextNode::exposeConstants(L_);
 	}
+	#endif
 	#ifdef WITH_OPENAL_EXT
 	if (appCfg.withAudio)
 	{

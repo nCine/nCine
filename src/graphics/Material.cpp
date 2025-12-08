@@ -16,8 +16,6 @@ const char *Material::InstanceBlockName = "InstanceBlock";
 const char *Material::InstancesBlockName = "InstancesBlock";
 const char *Material::ModelMatrixUniformName = "modelMatrix";
 
-const char *Material::GuiProjectionMatrixUniformName = "uGuiProjection";
-const char *Material::DepthUniformName = "uDepth";
 const char *Material::ProjectionMatrixUniformName = "uProjectionMatrix";
 const char *Material::ViewMatrixUniformName = "uViewMatrix";
 const char *Material::ProjectionViewMatrixExcludeString = "uProjectionMatrix\0uViewMatrix\0";
@@ -29,7 +27,6 @@ const char *Material::TexRectUniformName = "texRect";
 const char *Material::PositionAttributeName = "aPosition";
 const char *Material::TexCoordsAttributeName = "aTexCoords";
 const char *Material::MeshIndexAttributeName = "aMeshIndex";
-const char *Material::ColorAttributeName = "aColor";
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR

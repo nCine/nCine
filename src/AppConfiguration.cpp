@@ -309,6 +309,10 @@ AppConfiguration::AppConfiguration()
 	// DPI queries do not seem to work reliably on X11 with SDL2
 	windowScaling = false;
 #endif
+
+#if !defined(WITH_SCENEGRAPH)
+	withScenegraph = false;
+#endif
 }
 
 ///////////////////////////////////////////////////////////

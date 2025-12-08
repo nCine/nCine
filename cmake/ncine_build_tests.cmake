@@ -2,6 +2,7 @@ if(NCINE_BUILD_TESTS)
 	if(IS_DIRECTORY ${NCINE_DATA_DIR})
 		if(WIN32)
 			if(NOT NCINE_EMBED_SHADERS)
+				# Copying all shaders even if not all are required by the current configuration
 				add_custom_target(copy_shaders_data ALL
 					COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/src/shaders ${NCINE_DATA_DIR}/shaders
 					COMMENT "Copying shaders to data..."
@@ -13,6 +14,7 @@ if(NCINE_BUILD_TESTS)
 				include(InstallRequiredSystemLibraries)
 			endif()
 		else()
+			# Symlinking all shaders even if not all are required by the current configuration
 			if(NOT NCINE_EMBED_SHADERS)
 				add_custom_target(symlink_shaders_data ALL
 					COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/src/shaders ${NCINE_DATA_DIR}/shaders

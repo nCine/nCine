@@ -9,7 +9,6 @@ set(HEADERS
 	${NCINE_ROOT}/include/ncine/Colorf.h
 	${NCINE_ROOT}/include/ncine/ColorHdr.h
 	${NCINE_ROOT}/include/ncine/Object.h
-	${NCINE_ROOT}/include/ncine/DrawableNode.h
 	${NCINE_ROOT}/include/ncine/IAppEventHandler.h
 	${NCINE_ROOT}/include/ncine/IInputEventHandler.h
 	${NCINE_ROOT}/include/ncine/InputEvents.h
@@ -30,32 +29,38 @@ set(HEADERS
 	${NCINE_ROOT}/include/ncine/TimeStamp.h
 	${NCINE_ROOT}/include/ncine/Timer.h
 	${NCINE_ROOT}/include/ncine/IFrameTimer.h
-	${NCINE_ROOT}/include/ncine/Font.h
 	${NCINE_ROOT}/include/ncine/FileSystem.h
 	${NCINE_ROOT}/include/ncine/IFile.h
 	${NCINE_ROOT}/include/ncine/IGfxDevice.h
-	${NCINE_ROOT}/include/ncine/Texture.h
 	${NCINE_ROOT}/include/ncine/ITextureSaver.h
-	${NCINE_ROOT}/include/ncine/Shader.h
-	${NCINE_ROOT}/include/ncine/ShaderState.h
-	${NCINE_ROOT}/include/ncine/SceneNode.h
-	${NCINE_ROOT}/include/ncine/BaseSprite.h
-	${NCINE_ROOT}/include/ncine/Sprite.h
-	${NCINE_ROOT}/include/ncine/MeshSprite.h
 	${NCINE_ROOT}/include/ncine/Application.h
 	${NCINE_ROOT}/include/ncine/PCApplication.h
 	${NCINE_ROOT}/include/ncine/AppConfiguration.h
 	${NCINE_ROOT}/include/ncine/IDebugOverlay.h
-	${NCINE_ROOT}/include/ncine/Particle.h
-	${NCINE_ROOT}/include/ncine/ParticleAffectors.h
-	${NCINE_ROOT}/include/ncine/ParticleSystem.h
-	${NCINE_ROOT}/include/ncine/ParticleInitializer.h
-	${NCINE_ROOT}/include/ncine/TextNode.h
-	${NCINE_ROOT}/include/ncine/RectAnimation.h
-	${NCINE_ROOT}/include/ncine/AnimatedSprite.h
-	${NCINE_ROOT}/include/ncine/Viewport.h
-	${NCINE_ROOT}/include/ncine/Camera.h
 )
+
+if(NCINE_WITH_SCENEGRAPH)
+	list(APPEND HEADERS
+		${NCINE_ROOT}/include/ncine/DrawableNode.h
+		${NCINE_ROOT}/include/ncine/Font.h
+		${NCINE_ROOT}/include/ncine/Texture.h
+		${NCINE_ROOT}/include/ncine/Shader.h
+		${NCINE_ROOT}/include/ncine/ShaderState.h
+		${NCINE_ROOT}/include/ncine/SceneNode.h
+		${NCINE_ROOT}/include/ncine/BaseSprite.h
+		${NCINE_ROOT}/include/ncine/Sprite.h
+		${NCINE_ROOT}/include/ncine/MeshSprite.h
+		${NCINE_ROOT}/include/ncine/Particle.h
+		${NCINE_ROOT}/include/ncine/ParticleAffectors.h
+		${NCINE_ROOT}/include/ncine/ParticleSystem.h
+		${NCINE_ROOT}/include/ncine/ParticleInitializer.h
+		${NCINE_ROOT}/include/ncine/TextNode.h
+		${NCINE_ROOT}/include/ncine/RectAnimation.h
+		${NCINE_ROOT}/include/ncine/AnimatedSprite.h
+		${NCINE_ROOT}/include/ncine/Viewport.h
+		${NCINE_ROOT}/include/ncine/Camera.h
+	)
+endif()
 
 set(NCTL_HEADERS
 	${NCINE_ROOT}/include/nctl/algorithms.h

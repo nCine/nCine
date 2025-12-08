@@ -36,7 +36,7 @@ class SdlGfxDevice : public IGfxDevice
 	const VideoMode &currentVideoMode(unsigned int monitorIndex) const override;
 	bool setVideoMode(unsigned int modeIndex) override;
 
-	inline void update() override { SDL_GL_SwapWindow(windowHandle_); }
+	inline void swapBuffers() override { SDL_GL_SwapWindow(windowHandle_); }
 
 	static inline SDL_Window *windowHandle() { return windowHandle_; }
 

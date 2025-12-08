@@ -84,5 +84,13 @@ if(EMSCRIPTEN)
 	endif()
 endif()
 
+list(FIND SRCAPPTESTS ${NCINE_STARTUP_TEST} STARTUP_TEST_INDEX)
+if(STARTUP_TEST_INDEX GREATER -1)
+	if(NOT TESTS_DATA_DIR_DIST) # Don't set the startup test if it wouldn't find the data directory
+		set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${NCINE_STARTUP_TEST})
+	endif()
+	message(STATUS "Startup test target found in `src/tests/`: \"${NCINE_STARTUP_TEST}\"")
+endif()
+
 include(ncine_extract_symbols)
 include(ncine_strip_binaries)

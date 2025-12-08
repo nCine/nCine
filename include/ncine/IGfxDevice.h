@@ -261,8 +261,11 @@ class DLL_PUBLIC IGfxDevice
 	/// Sets up the initial OpenGL state for the scenegraph
 	virtual void setupGL();
 
-	/// Updates the screen swapping back and front buffers
-	virtual void update() = 0;
+	/// Swaps back and front buffers
+	virtual void swapBuffers() = 0;
+
+	/// Updates the screen by swapping back and front buffers
+	void update();
 
 	/// Updates the window size based on the monitor's scaling factor
 	bool scaleWindowSize(bool windowScaling);

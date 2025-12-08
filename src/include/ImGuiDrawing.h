@@ -29,8 +29,10 @@ class ImGuiDrawing
 	~ImGuiDrawing();
 
 	void newFrame();
+#ifdef WITH_SCENEGRAPH
 	/// Renders ImGui with render commands
 	void endFrame(RenderQueue &renderQueue);
+#endif
 	/// Renders ImGui directly with OpenGL
 	void endFrame();
 
@@ -57,9 +59,11 @@ class ImGuiDrawing
 	void destroyTexture(ImTextureData *tex);
 	void updateTexture(ImTextureData *tex);
 
+#ifdef WITH_SCENEGRAPH
 	RenderCommand *retrieveCommandFromPool();
 	void setupRenderCmd(RenderCommand &cmd);
 	void draw(RenderQueue &renderQueue);
+#endif
 
 	void setupBuffersAndShader();
 	void draw();

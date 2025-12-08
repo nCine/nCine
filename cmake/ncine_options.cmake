@@ -41,6 +41,7 @@ if(NCINE_WITH_LUA)
 	option(NCINE_WITH_SCRIPTING_API "Enable Lua scripting API" ON)
 endif()
 
+option(NCINE_WITH_SCENEGRAPH "Enable the scenegraph, with nodes and render commands" ON)
 option(NCINE_WITH_ALLOCATORS "Enable the custom memory allocators" OFF)
 option(NCINE_WITH_IMGUI "Enable the integration with Dear ImGui" ON)
 option(NCINE_WITH_NUKLEAR "Enable the integration with Nuklear" OFF)
@@ -95,6 +96,12 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQ
 endif()
 
 set(NCINE_STARTUP_TEST "apptest_camera" CACHE STRING "Set the starting test project and default running executable")
+if(NOT NCINE_WITH_SCENEGRAPH)
+	set(NCINE_STARTUP_TEST "apptest_gui")
+	if(NOT NCINE_WITH_IMGUI AND NOT NCINE_DYNAMIC_LIBRARY)
+		set(NCINE_STARTUP_TEST "glapptest_fbo_cube")
+	endif()
+endif()
 
 # nCine options presets
 set(NCINE_OPTIONS_PRESETS "Default" CACHE STRING "Presets for CMake options")
@@ -137,6 +144,7 @@ if(NCINE_USING_OPTIONS_PRESETS)
 	endif()
 	set(NCINE_PREFERRED_BACKEND "GLFW")
 	set(NCINE_STRIP_BINARIES ON)
+	set(NCINE_WITH_SCENEGRAPH ON)
 	set(NCINE_WITH_IMGUI ON)
 	set(NCINE_WITH_TRACY OFF)
 	set(NCINE_WITH_RENDERDOC OFF)

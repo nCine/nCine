@@ -2,9 +2,11 @@
 
 #include "apptest_gui.h"
 #include <ncine/Application.h>
-#include <ncine/Texture.h>
-#include <ncine/Sprite.h>
-#include <ncine/Viewport.h>
+#if NCINE_WITH_SCENEGRAPH
+	#include <ncine/Texture.h>
+	#include <ncine/Sprite.h>
+	#include <ncine/Viewport.h>
+#endif
 #include "apptest_datapath.h"
 
 #if (NCINE_WITH_IMGUI || NCINE_WITH_NUKLEAR || NCINE_WITH_QT5)
@@ -41,16 +43,18 @@
 
 namespace {
 
-#ifdef __ANDROID__
+#if NCINE_WITH_SCENEGRAPH
+	#ifdef __ANDROID__
 const char *Texture1File = "texture1_ETC2.ktx";
 const char *Texture2File = "texture2_ETC2.ktx";
 const char *Texture3File = "texture3_ETC2.ktx";
 const char *Texture4File = "texture4_ETC2.ktx";
-#else
+	#else
 const char *Texture1File = "texture1.png";
 const char *Texture2File = "texture2.png";
 const char *Texture3File = "texture3.png";
 const char *Texture4File = "texture4.png";
+	#endif
 #endif
 
 bool pause = false;
@@ -147,6 +151,7 @@ void MyEventHandler::onInit()
 {
 	angle_ = 0.0f;
 
+#if NCINE_WITH_SCENEGRAPH
 	nc::SceneNode &rootNode = nc::theApplication().rootNode();
 
 	textures_.pushBack(nctl::makeUnique<nc::Texture>((prefixDataPath("textures", Texture1File)).data()));
@@ -160,12 +165,11 @@ void MyEventHandler::onInit()
 		sprites_.pushBack(nctl::makeUnique<nc::Sprite>(&rootNode, textures_[i % NumTextures].get(), width * 0.15f + width * 0.1f * i, 0.0f));
 		sprites_.back()->setScale(0.5f);
 	}
+#endif
 }
 
 void MyEventHandler::onFrameStart()
 {
-	const float height = nc::theApplication().height();
-
 	if (pause == false)
 	{
 		angle_ += 1.0f * nc::theApplication().frameTime();
@@ -173,11 +177,14 @@ void MyEventHandler::onFrameStart()
 			angle_ -= 360.0f;
 	}
 
+#if NCINE_WITH_SCENEGRAPH
+	const float height = nc::theApplication().height();
 	for (unsigned int i = 0; i < NumSprites; i++)
 	{
 		sprites_[i]->setPositionY(height * 0.3f + fabsf(sinf(angle_ + 5.0f * i)) * (height * (0.25f + 0.02f * i)));
 		sprites_[i]->setRotation(angle_ * 20.0f);
 	}
+#endif
 
 #if NCINE_WITH_IMGUI
 	static char imguiTextInput[MaxBufferLength];
@@ -336,10 +343,12 @@ void MyEventHandler::onFrameStart()
 	}
 	#endif
 
+	#if NCINE_WITH_SCENEGRAPH
 	for (unsigned int i = 0; i < NumSprites; i++)
 		sprites_[i]->setScale(spriteScale);
 
 	nc::theApplication().screenViewport().setClearColor(bgColor);
+	#endif
 #endif
 }
 
