@@ -1,5 +1,7 @@
 ﻿#include "RenderStatistics.h"
-#include "tracy.h"
+#ifdef WITH_SCENEGRAPH
+	#include "tracy.h"
+#endif
 
 namespace ncine {
 
@@ -8,16 +10,18 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 nctl::String RenderStatistics::debugString_(256);
+#ifdef WITH_SCENEGRAPH
 RenderStatistics::Commands RenderStatistics::allCommands_;
 RenderStatistics::Commands RenderStatistics::typedCommands_[RenderCommand::CommandTypes::COUNT];
-RenderStatistics::Buffers RenderStatistics::typedBuffers_[RenderBuffersManager::BufferTypes::COUNT];
+RenderStatistics::CommandPool RenderStatistics::commandPool_;
 RenderStatistics::Textures RenderStatistics::textures_;
-RenderStatistics::CustomBuffers RenderStatistics::customVbos_;
-RenderStatistics::CustomBuffers RenderStatistics::customIbos_;
 unsigned int RenderStatistics::index_ = 0;
 unsigned int RenderStatistics::culledNodes_[2] = { 0, 0 };
+#endif
+RenderStatistics::Buffers RenderStatistics::typedBuffers_[RenderBuffersManager::BufferTypes::COUNT];
+RenderStatistics::CustomBuffers RenderStatistics::customVbos_;
+RenderStatistics::CustomBuffers RenderStatistics::customIbos_;
 RenderStatistics::VaoPool RenderStatistics::vaoPool_;
-RenderStatistics::CommandPool RenderStatistics::commandPool_;
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
@@ -25,6 +29,11 @@ RenderStatistics::CommandPool RenderStatistics::commandPool_;
 
 void RenderStatistics::reset()
 {
+#ifdef WITH_SCENEGRAPH
+	// Ping pong index for last and current frame
+	index_ = (index_ + 1) % 2;
+	culledNodes_[index_] = 0;
+
 	TracyPlot("Vertices", static_cast<int64_t>(allCommands_.vertices));
 	TracyPlot("Render Commands", static_cast<int64_t>(allCommands_.commands));
 
@@ -32,17 +41,16 @@ void RenderStatistics::reset()
 		typedCommands_[i].reset();
 	allCommands_.reset();
 
+	commandPool_.reset();
+#endif
+
 	for (unsigned int i = 0; i < RenderBuffersManager::BufferTypes::COUNT; i++)
 		typedBuffers_[i].reset();
 
-	// Ping pong index for last and current frame
-	index_ = (index_ + 1) % 2;
-	culledNodes_[index_] = 0;
-
 	vaoPool_.reset();
-	commandPool_.reset();
 }
 
+#ifdef WITH_SCENEGRAPH
 void RenderStatistics::gatherStatistics(const RenderCommand &command)
 {
 	const GLsizei numVertices = command.geometry().numVertices();
@@ -70,6 +78,7 @@ void RenderStatistics::gatherStatistics(const RenderCommand &command)
 	allCommands_.instances += command.numInstances();
 	allCommands_.batchSize += command.batchSize();
 }
+#endif
 
 void RenderStatistics::gatherStatistics(const RenderBuffersManager::ManagedBuffer &buffer)
 {

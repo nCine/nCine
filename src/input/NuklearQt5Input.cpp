@@ -115,9 +115,9 @@ void NuklearQt5Input::newFrame()
 		ctx->input.mouse.pos.y = ctx->input.mouse.prev.y;
 	}
 
-	nk_input_button(ctx, NK_BUTTON_LEFT, x, y, mouseState.isLeftButtonDown());
-	nk_input_button(ctx, NK_BUTTON_MIDDLE, x, y, mouseState.isLeftButtonDown());
-	nk_input_button(ctx, NK_BUTTON_RIGHT, x, y, mouseState.isRightButtonDown());
+	nk_input_button(ctx, NK_BUTTON_LEFT, x, y, mouseState.isButtonDown(MouseButton::LEFT));
+	nk_input_button(ctx, NK_BUTTON_MIDDLE, x, y, mouseState.isButtonDown(MouseButton::MIDDLE));
+	nk_input_button(ctx, NK_BUTTON_RIGHT, x, y, mouseState.isButtonDown(MouseButton::RIGHT));
 	nk_input_scroll(ctx, scroll_);
 	nk_input_end(ctx);
 	textLength_ = 0;

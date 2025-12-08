@@ -45,7 +45,7 @@ class EglGfxDevice : public IGfxDevice
 	/// Queries the size of the current surface
 	void querySurfaceSize();
 
-	inline void update() override { eglSwapBuffers(display_, surface_); }
+	inline void swapBuffers() override { eglSwapBuffers(display_, surface_); }
 
 	/// Checks if the desired pixel format is supported
 	static bool isModeSupported(struct android_app *state, const GLContextInfo &glContextInfo, const DisplayMode &mode);

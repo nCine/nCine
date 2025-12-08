@@ -519,6 +519,9 @@ void ImGuiDebugOverlay::guiPreprocessorDefines()
 #ifdef WITH_SCRIPTING_API
 			ImGui::TextUnformatted("WITH_SCRIPTING_API");
 #endif
+#ifdef WITH_SCENEGRAPH
+			ImGui::TextUnformatted("WITH_SCENEGRAPH");
+#endif
 #ifdef WITH_ALLOCATORS
 			ImGui::TextUnformatted("WITH_ALLOCATORS");
 #endif
@@ -1261,6 +1264,7 @@ void ImGuiDebugOverlay::guiBinaryShaderCache()
 			ImGui::Text("Count: %u (total: %u)", stats.PlatformFilesCount, stats.TotalFilesCount);
 			ImGui::Text("Size: %u Kb (total: %u Kb)", stats.PlatformBytesCount / 1024, stats.TotalBytesCount / 1024);
 
+#ifdef WITH_SCENEGRAPH
 			const unsigned int numDefaultVertexShaders = static_cast<unsigned int>(RenderResources::DefaultVertexShader::COUNT);
 			widgetName_.format("Default vertex shaders (%u)", numDefaultVertexShaders);
 			if (ImGui::TreeNode(widgetName_.data()))
@@ -1270,14 +1274,14 @@ void ImGuiDebugOverlay::guiBinaryShaderCache()
 					const RenderResources::ShaderProgramCompileInfo::ShaderCompileInfo &vertexInfo = RenderResources::defaultVertexShaderInfo(i);
 					if (ImGui::TreeNode(&vertexInfo, "#%u", i))
 					{
-#ifndef WITH_EMBEDDED_SHADERS
+	#ifndef WITH_EMBEDDED_SHADERS
 						ImGui::Text("Filename: %s", vertexInfo.shaderFile);
-#else
+	#else
 						ImGui::TextUnformatted("Source:");
 						ImGui::Separator();
 						ImGui::Text("%s", vertexInfo.shaderString);
 						ImGui::Separator();
-#endif
+	#endif
 						if (vertexInfo.hash != 0)
 							ImGui::Text("Hash: 0x%016llx", vertexInfo.hash);
 						if (vertexInfo.hashString)
@@ -1297,14 +1301,14 @@ void ImGuiDebugOverlay::guiBinaryShaderCache()
 					const RenderResources::ShaderProgramCompileInfo::ShaderCompileInfo &fragmentInfo = RenderResources::defaultFragmentShaderInfo(i);
 					if (ImGui::TreeNode(&fragmentInfo, "#%u", i))
 					{
-#ifndef WITH_EMBEDDED_SHADERS
+	#ifndef WITH_EMBEDDED_SHADERS
 						ImGui::Text("Filename: %s", fragmentInfo.shaderFile);
-#else
+	#else
 						ImGui::TextUnformatted("Source:");
 						ImGui::Separator();
 						ImGui::Text("%s", fragmentInfo.shaderString);
 						ImGui::Separator();
-#endif
+	#endif
 						if (fragmentInfo.hash != 0)
 							ImGui::Text("Hash: 0x%016llx", fragmentInfo.hash);
 						if (fragmentInfo.hashString)
@@ -1314,6 +1318,7 @@ void ImGuiDebugOverlay::guiBinaryShaderCache()
 				}
 				ImGui::TreePop();
 			}
+#endif
 
 			widgetName_.format("Shader Info Hashmap (%u)", cache.shaderInfoHashMap().size());
 			if (ImGui::TreeNode(widgetName_.data()))
@@ -1794,6 +1799,7 @@ void ImGuiDebugOverlay::guiAllocators()
 
 void ImGuiDebugOverlay::guiViewports(Viewport *viewport, unsigned int viewportId)
 {
+#ifdef WITH_SCENEGRAPH
 	if (viewport->type() == Viewport::Type::SCREEN)
 		widgetName_.format("#%u Screen Viewport", viewportId);
 	else
@@ -1870,10 +1876,12 @@ void ImGuiDebugOverlay::guiViewports(Viewport *viewport, unsigned int viewportId
 		guiRecursiveChildrenNodes(rootNode, 0);
 		ImGui::TreePop();
 	}
+#endif
 }
 
 void ImGuiDebugOverlay::guiRecursiveChildrenNodes(SceneNode *node, unsigned int childId)
 {
+#ifdef WITH_SCENEGRAPH
 	DrawableNode *drawable = nullptr;
 	if (node->type() != Object::ObjectType::SCENENODE &&
 	    node->type() != Object::ObjectType::PARTICLE_SYSTEM)
@@ -2069,10 +2077,12 @@ void ImGuiDebugOverlay::guiRecursiveChildrenNodes(SceneNode *node, unsigned int 
 		ImGui::PopID();
 		ImGui::TreePop();
 	}
+#endif
 }
 
 void ImGuiDebugOverlay::guiNodeInspector()
 {
+#ifdef WITH_SCENEGRAPH
 	if (ImGui::CollapsingHeader("Node Inspector"))
 	{
 		// Print viewport information in reverse order (same as chain processing one)
@@ -2081,13 +2091,16 @@ void ImGuiDebugOverlay::guiNodeInspector()
 			guiViewports(Viewport::chain()[chainLength - i - 1], i);
 		guiViewports(&theApplication().screenViewport(), chainLength);
 	}
+#endif
 }
 
 void ImGuiDebugOverlay::guiTopLeft()
 {
 	const RenderStatistics::VaoPool &vaoPool = RenderStatistics::vaoPool();
+#ifdef WITH_SCENEGRAPH
 	const RenderStatistics::CommandPool &commandPool = RenderStatistics::commandPool();
 	const RenderStatistics::Textures &textures = RenderStatistics::textures();
+#endif
 	const RenderStatistics::CustomBuffers &customVbos = RenderStatistics::customVBOs();
 	const RenderStatistics::CustomBuffers &customIbos = RenderStatistics::customIBOs();
 	const RenderStatistics::Buffers &vboBuffers = RenderStatistics::buffers(RenderBuffersManager::BufferTypes::ARRAY);
@@ -2106,7 +2119,9 @@ void ImGuiDebugOverlay::guiTopLeft()
 	{
 		ImGui::Begin("###Top-Left", nullptr, windowFlags);
 
+#ifdef WITH_SCENEGRAPH
 		ImGui::Text("Culled nodes: %u", RenderStatistics::culled());
+#endif
 		if (plotOverlayValues_)
 		{
 			ImGui::SameLine();
@@ -2114,8 +2129,10 @@ void ImGuiDebugOverlay::guiTopLeft()
 		}
 
 		ImGui::Text("%u/%u VAOs (%u reuses, %u bindings)", vaoPool.size, vaoPool.capacity, vaoPool.reuses, vaoPool.bindings);
+#ifdef WITH_SCENEGRAPH
 		ImGui::Text("%u/%u RenderCommands in the pool (%u retrievals)", commandPool.usedSize, commandPool.usedSize + commandPool.freeSize, commandPool.retrievals);
 		ImGui::Text("%.2f Kb in %u Texture(s)", textures.dataSize / 1024.0f, textures.count);
+#endif
 		ImGui::Text("%.2f Kb in %u custom VBO(s)", customVbos.dataSize / 1024.0f, customVbos.count);
 		ImGui::Text("%.2f Kb in %u custom IBO(s)", customIbos.dataSize / 1024.0f, customIbos.count);
 		ImGui::Text("%.2f/%lu Kb in %u VBO(s)", vboBuffers.usedSpace / 1024.0f, vboBuffers.size / 1024, vboBuffers.count);
@@ -2141,7 +2158,9 @@ void ImGuiDebugOverlay::guiTopLeft()
 
 		if (RenderResources::binaryShaderCache().isAvailable())
 			ImGui::Text("Binary Shaders: %u Kb in %u file(s)", shaderCacheStats.TotalBytesCount / 1024, shaderCacheStats.TotalFilesCount);
+#ifdef WITH_SCENEGRAPH
 		ImGui::Text("Viewport chain length: %u", Viewport::chain().size());
+#endif
 
 		ImGui::End();
 	}
@@ -2163,6 +2182,7 @@ void ImGuiDebugOverlay::guiTopRight()
 		ImGui::Text("FPS: %.0f (%.2f ms)", 1.0f / theApplication().frameTime(), theApplication().frameTime() * 1000.0f);
 		ImGui::Text("Num Frames: %lu", theApplication().numFrames());
 
+#ifdef WITH_SCENEGRAPH
 		const AppConfiguration &appCfg = theApplication().appConfiguration();
 		if (appCfg.withScenegraph)
 		{
@@ -2171,9 +2191,9 @@ void ImGuiDebugOverlay::guiTopRight()
 			const RenderStatistics::Commands &particleCommands = RenderStatistics::commands(RenderCommand::CommandTypes::PARTICLE);
 			const RenderStatistics::Commands &textCommands = RenderStatistics::commands(RenderCommand::CommandTypes::TEXT);
 			const RenderStatistics::Commands &imguiCommands = RenderStatistics::commands(RenderCommand::CommandTypes::IMGUI);
-#ifdef WITH_NUKLEAR
+	#ifdef WITH_NUKLEAR
 			const RenderStatistics::Commands &nuklearCommands = RenderStatistics::commands(RenderCommand::CommandTypes::NUKLEAR);
-#endif
+	#endif
 			const RenderStatistics::Commands &allCommands = RenderStatistics::allCommands();
 
 			ImGui::Text("Sprites: %uV, %uDC (%u Tr), %uI/%uB", spriteCommands.vertices, spriteCommands.commands, spriteCommands.transparents, spriteCommands.instances, spriteCommands.batchSize);
@@ -2211,14 +2231,14 @@ void ImGuiDebugOverlay::guiTopRight()
 				ImGui::PlotLines("", plotValues_[ValuesType::IMGUI_VERTICES].get(), numValues_, 0, nullptr, 0.0f, FLT_MAX);
 			}
 
-#ifdef WITH_NUKLEAR
+	#ifdef WITH_NUKLEAR
 			ImGui::Text("Nuklear: %uV, %uDC (%u Tr), %uI/%u", nuklearCommands.vertices, nuklearCommands.commands, nuklearCommands.transparents, nuklearCommands.instances, nuklearCommands.batchSize);
 			if (plotOverlayValues_)
 			{
 				ImGui::SameLine();
 				ImGui::PlotLines("", plotValues_[ValuesType::NUKLEAR_VERTICES].get(), numValues_, 0, nullptr, 0.0f, FLT_MAX);
 			}
-#endif
+	#endif
 
 			ImGui::Text("Total: %uV, %uDC (%u Tr), %uI/%uB", allCommands.vertices, allCommands.commands, allCommands.transparents, allCommands.instances, allCommands.batchSize);
 			if (plotOverlayValues_)
@@ -2227,6 +2247,7 @@ void ImGuiDebugOverlay::guiTopRight()
 				ImGui::PlotLines("", plotValues_[ValuesType::TOTAL_VERTICES].get(), numValues_, 0, nullptr, 0.0f, FLT_MAX);
 			}
 		}
+#endif
 
 		ImGui::End();
 	}
@@ -2372,30 +2393,32 @@ void ImGuiDebugOverlay::updateOverlayTimings()
 	const RenderStatistics::Buffers &iboBuffers = RenderStatistics::buffers(RenderBuffersManager::BufferTypes::ELEMENT_ARRAY);
 	const RenderStatistics::Buffers &uboBuffers = RenderStatistics::buffers(RenderBuffersManager::BufferTypes::UNIFORM);
 
+	plotValues_[ValuesType::VBO_USED][index_] = vboBuffers.usedSpace / 1024.0f;
+	plotValues_[ValuesType::IBO_USED][index_] = iboBuffers.usedSpace / 1024.0f;
+	plotValues_[ValuesType::UBO_USED][index_] = uboBuffers.usedSpace / 1024.0f;
+
+#ifdef WITH_SCENEGRAPH
 	const RenderStatistics::Commands &spriteCommands = RenderStatistics::commands(RenderCommand::CommandTypes::SPRITE);
 	const RenderStatistics::Commands &meshspriteCommands = RenderStatistics::commands(RenderCommand::CommandTypes::MESH_SPRITE);
 	const RenderStatistics::Commands &particleCommands = RenderStatistics::commands(RenderCommand::CommandTypes::PARTICLE);
 	const RenderStatistics::Commands &textCommands = RenderStatistics::commands(RenderCommand::CommandTypes::TEXT);
 	const RenderStatistics::Commands &imguiCommands = RenderStatistics::commands(RenderCommand::CommandTypes::IMGUI);
-#ifdef WITH_NUKLEAR
+	#ifdef WITH_NUKLEAR
 	const RenderStatistics::Commands &nuklearCommands = RenderStatistics::commands(RenderCommand::CommandTypes::NUKLEAR);
-#endif
+	#endif
 	const RenderStatistics::Commands &allCommands = RenderStatistics::allCommands();
 
 	plotValues_[ValuesType::CULLED_NODES][index_] = static_cast<float>(RenderStatistics::culled());
-	plotValues_[ValuesType::VBO_USED][index_] = vboBuffers.usedSpace / 1024.0f;
-	plotValues_[ValuesType::IBO_USED][index_] = iboBuffers.usedSpace / 1024.0f;
-	plotValues_[ValuesType::UBO_USED][index_] = uboBuffers.usedSpace / 1024.0f;
-
 	plotValues_[ValuesType::SPRITE_VERTICES][index_] = static_cast<float>(spriteCommands.vertices);
 	plotValues_[ValuesType::MESHSPRITE_VERTICES][index_] = static_cast<float>(meshspriteCommands.vertices);
 	plotValues_[ValuesType::PARTICLE_VERTICES][index_] = static_cast<float>(particleCommands.vertices);
 	plotValues_[ValuesType::TEXT_VERTICES][index_] = static_cast<float>(textCommands.vertices);
 	plotValues_[ValuesType::IMGUI_VERTICES][index_] = static_cast<float>(imguiCommands.vertices);
-#ifdef WITH_NUKLEAR
+	#ifdef WITH_NUKLEAR
 	plotValues_[ValuesType::NUKLEAR_VERTICES][index_] = static_cast<float>(nuklearCommands.vertices);
-#endif
+	#endif
 	plotValues_[ValuesType::TOTAL_VERTICES][index_] = static_cast<float>(allCommands.vertices);
+#endif
 
 #ifdef WITH_LUA
 	plotValues_[ValuesType::LUA_USED][index_] = LuaStatistics::usedMemory() / 1024.0f;

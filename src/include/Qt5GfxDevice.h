@@ -39,7 +39,7 @@ class Qt5GfxDevice : public IGfxDevice
 	const VideoMode &currentVideoMode(unsigned int monitorIndex) const override;
 	bool setVideoMode(unsigned int modeIndex) override { return false; }
 
-	inline void update() override {}
+	inline void swapBuffers() override {}
 
 #ifdef WITH_GLEW
 	void initGlew();

@@ -6,14 +6,17 @@
 #include "IDebugOverlay.h"
 #include "TimeStamp.h"
 #include <nctl/UniquePtr.h>
+#include <ncine/config.h>
 
 namespace ncine {
 
 class IFrameTimer;
 class FrameTimer;
+#if NCINE_WITH_SCENEGRAPH
 class SceneNode;
 class Viewport;
 class ScreenViewport;
+#endif
 class IInputManager;
 class IAppEventHandler;
 class ImGuiDrawing;
@@ -47,6 +50,7 @@ class DLL_PUBLIC Application
 	{
 		GuiSettings();
 
+#if NCINE_WITH_SCENEGRAPH
 		/// ImGui drawable node layer
 		uint16_t imguiLayer;
 		/// Nuklear drawable node layer
@@ -57,6 +61,7 @@ class DLL_PUBLIC Application
 		/// Nuklear viewport
 		/*! \note The viewport should mirror the screen dimensions or mouse input would not work. Setting `nullptr` is the same as setting the screen */
 		Viewport *nuklearViewport;
+#endif
 	};
 
 	struct Timings
@@ -97,10 +102,12 @@ class DLL_PUBLIC Application
 
 	/// Returns the graphics device instance
 	inline IGfxDevice &gfxDevice() { return *gfxDevice_; }
+#if NCINE_WITH_SCENEGRAPH
 	/// Returns the root node of the transformation graph
-	inline SceneNode &rootNode() { return *rootNode_; }
+	SceneNode &rootNode();
 	/// Returns the screen viewport
 	Viewport &screenViewport();
+#endif
 	/// Returns the input manager instance
 	inline IInputManager &inputManager() { return *inputManager_; }
 
@@ -159,15 +166,17 @@ class DLL_PUBLIC Application
 	TimeStamp profileStartTime_;
 	nctl::UniquePtr<FrameTimer> frameTimer_;
 	nctl::UniquePtr<IGfxDevice> gfxDevice_;
+#if NCINE_WITH_SCENEGRAPH
 	nctl::UniquePtr<SceneNode> rootNode_;
 	nctl::UniquePtr<ScreenViewport> screenViewport_;
+#endif
 	nctl::UniquePtr<IDebugOverlay> debugOverlay_;
 	nctl::UniquePtr<IInputManager> inputManager_;
 	nctl::UniquePtr<IAppEventHandler> appEventHandler_;
-#ifdef WITH_IMGUI
+#if NCINE_WITH_IMGUI
 	nctl::UniquePtr<ImGuiDrawing> imguiDrawing_;
 #endif
-#ifdef WITH_NUKLEAR
+#if NCINE_WITH_NUKLEAR
 	nctl::UniquePtr<NuklearDrawing> nuklearDrawing_;
 #endif
 

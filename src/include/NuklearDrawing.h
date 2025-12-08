@@ -26,8 +26,10 @@ class NuklearDrawing
 	bool bakeFonts();
 
 	void newFrame();
+#ifdef WITH_SCENEGRAPH
 	/// Renders Nuklear with render commands
 	void endFrame(RenderQueue &renderQueue);
+#endif
 	/// Renders Nuklear directly with OpenGL
 	void endFrame();
 
@@ -52,9 +54,11 @@ class NuklearDrawing
 	struct nk_draw_null_texture null_;
 	nctl::UniquePtr<GLTexture> fontTex_;
 
+#ifdef WITH_SCENEGRAPH
 	RenderCommand *retrieveCommandFromPool();
 	void setupRenderCmd(RenderCommand &cmd);
 	void draw(RenderQueue &renderQueue);
+#endif
 
 	void setupBuffersAndShader();
 	void draw();

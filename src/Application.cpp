@@ -5,16 +5,19 @@
 #include "ArrayIndexer.h"
 #include "GfxCapabilities.h"
 #include "RenderResources.h"
-#include "RenderQueue.h"
-#include "ScreenViewport.h"
 #include "GLDebug.h"
 #include "Timer.h" // for `sleep()`
 #include "FrameTimer.h"
-#include "SceneNode.h"
 #include <nctl/StaticString.h>
 
 #if WITH_ALLOCATORS
 	#include "IInputManager.h"
+#endif
+
+#ifdef WITH_SCENEGRAPH
+	#include "RenderQueue.h"
+	#include "ScreenViewport.h"
+	#include "SceneNode.h"
 #endif
 
 #ifdef WITH_AUDIO
@@ -155,6 +158,9 @@ namespace {
 #ifdef WITH_SCRIPTING_API
 		LOGD("WITH_SCRIPTING_API");
 #endif
+#ifdef WITH_SCENEGRAPH
+		LOGD("WITH_SCENEGRAPH");
+#endif
 #ifdef WITH_ALLOCATORS
 		LOGD("WITH_ALLOCATORS");
 #endif
@@ -188,9 +194,11 @@ Application::Application()
 Application::~Application() = default;
 
 Application::GuiSettings::GuiSettings()
+#ifdef WITH_SCENEGRAPH
     : imguiLayer(0xffff - 1024),
       nuklearLayer(0xffff - 512),
       imguiViewport(nullptr), nuklearViewport(nullptr)
+#endif
 {
 }
 
@@ -198,10 +206,17 @@ Application::GuiSettings::GuiSettings()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+#ifdef WITH_SCENEGRAPH
+SceneNode &Application::rootNode()
+{
+	return *rootNode_;
+}
+
 Viewport &Application::screenViewport()
 {
 	return *screenViewport_;
 }
+#endif
 
 IFrameTimer &Application::frameTimer()
 {
@@ -231,7 +246,9 @@ void Application::initCommon()
 
 	logInitInformation();
 
+#ifdef WITH_SCENEGRAPH
 	theServiceLocator().registerIndexer(nctl::makeUnique<ArrayIndexer>());
+#endif
 #ifdef WITH_AUDIO
 	if (appCfg_.withAudio)
 		theServiceLocator().registerAudioDevice(nctl::makeUnique<ALAudioDevice>(appCfg_));
@@ -269,6 +286,7 @@ void Application::initCommon()
 	nuklearDrawing_ = nctl::makeUnique<NuklearDrawing>(appCfg_.withScenegraph);
 #endif
 
+#ifdef WITH_SCENEGRAPH
 	if (appCfg_.withScenegraph)
 	{
 		gfxDevice_->setupGL();
@@ -277,6 +295,7 @@ void Application::initCommon()
 		screenViewport_ = nctl::makeUnique<ScreenViewport>();
 		screenViewport_->setRootNode(rootNode_.get());
 	}
+#endif
 
 #ifdef WITH_IMGUI
 	// Debug overlay is available even when scenegraph is not
@@ -356,6 +375,7 @@ void Application::step()
 	if (debugOverlay_)
 		debugOverlay_->update();
 
+#ifdef WITH_SCENEGRAPH
 	if (appCfg_.withScenegraph)
 	{
 		ZoneScopedN("SceneGraph");
@@ -380,7 +400,7 @@ void Application::step()
 			timings_[Timings::VISIT] = profileStartTime_.secondsSince();
 		}
 
-#ifdef WITH_IMGUI
+	#ifdef WITH_IMGUI
 		{
 			ZoneScopedN("ImGui endFrame");
 			profileStartTime_ = TimeStamp::now();
@@ -390,9 +410,9 @@ void Application::step()
 			imguiDrawing_->endFrame(*imguiRenderQueue);
 			timings_[Timings::IMGUI] += profileStartTime_.secondsSince();
 		}
-#endif
+	#endif
 
-#ifdef WITH_NUKLEAR
+	#ifdef WITH_NUKLEAR
 		{
 			ZoneScopedN("Nuklear endFrame");
 			profileStartTime_ = TimeStamp::now();
@@ -402,7 +422,7 @@ void Application::step()
 			nuklearDrawing_->endFrame(*nuklearRenderQueue);
 			timings_[Timings::NUKLEAR] += profileStartTime_.secondsSince();
 		}
-#endif
+	#endif
 
 		{
 			ZoneScopedN("Draw");
@@ -413,6 +433,7 @@ void Application::step()
 		}
 	}
 	else
+#endif // WITH_SCENEGRAPH
 	{
 #ifdef WITH_IMGUI
 		{
@@ -487,7 +508,10 @@ void Application::shutdownCommon()
 #endif
 
 	debugOverlay_.reset(nullptr);
+#ifdef WITH_SCENEGRAPH
+	screenViewport_.reset(nullptr);
 	rootNode_.reset(nullptr);
+#endif
 	RenderResources::dispose();
 	frameTimer_.reset(nullptr);
 	inputManager_.reset(nullptr);
@@ -538,6 +562,7 @@ void Application::resume()
 /*! \note It will also call the `onResizeWindow()` callback if the size has really changed */
 bool Application::resizeScreenViewport(int width, int height)
 {
+#ifdef WITH_SCENEGRAPH
 	if (screenViewport_ != nullptr)
 	{
 		const bool shouldResize = (width != screenViewport_->width_ || height != screenViewport_->height_);
@@ -549,6 +574,7 @@ bool Application::resizeScreenViewport(int width, int height)
 		return shouldResize;
 	}
 	else
+#endif
 	{
 		appEventHandler_->onResizeWindow(width, height);
 		return false;

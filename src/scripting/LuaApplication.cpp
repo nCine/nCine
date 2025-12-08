@@ -19,14 +19,18 @@ namespace Application {
 	static const char *renderingSettings = "get_rendering_settings";
 	static const char *setRenderingSettings = "set_rendering_settings";
 
+#ifdef WITH_SCENEGRAPH
 	static const char *guiSettings = "get_gui_settings";
 	static const char *setGuiSettings = "set_gui_settings";
+#endif
 
 	static const char *debugOverlaySettings = "get_debugoverlay_settings";
 	static const char *setDebugOverlaySettings = "set_debugoverlay_settings";
 
+#ifdef WITH_SCENEGRAPH
 	static const char *rootNode = "get_rootnode";
 	static const char *screenViewport = "get_screen_viewport";
+#endif
 	static const char *numFrames = "get_num_frames";
 	static const char *frameTime = "get_frame_time";
 
@@ -50,12 +54,14 @@ namespace Application {
 		static const char *maxBatchSize = "max_batch_size";
 	}
 
+#ifdef WITH_SCENEGRAPH
 	namespace GuiSettings {
 		static const char *imguiLayer = "imgui_layer";
 		static const char *nuklearLayer = "nuklear_layer";
 		static const char *imguiViewport = "imgui_viewport";
 		static const char *nuklearViewport = "nuklear_viewport";
 	}
+#endif
 
 	namespace DebugOverlaySettings {
 		static const char *showProfilerGraphs = "profiler_graphs";
@@ -70,21 +76,23 @@ namespace Application {
 
 void LuaApplication::expose(lua_State *L)
 {
-	lua_createtable(L, 0, 15);
+	lua_createtable(L, 0, 19);
 
 	LuaUtils::addFunction(L, LuaNames::Application::appConfiguration, appConfiguration);
 
 	LuaUtils::addFunction(L, LuaNames::Application::renderingSettings, renderingSettings);
 	LuaUtils::addFunction(L, LuaNames::Application::setRenderingSettings, setRenderingSettings);
-
+#ifdef WITH_SCENEGRAPH
 	LuaUtils::addFunction(L, LuaNames::Application::guiSettings, guiSettings);
 	LuaUtils::addFunction(L, LuaNames::Application::setGuiSettings, setGuiSettings);
-
+#endif
 	LuaUtils::addFunction(L, LuaNames::Application::debugOverlaySettings, debugOverlaySettings);
 	LuaUtils::addFunction(L, LuaNames::Application::setDebugOverlaySettings, setDebugOverlaySettings);
 
+#ifdef WITH_SCENEGRAPH
 	LuaUtils::addFunction(L, LuaNames::Application::rootNode, rootNode);
 	LuaUtils::addFunction(L, LuaNames::Application::screenViewport, screenViewport);
+#endif
 	LuaUtils::addFunction(L, LuaNames::Application::numFrames, numFrames);
 	LuaUtils::addFunction(L, LuaNames::Application::frameTime, frameTime);
 
@@ -149,6 +157,7 @@ int LuaApplication::setRenderingSettings(lua_State *L)
 	return 0;
 }
 
+#ifdef WITH_SCENEGRAPH
 int LuaApplication::guiSettings(lua_State *L)
 {
 	const Application::GuiSettings &settings = theApplication().guiSettings();
@@ -179,6 +188,7 @@ int LuaApplication::setGuiSettings(lua_State *L)
 
 	return 0;
 }
+#endif
 
 int LuaApplication::debugOverlaySettings(lua_State *L)
 {
@@ -209,6 +219,7 @@ int LuaApplication::setDebugOverlaySettings(lua_State *L)
 	return 0;
 }
 
+#ifdef WITH_SCENEGRAPH
 int LuaApplication::rootNode(lua_State *L)
 {
 	LuaUntrackedUserData<SceneNode>::push(L, &theApplication().rootNode());
@@ -220,6 +231,7 @@ int LuaApplication::screenViewport(lua_State *L)
 	LuaUntrackedUserData<Viewport>::push(L, &theApplication().screenViewport());
 	return 1;
 }
+#endif
 
 int LuaApplication::numFrames(lua_State *L)
 {

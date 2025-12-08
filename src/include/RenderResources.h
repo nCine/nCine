@@ -6,9 +6,12 @@
 
 #include <nctl/UniquePtr.h>
 #include <nctl/HashMap.h>
-#include "Material.h"
 #include "GLShaderProgram.h" // For the UniquePtr to invoke the destructor
 #include "GLShaderUniforms.h"
+
+#ifdef WITH_SCENEGRAPH
+	#include "Material.h"
+#endif
 
 namespace ncine {
 
@@ -25,6 +28,7 @@ class Viewport;
 class RenderResources
 {
   public:
+#ifdef WITH_SCENEGRAPH
 	/// A vertex format structure for vertices with positions only
 	struct VertexFormatPos2
 	{
@@ -52,6 +56,7 @@ class RenderResources
 		GLfloat texcoords[2];
 		int drawindex;
 	};
+#endif
 
 	/// A structure used by the `compileShader()` method to load and compile a shader program
 	struct ShaderProgramCompileInfo
@@ -106,6 +111,7 @@ class RenderResources
 		const char *objectLabel;
 	};
 
+#ifdef WITH_SCENEGRAPH
 	struct CameraUniformData
 	{
 		CameraUniformData()
@@ -143,6 +149,7 @@ class RenderResources
 
 		COUNT
 	};
+#endif
 
 	/// The name of the directory, inside the data path, that contains the default shader files
 	static char const * const ShadersDir;
@@ -151,9 +158,14 @@ class RenderResources
 	static inline RenderBuffersManager &buffersManager() { return *buffersManager_; }
 	static inline RenderVaoPool &vaoPool() { return *vaoPool_; }
 	static inline const Hash64 &hash64() { return *hash64_; }
+#ifdef WITH_SCENEGRAPH
 	static inline RenderCommandPool &renderCommandPool() { return *renderCommandPool_; }
 	static inline RenderBatcher &renderBatcher() { return *renderBatcher_; }
+#endif
 
+	/// The function compiles a shader ex-novo or load it from the binary cache
+	static void compileShader(ShaderProgramCompileInfo &shaderToCompile);
+#ifdef WITH_SCENEGRAPH
 	static GLShaderProgram *shaderProgram(Material::ShaderProgramType shaderProgramType);
 
 	/// Retrieves the compilation information for a default vertex shader
@@ -164,8 +176,6 @@ class RenderResources
 	static const ShaderProgramCompileInfo::ShaderCompileInfo &defaultVertexShaderInfo(unsigned int index);
 	/// Retrieves the compilation information for a default fragment shader (given its enum index)
 	static const ShaderProgramCompileInfo::ShaderCompileInfo &defaultFragmentShaderInfo(unsigned int index);
-	/// The function compiles a shader ex-novo or load it from the binary cache
-	static void compileShader(ShaderProgramCompileInfo &shaderToCompile);
 
 	static GLShaderProgram *batchedShader(const GLShaderProgram *shader);
 	static bool registerBatchedShader(const GLShaderProgram *shader, ncine::GLShaderProgram *batchedShader);
@@ -180,6 +190,7 @@ class RenderResources
 	static inline const Viewport *currentViewport() { return currentViewport_; }
 
 	static void setDefaultAttributesParameters(GLShaderProgram &shaderProgram);
+#endif
 
   private:
 	static nctl::UniquePtr<BinaryShaderCache> binaryShaderCache_;
@@ -187,6 +198,7 @@ class RenderResources
 	static nctl::UniquePtr<RenderVaoPool> vaoPool_;
 	/// Hashing class used to hash shaders sources and keep their statistics separated
 	static nctl::UniquePtr<Hash64> hash64_;
+#ifdef WITH_SCENEGRAPH
 	static nctl::UniquePtr<RenderCommandPool> renderCommandPool_;
 	static nctl::UniquePtr<RenderBatcher> renderBatcher_;
 
@@ -212,12 +224,14 @@ class RenderResources
 	static void updateCameraUniforms();
 	static void setCurrentViewport(Viewport *viewport);
 
-	static void createMinimal();
-	static void create();
-	static void dispose();
-
 	static void fillDefaultShaderInfos();
 	static void registerDefaultBatchedShaders();
+
+	static void create();
+#endif
+
+	static void createMinimal();
+	static void dispose();
 
 	/// Static class, deleted constructor
 	RenderResources() = delete;

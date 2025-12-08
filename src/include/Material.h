@@ -65,8 +65,6 @@ class Material
 	static const char *ModelMatrixUniformName;
 
 	// Camera related shader uniform names
-	static const char *GuiProjectionMatrixUniformName;
-	static const char *DepthUniformName;
 	static const char *ProjectionMatrixUniformName;
 	static const char *ViewMatrixUniformName;
 	static const char *ProjectionViewMatrixExcludeString;
@@ -79,7 +77,6 @@ class Material
 	static const char *PositionAttributeName;
 	static const char *TexCoordsAttributeName;
 	static const char *MeshIndexAttributeName;
-	static const char *ColorAttributeName;
 
 	/// Default constructor
 	Material();

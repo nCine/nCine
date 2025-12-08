@@ -17,14 +17,18 @@ class LuaApplication
 	static int renderingSettings(lua_State *L);
 	static int setRenderingSettings(lua_State *L);
 
+#ifdef WITH_SCENEGRAPH
 	static int guiSettings(lua_State *L);
 	static int setGuiSettings(lua_State *L);
+#endif
 
 	static int debugOverlaySettings(lua_State *L);
 	static int setDebugOverlaySettings(lua_State *L);
 
+#ifdef WITH_SCENEGRAPH
 	static int rootNode(lua_State *L);
 	static int screenViewport(lua_State *L);
+#endif
 	static int numFrames(lua_State *L);
 	static int frameTime(lua_State *L);
 

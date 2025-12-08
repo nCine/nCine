@@ -21,6 +21,11 @@
 	#include "RenderResources.h" // for `ShadersDir`
 #endif
 
+#include <ncine/config.h>
+#if NCINE_WITH_IMGUI
+	#include <ncine/imgui.h>
+#endif
+
 namespace {
 
 struct VertexFormatCol
@@ -91,6 +96,11 @@ const GLushort cubeIndices[] = {
 	 9, 20, 10
 	// clang-format on
 };
+
+#if NCINE_WITH_IMGUI
+nctl::String auxString;
+bool showImGui = true;
+#endif
 
 }
 
@@ -174,6 +184,28 @@ void MyEventHandler::onInit()
 
 void MyEventHandler::onFrameStart()
 {
+#if NCINE_WITH_IMGUI
+	if (showImGui)
+	{
+		ImGui::SetNextWindowSize(ImVec2(300.0f, 125.0f), ImGuiCond_FirstUseEver);
+		ImGui::SetNextWindowPos(ImVec2(35.0f, 35.0f), ImGuiCond_FirstUseEver);
+		if (ImGui::Begin("glapptest_fbo_cube", &showImGui))
+		{
+			ImGui::Checkbox("Pause triangle", &pauseTri_);
+			ImGui::Checkbox("Pause cube", &pauseCube_);
+
+			const float angleTriFraction = angleTri_ / 360.0f;
+			auxString.format("%.2f", angleTri_);
+			ImGui::ProgressBar(angleTriFraction, ImVec2(0.0f, 0.0f), auxString.data());
+
+			const float angleCubeFraction = angleCube_ / 360.0f;
+			auxString.format("%.2f", angleCube_);
+			ImGui::ProgressBar(angleCubeFraction, ImVec2(0.0f, 0.0f), auxString.data());
+		}
+		ImGui::End();
+	}
+#endif
+
 	// Triangle
 	nc::GLViewport::setRect(0, 0, FboSize, FboSize);
 	colorProgram_->use();
@@ -218,9 +250,17 @@ void MyEventHandler::onFrameStart()
 
 	const float frameTime = nc::theApplication().frameTime();
 	if (pauseTri_ == false)
+	{
 		angleTri_ += 20.0f * frameTime;
+		if (angleTri_ >= 360.0f)
+			angleTri_ -= 360.0f;
+	}
 	if (pauseCube_ == false)
+	{
 		angleCube_ += 20.0f * frameTime;
+		if (angleCube_ >= 360.0f)
+			angleCube_ -= 360.0f;
+	}
 }
 
 void MyEventHandler::onResizeWindow(int width, int height)
@@ -268,6 +308,10 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		if (gfxDevice.isFullScreen() == false)
 			gfxDevice.setWindowSize(nc::theApplication().appConfiguration().resolution);
 	}
+#if NCINE_WITH_IMGUI
+	else if (event.mod & nc::KeyMod::CTRL && event.sym == nc::KeySym::H)
+		showImGui = !showImGui;
+#endif
 	else if (event.sym == nc::KeySym::ESCAPE)
 		nc::theApplication().quit();
 }
