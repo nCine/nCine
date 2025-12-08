@@ -6,6 +6,10 @@
 #include "GLBlending.h"
 #include "GLViewport.h"
 
+#ifdef WITH_QT5
+	#include "GLClearColor.h"
+#endif
+
 #ifdef __EMSCRIPTEN__
 	#include <emscripten/html5.h>
 	#include "Application.h"
@@ -216,6 +220,18 @@ void IGfxDevice::setupGL()
 	glDisable(GL_DITHER);
 	GLBlending::setBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	GLDepthTest::enable();
+}
+
+void IGfxDevice::update()
+{
+	swapBuffers();
+#if !defined(WITH_SCENEGRAPH)
+	#if defined(WITH_QT5)
+	GLClearColor::setColor(0.0f, 0.0f, 0.0f, 1.0f);
+	#else
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	#endif
+#endif
 }
 
 bool IGfxDevice::scaleWindowSize(bool windowScaling)

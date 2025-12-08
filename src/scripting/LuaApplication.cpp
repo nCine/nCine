@@ -50,12 +50,14 @@ namespace Application {
 		static const char *maxBatchSize = "max_batch_size";
 	}
 
+#ifdef WITH_SCENEGRAPH
 	namespace GuiSettings {
 		static const char *imguiLayer = "imgui_layer";
 		static const char *nuklearLayer = "nuklear_layer";
 		static const char *imguiViewport = "imgui_viewport";
 		static const char *nuklearViewport = "nuklear_viewport";
 	}
+#endif
 
 	namespace DebugOverlaySettings {
 		static const char *showProfilerGraphs = "profiler_graphs";
@@ -76,15 +78,17 @@ void LuaApplication::expose(lua_State *L)
 
 	LuaUtils::addFunction(L, LuaNames::Application::renderingSettings, renderingSettings);
 	LuaUtils::addFunction(L, LuaNames::Application::setRenderingSettings, setRenderingSettings);
-
+#ifdef WITH_SCENEGRAPH
 	LuaUtils::addFunction(L, LuaNames::Application::guiSettings, guiSettings);
 	LuaUtils::addFunction(L, LuaNames::Application::setGuiSettings, setGuiSettings);
-
+#endif
 	LuaUtils::addFunction(L, LuaNames::Application::debugOverlaySettings, debugOverlaySettings);
 	LuaUtils::addFunction(L, LuaNames::Application::setDebugOverlaySettings, setDebugOverlaySettings);
 
+#ifdef WITH_SCENEGRAPH
 	LuaUtils::addFunction(L, LuaNames::Application::rootNode, rootNode);
 	LuaUtils::addFunction(L, LuaNames::Application::screenViewport, screenViewport);
+#endif
 	LuaUtils::addFunction(L, LuaNames::Application::numFrames, numFrames);
 	LuaUtils::addFunction(L, LuaNames::Application::frameTime, frameTime);
 
@@ -149,6 +153,7 @@ int LuaApplication::setRenderingSettings(lua_State *L)
 	return 0;
 }
 
+#ifdef WITH_SCENEGRAPH
 int LuaApplication::guiSettings(lua_State *L)
 {
 	const Application::GuiSettings &settings = theApplication().guiSettings();
@@ -179,6 +184,7 @@ int LuaApplication::setGuiSettings(lua_State *L)
 
 	return 0;
 }
+#endif
 
 int LuaApplication::debugOverlaySettings(lua_State *L)
 {
@@ -209,6 +215,7 @@ int LuaApplication::setDebugOverlaySettings(lua_State *L)
 	return 0;
 }
 
+#ifdef WITH_SCENEGRAPH
 int LuaApplication::rootNode(lua_State *L)
 {
 	LuaUntrackedUserData<SceneNode>::push(L, &theApplication().rootNode());
@@ -220,6 +227,7 @@ int LuaApplication::screenViewport(lua_State *L)
 	LuaUntrackedUserData<Viewport>::push(L, &theApplication().screenViewport());
 	return 1;
 }
+#endif
 
 int LuaApplication::numFrames(lua_State *L)
 {

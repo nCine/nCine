@@ -71,7 +71,9 @@ GLShaderProgram::~GLShaderProgram()
 
 	glDeleteProgram(glHandle_);
 
+#ifdef WITH_SCENEGRAPH
 	RenderResources::removeCameraUniformData(this);
+#endif
 }
 
 ///////////////////////////////////////////////////////////
@@ -337,9 +339,11 @@ void GLShaderProgram::reset(QueryPhase queryPhase)
 
 		glDeleteProgram(glHandle_);
 
+#ifdef WITH_SCENEGRAPH
 		RenderResources::removeCameraUniformData(this);
 		// In case there is a batched version of this shader
 		RenderResources::unregisterBatchedShader(this);
+#endif
 
 		glHandle_ = glCreateProgram();
 		hashName_ = 0;

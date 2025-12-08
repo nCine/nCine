@@ -306,22 +306,6 @@ if(LUA_FOUND)
 			${NCINE_ROOT}/src/include/LuaApplication.h
 			${NCINE_ROOT}/src/include/LuaAppConfiguration.h
 			${NCINE_ROOT}/src/include/LuaIGfxDevice.h
-			${NCINE_ROOT}/src/include/LuaSceneNode.h
-			${NCINE_ROOT}/src/include/LuaDrawableNode.h
-			${NCINE_ROOT}/src/include/LuaTexture.h
-			${NCINE_ROOT}/src/include/LuaBaseSprite.h
-			${NCINE_ROOT}/src/include/LuaSprite.h
-			${NCINE_ROOT}/src/include/LuaMeshSprite.h
-			${NCINE_ROOT}/src/include/LuaRectAnimation.h
-			${NCINE_ROOT}/src/include/LuaAnimatedSprite.h
-			${NCINE_ROOT}/src/include/LuaFont.h
-			${NCINE_ROOT}/src/include/LuaTextNode.h
-			${NCINE_ROOT}/src/include/LuaParticleSystem.h
-			${NCINE_ROOT}/src/include/LuaParticleAffector.h
-			${NCINE_ROOT}/src/include/LuaViewport.h
-			${NCINE_ROOT}/src/include/LuaCamera.h
-			${NCINE_ROOT}/src/include/LuaShader.h
-			${NCINE_ROOT}/src/include/LuaShaderState.h
 		)
 
 		list(APPEND SOURCES
@@ -342,6 +326,29 @@ if(LUA_FOUND)
 			${NCINE_ROOT}/src/scripting/LuaApplication.cpp
 			${NCINE_ROOT}/src/scripting/LuaAppConfiguration.cpp
 			${NCINE_ROOT}/src/scripting/LuaIGfxDevice.cpp
+		)
+
+	if(NCINE_WITH_SCENEGRAPH)
+		list(APPEND PRIVATE_HEADERS
+			${NCINE_ROOT}/src/include/LuaSceneNode.h
+			${NCINE_ROOT}/src/include/LuaDrawableNode.h
+			${NCINE_ROOT}/src/include/LuaTexture.h
+			${NCINE_ROOT}/src/include/LuaBaseSprite.h
+			${NCINE_ROOT}/src/include/LuaSprite.h
+			${NCINE_ROOT}/src/include/LuaMeshSprite.h
+			${NCINE_ROOT}/src/include/LuaRectAnimation.h
+			${NCINE_ROOT}/src/include/LuaAnimatedSprite.h
+			${NCINE_ROOT}/src/include/LuaFont.h
+			${NCINE_ROOT}/src/include/LuaTextNode.h
+			${NCINE_ROOT}/src/include/LuaParticleSystem.h
+			${NCINE_ROOT}/src/include/LuaParticleAffector.h
+			${NCINE_ROOT}/src/include/LuaViewport.h
+			${NCINE_ROOT}/src/include/LuaCamera.h
+			${NCINE_ROOT}/src/include/LuaShader.h
+			${NCINE_ROOT}/src/include/LuaShaderState.h
+		)
+
+		list(APPEND SOURCES
 			${NCINE_ROOT}/src/scripting/LuaSceneNode.cpp
 			${NCINE_ROOT}/src/scripting/LuaDrawableNode.cpp
 			${NCINE_ROOT}/src/scripting/LuaTexture.cpp
@@ -359,6 +366,7 @@ if(LUA_FOUND)
 			${NCINE_ROOT}/src/scripting/LuaShader.cpp
 			${NCINE_ROOT}/src/scripting/LuaShaderState.cpp
 		)
+	endif()
 
 		if(OPENAL_FOUND)
 			list(APPEND PRIVATE_HEADERS
@@ -398,6 +406,11 @@ if(LUA_FOUND)
 			list(APPEND SOURCES ${NCINE_ROOT}/src/scripting/LuaEventHandler.cpp)
 		endif()
 	endif()
+endif()
+
+if(NCINE_WITH_SCENEGRAPH)
+	target_compile_definitions(ncine PRIVATE "WITH_SCENEGRAPH")
+	# See `ncine_headers.cmake`, `ncine_private_headers.cmake` and `ncine_sources.cmake`
 endif()
 
 if(NCINE_WITH_ALLOCATORS)

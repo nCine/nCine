@@ -24,11 +24,6 @@
 	#include "LuaKeys.h"
 	#include "LuaJoystickEvents.h"
 
-	#include "LuaViewport.h"
-	#include "LuaCamera.h"
-	#include "LuaShader.h"
-	#include "LuaShaderState.h"
-
 	#include "LuaHash64.h"
 	#include "LuaTimeStamp.h"
 	#include "LuaIFrameTimer.h"
@@ -36,17 +31,24 @@
 	#include "LuaAppConfiguration.h"
 	#include "LuaApplication.h"
 	#include "LuaIGfxDevice.h"
+
+	#ifdef WITH_SCENEGRAPH
+	#include "LuaViewport.h"
+	#include "LuaCamera.h"
+	#include "LuaShader.h"
+	#include "LuaShaderState.h"
 	#include "LuaTexture.h"
+	#include "LuaFont.h"
 	#include "LuaSceneNode.h"
+	#include "LuaDrawableNode.h"
 	#include "LuaSprite.h"
 	#include "LuaMeshSprite.h"
 	#include "LuaAnimatedSprite.h"
-	#include "LuaFont.h"
-	#include "LuaTextNode.h"
-	#include "LuaDrawableNode.h"
 	#include "LuaRectAnimation.h"
+	#include "LuaTextNode.h"
 	#include "LuaParticleSystem.h"
 	#include "LuaParticleAffector.h"
+	#endif
 
 	#ifdef WITH_AUDIO
 		#include "LuaIAudioDevice.h"
@@ -467,6 +469,7 @@ void LuaStateManager::releaseTrackedMemory()
 
 		switch (type)
 		{
+	#ifdef WITH_SCENEGRAPH
 			case LuaTypes::VIEWPORT:
 			{
 				LuaViewport::release(object);
@@ -524,6 +527,13 @@ void LuaStateManager::releaseTrackedMemory()
 				break;
 			}
 
+			case LuaTypes::PARTICLE_SYSTEM:
+			{
+				LuaParticleSystem::release(object);
+				break;
+			}
+	#endif
+
 	#ifdef WITH_AUDIO
 			case LuaTypes::AUDIOBUFFER:
 			{
@@ -563,12 +573,6 @@ void LuaStateManager::releaseTrackedMemory()
 			}
 		#endif
 	#endif
-
-			case LuaTypes::PARTICLE_SYSTEM:
-			{
-				LuaParticleSystem::release(object);
-				break;
-			}
 			case LuaTypes::UNKNOWN:
 			default:
 				FATAL_MSG("Unsupported Lua wrapped userdata");
@@ -624,6 +628,7 @@ void LuaStateManager::exposeApi()
 	LuaFileSystem::expose(L_);
 	LuaApplication::expose(L_);
 	LuaIGfxDevice::expose(L_);
+	#ifdef WITH_SCENEGRAPH
 	if (appCfg.withScenegraph)
 	{
 		LuaViewport::expose(this);
@@ -641,6 +646,7 @@ void LuaStateManager::exposeApi()
 		LuaParticleSystem::expose(this);
 		LuaParticleAffector::expose(this);
 	}
+	#endif
 
 	#ifdef WITH_AUDIO
 	if (appCfg.withAudio)
@@ -674,6 +680,7 @@ void LuaStateManager::exposeConstants()
 
 	LuaFileSystem::exposeConstants(L_);
 	LuaAppConfiguration::exposeConstants(L_);
+	#ifdef WITH_SCENEGRAPH
 	if (appCfg.withScenegraph)
 	{
 		LuaViewport::exposeConstants(L_);
@@ -687,6 +694,7 @@ void LuaStateManager::exposeConstants()
 		LuaFont::exposeConstants(L_);
 		LuaTextNode::exposeConstants(L_);
 	}
+	#endif
 	#ifdef WITH_OPENAL_EXT
 	if (appCfg.withAudio)
 	{

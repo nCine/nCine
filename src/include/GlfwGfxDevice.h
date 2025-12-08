@@ -41,7 +41,7 @@ class GlfwGfxDevice : public IGfxDevice
 	const VideoMode &currentVideoMode(unsigned int monitorIndex) const override;
 	bool setVideoMode(unsigned int modeIndex) override;
 
-	inline void update() override { glfwSwapBuffers(windowHandle_); }
+	inline void swapBuffers() override { glfwSwapBuffers(windowHandle_); }
 
   private:
 	/// GLFW3 window handle

@@ -22,6 +22,8 @@
 #cmakedefine01 NCINE_WITH_LUA
 #cmakedefine01 NCINE_WITH_SCRIPTING_API
 
+#cmakedefine01 NCINE_WITH_SCENEGRAPH
+
 #cmakedefine01 NCINE_WITH_ALLOCATORS
 
 #cmakedefine01 NCINE_WITH_IMGUI
