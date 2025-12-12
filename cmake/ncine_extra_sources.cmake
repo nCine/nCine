@@ -553,11 +553,7 @@ if(NCINE_WITH_TRACY)
 	file(COPY ${TRACY_LIBBACKTRACE_HPP} DESTINATION ${TRACY_INCLUDE_ONLY_DIR}/tracy/client)
 	file(COPY "${TRACY_SOURCE_DIR}/LICENSE" DESTINATION ${TRACY_INCLUDE_ONLY_DIR}/tracy)
 
-	list(APPEND HEADERS
-		${NCINE_ROOT}/include/ncine/tracy.h
-		${NCINE_ROOT}/include/ncine/tracy_opengl.h
-	)
-
+	# `tracy.h` and `tracy_opengl.h` have been already added to the headers
 	list(APPEND SOURCES
 		${NCINE_ROOT}/src/tracy_memory.cpp
 		${TRACY_SOURCE_DIR}/public/TracyClient.cpp
