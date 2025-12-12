@@ -1,19 +1,5 @@
-#define WITH_TRACY_OPENGL (!defined(__ANDROID__) && !defined(__APPLE__) && !defined(__EMSCRIPTEN__))
-
-#if (defined(WITH_TRACY) || NCINE_WITH_TRACY) && defined(WITH_TRACY_OPENGL)
-
-	#ifdef __ANDROID__
-		#define GL_TIMESTAMP GL_TIMESTAMP_EXT
-		#define GL_QUERY_COUNTER_BITS GL_QUERY_COUNTER_BITS_EXT
-		#define GL_QUERY_RESULT GL_QUERY_RESULT_EXT
-		#define GL_QUERY_RESULT_AVAILABLE GL_QUERY_RESULT_AVAILABLE_EXT
-		#define glQueryCounter glQueryCounterEXT
-		#define glGetQueryiv glGetQueryivEXT
-		#define glGetQueryObjectiv glGetQueryObjectivEXT
-		#define glGetQueryObjectui64v glGetQueryObjectui64vEXT
-		#define glGenQueries glGenQueriesEXT
-		#define glGetInteger64v glGetInteger64vAPPLE
-	#endif
+#if (defined(WITH_TRACY) || NCINE_WITH_TRACY) && \
+    !defined(__ANDROID__) && !defined(__APPLE__) && !defined(__EMSCRIPTEN__)
 
 	#include "tracy/TracyOpenGL.hpp"
 

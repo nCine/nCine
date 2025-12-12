@@ -1,3 +1,13 @@
 *.user
-docs
+.qtcreator/
+.vscode/
+.idea/
+xcuserdata/
+*.patch
+*.diff
+
+.DS_Store
+
+CMakeUserPresets.json
+docs/
 Doxyfile
