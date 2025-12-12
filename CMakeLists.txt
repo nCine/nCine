@@ -48,8 +48,8 @@ else()
 	target_compile_definitions(ncine PUBLIC "NCINE_STATIC")
 endif()
 
-if(EMSCRIPTEN AND EMSCRIPTEN_VERSION VERSION_GREATER_EQUAL "3.1.57" AND NCINE_PREFERRED_BACKEND STREQUAL "GLFW")
-	# Needed by `upstream/emscripten/cache/sysroot/include/contrib.glfw3/GLFW/emscripten_glfw3.h`
+if(EMSCRIPTEN AND EMSCRIPTEN_VERSION VERSION_GREATER_EQUAL "3.1.57")
+	# embind requires -std=c++17 or newer
 	set_target_properties(ncine PROPERTIES CXX_STANDARD 17 CXX_EXTENSIONS off)
 endif()
 
