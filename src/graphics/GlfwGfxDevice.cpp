@@ -1,3 +1,9 @@
+#ifdef WITH_GLEW
+	#define GLEW_NO_GLU
+	#include <GL/glew.h>
+#endif
+#include <GLFW/glfw3.h>
+
 #include "common_macros.h"
 #include "GlfwGfxDevice.h"
 #include "GlfwInputManager.h"
@@ -113,6 +119,12 @@ void GlfwGfxDevice::setFullScreen(bool fullScreen)
 	glfwGetFramebufferSize(windowHandle_, &drawableWidth_, &drawableHeight_);
 }
 
+void GlfwGfxDevice::setResizable(bool resizable)
+{
+	glfwSetWindowAttrib(windowHandle_, GLFW_RESIZABLE, resizable ? GLFW_TRUE : GLFW_FALSE);
+	isResizable_ = resizable;
+}
+
 int GlfwGfxDevice::windowPositionX() const
 {
 	int posX = 0;
@@ -162,6 +174,11 @@ void GlfwGfxDevice::setWindowSize(int width, int height)
 		glfwGetWindowSize(windowHandle_, &width_, &height_);
 		glfwGetFramebufferSize(windowHandle_, &drawableWidth_, &drawableHeight_);
 	}
+}
+
+void GlfwGfxDevice::setWindowTitle(const char *windowTitle)
+{
+	glfwSetWindowTitle(windowHandle_, windowTitle);
 }
 
 void GlfwGfxDevice::setWindowIcon(const char *windowIconFilename)
@@ -257,6 +274,11 @@ bool GlfwGfxDevice::setVideoMode(unsigned int modeIndex)
 		return true;
 	}
 	return false;
+}
+
+void GlfwGfxDevice::swapBuffers()
+{
+	glfwSwapBuffers(windowHandle_);
 }
 
 ///////////////////////////////////////////////////////////

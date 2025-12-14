@@ -1,4 +1,5 @@
 #include "SdlInputManager.h"
+#include <SDL2/SDL_keycode.h>
 
 namespace ncine {
 

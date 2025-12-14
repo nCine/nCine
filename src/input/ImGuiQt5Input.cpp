@@ -238,9 +238,8 @@ void ImGuiQt5Input::shutdown()
 void ImGuiQt5Input::newFrame()
 {
 	ImGuiIO &io = ImGui::GetIO();
-	io.DeltaTime = theApplication().frameTime();
-
 	io.DisplaySize = ImVec2(theApplication().width(), theApplication().height());
+	io.DeltaTime = theApplication().frameTime();
 
 	updateMouseData();
 	updateMouseCursor();

@@ -1,7 +1,7 @@
 #ifndef CLASS_NCINE_SDLGFXDEVICE
 #define CLASS_NCINE_SDLGFXDEVICE
 
-#include <SDL.h>
+#include <SDL2/SDL_video.h>
 
 #include "IGfxDevice.h"
 #include "Vector2.h"
@@ -19,15 +19,16 @@ class SdlGfxDevice : public IGfxDevice
 	void setSwapInterval(int interval) override;
 
 	void setFullScreen(bool fullScreen) override;
+	void setResizable(bool resizable) override;
 
 	int windowPositionX() const override;
 	int windowPositionY() const override;
 	const Vector2i windowPosition() const override;
-	inline void setWindowPosition(int x, int y) override { SDL_SetWindowPosition(windowHandle_, x, y); }
+	void setWindowPosition(int x, int y) override;
 
 	void setWindowSize(int width, int height) override;
 
-	inline void setWindowTitle(const char *windowTitle) override { SDL_SetWindowTitle(windowHandle_, windowTitle); }
+	void setWindowTitle(const char *windowTitle) override;
 	void setWindowIcon(const char *windowIconFilename) override;
 	void flashWindow() const override;
 
@@ -36,9 +37,7 @@ class SdlGfxDevice : public IGfxDevice
 	const VideoMode &currentVideoMode(unsigned int monitorIndex) const override;
 	bool setVideoMode(unsigned int modeIndex) override;
 
-	inline void swapBuffers() override { SDL_GL_SwapWindow(windowHandle_); }
-
-	static inline SDL_Window *windowHandle() { return windowHandle_; }
+	void swapBuffers() override;
 
   private:
 	/// SDL2 window handle
@@ -59,6 +58,8 @@ class SdlGfxDevice : public IGfxDevice
 	void updateMonitors() override;
 
 	void convertVideoModeInfo(const SDL_DisplayMode &sdlVideoMode, IGfxDevice::VideoMode &videoMode) const;
+
+	static inline SDL_Window *windowHandle() { return windowHandle_; }
 
 	friend class SdlInputManager;
 };

@@ -5,7 +5,6 @@
 #include "common_macros.h"
 #include "SdlInputManager.h"
 #include "IInputEventHandler.h"
-#include "FileLogger.h"
 #include "Application.h"
 #include "JoyMapping.h"
 
@@ -27,8 +26,6 @@ namespace ncine {
 
 const int IInputManager::MaxNumJoysticks = 16;
 const unsigned short int IInputManager::MaxVibrationValue = 0xFFFF;
-
-SDL_Window *SdlInputManager::windowHandle_ = nullptr;
 
 TouchEvent SdlInputManager::touchEvent_;
 SdlMouseState SdlInputManager::mouseState_;
@@ -486,6 +483,12 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 	}
 }
 
+const MouseState &SdlInputManager::mouseState() const
+{
+	mouseState_.buttons_[mouseState_.currentStateIndex_] = SDL_GetMouseState(&mouseState_.x, &mouseState_.y);
+	return mouseState_;
+}
+
 bool SdlInputManager::isJoyPresent(int joyId) const
 {
 	ASSERT(joyId >= 0);
@@ -667,12 +670,12 @@ void SdlInputManager::handleJoyDeviceEvent(const SDL_Event &event)
 	}
 }
 
-int SdlInputManager::joyInstanceIdToDeviceIndex(SDL_JoystickID instanceId)
+int SdlInputManager::joyInstanceIdToDeviceIndex(int32_t instanceId)
 {
 	int deviceIndex = -1;
 	for (int i = 0; i < MaxNumJoysticks; i++)
 	{
-		SDL_JoystickID id = SDL_JoystickInstanceID(sdlJoysticks_[i]);
+		const SDL_JoystickID id = SDL_JoystickInstanceID(sdlJoysticks_[i]);
 		if (instanceId == id)
 		{
 			deviceIndex = i;

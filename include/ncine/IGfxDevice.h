@@ -120,6 +120,8 @@ class DLL_PUBLIC IGfxDevice
 
 	/// Returns true if the window is resizable
 	inline bool isResizable() const { return isResizable_; }
+	/// Sets the resizable flag of the window
+	virtual void setResizable(bool resizable) = 0;
 
 	/// Returns the window horizontal position
 	inline virtual int windowPositionX() const { return 0; }

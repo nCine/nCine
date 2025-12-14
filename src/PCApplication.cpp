@@ -4,12 +4,14 @@
 #include "FileSystem.h"
 
 #if defined(WITH_SDL)
+	#include <SDL.h>
 	#include "SdlGfxDevice.h"
 	#include "SdlInputManager.h"
 	#ifdef WITH_NUKLEAR
 		#include "NuklearSdlInput.h"
 	#endif
 #elif defined(WITH_GLFW)
+	#include <GLFW/glfw3.h>
 	#include "GlfwGfxDevice.h"
 	#include "GlfwInputManager.h"
 #elif defined(WITH_QT5)

@@ -21,6 +21,7 @@ class Qt5GfxDevice : public IGfxDevice
 	void setSwapInterval(int interval) override;
 
 	void setFullScreen(bool fullScreen) override;
+	void setResizable(bool resizable) override;
 
 	int windowPositionX() const override;
 	int windowPositionY() const override;
