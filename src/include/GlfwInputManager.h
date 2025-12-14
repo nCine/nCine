@@ -1,10 +1,11 @@
 #ifndef CLASS_NCINE_GLFWINPUTMANAGER
 #define CLASS_NCINE_GLFWINPUTMANAGER
 
-#include <cstdio>
 #include "IInputManager.h"
-#include "GlfwGfxDevice.h" // for WindowHandle()
 #include <nctl/StaticArray.h>
+
+struct GLFWwindow;
+struct GLFWmonitor;
 
 namespace ncine {
 
@@ -127,7 +128,7 @@ class GlfwInputManager : public IInputManager
 	void setMouseCursorMode(MouseCursorMode mode) override;
 
   private:
-	static const int MaxNumJoysticks = GLFW_JOYSTICK_LAST - GLFW_JOYSTICK_1 + 1;
+	static const int MaxNumJoysticks = 16; // GLFW_JOYSTICK_LAST - GLFW_JOYSTICK_1 + 1;
 
 	class JoystickEventsSimulator
 	{
@@ -194,17 +195,6 @@ class GlfwInputManager : public IInputManager
 
 	friend class GlfwGfxDevice; // for `setWindowPosition()`
 };
-
-inline const MouseState &GlfwInputManager::mouseState() const
-{
-	double xCursor, yCursor;
-
-	glfwGetCursorPos(GlfwGfxDevice::windowHandle(), &xCursor, &yCursor);
-	mouseState_.x = int(xCursor);
-	mouseState_.y = int(yCursor);
-
-	return mouseState_;
-}
 
 }
 

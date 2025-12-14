@@ -1,3 +1,4 @@
+#include <GLFW/glfw3.h>
 #include "GlfwInputManager.h"
 
 namespace ncine {

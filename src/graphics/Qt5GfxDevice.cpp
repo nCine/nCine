@@ -67,6 +67,19 @@ void Qt5GfxDevice::setFullScreen(bool fullScreen)
 	// width and height are updated by the resize event that calls `resizeWindow()`
 }
 
+void Qt5GfxDevice::setResizable(bool resizable)
+{
+	QWidget *window = widget_.window();
+	if (resizable == false)
+		window->setFixedSize(window->size());
+	else
+	{
+		window->setMinimumSize(0, 0);
+		window->setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+	}
+	isResizable_ = resizable;
+}
+
 int Qt5GfxDevice::windowPositionX() const
 {
 	QWidget *window = widget_.window();

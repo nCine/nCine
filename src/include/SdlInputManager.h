@@ -1,10 +1,11 @@
 #ifndef CLASS_NCINE_SDLINPUTMANAGER
 #define CLASS_NCINE_SDLINPUTMANAGER
 
-#include <SDL_events.h>
-#include <SDL_mouse.h>
 #include "IInputManager.h"
 #include <nctl/StaticArray.h>
+
+typedef struct _SDL_Joystick SDL_Joystick;
+union SDL_Event;
 
 namespace ncine {
 
@@ -101,18 +102,13 @@ class SdlInputManager : public IInputManager
 	/// The constructor takes care of opening available joysticks
 	SdlInputManager();
 	/// The destructor releases every opened joystick
-	~SdlInputManager();
+	~SdlInputManager() override;
 
 	static bool shouldQuitOnRequest();
 	static void copyButtonStatesToPrev();
 	static void parseEvent(const SDL_Event &event);
 
-	inline const MouseState &mouseState() const override
-	{
-		mouseState_.buttons_[mouseState_.currentStateIndex_] = SDL_GetMouseState(&mouseState_.x, &mouseState_.y);
-		return mouseState_;
-	}
-
+	const MouseState &mouseState() const override;
 	inline const KeyboardState &keyboardState() const override { return keyboardState_; }
 
 	bool isJoyPresent(int joyId) const override;
@@ -130,8 +126,6 @@ class SdlInputManager : public IInputManager
 
   private:
 	static const int MaxNumJoysticks = 16;
-
-	static SDL_Window *windowHandle_;
 
 	static TouchEvent touchEvent_;
 	static SdlMouseState mouseState_;
@@ -156,7 +150,7 @@ class SdlInputManager : public IInputManager
 	SdlInputManager &operator=(const SdlInputManager &) = delete;
 
 	static void handleJoyDeviceEvent(const SDL_Event &event);
-	static int joyInstanceIdToDeviceIndex(SDL_JoystickID instanceId);
+	static int joyInstanceIdToDeviceIndex(int32_t instanceId);
 };
 
 }

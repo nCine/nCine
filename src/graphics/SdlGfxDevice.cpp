@@ -2,6 +2,7 @@
 	#define GLEW_NO_GLU
 	#include <GL/glew.h>
 #endif
+#include <SDL.h>
 
 #include "common_macros.h"
 #include "SdlGfxDevice.h"
@@ -79,6 +80,12 @@ void SdlGfxDevice::setFullScreen(bool fullScreen)
 	SDL_GL_GetDrawableSize(windowHandle_, &drawableWidth_, &drawableHeight_);
 }
 
+void SdlGfxDevice::setResizable(bool resizable)
+{
+	SDL_SetWindowResizable(windowHandle_, resizable ? SDL_TRUE : SDL_FALSE);
+	isResizable_ = resizable;
+}
+
 int SdlGfxDevice::windowPositionX() const
 {
 	int posX = 0;
@@ -100,6 +107,11 @@ const Vector2i SdlGfxDevice::windowPosition() const
 	return position;
 }
 
+inline void SdlGfxDevice::setWindowPosition(int x, int y)
+{
+	SDL_SetWindowPosition(windowHandle_, x, y);
+}
+
 void SdlGfxDevice::setWindowSize(int width, int height)
 {
 	// change resolution only in case it is valid and it really changes
@@ -113,6 +125,11 @@ void SdlGfxDevice::setWindowSize(int width, int height)
 		SDL_GetWindowSize(windowHandle_, &width_, &height_);
 		SDL_GL_GetDrawableSize(windowHandle_, &drawableWidth_, &drawableHeight_);
 	}
+}
+
+void SdlGfxDevice::setWindowTitle(const char *windowTitle)
+{
+	SDL_SetWindowTitle(windowHandle_, windowTitle);
 }
 
 void SdlGfxDevice::setWindowIcon(const char *windowIconFilename)
@@ -168,6 +185,11 @@ bool SdlGfxDevice::setVideoMode(unsigned int modeIndex)
 		return SDL_SetWindowDisplayMode(windowHandle_, &mode);
 	}
 	return false;
+}
+
+void SdlGfxDevice::swapBuffers()
+{
+	SDL_GL_SwapWindow(windowHandle_);
 }
 
 ///////////////////////////////////////////////////////////

@@ -1,8 +1,10 @@
 #include <cstring> // for memset() and memcpy()
 #include <cmath> // for fabsf()
+#include <GLFW/glfw3.h>
 #include <nctl/CString.h>
 #include <nctl/Utf8.h>
 #include "GlfwInputManager.h"
+#include "GlfwGfxDevice.h" // for `windowHandle()`
 #include "IInputEventHandler.h"
 #include "IAppEventHandler.h"
 #include "Application.h"
@@ -326,6 +328,17 @@ void GlfwInputManager::updateJoystickStates()
 			joyEventsSimulator_.simulateAxesEvents(joyId, joystickStates_[joyId].numAxes_, joystickStates_[joyId].axesValues_);
 		}
 	}
+}
+
+const MouseState &GlfwInputManager::mouseState() const
+{
+	double xCursor, yCursor;
+
+	glfwGetCursorPos(GlfwGfxDevice::windowHandle(), &xCursor, &yCursor);
+	mouseState_.x = int(xCursor);
+	mouseState_.y = int(yCursor);
+
+	return mouseState_;
 }
 
 bool GlfwInputManager::isJoyPresent(int joyId) const
