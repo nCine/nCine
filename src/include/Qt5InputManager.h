@@ -136,7 +136,7 @@ class Qt5InputManager : public IInputManager
 	/// The constructor takes care of opening available joysticks
 	Qt5InputManager(Qt5Widget &widget);
 	/// The destructor releases every opened joystick
-	~Qt5InputManager();
+	~Qt5InputManager() override;
 
 #ifdef WITH_QT5GAMEPAD
 	void updateJoystickStates();

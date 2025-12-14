@@ -1,15 +1,13 @@
 #ifndef CLASS_NCINE_GLFWGFXDEVICE
 #define CLASS_NCINE_GLFWGFXDEVICE
 
-#ifdef WITH_GLEW
-	#define GLEW_NO_GLU
-	#include <GL/glew.h>
-#endif
-#include <GLFW/glfw3.h>
-
 #include "IGfxDevice.h"
 #include "Vector2.h"
 #include "DisplayMode.h"
+
+struct GLFWwindow;
+struct GLFWmonitor;
+struct GLFWvidmode;
 
 namespace ncine {
 
@@ -23,6 +21,7 @@ class GlfwGfxDevice : public IGfxDevice
 	void setSwapInterval(int interval) override;
 
 	void setFullScreen(bool fullScreen) override;
+	void setResizable(bool resizable) override;
 
 	int windowPositionX() const override;
 	int windowPositionY() const override;
@@ -31,7 +30,7 @@ class GlfwGfxDevice : public IGfxDevice
 
 	void setWindowSize(int width, int height) override;
 
-	inline void setWindowTitle(const char *windowTitle) override { glfwSetWindowTitle(windowHandle_, windowTitle); }
+	void setWindowTitle(const char *windowTitle) override;
 	void setWindowIcon(const char *windowIconFilename) override;
 	void flashWindow() const override;
 
@@ -41,7 +40,7 @@ class GlfwGfxDevice : public IGfxDevice
 	const VideoMode &currentVideoMode(unsigned int monitorIndex) const override;
 	bool setVideoMode(unsigned int modeIndex) override;
 
-	inline void swapBuffers() override { glfwSwapBuffers(windowHandle_); }
+	void swapBuffers() override;
 
   private:
 	/// GLFW3 window handle
@@ -77,7 +76,7 @@ class GlfwGfxDevice : public IGfxDevice
 	void convertVideoModeInfo(const GLFWvidmode &glfwVideoMode, IGfxDevice::VideoMode &videoMode) const;
 
 	/// Returns the window handle used by GLFW3
-	static GLFWwindow *windowHandle() { return windowHandle_; }
+	static inline GLFWwindow *windowHandle() { return windowHandle_; }
 
 	/// Callback for `glfwSetErrorCallback()`
 	static void errorCallback(int error, const char *description);

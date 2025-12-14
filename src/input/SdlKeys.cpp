@@ -1,5 +1,11 @@
 #include "SdlInputManager.h"
 
+#ifdef __APPLE__
+	#include <SDL_keycode.h>
+#else
+	#include <SDL2/SDL_keycode.h>
+#endif
+
 namespace ncine {
 
 KeySym SdlKeys::keySymValueToEnum(int keysym)

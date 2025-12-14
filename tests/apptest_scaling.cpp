@@ -244,7 +244,15 @@ void MyEventHandler::onFrameStart()
 			}
 
 			const bool windowScaling = nc::theApplication().appConfiguration().windowScaling;
-			ImGui::Text("Window resolution: %d x %d (resizable: %s, scaled: %s)", gfxDevice.width(), gfxDevice.height(), gfxDevice.isResizable() ? "yes" : "no", windowScaling ? "yes" : "no");
+#ifndef __ANDROID__
+			ImGui::Text("Window resolution: %d x %d (scaled: %s)", gfxDevice.width(), gfxDevice.height(), windowScaling ? "yes" : "no");
+			bool resizable = gfxDevice.isResizable();
+			ImGui::SameLine();
+			ImGui::Checkbox("Resizable", &resizable);
+			gfxDevice.setResizable(resizable);
+#else
+			ImGui::Text("Window resolution: %d x %d (scaled: %s, resizable: %s)", gfxDevice.width(), gfxDevice.height(), windowScaling ? "yes" : "no", gfxDevice.isResizable() ? "yes" : "no");
+#endif
 			ImGui::Text("Drawable resolution: %d x %d", gfxDevice.drawableWidth(), gfxDevice.drawableHeight());
 #if !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
 			ImGui::Text("Window position: <%d, %d>", gfxDevice.windowPositionX(), gfxDevice.windowPositionY());
