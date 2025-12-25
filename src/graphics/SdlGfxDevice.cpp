@@ -206,6 +206,7 @@ void SdlGfxDevice::initDevice(const WindowMode &windowMode)
 {
 	// At this point `updateMonitors()` has already been called by `initWindowScaling()`
 
+	SDL_SetHint(SDL_HINT_VIDEO_X11_FORCE_EGL, "1");
 	// setting OpenGL attributes
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, displayMode_.redBits());
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, displayMode_.greenBits());

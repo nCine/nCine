@@ -25,7 +25,7 @@ jobs:
     - run: |
         # Install Build Dependencies on Linux
         sudo apt-get update
-        sudo apt-get install -y libgl-dev libxext-dev libxrandr-dev libwayland-dev
+        sudo apt-get install -y libgl1-mesa-dev libopengl-dev libegl1-mesa-dev libglvnd-dev libxext-dev libxrandr-dev libwayland-dev
 
         # Download nCine-libraries Artifacts and nCine-data
         export OS=linux
