@@ -503,6 +503,14 @@ else() # GCC and LLVM
 		set_target_properties(WebP::WebP PROPERTIES
 			IMPORTED_LOCATION ${WEBP_LIBRARY}
 			INTERFACE_INCLUDE_DIRECTORIES ${WEBP_INCLUDE_DIR})
+		if(EXISTS ${SHARPYUV_LIBRARY})
+			# Since libwebp 1.3.0, libwebp.so needs some symbols from libsharpyuv.so
+			add_library(WebP::SharpYUV SHARED IMPORTED)
+			set_target_properties(WebP::SharpYUV PROPERTIES
+				IMPORTED_LOCATION ${SHARPYUV_LIBRARY})
+			set_target_properties(WebP::WebP PROPERTIES
+				INTERFACE_LINK_LIBRARIES WebP::SharpYUV)
+		endif()
 	endif()
 
 	if(OPENAL_FOUND)

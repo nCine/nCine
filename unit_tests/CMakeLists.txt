@@ -92,7 +92,9 @@ foreach(TEST ${TESTS})
 
 	target_compile_definitions(${TEST} PRIVATE "$<$<CONFIG:Debug>:NCINE_DEBUG>")
 
-	if(APPLE)
+	if(LINUX AND NOT CMAKE_SKIP_RPATH AND NOT CMAKE_SKIP_INSTALL_RPATH)
+		set_target_properties(${TEST} PROPERTIES INSTALL_RPATH "$ORIGIN;$ORIGIN/../${LIBRARY_INSTALL_DESTINATION}")
+	elseif(APPLE)
 		set_target_properties(${TEST} PROPERTIES INSTALL_RPATH "@executable_path/${RELPATH_TO_LIB}")
 	endif()
 endforeach()

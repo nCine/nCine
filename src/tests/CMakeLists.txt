@@ -62,6 +62,12 @@ foreach(SRCAPPTEST ${SRCAPPTESTS})
 	target_include_directories(${SRCAPPTEST} PRIVATE ${CMAKE_SOURCE_DIR}/include/ncine ${CMAKE_SOURCE_DIR}/src/include)
 	target_link_libraries(${SRCAPPTEST} PRIVATE ncine_main ncine)
 	set_target_properties(${SRCAPPTEST} PROPERTIES FOLDER "SrcTests")
+	if(LINUX AND NOT CMAKE_SKIP_RPATH AND NOT CMAKE_SKIP_INSTALL_RPATH)
+		set_target_properties(${SRCAPPTEST} PROPERTIES INSTALL_RPATH "$ORIGIN;$ORIGIN/../${LIBRARY_INSTALL_DESTINATION}")
+	elseif(APPLE)
+		set_target_properties(${SRCAPPTEST} PROPERTIES INSTALL_RPATH "@executable_path/${RELPATH_TO_LIB}")
+	endif()
+
 	install(TARGETS ${SRCAPPTEST} RUNTIME DESTINATION ${RUNTIME_INSTALL_DESTINATION} COMPONENT tests)
 
 	if(EMSCRIPTEN)

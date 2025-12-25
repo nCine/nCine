@@ -75,7 +75,7 @@ if(EMSCRIPTEN)
 	return()
 endif()
 
-if(NOT NCINE_DYNAMIC_LIBRARY OR NCPROJECT_ALWAYS_FIND_PACKAGES)
+if(NOT NCINE_DYNAMIC_LIBRARY OR (NOT CMAKE_SKIP_RPATH AND NOT CMAKE_SKIP_INSTALL_RPATH))
 	find_package(Threads)
 	if (NOT ANDROID)
 		find_package(OpenGL REQUIRED)
@@ -432,6 +432,14 @@ else() # GCC and LLVM
 		set_target_properties(WebP::WebP PROPERTIES
 			IMPORTED_LOCATION ${WEBP_LIBRARY}
 			INTERFACE_INCLUDE_DIRECTORIES ${WEBP_INCLUDE_DIR})
+		if(EXISTS ${SHARPYUV_LIBRARY})
+			# Since libwebp 1.3.0, libwebp.so needs some symbols from libsharpyuv.so
+			add_library(WebP::SharpYUV SHARED IMPORTED)
+			set_target_properties(WebP::SharpYUV PROPERTIES
+				IMPORTED_LOCATION ${SHARPYUV_LIBRARY})
+			set_target_properties(WebP::WebP PROPERTIES
+				INTERFACE_LINK_LIBRARIES WebP::SharpYUV)
+		endif()
 	endif()
 
 	if(OPENAL_FOUND)
