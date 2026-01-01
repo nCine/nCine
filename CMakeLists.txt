@@ -46,6 +46,10 @@ if(NCINE_DYNAMIC_LIBRARY)
 else()
 	add_library(ncine STATIC)
 	target_compile_definitions(ncine PUBLIC "NCINE_STATIC")
+
+	if(INSTALL_LIBRARIES_MINGW)
+		target_include_directories(ncine INTERFACE ${EXTERNAL_MSYS_DIR}/include)
+	endif()
 endif()
 
 if(EMSCRIPTEN AND EMSCRIPTEN_VERSION VERSION_GREATER_EQUAL "3.1.57")

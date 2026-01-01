@@ -1,12 +1,23 @@
 cmake_minimum_required(VERSION 3.10)
 project(nCine-srctests)
 
-if(MSVC)
-	add_custom_target(copy_dlls_srctests ALL
-		COMMAND ${CMAKE_COMMAND} -E copy_directory ${MSVC_BINDIR} ${CMAKE_BINARY_DIR}/src/tests
-		COMMENT "Copying DLLs to src/tests..."
-	)
-	set_target_properties(copy_dlls_srctests PROPERTIES FOLDER "CustomCopyTargets")
+if(WIN32)
+	if(MSVC)
+		add_custom_target(copy_dlls_srctests ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${MSVC_BINDIR} ${CMAKE_BINARY_DIR}/src/tests
+			COMMENT "Copying DLLs to src/tests..."
+		)
+		set_target_properties(copy_dlls_srctests PROPERTIES FOLDER "CustomCopyTargets")
+	elseif(INSTALL_LIBRARIES_MINGW)
+		add_custom_target(copy_dlls_srctests ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MSYS_DLL_FILES} ${CMAKE_BINARY_DIR}/src/tests
+			COMMENT "Copying DLLs to src/tests..."
+		)
+		add_custom_target(copy_mingw_syslibs_srctests ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MINGW_SYSTEMLIB_LOCATIONS} ${CMAKE_BINARY_DIR}/src/tests
+			COMMENT "Copying MinGW system libraries to src/tests..."
+		)
+	endif()
 
 	if(ANGLE_FOUND)
 		get_target_property(EGL_IMPORTED_LOCATION EGL::EGL IMPORTED_LOCATION)

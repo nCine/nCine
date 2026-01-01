@@ -25,7 +25,7 @@ elseif(WIN32)
 	endif()
 endif()
 
-if(MSVC)
+if(MSVC OR INSTALL_LIBRARIES_MINGW)
 	if(EXISTS ${NCINE_CONFIG_H})
 		if(ANGLE_FOUND AND NCINE_WITH_ANGLE)
 			add_custom_target(copy_angle_dlls ALL
@@ -95,12 +95,20 @@ if(MSVC)
 			set_target_properties(copy_lua_dll PROPERTIES FOLDER "CustomCopyTargets")
 		endif()
 	else()
-		file(GLOB MSVC_DLL_FILES ${MSVC_BINDIR}/*.dll)
-		add_custom_target(copy_dlls ALL
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MSVC_DLL_FILES} $<TARGET_FILE_DIR:${NCPROJECT_EXE_NAME}>
-			COMMENT "Copying DLLs..."
-		)
-		set_target_properties(copy_dlls PROPERTIES FOLDER "CustomCopyTargets")
+		if(MSVC)
+			file(GLOB MSVC_DLL_FILES ${MSVC_BINDIR}/*.dll)
+			add_custom_target(copy_dlls ALL
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MSVC_DLL_FILES} $<TARGET_FILE_DIR:${NCPROJECT_EXE_NAME}>
+				COMMENT "Copying DLLs..."
+			)
+			set_target_properties(copy_dlls PROPERTIES FOLDER "CustomCopyTargets")
+		elseif(INSTALL_LIBRARIES_MINGW)
+			file(GLOB MSYS_DLL_FILES ${NCINE_EXTERNAL_DIR}/bin/*.dll)
+			add_custom_target(copy_dlls ALL
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MSYS_DLL_FILES} $<TARGET_FILE_DIR:${NCPROJECT_EXE_NAME}>
+				COMMENT "Copying DLLs..."
+			)
+		endif()
 	endif()
 endif()
 
