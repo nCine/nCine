@@ -5,9 +5,18 @@ if(WIN32)
 	if(MSVC)
 		add_custom_target(copy_dlls_unit_tests ALL
 			COMMAND ${CMAKE_COMMAND} -E copy_directory ${MSVC_BINDIR} ${CMAKE_BINARY_DIR}/unit_tests
-			COMMENT "Copying DLLs to tests..."
+			COMMENT "Copying DLLs to unit tests..."
 		)
 		set_target_properties(copy_dlls_unit_tests PROPERTIES FOLDER "CustomCopyTargets")
+	elseif(INSTALL_LIBRARIES_MINGW)
+		add_custom_target(copy_dlls_unit_tests ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MSYS_DLL_FILES} ${CMAKE_BINARY_DIR}/unit_tests
+			COMMENT "Copying DLLs to unit tests..."
+		)
+		add_custom_target(copy_mingw_syslibs_unit_tests ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MINGW_SYSTEMLIB_LOCATIONS} ${CMAKE_BINARY_DIR}/unit_tests
+			COMMENT "Copying MinGW system libraries to unit tests..."
+		)
 	endif()
 
 	if(NCINE_DYNAMIC_LIBRARY)
