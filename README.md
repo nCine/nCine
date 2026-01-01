@@ -33,7 +33,7 @@ It is released under the MIT License and it has been in active development since
 
 For additional information: <https://ncine.github.io/>.
 
-Copyright (c) 2011-2025 Angelo Theodorou.
+Copyright (c) 2011-2026 Angelo Theodorou.
 
 ## Screenshots
 
