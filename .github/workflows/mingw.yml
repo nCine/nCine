@@ -65,7 +65,7 @@ jobs:
       run: |
         $env:MSYSTEM = "MINGW64"
 
-        C:\msys64\usr\bin\bash -lc 'pacman --needed --noconfirm -S mingw-w64-x86_64-glew mingw-w64-x86_64-glfw mingw-w64-x86_64-SDL2 mingw-w64-x86_64-openal mingw-w64-x86_64-libvorbis mingw-w64-x86_64-libwebp mingw-w64-x86_64-lua mingw-w64-x86_64-cmake make patch'
+        C:\msys64\usr\bin\bash -lc 'pacman --needed --noconfirm -S mingw-w64-x86_64-cmake make patch'
 
         if ("${{ matrix.CC }}" -eq "gcc") { C:\msys64\usr\bin\bash -lc 'pacman --needed --noconfirm -S mingw-w64-x86_64-gcc' }
         else { C:\msys64\usr\bin\bash -lc 'pacman --needed --noconfirm -S mingw-w64-x86_64-clang' }
@@ -81,10 +81,22 @@ jobs:
     - name: 'Download nCine-libraries Artifacts and nCine-data'
       run: |
         $env:GIT_REDIRECT_STDERR = '2>&1'
+        $env:compiler = switch ("${{ matrix.CC }}")
+        {
+          "gcc" {"gcc"}
+          "clang" {"clang"}
+        }
 
         cd ..
         git clone https://github.com/nCine/nCine-libraries-artifacts.git
         cd nCine-libraries-artifacts
+
+        $env:LIBRARIES_BRANCH = $env:LIBRARIES_BRANCH -replace "OS","mingw64" -replace "COMPILER",$env:compiler
+        git checkout $env:LIBRARIES_BRANCH
+        $env:LIBRARIES_FILE = Get-ChildItem -Path $(pwd) -Name -File | Select-Object -First 1
+        7z x $env:LIBRARIES_FILE
+
+        Move-Item -Path nCine-external -Destination ..
 
         git checkout android-libraries-armeabi-v7a
         $env:LIBRARIES_FILE = Get-ChildItem -Path $(pwd) -Filter *.gz -Name -File | Select-Object -First 1
@@ -126,7 +138,7 @@ jobs:
         $env:CXX = "${{ matrix.CXX }}"
         $env:MSYSTEM = "MINGW64"
 
-        C:\msys64\usr\bin\bash.exe -lc "cmake -G 'MSYS Makefiles' -B ../nCine-buildtests-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=UnitTests"
+        C:\msys64\usr\bin\bash.exe -lc "cmake -G 'MSYS Makefiles' -B ../nCine-buildtests-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=UnitTests -D CMAKE_PREFIX_PATH=$(cygpath -m $PWD/../nCine-external)"
         C:\msys64\usr\bin\bash.exe -lc 'make -j $NUMBER_OF_PROCESSORS -C ../nCine-buildtests-${{ matrix.BuildType }}'
         cd ..\nCine-buildtests-${{ matrix.BuildType }}
         C:\msys64\usr\bin\bash.exe -lc 'ctest -j $NUMBER_OF_PROCESSORS --build-config ${{ matrix.BuildType }} --output-on-failure'
@@ -144,10 +156,10 @@ jobs:
           { $EnableTracy = 'OFF' }
 
         if ("${{ matrix.BuildType }}" -eq "DevDist" -Or "${{ matrix.BuildType }}" -eq "LuaDist")
-          { C:\msys64\usr\bin\bash.exe -lc "cmake -G 'MSYS Makefiles' -B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=Release -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }} -D NDK_DIR=$(cygpath -m $ANDROID_NDK_LATEST_HOME)" }
+          { C:\msys64\usr\bin\bash.exe -lc "cmake -G 'MSYS Makefiles' -B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=Release -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }} -D NDK_DIR=$(cygpath -m $ANDROID_NDK_LATEST_HOME) -D CMAKE_PREFIX_PATH=$(cygpath -m $PWD/../nCine-external)" }
         else
           # Disable benchmarks building to avoid "error: enumeration value 'CacheUnknown' not handled in switch [-Werror=switch]" in sysinfo.cc
-          { C:\msys64\usr\bin\bash.exe -lc "cmake -G 'MSYS Makefiles' -B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_BENCHMARKS=OFF -D NCINE_WITH_TRACY=$EnableTracy -D NCINE_WITH_RENDERDOC=ON -D RENDERDOC_DIR=$(cygpath -m $PWD/../RenderDoc)" }
+          { C:\msys64\usr\bin\bash.exe -lc "cmake -G 'MSYS Makefiles' -B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_BENCHMARKS=OFF -D NCINE_WITH_TRACY=$EnableTracy -D NCINE_WITH_RENDERDOC=ON -D RENDERDOC_DIR=$(cygpath -m $PWD/../RenderDoc) -D CMAKE_PREFIX_PATH=$(cygpath -m $PWD/../nCine-external)" }
 
     - name: 'Make'
       env:

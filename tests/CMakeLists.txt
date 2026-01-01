@@ -8,6 +8,15 @@ if(WIN32)
 			COMMENT "Copying DLLs to tests..."
 		)
 		set_target_properties(copy_dlls_tests PROPERTIES FOLDER "CustomCopyTargets")
+	elseif(INSTALL_LIBRARIES_MINGW)
+		add_custom_target(copy_dlls_tests ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MSYS_DLL_FILES} ${CMAKE_BINARY_DIR}/tests
+			COMMENT "Copying DLLs to tests..."
+		)
+		add_custom_target(copy_mingw_syslibs_tests ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MINGW_SYSTEMLIB_LOCATIONS} ${CMAKE_BINARY_DIR}/tests
+			COMMENT "Copying MinGW system libraries to tests..."
+		)
 	endif()
 
 	if(NCINE_DYNAMIC_LIBRARY)

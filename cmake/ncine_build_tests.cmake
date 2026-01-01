@@ -9,10 +9,6 @@ if(NCINE_BUILD_TESTS)
 				)
 				set_target_properties(copy_shaders_data PROPERTIES FOLDER "CustomCopyTargets")
 			endif()
-
-			if(MSVC)
-				include(InstallRequiredSystemLibraries)
-			endif()
 		else()
 			# Symlinking all shaders even if not all are required by the current configuration
 			if(NOT NCINE_EMBED_SHADERS)

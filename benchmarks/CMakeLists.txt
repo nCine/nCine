@@ -5,9 +5,18 @@ if(WIN32)
 	if(MSVC)
 		add_custom_target(copy_dlls_benchmarks ALL
 			COMMAND ${CMAKE_COMMAND} -E copy_directory ${MSVC_BINDIR} ${CMAKE_BINARY_DIR}/benchmarks
-			COMMENT "Copying DLLs to tests..."
+			COMMENT "Copying DLLs to benchmarks..."
 		)
 		set_target_properties(copy_dlls_benchmarks PROPERTIES FOLDER "CustomCopyTargets")
+	elseif(INSTALL_LIBRARIES_MINGW)
+		add_custom_target(copy_dlls_benchmarks ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MSYS_DLL_FILES} ${CMAKE_BINARY_DIR}/benchmarks
+			COMMENT "Copying DLLs to benchmarks..."
+		)
+		add_custom_target(copy_mingw_syslibs_benchmarks ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MINGW_SYSTEMLIB_LOCATIONS} ${CMAKE_BINARY_DIR}/benchmarks
+			COMMENT "Copying MinGW system libraries to benchmarks..."
+		)
 	endif()
 
 	if(NCINE_DYNAMIC_LIBRARY)
