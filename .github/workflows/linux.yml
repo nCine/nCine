@@ -2,51 +2,28 @@ name: 'Linux'
 
 env:
   LIBRARIES_BRANCH: libraries-OS-COMPILER
-  DEPLOY_MESSAGE:
-    "Push artifact from GitHub Actions build ${{ github.run_number }} with id ${{ github.run_id }}
+  DEPLOY_MESSAGE: |
+    Push artifact from GitHub Actions build ${{ github.run_number }} with id ${{ github.run_id }}
 
-     - nCine artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
+    - nCine artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}
   DEPLOY_BRANCH: nCine-BRANCH_NAME-OS-COMPILER
 
 on: [push, workflow_dispatch]
 
 jobs:
-  Linux:
+  Build:
     strategy:
       fail-fast: false
       matrix:
+        BuildType: [Debug, Release, DevDist, LuaDist]
+        compiler: [gcc, clang]
         include:
-        - BuildType: Debug
-          CC: gcc
-          CXX: g++
-
-        - BuildType: Release
-          CC: gcc
-          CXX: g++
-
-        - BuildType: DevDist
-          CC: gcc
-          CXX: g++
-
-        - BuildType: LuaDist
-          CC: gcc
-          CXX: g++
-
-        - BuildType: Debug
-          CC: clang
-          CXX: clang++
-
-        - BuildType: Release
-          CC: clang
-          CXX: clang++
-
-        - BuildType: DevDist
-          CC: clang
-          CXX: clang++
-
-        - BuildType: LuaDist
-          CC: clang
-          CXX: clang++
+          - compiler: gcc
+            CC: gcc
+            CXX: g++
+          - compiler: clang
+            CC: clang
+            CXX: clang++
 
     runs-on: 'ubuntu-24.04'
 
@@ -63,18 +40,13 @@ jobs:
           sudo apt-get install -y doxygen graphviz
         fi
 
-    - name: 'Unshallow Git Repository for Versioning'
-      if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'
-      run: |
-        git fetch --unshallow || true
-
     - name: 'Download nCine-libraries Artifacts and nCine-data'
       run: |
-        export OS=linux
-        export CC=${{ matrix.CC }}
+        OS=linux
+        CC=${{ matrix.CC }}
 
-        export LIBRARIES_BRANCH=`echo $LIBRARIES_BRANCH | sed 's/OS/'"$OS"'/'`
-        export LIBRARIES_BRANCH=`echo $LIBRARIES_BRANCH | sed 's/COMPILER/'"$CC"'/'`
+        LIBRARIES_BRANCH=`echo $LIBRARIES_BRANCH | sed 's/OS/'"$OS"'/'`
+        LIBRARIES_BRANCH=`echo $LIBRARIES_BRANCH | sed 's/COMPILER/'"$CC"'/'`
 
         cd ..
         git clone https://github.com/nCine/nCine-libraries-artifacts.git
@@ -107,7 +79,7 @@ jobs:
         export CC=${{ matrix.CC }}
         export CXX=${{ matrix.CXX }}
 
-        export CMAKE_ARGS="-B ../nCine-buildtests-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=UnitTests -D CMAKE_PREFIX_PATH=$(pwd)/../nCine-external"
+        CMAKE_ARGS="-B ../nCine-buildtests-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=UnitTests -D CMAKE_PREFIX_PATH=$(pwd)/../nCine-external"
 
         cmake $CMAKE_ARGS
         make -j $(getconf _NPROCESSORS_ONLN) -C ../nCine-buildtests-${{ matrix.BuildType }}
@@ -120,11 +92,11 @@ jobs:
         export CXX=${{ matrix.CXX }}
 
         if [[ "${{ matrix.BuildType }}" == "DevDist" || "${{ matrix.BuildType }}" == "LuaDist" ]]; then
-          export CMAKE_ARGS="-B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=Release -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }} -D CMAKE_INSTALL_PREFIX='' -D NDK_DIR=$ANDROID_NDK_LATEST_HOME"
+          CMAKE_ARGS="-B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=Release -D NCINE_OPTIONS_PRESETS=${{ matrix.BuildType }} -D CMAKE_INSTALL_PREFIX='' -D NDK_DIR=$ANDROID_NDK_LATEST_HOME"
         else
-          export CMAKE_ARGS="-B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_BENCHMARKS=ON -D NCINE_WITH_TRACY=ON"
+          CMAKE_ARGS="-B ../nCine-build-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_BUILD_BENCHMARKS=ON -D NCINE_WITH_TRACY=ON"
         fi
-        export CMAKE_ARGS="$CMAKE_ARGS -D NCINE_WITH_RENDERDOC=ON -D RENDERDOC_DIR=$(pwd)/../RenderDoc -D CMAKE_PREFIX_PATH=$(pwd)/../nCine-external"
+        CMAKE_ARGS="$CMAKE_ARGS -D NCINE_WITH_RENDERDOC=ON -D RENDERDOC_DIR=$(pwd)/../RenderDoc -D CMAKE_PREFIX_PATH=$(pwd)/../nCine-external"
 
         cmake $CMAKE_ARGS
 
@@ -137,14 +109,60 @@ jobs:
       run: |
         make package -C ../nCine-build-${{ matrix.BuildType }}
 
+    - name: 'Prepare GitHub Actions Artifact'
+      if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'
+      run: |
+        cd ../nCine-build-${{ matrix.BuildType }}/
+
+        echo -e "include(CPackConfig.cmake)\nexecute_process(COMMAND \${CMAKE_COMMAND} -E echo_append \"\${CPACK_PACKAGE_FILE_NAME}\")" > package_file_name.cmake
+        PACKAGE_FILE_NAME=$(cmake -P package_file_name.cmake)
+        PACKAGE_EXT=tar.gz
+        PACKAGE="$PACKAGE_FILE_NAME.$PACKAGE_EXT"
+
+        # Generate a JSON manifest file
+        MANIFEST="manifest.json"
+        [ "${{ matrix.BuildType }}" = "LuaDist" ] && MANIFEST="manifestLua.json"
+
+        SIZE=$(stat -c %s "$PACKAGE")
+        MTIME=$(stat -c %y "$PACKAGE")
+        MTIME_ISO=$(date -u -d "$MTIME" +"%Y-%m-%dT%H:%M:%SZ")
+        SHA256=$(sha256sum "$PACKAGE" | awk '{print $1}')
+
+        cat > "$MANIFEST" <<EOF
+        {
+          "filename": "$PACKAGE",
+          "size": $SIZE,
+          "timestamp": "$MTIME_ISO",
+          "sha256": "$SHA256",
+          "git_revision": "$GITHUB_SHA"
+        }
+        EOF
+
+        ARTIFACTS_DIR="$GITHUB_WORKSPACE/nCine-job-artifacts"
+        mkdir -p $ARTIFACTS_DIR
+        cp -p $PACKAGE $ARTIFACTS_DIR
+        cp -p $MANIFEST $ARTIFACTS_DIR
+
+        echo "Contents of the nCine-job-artifacts directory:"
+        ls -l $ARTIFACTS_DIR
+        echo "Contents of the manifest file:"
+        cat $MANIFEST
+
+    - name: 'Upload GitHub Actions Artifact'
+      if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'
+      uses: actions/upload-artifact@v4
+      with:
+        name: nCine-job-artifacts-${{ matrix.BuildType }}-${{ matrix.compiler }}
+        path: nCine-job-artifacts/*
+
     - name: 'Generate and Push Documentation'
-      if: matrix.BuildType == 'DevDist' && matrix.CC == 'gcc'
+      if: matrix.BuildType == 'DevDist' && matrix.compiler == 'gcc'
       env:
         PUBLIC_REPO_TOKEN: ${{ secrets.PUBLIC_REPO_TOKEN }}
       run: |
         git config --global user.email "actions@github.com"
         git config --global user.name "GitHub Actions"
-        export BRANCH_NAME=$(git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git rev-parse --short HEAD)
+        BRANCH_NAME=$(git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git rev-parse --short HEAD)
 
         cd ../nCine-build-${{ matrix.BuildType }}
         doxygen
@@ -174,38 +192,73 @@ jobs:
         git commit --amend -m "Initial commit" || git commit -m "Initial commit"
         git push --force || git push --set-upstream origin master
 
+  Artifacts:
+    needs: Build
+    strategy:
+      fail-fast: false
+      matrix:
+        BuildType: [DevDist, LuaDist]
+        compiler: [gcc, clang]
+        include:
+          - compiler: gcc
+            CC: gcc
+            CXX: g++
+          - compiler: clang
+            CC: clang
+            CXX: clang++
+
+    runs-on: 'ubuntu-24.04'
+    concurrency:
+        group: artifacts-linux-${{ matrix.compiler }}
+        cancel-in-progress: false
+
+    steps:
+    - name: 'Checkout Code'
+      uses: actions/checkout@v4
+
+    - name: 'Unshallow Git Repository for Versioning'
+      run: |
+        git fetch --unshallow || true
+
+    - name: 'Download GitHub Actions Artifact'
+      uses: actions/download-artifact@v4
+      with:
+        name: nCine-job-artifacts-${{ matrix.BuildType }}-${{ matrix.compiler }}
+        path: nCine-job-artifacts
+
     - name: 'Push Artifacts'
-      if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'
       env:
         PUBLIC_REPO_TOKEN: ${{ secrets.PUBLIC_REPO_TOKEN }}
       run: |
         git config --global user.email "actions@github.com"
         git config --global user.name "GitHub Actions"
 
-        export BRANCH_NAME=$(git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git rev-parse --short HEAD)
-        export DEPLOY_MESSAGE=`sed 's/BRANCH_NAME/'"$BRANCH_NAME"'/' <<< "$DEPLOY_MESSAGE"`
+        BRANCH_NAME=$(git describe --tags --exact-match 2> /dev/null || git symbolic-ref -q --short HEAD || git rev-parse --short HEAD)
+        DEPLOY_MESSAGE=$(sed "s/BRANCH_NAME/$BRANCH_NAME/" <<< "$DEPLOY_MESSAGE")
 
-        export OS=linux
-        export CC=${{ matrix.CC }}
-        export PACKAGE_EXT=tar.gz
+        OS=linux
+        CC=${{ matrix.CC }}
 
-        cd ../nCine-build-${{ matrix.BuildType }}
-        echo -e "include(CPackConfig.cmake)\nexecute_process(COMMAND \${CMAKE_COMMAND} -E echo_append \"\${CPACK_PACKAGE_NAME}\")" > package_name.cmake
-        export PACKAGE_NAME=$(cmake -P package_name.cmake)
-        echo -e "include(CPackConfig.cmake)\nexecute_process(COMMAND \${CMAKE_COMMAND} -E echo_append \"\${CPACK_PACKAGE_FILE_NAME}\")" > package_file_name.cmake
-        export PACKAGE_FILE_NAME=$(cmake -P package_file_name.cmake)
+        cd nCine-job-artifacts
+        MANIFEST=$(ls manifest*.json)
+        PACKAGE=$(jq -r '.filename' "$MANIFEST")
+        PACKAGE_NAME=$(basename "$PACKAGE" | sed "s/-.*//")
+        PACKAGE_EXT="${PACKAGE##*.}"
 
         cd ..
-        export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/BRANCH_NAME/'"$BRANCH_NAME"'/'`
-        export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/OS/'"$OS"'/'`
-        export DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/COMPILER/'"$CC"'/'`
+        DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/BRANCH_NAME/'"$BRANCH_NAME"'/'`
+        DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/OS/'"$OS"'/'`
+        DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/COMPILER/'"$CC"'/'`
         git clone https://$PUBLIC_REPO_TOKEN@github.com/nCine/nCine-artifacts.git >/dev/null 2>&1
+
         cd nCine-artifacts
         git checkout $DEPLOY_BRANCH || git checkout --orphan $DEPLOY_BRANCH
         git reset
         git clean -f
         git rm $PACKAGE_NAME-*.$PACKAGE_EXT || true
-        mv -f ../nCine-build-${{ matrix.BuildType }}/$PACKAGE_FILE_NAME.$PACKAGE_EXT .
-        git add $PACKAGE_FILE_NAME.$PACKAGE_EXT
+        mv -f ../nCine-job-artifacts/$MANIFEST .
+        mv -f ../nCine-job-artifacts/$PACKAGE .
+
+        git add $MANIFEST $PACKAGE
         git commit --amend -m "$DEPLOY_MESSAGE" || git commit -m "$DEPLOY_MESSAGE"
         git push --force || git push --set-upstream origin $DEPLOY_BRANCH

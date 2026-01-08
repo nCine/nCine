@@ -2,53 +2,32 @@ name: 'MinGW'
 
 env:
   LIBRARIES_BRANCH: libraries-OS-COMPILER
-  DEPLOY_MESSAGE:
-    "Push artifact from GitHub Actions build ${{ github.run_number }} with id ${{ github.run_id }}
+  DEPLOY_MESSAGE: |
+    Push artifact from GitHub Actions build ${{ github.run_number }} with id ${{ github.run_id }}
 
-     - nCine artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}"
+    - nCine artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}
   DEPLOY_BRANCH: nCine-BRANCH_NAME-OS-COMPILER
 
 on: [push, workflow_dispatch]
 
 jobs:
-  MinGW:
+  Build:
     strategy:
       fail-fast: false
       matrix:
+        BuildType: [Debug, Release, DevDist, LuaDist]
+        compiler: [gcc, clang]
         include:
-        - BuildType: Debug
-          CC: gcc
-          CXX: g++
-
-        - BuildType: Release
-          CC: gcc
-          CXX: g++
-
-        - BuildType: DevDist
-          CC: gcc
-          CXX: g++
-
-        - BuildType: LuaDist
-          CC: gcc
-          CXX: g++
-
-        - BuildType: Debug
-          CC: clang
-          CXX: clang++
-
-        - BuildType: Release
-          CC: clang
-          CXX: clang++
-
-        - BuildType: DevDist
-          CC: clang
-          CXX: clang++
-
-        - BuildType: LuaDist
-          CC: clang
-          CXX: clang++
+          - compiler: gcc
+            CC: gcc
+            CXX: g++
+          - compiler: clang
+            CC: clang
+            CXX: clang++
 
     runs-on: 'windows-2022'
+    env:
+      MSYSTEM: MINGW64
 
     steps:
     - name: 'Checkout Code'
@@ -56,15 +35,11 @@ jobs:
 
     - name: 'Update MSYS2'
       run: |
-        $env:MSYSTEM = "MINGW64"
-
         C:\msys64\usr\bin\bash -lc 'pacman --noconfirm -Syyuu'
         C:\msys64\usr\bin\bash -lc 'pacman --noconfirm -Syyuu'
 
     - name: 'Install Build Dependencies'
       run: |
-        $env:MSYSTEM = "MINGW64"
-
         C:\msys64\usr\bin\bash -lc 'pacman --needed --noconfirm -S mingw-w64-x86_64-cmake make patch'
 
         if ("${{ matrix.CC }}" -eq "gcc") { C:\msys64\usr\bin\bash -lc 'pacman --needed --noconfirm -S mingw-w64-x86_64-gcc' }
@@ -72,49 +47,39 @@ jobs:
 
         C:\msys64\usr\bin\bash -lc 'pacman --noconfirm -Scc'
 
-    - name: 'Unshallow Git Repository for Versioning'
-      if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'
-      run: |
-        $env:GIT_REDIRECT_STDERR = '2>&1'
-        git fetch --unshallow; if (-not $?) { return }
-
     - name: 'Download nCine-libraries Artifacts and nCine-data'
       run: |
         $env:GIT_REDIRECT_STDERR = '2>&1'
-        $env:compiler = switch ("${{ matrix.CC }}")
-        {
-          "gcc" {"gcc"}
-          "clang" {"clang"}
-        }
+        $compiler = "${{ matrix.CC }}"
 
         cd ..
         git clone https://github.com/nCine/nCine-libraries-artifacts.git
         cd nCine-libraries-artifacts
 
-        $env:LIBRARIES_BRANCH = $env:LIBRARIES_BRANCH -replace "OS","mingw64" -replace "COMPILER",$env:compiler
+        $env:LIBRARIES_BRANCH = $env:LIBRARIES_BRANCH -creplace "OS","mingw64" -creplace "COMPILER",$compiler
         git checkout $env:LIBRARIES_BRANCH
-        $env:LIBRARIES_FILE = Get-ChildItem -Path $(pwd) -Name -File | Select-Object -First 1
-        7z x $env:LIBRARIES_FILE
+        $libraries_file = Get-ChildItem -Path $(pwd) -Name -File | Select-Object -First 1
+        7z x $libraries_file
 
         Move-Item -Path nCine-external -Destination ..
 
         git checkout android-libraries-armeabi-v7a
-        $env:LIBRARIES_FILE = Get-ChildItem -Path $(pwd) -Filter *.gz -Name -File | Select-Object -First 1
-        7z x $env:LIBRARIES_FILE
-        $env:LIBRARIES_FILE = $env:LIBRARIES_FILE -replace ".gz",""
-        7z x $env:LIBRARIES_FILE -aos
+        $libraries_file = Get-ChildItem -Path $(pwd) -Filter *.gz -Name -File | Select-Object -First 1
+        7z x $libraries_file
+        $libraries_file = $libraries_file -replace ".gz",""
+        7z x $libraries_file -aos
 
         git checkout android-libraries-arm64-v8a
-        $env:LIBRARIES_FILE = Get-ChildItem -Path $(pwd) -Filter *.gz -Name -File | Select-Object -First 1
-        7z x $env:LIBRARIES_FILE
-        $env:LIBRARIES_FILE = $env:LIBRARIES_FILE -replace ".gz",""
-        7z x $env:LIBRARIES_FILE -aos
+        $libraries_file = Get-ChildItem -Path $(pwd) -Filter *.gz -Name -File | Select-Object -First 1
+        7z x $libraries_file
+        $libraries_file = $libraries_file -replace ".gz",""
+        7z x $libraries_file -aos
 
         git checkout android-libraries-x86_64
-        $env:LIBRARIES_FILE = Get-ChildItem -Path $(pwd) -Filter *.gz -Name -File | Select-Object -First 1
-        7z x $env:LIBRARIES_FILE
-        $env:LIBRARIES_FILE = $env:LIBRARIES_FILE -replace ".gz",""
-        7z x $env:LIBRARIES_FILE -aos
+        $libraries_file = Get-ChildItem -Path $(pwd) -Filter *.gz -Name -File | Select-Object -First 1
+        7z x $libraries_file
+        $libraries_file = $libraries_file -replace ".gz",""
+        7z x $libraries_file -aos
 
         Move-Item -Path nCine-android-external -Destination ..
         cd ..
@@ -136,7 +101,6 @@ jobs:
       run: |
         $env:CC = "${{ matrix.CC }}"
         $env:CXX = "${{ matrix.CXX }}"
-        $env:MSYSTEM = "MINGW64"
 
         C:\msys64\usr\bin\bash.exe -lc "cmake -G 'MSYS Makefiles' -B ../nCine-buildtests-${{ matrix.BuildType }} -D CMAKE_BUILD_TYPE=${{ matrix.BuildType }} -D NCINE_OPTIONS_PRESETS=UnitTests -D CMAKE_PREFIX_PATH=$(cygpath -m $PWD/../nCine-external)"
         C:\msys64\usr\bin\bash.exe -lc 'make -j $NUMBER_OF_PROCESSORS -C ../nCine-buildtests-${{ matrix.BuildType }}'
@@ -149,7 +113,6 @@ jobs:
       run: |
         $env:CC = "${{ matrix.CC }}"
         $env:CXX = "${{ matrix.CXX }}"
-        $env:MSYSTEM = "MINGW64"
 
         $EnableTracy = 'ON'
         if ("${{ matrix.CC }}" -eq "clang")
@@ -165,8 +128,6 @@ jobs:
       env:
         CHERE_INVOKING: on
       run: |
-        $env:MSYSTEM = "MINGW64"
-
         C:\msys64\usr\bin\bash.exe -lc 'make -j $NUMBER_OF_PROCESSORS -C ../nCine-build-${{ matrix.BuildType }}'
 
     - name: 'Package'
@@ -174,12 +135,95 @@ jobs:
       env:
         CHERE_INVOKING: on
       run: |
-        $env:MSYSTEM = "MINGW64"
-
         C:\msys64\usr\bin\bash.exe -lc 'make package -C ../nCine-build-${{ matrix.BuildType }}'
 
-    - name: 'Push Artifacts'
+    - name: 'Prepare GitHub Actions Artifact'
       if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'
+      run: |
+        cd ../nCine-build-${{ matrix.BuildType }}/
+
+        Set-Content -Path package_file_name.cmake -Value 'include(CPackConfig.cmake)','execute_process(COMMAND ${CMAKE_COMMAND} -E echo_append "${CPACK_PACKAGE_FILE_NAME}")'
+        $package_file_name = cmake -P package_file_name.cmake
+        $package_ext = "tar.gz"
+        $package = "$package_file_name.$package_ext"
+
+        # Generate a JSON manifest file
+        $manifest = "manifest.json"
+        if ("${{ matrix.BuildType }}" -eq "LuaDist") {
+          $manifest = "manifestLua.json"
+        }
+
+        $packageInfo = Get-Item $package
+        $packageHash = (Get-FileHash -Algorithm SHA256 -Path $package).Hash.ToLower()
+
+        $manifestObj = [ordered]@{
+          filename = $package
+          size     = $packageInfo.Length
+          timestamp = $packageInfo.LastWriteTimeUtc.ToString("yyyy-MM-ddTHH:mm:ssZ")
+          sha256   = $packageHash
+          git_revision = $env:GITHUB_SHA
+        }
+
+        $manifestObj |
+          ConvertTo-Json -Depth 4 |
+          Set-Content -Encoding UTF8 $manifest
+
+        $artifactsDir = Join-Path $env:GITHUB_WORKSPACE 'nCine-job-artifacts'
+        New-Item -ItemType Directory -Force $artifactsDir | Out-Null
+        Copy-Item $package $artifactsDir -Force
+        Copy-Item $manifest $artifactsDir -Force
+
+        Write-Host "Contents of the nCine-job-artifacts directory:"
+        Get-ChildItem $artifactsDir
+        Write-Host "Contents of the manifest file:"
+        Get-Content $manifest -Raw
+
+    - name: 'Upload GitHub Actions Artifact'
+      if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'
+      uses: actions/upload-artifact@v4
+      with:
+        name: nCine-job-artifacts-${{ matrix.BuildType }}-${{ matrix.compiler }}
+        path: nCine-job-artifacts/*
+
+  Artifacts:
+    needs: Build
+    strategy:
+      fail-fast: false
+      matrix:
+        BuildType: [DevDist, LuaDist]
+        compiler: [gcc, clang]
+        include:
+          - compiler: gcc
+            CC: gcc
+            CXX: g++
+          - compiler: clang
+            CC: clang
+            CXX: clang++
+
+    runs-on: 'windows-2022'
+    env:
+      MSYSTEM: MINGW64
+
+    concurrency:
+        group: artifacts-mingw64-${{ matrix.compiler }}
+        cancel-in-progress: false
+
+    steps:
+    - name: 'Checkout Code'
+      uses: actions/checkout@v4
+
+    - name: 'Unshallow Git Repository for Versioning'
+      run: |
+        $env:GIT_REDIRECT_STDERR = '2>&1'
+        git fetch --unshallow; if (-not $?) { return }
+
+    - name: 'Download GitHub Actions Artifact'
+      uses: actions/download-artifact@v4
+      with:
+        name: nCine-job-artifacts-${{ matrix.BuildType }}-${{ matrix.compiler }}
+        path: nCine-job-artifacts
+
+    - name: 'Push Artifacts'
       env:
         PUBLIC_REPO_TOKEN: ${{ secrets.PUBLIC_REPO_TOKEN }}
       run: |
@@ -187,30 +231,31 @@ jobs:
         git config --global user.name "GitHub Actions"
         $env:GIT_REDIRECT_STDERR = '2>&1'
 
-        $env:branch_name = git describe --tags --exact-match; if (-not $?) { $env:branch_name = git symbolic-ref -q --short HEAD }; if (-not $?) { $env:branch_name = git rev-parse --short HEAD }
-        $env:DEPLOY_MESSAGE = $env:DEPLOY_MESSAGE -replace "BRANCH_NAME",$env:branch_name
+        $branch_name = git describe --tags --exact-match; if (-not $?) { $branch_name = git symbolic-ref -q --short HEAD }; if (-not $?) { $branch_name = git rev-parse --short HEAD }
+        $env:DEPLOY_MESSAGE = $env:DEPLOY_MESSAGE -creplace "BRANCH_NAME",$branch_name
 
-        $env:CC = "${{ matrix.CC }}"
-        $env:DEPLOY_BRANCH = $env:DEPLOY_BRANCH -replace "BRANCH_NAME",$env:branch_name
-        $env:DEPLOY_BRANCH = $env:DEPLOY_BRANCH -replace "OS","mingw64" -replace "COMPILER",$env:CC
-        $env:package_ext = "tar.gz"
+        $CC = "${{ matrix.CC }}"
+        $env:DEPLOY_BRANCH = $env:DEPLOY_BRANCH -creplace "BRANCH_NAME",$branch_name
+        $env:DEPLOY_BRANCH = $env:DEPLOY_BRANCH -creplace "OS","mingw64" -creplace "COMPILER",$CC
 
-        cd ..\nCine-build-${{ matrix.BuildType }}
-        Set-Content -Path package_name.cmake -Value 'include(CPackConfig.cmake)','execute_process(COMMAND ${CMAKE_COMMAND} -E echo_append "${CPACK_PACKAGE_NAME}")'
-        $env:package_name = cmake -P package_name.cmake
-        Set-Content -Path package_file_name.cmake -Value 'include(CPackConfig.cmake)','execute_process(COMMAND ${CMAKE_COMMAND} -E echo_append "${CPACK_PACKAGE_FILE_NAME}")'
-        $env:package_file_name = cmake -P package_file_name.cmake
+        cd nCine-job-artifacts
+        $manifest = Get-ChildItem -Filter 'manifest*.json' -Name | Select-Object -First 1
+        $json = Get-Content $manifest -Raw | ConvertFrom-Json
+        $package = $json.filename
+        $package_name = ($package -replace '-.*$', '')
+        $package_ext = [System.IO.Path]::GetExtension($package).TrimStart('.')
 
         cd ..
         git clone https://$env:PUBLIC_REPO_TOKEN@github.com/nCine/nCine-artifacts.git 2>&1>$null
+
         cd nCine-artifacts
         git checkout $env:DEPLOY_BRANCH; if (-not $?) { git checkout --orphan $env:DEPLOY_BRANCH }
         git reset
         git clean -f
-        git rm "$env:package_name-*.$env:package_ext"
+        git rm "$package_name-*.$package_ext"
+        Move-Item -Path ..\nCine-job-artifacts\$manifest -Destination . -Force
+        Move-Item -Path ..\nCine-job-artifacts\$package -Destination .
 
-        Move-Item -Path ..\nCine-build-${{ matrix.BuildType }}\$env:package_file_name.$env:package_ext -Destination .
-        git add "$env:package_file_name.$env:package_ext"
-
+        git add $manifest "$package"
         git commit --amend -m "$env:DEPLOY_MESSAGE"; if (-not $?) { git commit -m "$env:DEPLOY_MESSAGE" }
         git push --force; if (-not $?) { git push --set-upstream origin $env:DEPLOY_BRANCH }
