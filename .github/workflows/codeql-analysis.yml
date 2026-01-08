@@ -6,15 +6,14 @@ env:
 on: [push, workflow_dispatch]
 
 jobs:
-  analyze:
-    name: 'Analyze'
-    runs-on: 'ubuntu-24.04'
-
+  Analyze:
     strategy:
       fail-fast: false
 
+    runs-on: 'ubuntu-24.04'
+
     steps:
-    - name: 'Checkout Repository'
+    - name: 'Checkout Code'
       uses: actions/checkout@v4
 
     - name: 'Initialize CodeQL'
@@ -28,11 +27,11 @@ jobs:
         sudo apt-get install -y libgl1-mesa-dev libopengl-dev libegl1-mesa-dev libglvnd-dev libxext-dev libxrandr-dev libwayland-dev
 
         # Download nCine-libraries Artifacts and nCine-data
-        export OS=linux
+        OS=linux
         export CC=gcc
 
-        export LIBRARIES_BRANCH=`echo $LIBRARIES_BRANCH | sed 's/OS/'"$OS"'/'`
-        export LIBRARIES_BRANCH=`echo $LIBRARIES_BRANCH | sed 's/COMPILER/'"$CC"'/'`
+        LIBRARIES_BRANCH=`echo $LIBRARIES_BRANCH | sed 's/OS/'"$OS"'/'`
+        LIBRARIES_BRANCH=`echo $LIBRARIES_BRANCH | sed 's/COMPILER/'"$CC"'/'`
 
         cd ..
         git clone https://github.com/nCine/nCine-libraries-artifacts.git
@@ -53,7 +52,7 @@ jobs:
         git clone https://github.com/nCine/nCine-data.git
 
         # CMake Configuration and Make
-        export BuildType=Debug
+        BuildType=Debug
 
         cd nCine
         cmake -B ../nCine-build-$BuildType -D CMAKE_BUILD_TYPE=$BuildType -D NCINE_BUILD_UNIT_TESTS=ON -D CMAKE_PREFIX_PATH=$(pwd)/../nCine-external
