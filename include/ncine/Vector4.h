@@ -1,6 +1,7 @@
 #ifndef CLASS_NCINE_VECTOR4
 #define CLASS_NCINE_VECTOR4
 
+#include <cstddef>
 #include "Vector2.h"
 #include "Vector3.h"
 
