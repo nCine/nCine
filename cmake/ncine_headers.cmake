@@ -101,4 +101,5 @@ set(NCTL_HEADERS
 	${NCINE_ROOT}/include/nctl/UniquePtr.h
 	${NCINE_ROOT}/include/nctl/SharedPtr.h
 	${NCINE_ROOT}/include/nctl/BitSet.h
+	${NCINE_ROOT}/include/nctl/Optional.h
 )

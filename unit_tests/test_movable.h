@@ -10,7 +10,7 @@ namespace {
 class Movable
 {
   public:
-	static const unsigned int Size = 10;
+	static constexpr unsigned int Size = 10;
 	enum class Construction
 	{
 		INITIALIZED
