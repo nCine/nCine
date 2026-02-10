@@ -255,12 +255,9 @@ JobId JobSystem::createJobAsChild(JobId parentId, JobFunction function, const vo
 #endif
 	}
 
-	JobId jobId = jobPool_.allocateJob();
+	Job *job = nullptr;
+	JobId jobId = jobPool_.allocateJob(&job);
 	if (jobId == InvalidJobId)
-		return InvalidJobId;
-
-	Job *job = jobPool_.retrieveJob(jobId);
-	if (job == nullptr)
 		return InvalidJobId;
 
 	job->function = function;

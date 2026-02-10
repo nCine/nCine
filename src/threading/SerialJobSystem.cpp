@@ -69,12 +69,9 @@ JobId SerialJobSystem::createJobAsChild(JobId parentId, JobFunction function, co
 #endif
 	}
 
-	JobId jobId = allocateJob();
+	Job *job = nullptr;
+	JobId jobId = allocateJob(&job);
 	if (jobId == InvalidJobId)
-		return InvalidJobId;
-
-	Job *job = retrieveJob(jobId);
-	if (job == nullptr)
 		return InvalidJobId;
 
 	job->function = function;
@@ -278,7 +275,7 @@ uint16_t SerialJobSystem::continuationCount(JobId jobId)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-JobId SerialJobSystem::allocateJob()
+JobId SerialJobSystem::allocateJob(Job **newJob)
 {
 	if (freeList_.isEmpty() == false)
 	{
@@ -288,6 +285,8 @@ JobId SerialJobSystem::allocateJob()
 
 		JobId jobId = Job::makeJobId(index, job.generation);
 		FATAL_ASSERT_MSG(jobId != InvalidJobId, "Generated an invalid job id");
+		if (newJob != nullptr)
+			*newJob = &job;
 
 		JOB_LOG_POOL_ALLOC(jobId, index, job.generation);
 		theJobStatistics().jobPoolStatsMut().incrementJobsAllocated();

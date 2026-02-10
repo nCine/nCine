@@ -16,7 +16,7 @@ JobPool::JobPool()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-JobId JobPool::allocateJob()
+JobId JobPool::allocateJob(Job **newJob)
 {
 	FATAL_ASSERT(numThreads_ > 0);
 	const unsigned char threadIndex = IJobSystem::threadIndex();
@@ -30,6 +30,8 @@ JobId JobPool::allocateJob()
 
 		JobId jobId = Job::makeJobId(index, job.generation);
 		FATAL_ASSERT_MSG(jobId != InvalidJobId, "Generated an invalid job id");
+		if (newJob != nullptr)
+			*newJob = &job;
 
 		JOB_LOG_POOL_ALLOC(jobId, index, job.generation);
 		theJobStatistics().jobPoolStatsMut().incrementJobsAllocated();
@@ -58,7 +60,7 @@ JobId JobPool::allocateJob()
 	}
 
 	// Retry allocation (now cache has items)
-	return allocateJob();
+	return allocateJob(newJob);
 }
 
 void JobPool::freeJob(JobId jobId)

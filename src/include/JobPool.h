@@ -13,8 +13,11 @@ class JobPool
   public:
 	JobPool();
 
+	/// Allocates a job from the pool and sets it in the parameter passed, returns `InvalidJobId` if none available
+	JobId allocateJob(Job **newJob);
+
 	/// Allocates a job from the pool, returns `InvalidJobId` if none available
-	JobId allocateJob();
+	inline JobId allocateJob() { return allocateJob(nullptr); }
 
 	/// Frees a job back to the pool
 	void freeJob(JobId jobId);
