@@ -40,7 +40,7 @@ class SerialJobSystem : public IJobSystem
 	JobId jobQueue_[MaxNumJobs];
 
 	/// Allocates a job from the pool, returns `InvalidJobId` if none available
-	JobId allocateJob();
+	JobId allocateJob(Job **newJob);
 	/// Frees a job back to the pool
 	void freeJob(JobId jobId);
 	/// Accesses the `Job` structure pointer from `JobId`
