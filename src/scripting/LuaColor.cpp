@@ -2,7 +2,7 @@
 #include "common_headers.h"
 
 #include "LuaColor.h"
-#include "LuaColorUtils.h"
+#include "LuaColorfUtils.h"
 #include "LuaUtils.h"
 #include "LuaDebug.h"
 #include "Colorf.h"
@@ -50,14 +50,14 @@ void LuaColor::exposeConstants(lua_State *L)
 {
 	lua_createtable(L, 0, 8);
 
-	LuaColorUtils::pushField(L, LuaNames::Color::BLACK, Colorf::Black);
-	LuaColorUtils::pushField(L, LuaNames::Color::WHITE, Colorf::White);
-	LuaColorUtils::pushField(L, LuaNames::Color::RED, Colorf::Red);
-	LuaColorUtils::pushField(L, LuaNames::Color::GREEN, Colorf::Green);
-	LuaColorUtils::pushField(L, LuaNames::Color::BLUE, Colorf::Blue);
-	LuaColorUtils::pushField(L, LuaNames::Color::YELLOW, Colorf::Yellow);
-	LuaColorUtils::pushField(L, LuaNames::Color::MAGENTA, Colorf::Magenta);
-	LuaColorUtils::pushField(L, LuaNames::Color::CYAN, Colorf::Cyan);
+	LuaColorfUtils::pushField(L, LuaNames::Color::BLACK, Colorf::Black);
+	LuaColorfUtils::pushField(L, LuaNames::Color::WHITE, Colorf::White);
+	LuaColorfUtils::pushField(L, LuaNames::Color::RED, Colorf::Red);
+	LuaColorfUtils::pushField(L, LuaNames::Color::GREEN, Colorf::Green);
+	LuaColorfUtils::pushField(L, LuaNames::Color::BLUE, Colorf::Blue);
+	LuaColorfUtils::pushField(L, LuaNames::Color::YELLOW, Colorf::Yellow);
+	LuaColorfUtils::pushField(L, LuaNames::Color::MAGENTA, Colorf::Magenta);
+	LuaColorfUtils::pushField(L, LuaNames::Color::CYAN, Colorf::Cyan);
 
 	lua_setfield(L, -2, LuaNames::Color::Colors);
 }
@@ -74,7 +74,7 @@ int LuaColor::create(lua_State *L)
 	const float a = LuaUtils::retrieve<float>(L, -1);
 	const Colorf color(r, g, b, a);
 
-	LuaColorUtils::push(L, color);
+	LuaColorfUtils::push(L, color);
 
 	return 1;
 }
@@ -86,9 +86,9 @@ int LuaColor::add(lua_State *L)
 
 	if (lua_istable(L, -2) && lua_istable(L, -1))
 	{
-		second = LuaColorUtils::retrieveTable(L, -1);
+		second = LuaColorfUtils::retrieveTable(L, -1);
 		lua_pop(L, 1);
-		first = LuaColorUtils::retrieveTable(L, -1);
+		first = LuaColorfUtils::retrieveTable(L, -1);
 		lua_pop(L, 1);
 	}
 	else
@@ -96,7 +96,7 @@ int LuaColor::add(lua_State *L)
 
 	first += second;
 
-	LuaColorUtils::push(L, first);
+	LuaColorfUtils::push(L, first);
 
 	return 1;
 }
@@ -108,9 +108,9 @@ int LuaColor::subtract(lua_State *L)
 
 	if (lua_istable(L, -2) && lua_istable(L, -1))
 	{
-		second = LuaColorUtils::retrieveTable(L, -1);
+		second = LuaColorfUtils::retrieveTable(L, -1);
 		lua_pop(L, 1);
-		first = LuaColorUtils::retrieveTable(L, -1);
+		first = LuaColorfUtils::retrieveTable(L, -1);
 		lua_pop(L, 1);
 	}
 	else
@@ -118,7 +118,7 @@ int LuaColor::subtract(lua_State *L)
 
 	first -= second;
 
-	LuaColorUtils::push(L, first);
+	LuaColorfUtils::push(L, first);
 
 	return 1;
 }
@@ -135,19 +135,19 @@ int LuaColor::multiply(lua_State *L)
 	else if (lua_isnumber(L, -2) && lua_istable(L, -1))
 	{
 		scalar = LuaUtils::retrieve<float>(L, -2);
-		first = LuaColorUtils::retrieveTable(L, -1);
+		first = LuaColorfUtils::retrieveTable(L, -1);
 	}
 	else if (lua_istable(L, -2) && lua_isnumber(L, -1))
 	{
 		scalar = LuaUtils::retrieve<float>(L, -1);
 		lua_pop(L, 1);
-		first = LuaColorUtils::retrieveTable(L, -1);
+		first = LuaColorfUtils::retrieveTable(L, -1);
 	}
 	else if (lua_istable(L, -2) && lua_istable(L, -1))
 	{
-		second = LuaColorUtils::retrieveTable(L, -1);
+		second = LuaColorfUtils::retrieveTable(L, -1);
 		lua_pop(L, 1);
-		first = LuaColorUtils::retrieveTable(L, -1);
+		first = LuaColorfUtils::retrieveTable(L, -1);
 		lua_pop(L, 1);
 		scalarOp = false;
 	}
@@ -159,7 +159,7 @@ int LuaColor::multiply(lua_State *L)
 	else
 		first *= second;
 
-	LuaColorUtils::push(L, first);
+	LuaColorfUtils::push(L, first);
 
 	return 1;
 }

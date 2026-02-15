@@ -1,7 +1,7 @@
 #include "LuaTexture.h"
 #include "LuaUntrackedUserData.h"
 #include "LuaClassTracker.h"
-#include "LuaColorUtils.h"
+#include "LuaColorfUtils.h"
 #include "LuaVector2Utils.h"
 #include "LuaUtils.h"
 #include "Texture.h"
@@ -351,7 +351,7 @@ int LuaTexture::chromaKeyColor(lua_State *L)
 	Texture *texture = LuaUntrackedUserData<Texture>::retrieve(L, -1);
 
 	if (texture)
-		LuaColorUtils::push(L, Colorf(texture->chromaKeyColor()));
+		LuaColorfUtils::push(L, Colorf(texture->chromaKeyColor()));
 	else
 		LuaUtils::pushNil(L);
 
@@ -372,7 +372,7 @@ int LuaTexture::setChromaKeyEnabled(lua_State *L)
 int LuaTexture::setChromaKeyColor(lua_State *L)
 {
 	int colorIndex = 0;
-	const Colorf chromaKeyColor = LuaColorUtils::retrieve(L, -1, colorIndex);
+	const Colorf chromaKeyColor = LuaColorfUtils::retrieve(L, -1, colorIndex);
 	Texture *texture = LuaUntrackedUserData<Texture>::retrieve(L, colorIndex - 1);
 
 	if (texture)
