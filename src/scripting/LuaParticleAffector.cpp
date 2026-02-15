@@ -1,8 +1,10 @@
+#define NCINE_INCLUDE_LUA
+#include "common_headers.h"
+
 #include "LuaParticleAffector.h"
 #include "LuaUntrackedUserData.h"
-#include "LuaClassTracker.h"
 #include "LuaVector2Utils.h"
-#include "LuaColorUtils.h"
+#include "LuaColorfUtils.h"
 #include "ParticleAffectors.h"
 
 namespace ncine {
@@ -105,7 +107,7 @@ namespace {
 
 			LuaUtils::push(L, step.age);
 			lua_rawseti(L, -2, 1); // Lua arrays start from index 1
-			LuaColorUtils::push(L, step.color);
+			LuaColorfUtils::push(L, step.color);
 			lua_rawseti(L, -2, 2);
 
 			lua_rawseti(L, -2, i + 1); // Lua arrays start from index 1
@@ -340,7 +342,7 @@ int LuaParticleAffector::velocitySteps(lua_State *L)
 int LuaParticleAffector::addColorStep(lua_State *L)
 {
 	int colorIndex = 0;
-	const Colorf color = LuaColorUtils::retrieve(L, -1, colorIndex);
+	const Colorf color = LuaColorfUtils::retrieve(L, -1, colorIndex);
 	ParticleAffector *affector = LuaUntrackedUserData<ParticleAffector>::retrieve(L, colorIndex - 2);
 	const float age = LuaUtils::retrieve<float>(L, colorIndex - 1);
 

@@ -261,6 +261,7 @@ if(LUA_FOUND)
 		${NCINE_ROOT}/include/ncine/LuaVector3Utils.h
 		${NCINE_ROOT}/include/ncine/LuaVector4Utils.h
 		${NCINE_ROOT}/include/ncine/LuaColorUtils.h
+		${NCINE_ROOT}/include/ncine/LuaColorfUtils.h
 	)
 
 	list(APPEND PRIVATE_HEADERS
@@ -274,6 +275,7 @@ if(LUA_FOUND)
 		${NCINE_ROOT}/src/scripting/LuaDebug.cpp
 		${NCINE_ROOT}/src/scripting/LuaStatistics.cpp
 		${NCINE_ROOT}/src/scripting/LuaColorUtils.cpp
+		${NCINE_ROOT}/src/scripting/LuaColorfUtils.cpp
 	)
 
 	if(NCINE_WITH_SCRIPTING_API)

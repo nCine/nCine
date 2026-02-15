@@ -4,10 +4,8 @@
 #include <ncine/ParticleSystem.h>
 #include <ncine/ParticleInitializer.h>
 #include <ncine/LuaIAppEventHandler.h>
-#include <ncine/LuaIInputEventHandler.h>
 #include <ncine/LuaUntrackedUserData.h>
 #include <ncine/LuaUtils.h>
-#include <ncine/LuaColorUtils.h>
 #include "apptest_datapath.h"
 
 namespace {

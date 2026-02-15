@@ -1,7 +1,7 @@
 #include "LuaSceneNode.h"
 #include "LuaUntrackedUserData.h"
 #include "LuaClassTracker.h"
-#include "LuaColorUtils.h"
+#include "LuaColorfUtils.h"
 #include "LuaVector2Utils.h"
 #include "SceneNode.h"
 
@@ -565,7 +565,7 @@ int LuaSceneNode::color(lua_State *L)
 	const Colorf nodeColor(node->color());
 
 	if (node)
-		LuaColorUtils::push(L, nodeColor);
+		LuaColorfUtils::push(L, nodeColor);
 	else
 		LuaUtils::pushNil(L);
 
@@ -575,7 +575,7 @@ int LuaSceneNode::color(lua_State *L)
 int LuaSceneNode::setColor(lua_State *L)
 {
 	int colorIndex = 0;
-	const Colorf nodeColor = LuaColorUtils::retrieve(L, -1, colorIndex);
+	const Colorf nodeColor = LuaColorfUtils::retrieve(L, -1, colorIndex);
 	SceneNode *node = LuaUntrackedUserData<SceneNode>::retrieve(L, colorIndex - 1);
 
 	if (node)

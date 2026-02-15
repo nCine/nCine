@@ -1,10 +1,13 @@
+#define NCINE_INCLUDE_LUA
+#include "common_headers.h"
+
 #include "LuaParticleSystem.h"
 #include "LuaUntrackedUserData.h"
 #include "LuaClassTracker.h"
 #include "LuaSceneNode.h"
 #include "LuaRectUtils.h"
 #include "LuaVector2Utils.h"
-#include "LuaColorUtils.h"
+#include "LuaColorfUtils.h"
 #include "ParticleSystem.h"
 #include "ParticleInitializer.h"
 
@@ -143,7 +146,7 @@ namespace {
 			const float age = LuaUtils::retrieve<float>(L, -1);
 			lua_pop(L, 1);
 			lua_rawgeti(L, -1, 2);
-			const Colorf color = LuaColorUtils::retrieveTable(L, -1);
+			const Colorf color = LuaColorfUtils::retrieveTable(L, -1);
 			lua_pop(L, 1);
 
 			lua_pop(L, 1);

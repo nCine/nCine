@@ -2,7 +2,7 @@
 #include "LuaUntrackedUserData.h"
 #include "LuaClassTracker.h"
 #include "LuaRectUtils.h"
-#include "LuaColorUtils.h"
+#include "LuaColorfUtils.h"
 #include "LuaUtils.h"
 #include "Viewport.h"
 
@@ -390,7 +390,7 @@ int LuaViewport::clearColor(lua_State *L)
 	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, -1);
 
 	if (viewport)
-		LuaColorUtils::push(L, viewport->clearColor());
+		LuaColorfUtils::push(L, viewport->clearColor());
 	else
 		LuaUtils::pushNil(L);
 
@@ -400,7 +400,7 @@ int LuaViewport::clearColor(lua_State *L)
 int LuaViewport::setClearColor(lua_State *L)
 {
 	int colorIndex = 0;
-	const Colorf clearColor = LuaColorUtils::retrieve(L, -1, colorIndex);
+	const Colorf clearColor = LuaColorfUtils::retrieve(L, -1, colorIndex);
 	Viewport *viewport = LuaUntrackedUserData<Viewport>::retrieve(L, colorIndex - 1);
 
 	if (viewport)

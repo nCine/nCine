@@ -4,7 +4,7 @@
 #include "LuaVector2Utils.h"
 #include "LuaVector3Utils.h"
 #include "LuaVector4Utils.h"
-#include "LuaColorUtils.h"
+#include "LuaColorfUtils.h"
 #include "LuaUtils.h"
 #include "ShaderState.h"
 #include "DrawableNode.h"
@@ -468,7 +468,7 @@ int LuaShaderState::setUniformFloatColor(lua_State *L)
 	ShaderState *shaderState = LuaUntrackedUserData<ShaderState>::retrieve(L, -4);
 	const char *blockName = LuaUtils::retrieve<const char *>(L, -3);
 	const char *name = LuaUtils::retrieve<const char *>(L, -2);
-	const Colorf color = LuaColorUtils::retrieveTable(L, -1);
+	const Colorf color = LuaColorfUtils::retrieveTable(L, -1);
 
 	bool uniformHasBeenSet = false;
 	if (shaderState)

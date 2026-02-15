@@ -1,6 +1,6 @@
 #include "LuaColorUtils.h"
 #include "LuaUtils.h"
-#include "Colorf.h"
+#include "Color.h"
 
 namespace ncine {
 
@@ -16,7 +16,7 @@ namespace Color {
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void LuaColorUtils::push(lua_State *L, const Colorf &color)
+void LuaColorUtils::push(lua_State *L, const Color &color)
 {
 	LuaUtils::createTable(L, 0, 4);
 	LuaUtils::pushField(L, LuaNames::Color::r, color.r());
@@ -25,13 +25,13 @@ void LuaColorUtils::push(lua_State *L, const Colorf &color)
 	LuaUtils::pushField(L, LuaNames::Color::a, color.a());
 }
 
-void LuaColorUtils::pushField(lua_State *L, const char *name, const Colorf &color)
+void LuaColorUtils::pushField(lua_State *L, const char *name, const Color &color)
 {
 	push(L, color);
 	LuaUtils::setField(L, -2, name);
 }
 
-Colorf LuaColorUtils::retrieve(lua_State *L, int index, int &newIndex)
+Color LuaColorUtils::retrieve(lua_State *L, int index, int &newIndex)
 {
 	if (LuaUtils::isTable(L, index))
 	{
@@ -45,80 +45,80 @@ Colorf LuaColorUtils::retrieve(lua_State *L, int index, int &newIndex)
 	}
 }
 
-Colorf LuaColorUtils::retrieveTable(lua_State *L, int index)
+Color LuaColorUtils::retrieveTable(lua_State *L, int index)
 {
-	const float red = LuaUtils::retrieveField<float>(L, index, LuaNames::Color::r);
-	const float green = LuaUtils::retrieveField<float>(L, index, LuaNames::Color::g);
-	const float blue = LuaUtils::retrieveField<float>(L, index, LuaNames::Color::b);
-	const float alpha = LuaUtils::retrieveField<float>(L, index, LuaNames::Color::a);
-	return Colorf(red, green, blue, alpha);
+	const unsigned char red = LuaUtils::retrieveField<uint32_t>(L, index, LuaNames::Color::r);
+	const unsigned char green = LuaUtils::retrieveField<uint32_t>(L, index, LuaNames::Color::g);
+	const unsigned char blue = LuaUtils::retrieveField<uint32_t>(L, index, LuaNames::Color::b);
+	const unsigned char alpha = LuaUtils::retrieveField<uint32_t>(L, index, LuaNames::Color::a);
+	return Color(red, green, blue, alpha);
 }
 
-Colorf LuaColorUtils::retrieveArray(lua_State *L, int index)
+Color LuaColorUtils::retrieveArray(lua_State *L, int index)
 {
 	LuaUtils::rawGeti(L, index, 1);
-	const float red = LuaUtils::retrieve<float>(L, -1);
+	const unsigned char red = LuaUtils::retrieve<uint32_t>(L, -1);
 	LuaUtils::pop(L);
 
 	LuaUtils::rawGeti(L, index, 2);
-	const float green = LuaUtils::retrieve<float>(L, -1);
+	const unsigned char green = LuaUtils::retrieve<uint32_t>(L, -1);
 	LuaUtils::pop(L);
 
 	LuaUtils::rawGeti(L, index, 3);
-	const float blue = LuaUtils::retrieve<float>(L, -1);
+	const unsigned char blue = LuaUtils::retrieve<uint32_t>(L, -1);
 	LuaUtils::pop(L);
 
 	LuaUtils::rawGeti(L, index, 4);
-	const float alpha = LuaUtils::retrieve<float>(L, -1);
+	const unsigned char alpha = LuaUtils::retrieve<uint32_t>(L, -1);
 	LuaUtils::pop(L);
 
-	return Colorf(red, green, blue, alpha);
+	return Color(red, green, blue, alpha);
 }
 
-Colorf LuaColorUtils::retrieveParams(lua_State *L, int index)
+Color LuaColorUtils::retrieveParams(lua_State *L, int index)
 {
-	const float red = LuaUtils::retrieve<float>(L, index);
-	const float green = LuaUtils::retrieve<float>(L, index + 1);
-	const float blue = LuaUtils::retrieve<float>(L, index + 2);
-	const float alpha = LuaUtils::retrieve<float>(L, index + 3);
-	return Colorf(red, green, blue, alpha);
+	const unsigned char red = LuaUtils::retrieve<uint32_t>(L, index);
+	const unsigned char green = LuaUtils::retrieve<uint32_t>(L, index + 1);
+	const unsigned char blue = LuaUtils::retrieve<uint32_t>(L, index + 2);
+	const unsigned char alpha = LuaUtils::retrieve<uint32_t>(L, index + 3);
+	return Color(red, green, blue, alpha);
 }
 
-Colorf LuaColorUtils::retrieveTableField(lua_State *L, int index, const char *name)
+Color LuaColorUtils::retrieveTableField(lua_State *L, int index, const char *name)
 {
 	LuaUtils::retrieveFieldTable(L, index, name);
-	const float red = LuaUtils::retrieveField<float>(L, -1, LuaNames::Color::r);
-	const float green = LuaUtils::retrieveField<float>(L, -1, LuaNames::Color::g);
-	const float blue = LuaUtils::retrieveField<float>(L, -1, LuaNames::Color::b);
-	const float alpha = LuaUtils::retrieveField<float>(L, -1, LuaNames::Color::a);
+	const unsigned char red = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::Color::r);
+	const unsigned char green = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::Color::g);
+	const unsigned char blue = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::Color::b);
+	const unsigned char alpha = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::Color::a);
 	LuaUtils::pop(L);
 
-	return Colorf(red, green, blue, alpha);
+	return Color(red, green, blue, alpha);
 }
 
-Colorf LuaColorUtils::retrieveArrayField(lua_State *L, int index, const char *name)
+Color LuaColorUtils::retrieveArrayField(lua_State *L, int index, const char *name)
 {
 	LuaUtils::retrieveFieldTable(L, index, name);
 
 	LuaUtils::rawGeti(L, -1, 1);
-	const float red = LuaUtils::retrieve<float>(L, -1);
+	const unsigned char red = LuaUtils::retrieve<uint32_t>(L, -1);
 	LuaUtils::pop(L);
 
 	LuaUtils::rawGeti(L, -1, 2);
-	const float green = LuaUtils::retrieve<float>(L, -1);
+	const unsigned char green = LuaUtils::retrieve<uint32_t>(L, -1);
 	LuaUtils::pop(L);
 
 	LuaUtils::rawGeti(L, -1, 3);
-	const float blue = LuaUtils::retrieve<float>(L, -1);
+	const unsigned char blue = LuaUtils::retrieve<uint32_t>(L, -1);
 	LuaUtils::pop(L);
 
 	LuaUtils::rawGeti(L, -1, 4);
-	const float alpha = LuaUtils::retrieve<float>(L, -1);
+	const unsigned char alpha = LuaUtils::retrieve<uint32_t>(L, -1);
 	LuaUtils::pop(L);
 
 	LuaUtils::pop(L);
 
-	return Colorf(red, green, blue, alpha);
+	return Color(red, green, blue, alpha);
 }
 
 }
