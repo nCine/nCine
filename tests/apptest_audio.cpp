@@ -295,7 +295,7 @@ bool eaxReverbPropertiesGui()
 	if (valueChanged)
 		selectedEfxPreset = 0;
 
-	if (ImGui::Combo("EFX Preset", &selectedEfxPreset, EfxPresetLabels, IM_ARRAYSIZE(EfxPresetLabels)))
+	if (ImGui::Combo("EFX Preset", &selectedEfxPreset, EfxPresetLabels, IM_COUNTOF(EfxPresetLabels)))
 	{
 		if (selectedEfxPreset > 0)
 		{
@@ -1060,7 +1060,7 @@ void MyEventHandler::onFrameStart()
 				{
 					bool valueChanged = false;
 
-					if (ImGui::Combo("Effect", &selectedEffectType, EffectTypeLabels, IM_ARRAYSIZE(EffectTypeLabels)))
+					if (ImGui::Combo("Effect", &selectedEffectType, EffectTypeLabels, IM_COUNTOF(EffectTypeLabels)))
 						valueChanged = true;
 
 					switch (selectedEffectType)
@@ -1122,7 +1122,7 @@ void MyEventHandler::onFrameStart()
 				{
 					bool valueChanged = false;
 
-					if (ImGui::Combo("Filter", &selectedFilterType, FilterTypeLabels, IM_ARRAYSIZE(FilterTypeLabels)))
+					if (ImGui::Combo("Filter", &selectedFilterType, FilterTypeLabels, IM_COUNTOF(FilterTypeLabels)))
 						valueChanged = true;
 
 					switch (selectedFilterType)

@@ -385,7 +385,7 @@ void MyEventHandler::onFrameStart()
 						const char *formats[] = { "Png", "WebP" };
 						ImGui::SameLine();
 						ImGui::PushItemWidth(ImGui::GetFontSize() * 5.0f);
-						ImGui::Combo("##SaveFormat", &selectedFormat, formats, IM_ARRAYSIZE(formats));
+						ImGui::Combo("##SaveFormat", &selectedFormat, formats, IM_COUNTOF(formats));
 						ImGui::PopItemWidth();
 	#endif
 						nc::fs::fixExtension(saveTexelsFilename, extensions[selectedFormat]);
@@ -444,7 +444,7 @@ void MyEventHandler::onFrameStart()
 
 						const char *formats[] = { "R", "RG", "RGB", "RGBA" };
 						static int selectedFormat = 3;
-						ImGui::Combo("Format", &selectedFormat, formats, IM_ARRAYSIZE(formats));
+						ImGui::Combo("Format", &selectedFormat, formats, IM_COUNTOF(formats));
 
 						if (ImGui::Button("Init"))
 						{
@@ -639,11 +639,11 @@ void MyEventHandler::onFrameStart()
 					const char *frequencyStrings[3] = { "44100 Hz", "22050 Hz", "11025 Hz" };
 					static const int frequencies[3] = { 44100, 22050, 11025 };
 					static int selectedFrequency = 0;
-					ImGui::Combo("Frequency", &selectedFrequency, frequencyStrings, IM_ARRAYSIZE(frequencyStrings));
+					ImGui::Combo("Frequency", &selectedFrequency, frequencyStrings, IM_COUNTOF(frequencyStrings));
 
 					const char *formats[4] = { "Mono 8bit", "Stereo 8bit", "Mono 16bit", "Stereo 16bit" };
 					static int selectedFormat = 0;
-					ImGui::Combo("Format", &selectedFormat, formats, IM_ARRAYSIZE(formats));
+					ImGui::Combo("Format", &selectedFormat, formats, IM_COUNTOF(formats));
 
 					if (ImGui::Button("Init Buffer"))
 						audioBuffer_->init("Initialized", nc::AudioBuffer::Format(selectedFormat), frequencies[selectedFrequency]);

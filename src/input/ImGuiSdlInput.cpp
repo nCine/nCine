@@ -1,7 +1,6 @@
 // Based on imgui/backends/imgui_impl_sdl.cpp
 
 #include "ImGuiSdlInput.h"
-#include "ImGuiJoyMappedInput.h"
 
 // SDL
 #include <SDL.h>
@@ -248,7 +247,7 @@ SDL_Cursor *ImGuiSdlInput::mouseCursors_[ImGuiMouseCursor_COUNT] = {};
 SDL_Cursor *ImGuiSdlInput::mouseLastCursor_ = nullptr;
 unsigned int ImGuiSdlInput::mouseLastLeaveFrame_ = 0;
 bool ImGuiSdlInput::mouseCanUseGlobalState_ = false;
-bool ImGuiSdlInput::mouseCanUseCapture_ = false;
+ImGuiSdlInput::MouseCaptureMode ImGuiSdlInput::mouseCaptureMode_ = MouseCaptureMode::DISABLED;
 
 ImVector<SDL_GameController *> ImGuiSdlInput::gamepads_;
 ImGuiSdlInput::GamepadMode ImGuiSdlInput::gamepadMode_ = ImGuiSdlInput::GamepadMode::AUTO_FIRST;
@@ -266,28 +265,7 @@ void ImGuiSdlInput::init(SDL_Window *window)
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-
-	// Obtain compiled and runtime versions
-	SDL_version ver_compiled;
-	SDL_version ver_runtime;
-	SDL_VERSION(&ver_compiled);
-	SDL_GetVersion(&ver_runtime);
-
-	// Check and store if we are on a SDL backend that supports SDL_GetGlobalMouseState() and SDL_CaptureMouse()
-	// ("wayland" and "rpi" don't support it, but we chose to use a white-list instead of a black-list)
-#if SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE
-	const char *sdlBackend = SDL_GetCurrentVideoDriver();
-	const char *captureAndGlobalStateWhitelist[] = { "windows", "cocoa", "x11", "DIVE", "VMAN" };
-	for (const char *item : captureAndGlobalStateWhitelist)
-	{
-		if (strncmp(sdlBackend, item, strlen(item)) == 0)
-		{
-			mouseCanUseGlobalState_ = true;
-			mouseCanUseCapture_ = true;
-			break;
-		}
-	}
-#endif
+	//SDL_SetHint(SDL_HINT_EVENT_LOGGING, "2");
 
 	ImGuiIO &io = ImGui::GetIO();
 	// Setup backend capabilities flags
@@ -296,6 +274,24 @@ void ImGuiSdlInput::init(SDL_Window *window)
 	io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos; // We can honor io.WantSetMousePos requests (optional, rarely used)
 
 	window_ = window;
+
+	// Check and store if we are on a SDL backend that supports SDL_GetGlobalMouseState() and SDL_CaptureMouse()
+	// ("wayland" and "rpi" don't support it, but we chose to use a white-list instead of a black-list)
+	mouseCanUseGlobalState_ = false;
+	mouseCaptureMode_ = MouseCaptureMode::DISABLED;
+#if SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE
+	const char *sdlBackend = SDL_GetCurrentVideoDriver();
+	const char *captureAndGlobalStateWhitelist[] = { "windows", "cocoa", "x11", "DIVE", "VMAN" };
+	for (const char *item : captureAndGlobalStateWhitelist)
+	{
+		if (strncmp(sdlBackend, item, strlen(item)) == 0)
+		{
+			mouseCanUseGlobalState_ = true;
+			mouseCaptureMode_ = (strcmp(item, "x11") == 0) ? MouseCaptureMode::ENABLED_AFTER_DRAG : MouseCaptureMode::ENABLED;
+			break;
+		}
+	}
+#endif
 
 	ImGuiPlatformIO &platformIo = ImGui::GetPlatformIO();
 	platformIo.Platform_SetClipboardTextFn = setClipboardText;
@@ -514,7 +510,7 @@ bool ImGuiSdlInput::processEvent(const SDL_Event *event)
 				mouseLastLeaveFrame_ = ImGui::GetFrameCount() + 1;
 			if (windowEvent == SDL_WINDOWEVENT_FOCUS_GAINED)
 				io.AddFocusEvent(true);
-			else if (event->window.event == SDL_WINDOWEVENT_FOCUS_LOST)
+			else if (windowEvent == SDL_WINDOWEVENT_FOCUS_LOST)
 				io.AddFocusEvent(false);
 			return true;
 		}
@@ -536,7 +532,10 @@ const char *ImGuiSdlInput::clipboardText(ImGuiContext *context)
 {
 	if (clipboardTextData_)
 		SDL_free(clipboardTextData_);
-	clipboardTextData_ = SDL_GetClipboardText();
+	if (SDL_HasClipboardText())
+		clipboardTextData_ = SDL_GetClipboardText();
+	else
+		clipboardTextData_ = nullptr;
 	return clipboardTextData_;
 }
 
@@ -548,7 +547,11 @@ void ImGuiSdlInput::updateMouseData()
 #if SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE
 	// - SDL_CaptureMouse() let the OS know e.g. that our drags can extend outside of parent boundaries (we want updated position) and shouldn't trigger other operations outside.
 	// - Debuggers under Linux tends to leave captured mouse on break, which may be very inconvenient, so to mitigate the issue we wait until mouse has moved to begin capture.
-	if (mouseCanUseCapture_)
+	if (mouseCaptureMode_ == MouseCaptureMode::ENABLED)
+	{
+		SDL_CaptureMouse((mouseButtonsDown_ != 0) ? SDL_TRUE : SDL_FALSE);
+	}
+	else if (mouseCaptureMode_ == MouseCaptureMode::ENABLED_AFTER_DRAG)
 	{
 		bool wantCapture = false;
 		for (int buttonN = 0; buttonN < ImGuiMouseButton_COUNT && !wantCapture; buttonN++)
@@ -726,6 +729,13 @@ void ImGuiSdlInput::updateGamepads()
 	updateGamepadAnalog(gamepads_, io, ImGuiKey_GamepadRStickUp,    SDL_CONTROLLER_AXIS_RIGHTY, -thumbDeadZone, -32768);
 	updateGamepadAnalog(gamepads_, io, ImGuiKey_GamepadRStickDown,  SDL_CONTROLLER_AXIS_RIGHTY, +thumbDeadZone, +32767);
 	// clang-format on
+}
+
+void ImGuiSdlInput::setMouseCaptureMode(MouseCaptureMode mode)
+{
+	if (mode == MouseCaptureMode::DISABLED && mouseCaptureMode_ != MouseCaptureMode::DISABLED)
+		SDL_CaptureMouse(SDL_FALSE);
+	mouseCaptureMode_ = mode;
 }
 
 void ImGuiSdlInput::getWindowSizeAndFramebufferScale(SDL_Window *window, SDL_Renderer *renderer, ImVec2 *outSize, ImVec2 *outFramebufferScale)

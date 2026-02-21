@@ -286,7 +286,7 @@ void MyEventHandler::onFrameStart()
 			ImGui::Separator();
 			if (ImGui::SliderInt("Blur passes", &numBlurPasses_, 1, 3, "%d", ImGuiSliderFlags_AlwaysClamp))
 				setupViewport();
-			if (ImGui::Combo("Viewport setup", &currentViewportSetup_, ViewportSetupLabels, IM_ARRAYSIZE(ViewportSetupLabels)))
+			if (ImGui::Combo("Viewport setup", &currentViewportSetup_, ViewportSetupLabels, IM_COUNTOF(ViewportSetupLabels)))
 				setupViewport();
 		}
 		ImGui::End();

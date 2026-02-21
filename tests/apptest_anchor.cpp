@@ -139,7 +139,7 @@ void MyEventHandler::onFrameStart()
 		ImGui::SetNextWindowPos(ImVec2(20.0f, 100.0f), ImGuiCond_FirstUseEver);
 		if (ImGui::Begin("apptest_anchor", &showImGui))
 		{
-			if (ImGui::Combo("Type", &currentType_, TypeLabels, IM_ARRAYSIZE(TypeLabels)))
+			if (ImGui::Combo("Type", &currentType_, TypeLabels, IM_COUNTOF(TypeLabels)))
 			{
 				if (currentType_ == Type::PARTICLE_SYSTEM)
 					lastEmissionTime_ = nc::TimeStamp::now();
@@ -148,7 +148,7 @@ void MyEventHandler::onFrameStart()
 			ImGui::Separator();
 			ImGui::SliderFloat2("Anchor", anchorPoint_.data(), 0.0f, 1.0f);
 			static int currentAnchorSelection = 0;
-			if (ImGui::Combo("Presets", &currentAnchorSelection, AnchorPoints, IM_ARRAYSIZE(AnchorPoints)))
+			if (ImGui::Combo("Presets", &currentAnchorSelection, AnchorPoints, IM_COUNTOF(AnchorPoints)))
 			{
 				switch (currentAnchorSelection)
 				{
@@ -211,7 +211,7 @@ void MyEventHandler::onFrameStart()
 			ImGui::Separator();
 			ImGui::ColorEdit4("Color", color_.data());
 			static int currentBlendingSelection = 1;
-			if (ImGui::Combo("Blending", &currentBlendingSelection, BlendingPresets, IM_ARRAYSIZE(BlendingPresets)))
+			if (ImGui::Combo("Blending", &currentBlendingSelection, BlendingPresets, IM_COUNTOF(BlendingPresets)))
 				blendingPreset_ = static_cast<nc::DrawableNode::BlendingPreset>(currentBlendingSelection);
 			if (currentType_ != Type::PARTICLE_SYSTEM)
 			{

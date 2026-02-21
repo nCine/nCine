@@ -104,7 +104,7 @@ void MyEventHandler::onFrameStart()
 		ImGui::SliderInt("Buffer Size", &bufferSize, 16, 4096);
 
 		static int currentComboAllocatorType = 0;
-		ImGui::Combo("Type", &currentComboAllocatorType, typeStrings, IM_ARRAYSIZE(typeStrings));
+		ImGui::Combo("Type", &currentComboAllocatorType, typeStrings, IM_COUNTOF(typeStrings));
 		AllocatorType allocatorType = static_cast<AllocatorType>(currentComboAllocatorType);
 
 		static int elementSize = 128;
@@ -443,7 +443,7 @@ void MyEventHandler::onFrameStart()
 			static int currentComboFitStrategy = 0;
 			currentComboFitStrategy = static_cast<int>(flAlloc.fitStrategy());
 			ImGui::PushItemWidth(ImGui::GetFontSize() * 8.0f);
-			ImGui::Combo("Fit Strategy", &currentComboFitStrategy, fitStrategyStrings, IM_ARRAYSIZE(fitStrategyStrings));
+			ImGui::Combo("Fit Strategy", &currentComboFitStrategy, fitStrategyStrings, IM_COUNTOF(fitStrategyStrings));
 			ImGui::PopItemWidth();
 			nctl::FreeListAllocator::FitStrategy fitStrategy = static_cast<nctl::FreeListAllocator::FitStrategy>(currentComboFitStrategy);
 			flAlloc.setFitStrategy(fitStrategy);

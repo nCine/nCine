@@ -3,10 +3,24 @@
 #include "ImGuiGlfwInput.h"
 #include "ImGuiJoyMappedInput.h"
 
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
-	#define GLFW_HAS_X11_OR_WAYLAND     1
+#if defined(__has_include)
+	#if !__has_include(<X11/Xlib.h>) || !__has_include(<X11/extensions/Xrandr.h>)
+		#define IMGUI_IMPL_GLFW_DISABLE_X11
+	#endif
+	#if !__has_include(<wayland-client.h>)
+		#define IMGUI_IMPL_GLFW_DISABLE_WAYLAND
+	#endif
+#endif
+
+#if !defined(IMGUI_IMPL_GLFW_DISABLE_X11) && (defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__))
+	#define GLFW_HAS_X11        1
 #else
-	#define GLFW_HAS_X11_OR_WAYLAND     0
+	#define GLFW_HAS_X11        0
+#endif
+#if !defined(IMGUI_IMPL_GLFW_DISABLE_WAYLAND) && (defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__))
+	#define GLFW_HAS_WAYLAND    1
+#else
+	#define GLFW_HAS_WAYLAND    0
 #endif
 #include <GLFW/glfw3.h>
 #ifdef _WIN32
@@ -20,7 +34,7 @@
 		#define GLFW_EXPOSE_NATIVE_COCOA
 	#endif
 	#include <GLFW/glfw3native.h>
-#elif GLFW_HAS_X11_OR_WAYLAND
+#elif GLFW_HAS_X11
 	#ifndef GLFW_EXPOSE_NATIVE_X11      // for glfwGetX11Display(), glfwGetX11Window() on Freedesktop (Linux, BSD, etc.)
 		#define GLFW_EXPOSE_NATIVE_X11
 	#endif
@@ -44,13 +58,13 @@
 
 // We gather version tests as define in order to easily see which features are version-dependent.
 #define GLFW_VERSION_COMBINED           (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 + GLFW_VERSION_REVISION)
+#define GLFW_HAS_CREATECURSOR (GLFW_VERSION_COMBINED >= 3100) // 3.1+ glfwCreateCursor()
 #define GLFW_HAS_PER_MONITOR_DPI        (GLFW_VERSION_COMBINED >= 3300) // 3.3+ glfwGetMonitorContentScale
 #ifdef GLFW_RESIZE_NESW_CURSOR          // Let's be nice to people who pulled GLFW between 2019-04-16 (3.4 define) and 2019-11-29 (cursors defines) // FIXME: Remove when GLFW 3.4 is released?
 #define GLFW_HAS_NEW_CURSORS            (GLFW_VERSION_COMBINED >= 3400) // 3.4+ GLFW_RESIZE_ALL_CURSOR, GLFW_RESIZE_NESW_CURSOR, GLFW_RESIZE_NWSE_CURSOR, GLFW_NOT_ALLOWED_CURSOR
 #else
 #define GLFW_HAS_NEW_CURSORS            (0)
 #endif
-#define GLFW_HAS_CREATECURSOR           (GLFW_VERSION_COMBINED >= 3100) // 3.1+ glfwCreateCursor()
 #define GLFW_HAS_GAMEPAD_API            (GLFW_VERSION_COMBINED >= 3300) // 3.3+ glfwGetGamepadState() new api
 #define GLFW_HAS_GETKEYNAME             (GLFW_VERSION_COMBINED >= 3200) // 3.2+ glfwGetKeyName()
 #define GLFW_HAS_GETERROR               (GLFW_VERSION_COMBINED >= 3300) // 3.3+ glfwGetError()
@@ -81,10 +95,10 @@ namespace {
 		return glfwGetPlatform() == GLFW_PLATFORM_WAYLAND;
 #else
 		const char *version = glfwGetVersionString();
-		if (strstr(version, "Wayland") == NULL) // e.g. Ubuntu 22.04 ships with GLFW 3.3.6 compiled without Wayland
+		if (strstr(version, "Wayland") == nullptr) // e.g. Ubuntu 22.04 ships with GLFW 3.3.6 compiled without Wayland
 			return false;
 	#ifdef GLFW_EXPOSE_NATIVE_X11
-		if (glfwGetX11Display() != NULL)
+		if (glfwGetX11Display() != nullptr)
 			return false;
 	#endif
 		return true;
@@ -250,7 +264,7 @@ namespace {
 		{
 			const char charNames[] = "`-=[]\\,;\'./";
 			const int charKeys[] = { GLFW_KEY_GRAVE_ACCENT, GLFW_KEY_MINUS, GLFW_KEY_EQUAL, GLFW_KEY_LEFT_BRACKET, GLFW_KEY_RIGHT_BRACKET, GLFW_KEY_BACKSLASH, GLFW_KEY_COMMA, GLFW_KEY_SEMICOLON, GLFW_KEY_APOSTROPHE, GLFW_KEY_PERIOD, GLFW_KEY_SLASH, 0 };
-			IM_ASSERT(IM_ARRAYSIZE(charNames) == IM_ARRAYSIZE(charKeys));
+			IM_ASSERT(IM_COUNTOF(charNames) == IM_COUNTOF(charKeys));
 			if (keyName[0] >= '0' && keyName[0] <= '9')
 				key = GLFW_KEY_0 + (keyName[0] - '0');
 			else if (keyName[0] >= 'A' && keyName[0] <= 'Z')
@@ -334,6 +348,7 @@ GLFWwindow *ImGuiGlfwInput::window_ = nullptr;
 GLFWwindow *ImGuiGlfwInput::mouseWindow_ = nullptr;
 double ImGuiGlfwInput::time_ = 0.0;
 GLFWcursor *ImGuiGlfwInput::mouseCursors_[ImGuiMouseCursor_COUNT] = {};
+GLFWcursor *ImGuiGlfwInput::lastMouseCursor_ = nullptr;
 ImVec2 ImGuiGlfwInput::lastValidMousePos_ = { FLT_MAX, FLT_MAX };
 bool ImGuiGlfwInput::installedCallbacks_ = false;
 
@@ -683,8 +698,12 @@ void ImGuiGlfwInput::updateMouseCursor()
 	{
 		if (imguiCursor == ImGuiMouseCursor_None || io.MouseDrawCursor)
 		{
-			// Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
-			glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+			if (lastMouseCursor_ != nullptr)
+			{
+				// Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
+				glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+				lastMouseCursor_ = nullptr;
+			}
 		}
 		else
 		{
@@ -692,6 +711,13 @@ void ImGuiGlfwInput::updateMouseCursor()
 			// FIXME-PLATFORM: Unfocused windows seems to fail changing the mouse cursor with GLFW 3.2, but 3.3 works here.
 #if GLFW_HAS_CREATECURSOR
 			glfwSetCursor(window_, mouseCursors_[imguiCursor] ? mouseCursors_[imguiCursor] : mouseCursors_[ImGuiMouseCursor_Arrow]);
+
+			GLFWcursor *cursor = mouseCursors_[imguiCursor] ? mouseCursors_[imguiCursor] : mouseCursors_[ImGuiMouseCursor_Arrow];
+			if (lastMouseCursor_ != cursor)
+			{
+				glfwSetCursor(window_, cursor);
+				lastMouseCursor_ = cursor;
+			}
 #endif
 			glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		}
@@ -767,7 +793,7 @@ void ImGuiGlfwInput::updateGamepads()
 // - Some accessibility applications are declaring virtual monitors with a DPI of 0.0f, see #7902. We preserve this value for caller to handle.
 float ImGuiGlfwInput::getContentScaleForWindow(GLFWwindow *window)
 {
-#if GLFW_HAS_X11_OR_WAYLAND
+#if GLFW_HAS_WAYLAND
 	if (isWayland_)
 		return 1.0f;
 #endif
@@ -783,7 +809,7 @@ float ImGuiGlfwInput::getContentScaleForWindow(GLFWwindow *window)
 
 float ImGuiGlfwInput::getContentScaleForMonitor(GLFWmonitor *monitor)
 {
-#if GLFW_HAS_X11_OR_WAYLAND
+#if GLFW_HAS_WAYLAND
 	if (isWayland()) // We can't access our isWayland cache for a monitor.
 		return 1.0f;
 #endif
@@ -805,7 +831,7 @@ void ImGuiGlfwInput::getWindowSizeAndFramebufferScale(GLFWwindow *window, ImVec2
 	glfwGetFramebufferSize(window, &displayW, &displayH);
 	float fbScaleX = (w > 0) ? (float)displayW / (float)w : 1.0f;
 	float fbScaleY = (h > 0) ? (float)displayH / (float)h : 1.0f;
-#if GLFW_HAS_X11_OR_WAYLAND
+#if GLFW_HAS_WAYLAND
 	if (isWayland_)
 		fbScaleX = fbScaleY = 1.0f;
 #endif
