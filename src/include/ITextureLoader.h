@@ -1,19 +1,20 @@
 #ifndef CLASS_NCINE_ITEXTURELOADER
 #define CLASS_NCINE_ITEXTURELOADER
 
+#include <nctl/UniquePtr.h>
 #include "TextureFormat.h"
 #include "Vector2.h"
-#include "IFile.h"
 
 namespace ncine {
 
 class IFile;
+class IImageLoader;
 
 /// Texture loader interface class
 class ITextureLoader
 {
   public:
-	virtual ~ITextureLoader() {}
+	virtual ~ITextureLoader();
 
 	/// Returns true if the texture has been correctly loaded
 	inline bool hasLoaded() const { return hasLoaded_; }
@@ -61,6 +62,8 @@ class ITextureLoader
 	/// An empty constructor only used by `TextureLoaderRaw`
 	ITextureLoader();
 	explicit ITextureLoader(nctl::UniquePtr<IFile> fileHandle);
+	/// A constructor that extracts all data from an image loader
+	explicit ITextureLoader(nctl::UniquePtr<IImageLoader> imageLoader);
 
 	static nctl::UniquePtr<ITextureLoader> createLoader(nctl::UniquePtr<IFile> fileHandle, const char *filename);
 	/// Loads pixel data from a texture file holding either compressed or uncompressed data
@@ -70,11 +73,10 @@ class ITextureLoader
 };
 
 /// A class created when the texture file extension is not recognized
-class InvalidTextureLoader : ITextureLoader
+class InvalidTextureLoader : public ITextureLoader
 {
   public:
-	explicit InvalidTextureLoader(nctl::UniquePtr<IFile> fileHandle)
-	    : ITextureLoader(nctl::move(fileHandle)) {}
+	explicit InvalidTextureLoader(nctl::UniquePtr<IFile> fileHandle);
 };
 
 }

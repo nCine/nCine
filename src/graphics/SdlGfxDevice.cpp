@@ -6,7 +6,7 @@
 
 #include "common_macros.h"
 #include "SdlGfxDevice.h"
-#include "ITextureLoader.h"
+#include "IImageLoader.h"
 
 #ifdef __EMSCRIPTEN__
 	#include <emscripten/html5.h>
@@ -134,13 +134,13 @@ void SdlGfxDevice::setWindowTitle(const char *windowTitle)
 
 void SdlGfxDevice::setWindowIcon(const char *windowIconFilename)
 {
-	nctl::UniquePtr<ITextureLoader> image = ITextureLoader::createFromFile(windowIconFilename);
-	const unsigned int bytesPerPixel = image->texFormat().numChannels();
+	nctl::UniquePtr<IImageLoader> image = IImageLoader::createFromFile(windowIconFilename);
+	const unsigned int bytesPerPixel = image->numChannels();
 	const Uint32 pixelFormat = (bytesPerPixel == 4) ? SDL_PIXELFORMAT_ABGR8888 : SDL_PIXELFORMAT_BGR888;
 
 	SDL_Surface *surface = nullptr;
 	const int pitch = image->width() * bytesPerPixel;
-	void *pixels = reinterpret_cast<void *>(const_cast<GLubyte *>(image->pixels()));
+	void *pixels = reinterpret_cast<void *>(image->pixels());
 	surface = SDL_CreateRGBSurfaceWithFormatFrom(pixels, image->width(), image->height(), bytesPerPixel * 8, pitch, pixelFormat);
 	SDL_SetWindowIcon(windowHandle_, surface);
 	SDL_FreeSurface(surface);

@@ -7,7 +7,7 @@
 #include "common_macros.h"
 #include "GlfwGfxDevice.h"
 #include "GlfwInputManager.h"
-#include "ITextureLoader.h"
+#include "IImageLoader.h"
 
 #ifdef __EMSCRIPTEN__
 	#include <emscripten/html5.h>
@@ -183,7 +183,7 @@ void GlfwGfxDevice::setWindowTitle(const char *windowTitle)
 
 void GlfwGfxDevice::setWindowIcon(const char *windowIconFilename)
 {
-	nctl::UniquePtr<ITextureLoader> image = ITextureLoader::createFromFile(windowIconFilename);
+	nctl::UniquePtr<IImageLoader> image = IImageLoader::createFromFile(windowIconFilename);
 	GLFWimage glfwImage;
 	glfwImage.width = image->width();
 	glfwImage.height = image->height();

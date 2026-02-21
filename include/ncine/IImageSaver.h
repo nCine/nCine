@@ -1,5 +1,5 @@
-#ifndef CLASS_NCINE_ITEXTURESAVER
-#define CLASS_NCINE_ITEXTURESAVER
+#ifndef CLASS_NCINE_IIMAGESAVER
+#define CLASS_NCINE_IIMAGESAVER
 
 #include "common_defines.h"
 #include <nctl/UniquePtr.h>
@@ -8,12 +8,14 @@ namespace ncine {
 
 class IFile;
 
-/// Texture saver interface class
-class DLL_PUBLIC ITextureSaver
+/// Image saver interface class
+class DLL_PUBLIC IImageSaver
 {
   public:
 	enum class Format
 	{
+		R8,
+		RG8,
 		RGB8,
 		RGBA8,
 		RGB_FLOAT
@@ -31,14 +33,15 @@ class DLL_PUBLIC ITextureSaver
 		void *pixels;
 	};
 
-	virtual ~ITextureSaver();
+	virtual ~IImageSaver();
 
 	virtual bool saveToFile(const Properties &properties, const char *filename) = 0;
 	virtual bool saveToFile(const Properties &properties, nctl::UniquePtr<IFile> fileHandle) = 0;
 
-	unsigned int bpp(const Format format);
-	unsigned int dataSize(const Properties &properties);
 	void flipPixels(const Properties &properties, unsigned char *dest);
+
+	static unsigned int imageFormatToBpp(const Format format);
+	static unsigned int dataSize(const Properties &properties);
 };
 
 }

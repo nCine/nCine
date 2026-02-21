@@ -1,12 +1,12 @@
-#ifndef CLASS_NCINE_TEXTURESAVERWEBP
-#define CLASS_NCINE_TEXTURESAVERWEBP
+#ifndef CLASS_NCINE_IMAGESAVERWEBP
+#define CLASS_NCINE_IMAGESAVERWEBP
 
-#include "ITextureSaver.h"
+#include "IImageSaver.h"
 
 namespace ncine {
 
-/// WebP texture saver
-class DLL_PUBLIC TextureSaverWebP : public ITextureSaver
+/// WebP image saver
+class DLL_PUBLIC ImageSaverWebP : public IImageSaver
 {
   public:
 	struct WebPProperties

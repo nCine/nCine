@@ -1,11 +1,24 @@
 #include <png.h>
 #include "common_macros.h"
-#include "TextureSaverPng.h"
+#include "ImageSaverPng.h"
 #include "IFile.h"
 
 namespace ncine {
 
 namespace {
+
+	int imageFormatToColorType(IImageSaver::Format format)
+	{
+		switch (format)
+		{
+			default:
+			case IImageSaver::Format::RGBA8: return PNG_COLOR_TYPE_RGB_ALPHA;
+			case IImageSaver::Format::RGB8: return PNG_COLOR_TYPE_RGB;
+			case IImageSaver::Format::RG8: return PNG_COLOR_TYPE_GRAY_ALPHA;
+			case IImageSaver::Format::R8: return PNG_COLOR_TYPE_GRAY;
+		}
+	}
+
 	void freePngMemory(png_structp &pngPtr, png_infop &infoPtr)
 	{
 		if (infoPtr != nullptr)
@@ -13,37 +26,37 @@ namespace {
 		if (pngPtr != nullptr)
 			png_destroy_write_struct(&pngPtr, png_infopp(nullptr));
 	}
+
 }
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-bool TextureSaverPng::saveToFile(const Properties &properties, const char *filename)
+bool ImageSaverPng::saveToFile(const Properties &properties, const char *filename)
 {
 	return saveToFile(properties, PngProperties(), IFile::createFileHandle(filename));
 }
 
-bool TextureSaverPng::saveToFile(const Properties &properties, nctl::UniquePtr<IFile> fileHandle)
+bool ImageSaverPng::saveToFile(const Properties &properties, nctl::UniquePtr<IFile> fileHandle)
 {
 	return saveToFile(properties, PngProperties(), nctl::move(fileHandle));
 }
 
-bool TextureSaverPng::saveToFile(const Properties &properties, const PngProperties &pngProperties, const char *filename)
+bool ImageSaverPng::saveToFile(const Properties &properties, const PngProperties &pngProperties, const char *filename)
 {
 	return saveToFile(properties, pngProperties, IFile::createFileHandle(filename));
 }
 
-bool TextureSaverPng::saveToFile(const Properties &properties, const PngProperties &pngProperties, nctl::UniquePtr<IFile> fileHandle)
+bool ImageSaverPng::saveToFile(const Properties &properties, const PngProperties &pngProperties, nctl::UniquePtr<IFile> fileHandle)
 {
-	const unsigned int bpp = (properties.format == Format::RGB8) ? 3 : 4;
-
+	const unsigned int bpp = imageFormatToBpp(properties.format);
 	FATAL_ASSERT(properties.width > 0);
 	FATAL_ASSERT(properties.height > 0);
 	FATAL_ASSERT_MSG(properties.height <= PNG_SIZE_MAX / (properties.width * bpp), "Image data buffer would be too large");
 	FATAL_ASSERT_MSG(properties.height <= PNG_UINT_32_MAX / sizeof(png_bytep), "Image is too tall to process in memory");
 	FATAL_ASSERT(properties.pixels != nullptr);
-	ASSERT(properties.format == Format::RGB8 || properties.format == Format::RGBA8);
+	ASSERT(properties.format != Format::RGB_FLOAT); // Floating point channels are not supported by PNG
 
 	LOGI_X("Saving \"%s\"", fileHandle->filename());
 	fileHandle->open(IFile::OpenMode::WRITE | IFile::OpenMode::BINARY);
@@ -81,7 +94,7 @@ bool TextureSaverPng::saveToFile(const Properties &properties, const PngProperti
 
 	png_init_io(pngPtr, fileHandle->filePointer_);
 
-	const unsigned int pngColorType = (properties.format == Format::RGB8) ? PNG_COLOR_TYPE_RGB : PNG_COLOR_TYPE_RGB_ALPHA;
+	const unsigned int pngColorType = imageFormatToColorType(properties.format);
 	// Write header (8 bit colour depth)
 	png_set_IHDR(pngPtr, infoPtr, properties.width, properties.height,
 	             8, pngColorType, PNG_INTERLACE_NONE,
@@ -92,7 +105,7 @@ bool TextureSaverPng::saveToFile(const Properties &properties, const PngProperti
 	{
 		png_text title_text;
 		title_text.compression = PNG_TEXT_COMPRESSION_NONE;
-		title_text.key = "Title";
+		title_text.key = const_cast<char *>("Title");
 		title_text.text = pngProperties.title;
 		png_set_text(pngPtr, infoPtr, &title_text, 1);
 	}

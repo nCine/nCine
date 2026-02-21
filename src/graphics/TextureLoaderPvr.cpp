@@ -1,5 +1,6 @@
 #include "return_macros.h"
 #include "TextureLoaderPvr.h"
+#include "IFile.h"
 
 namespace ncine {
 
