@@ -1,5 +1,6 @@
 #include "return_macros.h"
-#include "TextureLoaderPng.h"
+#include "ImageLoaderPng.h"
+#include "IFile.h"
 
 namespace ncine {
 
@@ -24,8 +25,8 @@ namespace {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-TextureLoaderPng::TextureLoaderPng(nctl::UniquePtr<IFile> fileHandle)
-    : ITextureLoader(nctl::move(fileHandle))
+ImageLoaderPng::ImageLoaderPng(nctl::UniquePtr<IFile> fileHandle)
+    : IImageLoader(nctl::move(fileHandle))
 {
 	LOGI_X("Loading \"%s\"", fileHandle_->filename());
 
@@ -75,30 +76,29 @@ TextureLoaderPng::TextureLoaderPng(nctl::UniquePtr<IFile> fileHandle)
 
 	width_ = width;
 	height_ = height;
-	mipMapCount_ = 1; // No MIP Mapping
 	LOGI_X("Header found: w:%d, h:%d, bitDepth:%d, colorType:%s", width_, height_, bitDepth, colorTypeString(colorType));
 
 	switch (colorType)
 	{
 		case PNG_COLOR_TYPE_RGB_ALPHA:
-			texFormat_ = TextureFormat(GL_RGBA8);
+			format_ = Format::RGBA8;
 			break;
 		case PNG_COLOR_TYPE_RGB:
-			texFormat_ = TextureFormat(GL_RGB8);
+			format_ = Format::RGB8;
 			break;
 		case PNG_COLOR_TYPE_PALETTE:
 			png_set_palette_to_rgb(pngPtr);
-			texFormat_ = TextureFormat(GL_RGB8);
+			format_ = Format::RGB8;
 			break;
 		case PNG_COLOR_TYPE_GRAY_ALPHA:
 			if (bitDepth < 8)
 				png_set_expand_gray_1_2_4_to_8(pngPtr);
-			texFormat_ = TextureFormat(GL_RG8);
+			format_ = Format::RG8;
 			break;
 		case PNG_COLOR_TYPE_GRAY:
 			if (bitDepth < 8)
 				png_set_expand_gray_1_2_4_to_8(pngPtr);
-			texFormat_ = TextureFormat(GL_R8);
+			format_ = Format::R8;
 			break;
 		default:
 			png_destroy_read_struct(&pngPtr, &infoPtr, nullptr);
@@ -109,7 +109,7 @@ TextureLoaderPng::TextureLoaderPng(nctl::UniquePtr<IFile> fileHandle)
 	if (png_get_valid(pngPtr, infoPtr, PNG_INFO_tRNS))
 	{
 		png_set_tRNS_to_alpha(pngPtr);
-		texFormat_ = TextureFormat(GL_RGBA8);
+		format_ = Format::RGBA8;
 	}
 	if (bitDepth == 16)
 		png_set_strip_16(pngPtr);
@@ -136,7 +136,7 @@ TextureLoaderPng::TextureLoaderPng(nctl::UniquePtr<IFile> fileHandle)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void TextureLoaderPng::readFromFileHandle(png_structp pngPtr, png_bytep outBytes, png_size_t byteCountToRead)
+void ImageLoaderPng::readFromFileHandle(png_structp pngPtr, png_bytep outBytes, png_size_t byteCountToRead)
 {
 	IFile *fileHandle = reinterpret_cast<IFile *>(png_get_io_ptr(pngPtr));
 

@@ -3,18 +3,59 @@
 #include "TextureLoaderDds.h"
 #include "TextureLoaderPvr.h"
 #include "TextureLoaderKtx.h"
-#ifdef WITH_PNG
-	#include "TextureLoaderPng.h"
-#endif
-#ifdef WITH_WEBP
-	#include "TextureLoaderWebP.h"
-#endif
 #ifdef WITH_OPENGLES
 	#include "TextureLoaderPkm.h"
 #endif
+
+#include "IImageLoader.h"
+#ifdef WITH_PNG
+	#include "ImageLoaderPng.h"
+#endif
+#ifdef WITH_WEBP
+	#include "ImageLoaderWebP.h"
+#endif
+
 #include "FileSystem.h"
+#include "IFile.h"
 
 namespace ncine {
+
+namespace {
+
+	TextureFormat imageToTextureFormat(IImageLoader::Format imgFormat)
+	{
+		switch (imgFormat)
+		{
+			default:
+			case IImageLoader::Format::RGBA8: return TextureFormat(GL_RGBA8);
+			case IImageLoader::Format::RGB8: return TextureFormat(GL_RGB8);
+			case IImageLoader::Format::RG8: return TextureFormat(GL_RG8);
+			case IImageLoader::Format::R8: return TextureFormat(GL_R8);
+		}
+	}
+
+}
+
+///////////////////////////////////////////////////////////
+// TextureLoaderImage
+///////////////////////////////////////////////////////////
+
+/// An adapter class to consume data from image loader classes
+class TextureLoaderImage : public ITextureLoader
+{
+  public:
+	explicit TextureLoaderImage(nctl::UniquePtr<IImageLoader> imageLoader)
+	    : ITextureLoader(nctl::move(imageLoader)) {}
+};
+
+///////////////////////////////////////////////////////////
+// InvalidTextureLoader
+///////////////////////////////////////////////////////////
+
+InvalidTextureLoader::InvalidTextureLoader(nctl::UniquePtr<IFile> fileHandle)
+    : ITextureLoader(nctl::move(fileHandle))
+{
+}
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -31,6 +72,16 @@ ITextureLoader::ITextureLoader(nctl::UniquePtr<IFile> fileHandle)
       width_(0), height_(0), headerSize_(0), dataSize_(0), mipMapCount_(1)
 {
 }
+
+ITextureLoader::ITextureLoader(nctl::UniquePtr<IImageLoader> imageLoader)
+    : hasLoaded_(imageLoader->hasLoaded()), fileHandle_(nctl::move(imageLoader->fileHandle_)),
+      width_(imageLoader->width()), height_(imageLoader->height()),
+      headerSize_(0), dataSize_(imageLoader->dataSize()), mipMapCount_(1),
+      texFormat_(imageToTextureFormat(imageLoader->format())), pixels_(nctl::move(imageLoader->pixels_))
+{
+}
+
+ITextureLoader::~ITextureLoader() = default;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -90,11 +141,17 @@ nctl::UniquePtr<ITextureLoader> ITextureLoader::createLoader(nctl::UniquePtr<IFi
 		return nctl::makeUnique<TextureLoaderKtx>(nctl::move(fileHandle));
 #ifdef WITH_PNG
 	else if (fs::hasExtension(filename, "png"))
-		return nctl::makeUnique<TextureLoaderPng>(nctl::move(fileHandle));
+	{
+		nctl::UniquePtr<ImageLoaderPng> imgLoader = nctl::makeUnique<ImageLoaderPng>(nctl::move(fileHandle));
+		return nctl::makeUnique<TextureLoaderImage>(nctl::move(imgLoader));
+	}
 #endif
 #ifdef WITH_WEBP
 	else if (fs::hasExtension(filename, "webp"))
-		return nctl::makeUnique<TextureLoaderWebP>(nctl::move(fileHandle));
+	{
+		nctl::UniquePtr<ImageLoaderWebP> imgLoader = nctl::makeUnique<ImageLoaderWebP>(nctl::move(fileHandle));
+		return nctl::makeUnique<TextureLoaderImage>(nctl::move(imgLoader));
+	}
 #endif
 #ifdef __ANDROID__
 	else if (fs::hasExtension(filename, "pkm"))

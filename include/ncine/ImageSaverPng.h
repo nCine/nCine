@@ -1,12 +1,12 @@
-#ifndef CLASS_NCINE_TEXTURESAVERPNG
-#define CLASS_NCINE_TEXTURESAVERPNG
+#ifndef CLASS_NCINE_IMAGESAVERPNG
+#define CLASS_NCINE_IMAGESAVERPNG
 
-#include "ITextureSaver.h"
+#include "IImageSaver.h"
 
 namespace ncine {
 
-/// PNG texture saver
-class DLL_PUBLIC TextureSaverPng : public ITextureSaver
+/// PNG image saver
+class DLL_PUBLIC ImageSaverPng : public IImageSaver
 {
   public:
 	struct PngProperties

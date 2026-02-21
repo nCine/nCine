@@ -34,7 +34,7 @@ set(HEADERS
 	${NCINE_ROOT}/include/ncine/FileSystem.h
 	${NCINE_ROOT}/include/ncine/IFile.h
 	${NCINE_ROOT}/include/ncine/IGfxDevice.h
-	${NCINE_ROOT}/include/ncine/ITextureSaver.h
+	${NCINE_ROOT}/include/ncine/IImageSaver.h
 	${NCINE_ROOT}/include/ncine/Application.h
 	${NCINE_ROOT}/include/ncine/PCApplication.h
 	${NCINE_ROOT}/include/ncine/AppConfiguration.h

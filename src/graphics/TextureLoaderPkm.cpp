@@ -1,6 +1,7 @@
 #include "return_macros.h"
 #include <cstring>
 #include "TextureLoaderPkm.h"
+#include "IFile.h"
 
 namespace ncine {
 
