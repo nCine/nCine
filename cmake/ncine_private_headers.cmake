@@ -11,6 +11,7 @@ set(PRIVATE_HEADERS
 	${NCINE_ROOT}/src/input/JoyMappingDb.h
 	${NCINE_ROOT}/src/include/GfxCapabilities.h
 	${NCINE_ROOT}/src/include/RenderResources.h
+	${NCINE_ROOT}/src/include/IImageLoader.h
 	${NCINE_ROOT}/src/include/TextureFormat.h
 	${NCINE_ROOT}/src/include/ITextureLoader.h
 	${NCINE_ROOT}/src/include/TextureLoaderRaw.h

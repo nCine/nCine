@@ -6,9 +6,9 @@
 #include "apptest_loading.h"
 #include <ncine/Application.h>
 #include <ncine/Texture.h>
-#include <ncine/TextureSaverPng.h>
+#include <ncine/ImageSaverPng.h>
 #if NCINE_WITH_WEBP
-	#include <ncine/TextureSaverWebP.h>
+	#include <ncine/ImageSaverWebP.h>
 #endif
 #include <ncine/Sprite.h>
 #include <ncine/TextNode.h>
@@ -396,23 +396,23 @@ void MyEventHandler::onFrameStart()
 
 							if (selectedFormat == 0)
 							{
-								nc::TextureSaverPng saver;
-								nc::TextureSaverPng::Properties props;
+								nc::ImageSaverPng saver;
+								nc::ImageSaverPng::Properties props;
 								props.width = w;
 								props.height = h;
-								props.format = nc::ITextureSaver::Format::RGBA8;
+								props.format = nc::IImageSaver::Format::RGBA8;
 								props.pixels = pixels.get();
 								hasSaved = saver.saveToFile(props, saveTexelsFilename.data());
 							}
 	#if NCINE_WITH_WEBP
 							else if (selectedFormat == 1)
 							{
-								nc::TextureSaverWebP saver;
-								nc::TextureSaverWebP::Properties props;
-								nc::TextureSaverWebP::WebPProperties webpProps;
+								nc::ImageSaverWebP saver;
+								nc::ImageSaverWebP::Properties props;
+								nc::ImageSaverWebP::WebPProperties webpProps;
 								props.width = w;
 								props.height = h;
-								props.format = nc::ITextureSaver::Format::RGBA8;
+								props.format = nc::IImageSaver::Format::RGBA8;
 								props.pixels = pixels.get();
 								webpProps.lossless = true;
 								hasSaved = saver.saveToFile(props, webpProps, saveTexelsFilename.data());

@@ -1,6 +1,6 @@
 #include <webp/encode.h>
 #include "common_macros.h"
-#include "TextureSaverWebP.h"
+#include "ImageSaverWebP.h"
 #include "IFile.h"
 
 namespace ncine {
@@ -9,22 +9,22 @@ namespace ncine {
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-bool TextureSaverWebP::saveToFile(const Properties &properties, const char *filename)
+bool ImageSaverWebP::saveToFile(const Properties &properties, const char *filename)
 {
 	return saveToFile(properties, WebPProperties(), IFile::createFileHandle(filename));
 }
 
-bool TextureSaverWebP::saveToFile(const Properties &properties, nctl::UniquePtr<IFile> fileHandle)
+bool ImageSaverWebP::saveToFile(const Properties &properties, nctl::UniquePtr<IFile> fileHandle)
 {
 	return saveToFile(properties, WebPProperties(), nctl::move(fileHandle));
 }
 
-bool TextureSaverWebP::saveToFile(const Properties &properties, const WebPProperties &webpProperties, const char *filename)
+bool ImageSaverWebP::saveToFile(const Properties &properties, const WebPProperties &webpProperties, const char *filename)
 {
 	return saveToFile(properties, webpProperties, IFile::createFileHandle(filename));
 }
 
-bool TextureSaverWebP::saveToFile(const Properties &properties, const WebPProperties &webpProperties, nctl::UniquePtr<IFile> fileHandle)
+bool ImageSaverWebP::saveToFile(const Properties &properties, const WebPProperties &webpProperties, nctl::UniquePtr<IFile> fileHandle)
 {
 	FATAL_ASSERT(properties.width > 0);
 	FATAL_ASSERT(properties.height > 0);
@@ -46,6 +46,7 @@ bool TextureSaverWebP::saveToFile(const Properties &properties, const WebPProper
 		flipPixels(properties, flippedPixels.get());
 	}
 	void *texturePixels = properties.verticalFlip ? flippedPixels.get() : properties.pixels;
+	const unsigned int bpp = imageFormatToBpp(properties.format);
 
 	// Using the WebP Simple Encoding API
 	const uint8_t *pixels = static_cast<uint8_t *>(texturePixels);
@@ -57,17 +58,17 @@ bool TextureSaverWebP::saveToFile(const Properties &properties, const WebPProper
 		case Format::RGB8:
 		{
 			if (webpProperties.lossless)
-				bytesWritten = WebPEncodeLosslessRGB(pixels, properties.width, properties.height, properties.width * bpp(properties.format), &output);
+				bytesWritten = WebPEncodeLosslessRGB(pixels, properties.width, properties.height, properties.width * bpp, &output);
 			else
-				bytesWritten = WebPEncodeRGB(pixels, properties.width, properties.height, properties.width * bpp(properties.format), webpProperties.quality, &output);
+				bytesWritten = WebPEncodeRGB(pixels, properties.width, properties.height, properties.width * bpp, webpProperties.quality, &output);
 			break;
 		}
 		case Format::RGBA8:
 		{
 			if (webpProperties.lossless)
-				bytesWritten = WebPEncodeLosslessRGBA(pixels, properties.width, properties.height, properties.width * bpp(properties.format), &output);
+				bytesWritten = WebPEncodeLosslessRGBA(pixels, properties.width, properties.height, properties.width * bpp, &output);
 			else
-				bytesWritten = WebPEncodeRGBA(pixels, properties.width, properties.height, properties.width * bpp(properties.format), webpProperties.quality, &output);
+				bytesWritten = WebPEncodeRGBA(pixels, properties.width, properties.height, properties.width * bpp, webpProperties.quality, &output);
 			break;
 		}
 	}

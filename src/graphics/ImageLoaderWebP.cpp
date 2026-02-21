@@ -1,5 +1,6 @@
 #include "return_macros.h"
-#include "TextureLoaderWebP.h"
+#include "ImageLoaderWebP.h"
+#include "IFile.h"
 
 namespace ncine {
 
@@ -7,8 +8,8 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-TextureLoaderWebP::TextureLoaderWebP(nctl::UniquePtr<IFile> fileHandle)
-    : ITextureLoader(nctl::move(fileHandle))
+ImageLoaderWebP::ImageLoaderWebP(nctl::UniquePtr<IFile> fileHandle)
+    : IImageLoader(nctl::move(fileHandle))
 {
 	LOGI_X("Loading \"%s\"", fileHandle_->filename());
 
@@ -37,9 +38,8 @@ TextureLoaderWebP::TextureLoaderWebP(nctl::UniquePtr<IFile> fileHandle)
 	LOGI_X("Bitstream features found: alpha:%d animation:%d format:%d",
 	       features.has_alpha, features.has_animation, features.format);
 
-	mipMapCount_ = 1; // No MIP Mapping
-	texFormat_ = features.has_alpha ? TextureFormat(GL_RGBA8) : TextureFormat(GL_RGB8);
-	dataSize_ = width_ * height_ * texFormat_.numChannels();
+	format_ = features.has_alpha ? Format::RGBA8 : Format::RGB8;
+	dataSize_ = width_ * height_ * numChannels(); // Set the format before calling `numChannels()`
 	pixels_ = nctl::makeUnique<unsigned char[]>(dataSize_);
 
 	if (features.has_alpha)

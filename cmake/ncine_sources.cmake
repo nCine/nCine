@@ -27,13 +27,14 @@ set(SOURCES
 	${NCINE_ROOT}/src/graphics/IGfxDevice.cpp
 	${NCINE_ROOT}/src/graphics/GfxCapabilities.cpp
 	${NCINE_ROOT}/src/graphics/RenderResources.cpp
+	${NCINE_ROOT}/src/graphics/IImageLoader.cpp
+	${NCINE_ROOT}/src/graphics/IImageSaver.cpp
 	${NCINE_ROOT}/src/graphics/TextureFormat.cpp
 	${NCINE_ROOT}/src/graphics/ITextureLoader.cpp
 	${NCINE_ROOT}/src/graphics/TextureLoaderRaw.cpp
 	${NCINE_ROOT}/src/graphics/TextureLoaderDds.cpp
 	${NCINE_ROOT}/src/graphics/TextureLoaderPvr.cpp
 	${NCINE_ROOT}/src/graphics/TextureLoaderKtx.cpp
-	${NCINE_ROOT}/src/graphics/ITextureSaver.cpp
 	${NCINE_ROOT}/src/Application.cpp
 	${NCINE_ROOT}/src/AppConfiguration.cpp
 	${NCINE_ROOT}/src/graphics/opengl/GLBufferObject.cpp

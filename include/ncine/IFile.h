@@ -146,8 +146,8 @@ class DLL_PUBLIC IFile
 	unsigned long int fileSize_;
 
   private:
-	/// The `TextureSaverPng` class needs to access the `filePointer_`
-	friend class TextureSaverPng;
+	/// The `ImageSaverPng` class needs to access the `filePointer_`
+	friend class ImageSaverPng;
 };
 
 }
