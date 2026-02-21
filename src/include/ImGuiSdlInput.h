@@ -30,6 +30,13 @@ class ImGuiSdlInput
 		MANUAL
 	};
 
+	enum class MouseCaptureMode
+	{
+		ENABLED,
+		ENABLED_AFTER_DRAG,
+		DISABLED
+	};
+
 	static bool inputEnabled_;
 
 	static SDL_Window *window_;
@@ -43,7 +50,7 @@ class ImGuiSdlInput
 	static SDL_Cursor *mouseLastCursor_;
 	static unsigned int mouseLastLeaveFrame_;
 	static bool mouseCanUseGlobalState_;
-	static bool mouseCanUseCapture_;
+	static MouseCaptureMode mouseCaptureMode_;
 
 	// Gamepad handling
 	static ImVector<SDL_GameController *> gamepads_;
@@ -58,6 +65,7 @@ class ImGuiSdlInput
 	static void closeGamepads();
 	static void setGamepadMode(GamepadMode mode, SDL_GameController **manualGamepadsArray, unsigned int manualGamepadsCount);
 	static void updateGamepads();
+	static void setMouseCaptureMode(MouseCaptureMode mode);
 	static void getWindowSizeAndFramebufferScale(SDL_Window *window, SDL_Renderer *renderer, ImVec2 *outSize, ImVec2 *outFramebufferScale);
 };
 

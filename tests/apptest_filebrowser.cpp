@@ -391,7 +391,7 @@ bool fileDialog(FileDialogConfig &config, nctl::String &selection)
 		ImGui::SameLine();
 		static int currentComboSortingType = 0;
 		ImGui::PushItemWidth(ImGui::GetFontSize() * 8.0f);
-		ImGui::Combo("Sorting", &currentComboSortingType, sortingStrings, IM_ARRAYSIZE(sortingStrings));
+		ImGui::Combo("Sorting", &currentComboSortingType, sortingStrings, IM_COUNTOF(sortingStrings));
 		ImGui::PopItemWidth();
 		config.sorting = static_cast<Sorting>(currentComboSortingType);
 	}

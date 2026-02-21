@@ -27,6 +27,7 @@ class ImGuiGlfwInput
 	static GLFWwindow *mouseWindow_;
 	static double time_;
 	static GLFWcursor *mouseCursors_[ImGuiMouseCursor_COUNT];
+	static GLFWcursor *lastMouseCursor_;
 	static ImVec2 lastValidMousePos_;
 	static bool installedCallbacks_;
 

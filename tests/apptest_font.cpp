@@ -182,11 +182,11 @@ void MyEventHandler::onFrameStart()
 						texts_[i]->setString(textBuffer);
 
 					int currentAlignment = static_cast<int>(texts_[i]->alignment());
-					if (ImGui::Combo("Alignment", &currentAlignment, AlignmentLabels, IM_ARRAYSIZE(AlignmentLabels)))
+					if (ImGui::Combo("Alignment", &currentAlignment, AlignmentLabels, IM_COUNTOF(AlignmentLabels)))
 						texts_[i]->setAlignment(static_cast<nc::TextNode::Alignment>(currentAlignment));
 
 					int currentRenderMode = static_cast<int>(texts_[i]->renderMode());
-					if (ImGui::Combo("Render mode", &currentRenderMode, RenderModeLabels, IM_ARRAYSIZE(RenderModeLabels)))
+					if (ImGui::Combo("Render mode", &currentRenderMode, RenderModeLabels, IM_COUNTOF(RenderModeLabels)))
 						texts_[i]->setRenderMode(static_cast<nc::Font::RenderMode>(currentRenderMode));
 
 					nc::Colorf color(texts_[i]->color());

@@ -294,8 +294,8 @@ void MyEventHandler::onFrameStart()
 
 					ImGui::SliderInt("Width", &viewportSize.x, 0, nc::theApplication().widthInt());
 					ImGui::SliderInt("Height", &viewportSize.y, 0, nc::theApplication().heightInt());
-					ImGui::Combo("Color Format", &comboColorFormatType, ColorFormatLabels, IM_ARRAYSIZE(ColorFormatLabels));
-					ImGui::Combo("Depth Format", &comboDepthFormatType, DepthFormatLabels, IM_ARRAYSIZE(DepthFormatLabels));
+					ImGui::Combo("Color Format", &comboColorFormatType, ColorFormatLabels, IM_COUNTOF(ColorFormatLabels));
+					ImGui::Combo("Depth Format", &comboDepthFormatType, DepthFormatLabels, IM_COUNTOF(DepthFormatLabels));
 
 					if (ImGui::Button("Current"))
 					{
@@ -375,7 +375,7 @@ void MyEventHandler::onFrameStart()
 				currentViewport.setClearColor(clearColor);
 
 				int comboClearMode = static_cast<int>(currentViewport.clearMode());
-				ImGui::Combo("Clear Mode", &comboClearMode, ClearModeLabels, IM_ARRAYSIZE(ClearModeLabels));
+				ImGui::Combo("Clear Mode", &comboClearMode, ClearModeLabels, IM_COUNTOF(ClearModeLabels));
 				currentViewport.setClearMode(nc::Viewport::ClearMode(comboClearMode));
 
 				ImGui::TreePop();
@@ -495,7 +495,7 @@ void MyEventHandler::onFrameStart()
 				static int positionIndex = viewportCreationData[currentComboViewport - 1].spritePositionIndex;
 				if (viewportChanged)
 					positionIndex = viewportCreationData[currentComboViewport - 1].spritePositionIndex;
-				if (ImGui::Combo("Position Presets", &positionIndex, PositionPresetsLabels, IM_ARRAYSIZE(PositionPresetsLabels)))
+				if (ImGui::Combo("Position Presets", &positionIndex, PositionPresetsLabels, IM_COUNTOF(PositionPresetsLabels)))
 					sprite.setPosition(positionPresets(sprite.absSize(), positionIndex));
 
 				float rotation = sprite.rotation();
