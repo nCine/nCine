@@ -10,6 +10,28 @@ class StaticStringIteratorTest : public ::testing::Test
 	nctl::StaticString<Capacity> string_;
 };
 
+TEST_F(StaticStringIteratorTest, BeginIteratorInvariant)
+{
+	nctl::StaticString<Capacity>::ConstIterator it = string_.begin();
+	nctl::StaticString<Capacity>::ConstIterator copy = it;
+	++it;
+	--it;
+
+	printf("Increment and then decrement from a begin iterator: %d\n", it == copy);
+	ASSERT_EQ(it, copy);
+}
+
+TEST_F(StaticStringIteratorTest, EndIteratorInvariants)
+{
+	nctl::StaticString<Capacity>::ConstIterator it = string_.end();
+	nctl::StaticString<Capacity>::ConstIterator copy = it;
+	--it;
+	++it;
+
+	printf("Decrement and then increment from an end iterator: %d\n", it == copy);
+	ASSERT_EQ(it, copy);
+}
+
 TEST_F(StaticStringIteratorTest, ForLoopIteration)
 {
 	unsigned int n = 0;

@@ -14,6 +14,28 @@ class StringIteratorTest : public ::testing::Test
 	nctl::String string_;
 };
 
+TEST_F(StringIteratorTest, BeginIteratorInvariant)
+{
+	nctl::String::ConstIterator it = string_.begin();
+	nctl::String::ConstIterator copy = it;
+	++it;
+	--it;
+
+	printf("Increment and then decrement from a begin iterator: %d\n", it == copy);
+	ASSERT_EQ(it, copy);
+}
+
+TEST_F(StringIteratorTest, EndIteratorInvariants)
+{
+	nctl::String::ConstIterator it = string_.end();
+	nctl::String::ConstIterator copy = it;
+	--it;
+	++it;
+
+	printf("Decrement and then increment from an end iterator: %d\n", it == copy);
+	ASSERT_EQ(it, copy);
+}
+
 TEST_F(StringIteratorTest, ForLoopIteration)
 {
 	unsigned int n = 0;

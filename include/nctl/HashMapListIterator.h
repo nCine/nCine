@@ -88,13 +88,7 @@ class HashMapListIterator
 	/// Inequality operator
 	friend inline bool operator!=(const HashMapListIterator &lhs, const HashMapListIterator &rhs)
 	{
-		if (lhs.tag_ == SentinelTag::REGULAR && rhs.tag_ == SentinelTag::REGULAR)
-		{
-			return (lhs.hashMap_ != rhs.hashMap_ || lhs.bucketIndex_ != rhs.bucketIndex_ ||
-			        lhs.listIterator_ != rhs.listIterator_ || lhs.atFirstNode_ != rhs.atFirstNode_);
-		}
-		else
-			return (lhs.tag_ != rhs.tag_);
+		return !(lhs == rhs);
 	}
 
 	/// Returns the hashmap node currently pointed by the iterator
@@ -282,23 +276,27 @@ void HashMapListIterator<K, T, HashFunc, IsConst>::next()
 	}
 }
 
+/*! It should be impossible to reach the beginning sentinel by calling this method on an iterator pointing to the first element. */
 template <class K, class T, class HashFunc, bool IsConst>
 void HashMapListIterator<K, T, HashFunc, IsConst>::previous()
 {
+	ASSERT(tag_ != SentinelTag::BEGINNING);
+
 	if (tag_ == SentinelTag::END)
 	{
 		findLastValid();
 		return;
 	}
-	else if (tag_ == SentinelTag::BEGINNING)
-		return;
 
 	typename HashMapListHelperTraits<K, T, HashFunc, IsConst>::BucketPtr bucket = &(hashMap_->buckets_[bucketIndex_]);
 
 	if (atFirstNode_)
 	{
 		if (bucketIndex_ == 0)
-			tag_ = SentinelTag::BEGINNING;
+		{
+			listIterator_ = typename HashMapListHelperTraits<K, T, HashFunc, IsConst>::ListIteratorType(nullptr);
+			return;
+		}
 		else
 		{
 			do
@@ -308,7 +306,7 @@ void HashMapListIterator<K, T, HashFunc, IsConst>::previous()
 		}
 
 		if (bucket->size() == 0)
-			tag_ = SentinelTag::BEGINNING;
+			return;
 		else if (bucket->size() > 1)
 		{
 			atFirstNode_ = false;
@@ -319,7 +317,10 @@ void HashMapListIterator<K, T, HashFunc, IsConst>::previous()
 		--listIterator_;
 
 	if (listIterator_ == bucket->collisionList_.end()) // nullptr sentinel
+	{
 		atFirstNode_ = true;
+		listIterator_ = typename HashMapListHelperTraits<K, T, HashFunc, IsConst>::ListIteratorType(nullptr);
+	}
 }
 
 template <class K, class T, class HashFunc, bool IsConst>
@@ -354,7 +355,7 @@ void HashMapListIterator<K, T, HashFunc, IsConst>::findLastValid()
 		atFirstNode_ = false;
 	}
 	else if (bucket->size() == 0)
-		tag_ = SentinelTag::BEGINNING;
+		return;
 }
 
 }

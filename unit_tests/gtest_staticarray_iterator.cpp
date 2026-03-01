@@ -10,6 +10,28 @@ class StaticArrayIteratorTest : public ::testing::Test
 	nctl::StaticArray<int, Capacity> array_;
 };
 
+TEST_F(StaticArrayIteratorTest, BeginIteratorInvariant)
+{
+	nctl::StaticArray<int, Capacity>::ConstIterator it = array_.begin();
+	nctl::StaticArray<int, Capacity>::ConstIterator copy = it;
+	++it;
+	--it;
+
+	printf("Increment and then decrement from a begin iterator: %d\n", it == copy);
+	ASSERT_EQ(it, copy);
+}
+
+TEST_F(StaticArrayIteratorTest, EndIteratorInvariants)
+{
+	nctl::StaticArray<int, Capacity>::ConstIterator it = array_.end();
+	nctl::StaticArray<int, Capacity>::ConstIterator copy = it;
+	--it;
+	++it;
+
+	printf("Decrement and then increment from an end iterator: %d\n", it == copy);
+	ASSERT_EQ(it, copy);
+}
+
 TEST_F(StaticArrayIteratorTest, ForLoopIteration)
 {
 	int n = FirstElement;

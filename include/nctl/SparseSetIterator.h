@@ -39,7 +39,7 @@ class SparseSetIterator
 	/// Inequality operator
 	friend inline bool operator!=(const SparseSetIterator &lhs, const SparseSetIterator &rhs)
 	{
-		return (lhs.sparseSet_ != rhs.sparseSet_ || lhs.index_ != rhs.index_);
+		return !(lhs == rhs);
 	}
 
   private:

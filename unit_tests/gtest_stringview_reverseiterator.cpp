@@ -14,6 +14,34 @@ class StringViewReverseIteratorTest : public ::testing::Test
 	nctl::StringView stringView_;
 };
 
+TEST_F(StringViewReverseIteratorTest, ReverseIteratorInvariants)
+{
+	printf("Reverse begin iterator should be the same as the end iterator: %d\n", stringView_.rBegin().base() == stringView_.end());
+	ASSERT_EQ(stringView_.rBegin().base(), stringView_.end());
+	printf("Reverse end iterator should be the same as the begin iterator: %d\n", stringView_.rEnd().base() == stringView_.begin());
+	ASSERT_EQ(stringView_.rEnd().base(), stringView_.begin());
+
+	nctl::StringView::ConstReverseIterator r = stringView_.rBegin();
+	for (unsigned int i = 0; i < stringView_.length(); i++)
+		++r;
+
+	printf("Reverse iterator should have reached the end: %d\n", r == stringView_.rEnd());
+	ASSERT_EQ(r, stringView_.rEnd());
+	printf("Reverse iterator should have be the same as the begin iterator: %d\n", r.base() == stringView_.begin());
+	ASSERT_EQ(r.base(), stringView_.begin());
+}
+
+TEST_F(StringViewReverseIteratorTest, ReverseIteratorInvariantsEmpty)
+{
+	char dummy;
+
+	nctl::StringView newStringView(&dummy, 0);
+	printf("Reverse begin iterator should be the same as the end iterator: %d\n", newStringView.rBegin().base() == newStringView.end());
+	ASSERT_EQ(newStringView.rBegin().base(), newStringView.end());
+	printf("Reverse end iterator should be the same as the begin iterator: %d\n", newStringView.rEnd().base() == newStringView.begin());
+	ASSERT_EQ(newStringView.rEnd().base(), newStringView.begin());
+}
+
 TEST_F(StringViewReverseIteratorTest, ForLoopIteration)
 {
 	unsigned int n = stringView_.length() - 1;

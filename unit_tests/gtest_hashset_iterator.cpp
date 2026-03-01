@@ -14,6 +14,54 @@ class HashSetIteratorTest : public ::testing::Test
 	HashSetTestType hashset_;
 };
 
+TEST_F(HashSetIteratorTest, BeginIteratorInvariant)
+{
+	HashSetTestType::ConstIterator it = hashset_.begin();
+	HashSetTestType::ConstIterator copy = it;
+	++it;
+	--it;
+
+	printf("Increment and then decrement from a begin iterator: %d\n", it == copy);
+	ASSERT_EQ(it, copy);
+}
+
+TEST_F(HashSetIteratorTest, EndIteratorInvariants)
+{
+	HashSetTestType::ConstIterator it = hashset_.end();
+	HashSetTestType::ConstIterator copy = it;
+	--it;
+	++it;
+
+	printf("Decrement and then increment from an end iterator: %d\n", it == copy);
+	ASSERT_EQ(it, copy);
+}
+
+TEST_F(HashSetIteratorTest, ReverseIteratorInvariants)
+{
+	printf("Reverse begin iterator should be the same as the end iterator: %d\n", hashset_.rBegin().base() == hashset_.end());
+	ASSERT_EQ(hashset_.rBegin().base(), hashset_.end());
+	printf("Reverse end iterator should be the same as the begin iterator: %d\n", hashset_.rEnd().base() == hashset_.begin());
+	ASSERT_EQ(hashset_.rEnd().base(), hashset_.begin());
+
+	HashSetTestType::ConstReverseIterator r = hashset_.rBegin();
+	for (unsigned int i = 0; i < hashset_.size(); i++)
+		++r;
+
+	printf("Reverse iterator should have reached the end: %d\n", r == hashset_.rEnd());
+	ASSERT_EQ(r, hashset_.rEnd());
+	printf("Reverse iterator should have be the same as the begin iterator: %d\n", r.base() == hashset_.begin());
+	ASSERT_EQ(r.base(), hashset_.begin());
+}
+
+TEST_F(HashSetIteratorTest, ReverseIteratorInvariantsEmpty)
+{
+	HashSetTestType newHashset(Capacity);
+	printf("Reverse begin iterator should be the same as the end iterator: %d\n", newHashset.rBegin().base() == newHashset.end());
+	ASSERT_EQ(newHashset.rBegin().base(), newHashset.end());
+	printf("Reverse end iterator should be the same as the begin iterator: %d\n", newHashset.rEnd().base() == newHashset.begin());
+	ASSERT_EQ(newHashset.rEnd().base(), newHashset.begin());
+}
+
 TEST_F(HashSetIteratorTest, ForLoopIteration)
 {
 	int n = 0;
@@ -45,8 +93,11 @@ TEST_F(HashSetIteratorTest, ReverseForLoopIteration)
 	printf("Reverse iterating through elements with for loop:\n");
 	for (HashSetTestType::ConstReverseIterator r = hashset_.rBegin(); r != hashset_.rEnd(); ++r)
 	{
-		printf(" [%d] hash: %u, key: %d\n", n, r.base().hash(), r.base().key());
-		ASSERT_EQ(r.base().key(), n);
+		HashSetTestType::ConstIterator it = r.base();
+		--it;
+
+		printf(" [%d] hash: %u, key: %d\n", n, it.hash(), it.key());
+		ASSERT_EQ(it.key(), n);
 		n--;
 	}
 	printf("\n");
@@ -100,8 +151,11 @@ TEST_F(HashSetIteratorTest, ReverseWhileLoopIteration)
 	HashSetTestType::ConstReverseIterator r = hashset_.rBegin();
 	while (r != hashset_.rEnd())
 	{
-		printf(" [%d] hash: %u, key: %d\n", n, r.base().hash(), r.base().key());
-		ASSERT_EQ(r.base().key(), n);
+		HashSetTestType::ConstIterator it = r.base();
+		--it;
+
+		printf(" [%d] hash: %u, key: %d\n", n, it.hash(), it.key());
+		ASSERT_EQ(it.key(), n);
 		++r;
 		--n;
 	}

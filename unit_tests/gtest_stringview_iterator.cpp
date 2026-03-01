@@ -14,6 +14,28 @@ class StringViewIteratorTest : public ::testing::Test
 	nctl::StringView stringView_;
 };
 
+TEST_F(StringViewIteratorTest, BeginIteratorInvariant)
+{
+	nctl::StringView::ConstIterator it = stringView_.begin();
+	nctl::StringView::ConstIterator copy = it;
+	++it;
+	--it;
+
+	printf("Increment and then decrement from a begin iterator: %d\n", it == copy);
+	ASSERT_EQ(it, copy);
+}
+
+TEST_F(StringViewIteratorTest, EndIteratorInvariants)
+{
+	nctl::StringView::ConstIterator it = stringView_.end();
+	nctl::StringView::ConstIterator copy = it;
+	--it;
+	++it;
+
+	printf("Decrement and then increment from an end iterator: %d\n", it == copy);
+	ASSERT_EQ(it, copy);
+}
+
 TEST_F(StringViewIteratorTest, ForLoopIteration)
 {
 	unsigned int n = 0;

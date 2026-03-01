@@ -14,6 +14,54 @@ class SparseSetIteratorTest : public ::testing::Test
 	SparseSetTestType sparseset_;
 };
 
+TEST_F(SparseSetIteratorTest, BeginIteratorInvariant)
+{
+	SparseSetTestType::ConstIterator it = sparseset_.begin();
+	SparseSetTestType::ConstIterator copy = it;
+	++it;
+	--it;
+
+	printf("Increment and then decrement from a begin iterator: %d\n", it == copy);
+	ASSERT_EQ(it, copy);
+}
+
+TEST_F(SparseSetIteratorTest, EndIteratorInvariants)
+{
+	SparseSetTestType::ConstIterator it = sparseset_.end();
+	SparseSetTestType::ConstIterator copy = it;
+	--it;
+	++it;
+
+	printf("Decrement and then increment from an end iterator: %d\n", it == copy);
+	ASSERT_EQ(it, copy);
+}
+
+TEST_F(SparseSetIteratorTest, ReverseIteratorInvariants)
+{
+	printf("Reverse begin iterator should be the same as the end iterator: %d\n", sparseset_.rBegin().base() == sparseset_.end());
+	ASSERT_EQ(sparseset_.rBegin().base(), sparseset_.end());
+	printf("Reverse end iterator should be the same as the begin iterator: %d\n", sparseset_.rEnd().base() == sparseset_.begin());
+	ASSERT_EQ(sparseset_.rEnd().base(), sparseset_.begin());
+
+	SparseSetTestType::ConstReverseIterator r = sparseset_.rBegin();
+	for (unsigned int i = 0; i < sparseset_.size(); i++)
+		++r;
+
+	printf("Reverse iterator should have reached the end: %d\n", r == sparseset_.rEnd());
+	ASSERT_EQ(r, sparseset_.rEnd());
+	printf("Reverse iterator should have be the same as the begin iterator: %d\n", r.base() == sparseset_.begin());
+	ASSERT_EQ(r.base(), sparseset_.begin());
+}
+
+TEST_F(SparseSetIteratorTest, ReverseIteratorInvariantsEmpty)
+{
+	SparseSetTestType newSparseset(Capacity, MaxValue);
+	printf("Reverse begin iterator should be the same as the end iterator: %d\n", newSparseset.rBegin().base() == newSparseset.end());
+	ASSERT_EQ(newSparseset.rBegin().base(), newSparseset.end());
+	printf("Reverse end iterator should be the same as the begin iterator: %d\n", newSparseset.rEnd().base() == newSparseset.begin());
+	ASSERT_EQ(newSparseset.rEnd().base(), newSparseset.begin());
+}
+
 TEST_F(SparseSetIteratorTest, ForLoopIteration)
 {
 	int n = 0;
@@ -45,8 +93,8 @@ TEST_F(SparseSetIteratorTest, ReverseForLoopIteration)
 	printf("Reverse iterating through elements with for loop:\n");
 	for (SparseSetTestType::ConstReverseIterator r = sparseset_.rBegin(); r != sparseset_.rEnd(); ++r)
 	{
-		printf(" [%d] value: %d\n", n, *r.base());
-		ASSERT_EQ(*r.base(), n);
+		printf(" [%d] value: %d\n", n, *r);
+		ASSERT_EQ(*r, n);
 		n--;
 	}
 	printf("\n");
@@ -100,8 +148,8 @@ TEST_F(SparseSetIteratorTest, ReverseWhileLoopIteration)
 	SparseSetTestType::ConstReverseIterator r = sparseset_.rBegin();
 	while (r != sparseset_.rEnd())
 	{
-		printf(" [%d] value: %d\n", n, *r.base());
-		ASSERT_EQ(*r.base(), n);
+		printf(" [%d] value: %d\n", n, *r);
+		ASSERT_EQ(*r, n);
 		++r;
 		--n;
 	}

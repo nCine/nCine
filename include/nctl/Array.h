@@ -81,32 +81,32 @@ class Array
 		nctl::swap(first.fixedCapacity_, second.fixedCapacity_);
 	}
 
-	/// Returns an iterator to the first element
+	/// Returns an iterator to the beginning
 	inline Iterator begin() { return Iterator(array_); }
-	/// Returns a reverse iterator to the last element
-	inline ReverseIterator rBegin() { return ReverseIterator(Iterator(array_ + size_ - 1)); }
-	/// Returns an iterator to past the last element
+	/// Returns a reverse iterator to the beginning
+	inline ReverseIterator rBegin() { return ReverseIterator(end()); }
+	/// Returns an iterator to the end
 	inline Iterator end() { return Iterator(array_ + size_); }
-	/// Returns a reverse iterator to prior the first element
-	inline ReverseIterator rEnd() { return ReverseIterator(Iterator(array_ - 1)); }
+	/// Returns a reverse iterator to the end
+	inline ReverseIterator rEnd() { return ReverseIterator(begin()); }
 
-	/// Returns a constant iterator to the first element
+	/// Returns a constant iterator to the beginning
 	inline ConstIterator begin() const { return ConstIterator(array_); }
-	/// Returns a constant reverse iterator to the last element
-	inline ConstReverseIterator rBegin() const { return ConstReverseIterator(ConstIterator(array_ + size_ - 1)); }
-	/// Returns a constant iterator to past the last lement
+	/// Returns a constant reverse iterator to beginning
+	inline ConstReverseIterator rBegin() const { return ConstReverseIterator(cEnd()); }
+	/// Returns a constant iterator to the end
 	inline ConstIterator end() const { return ConstIterator(array_ + size_); }
-	/// Returns a constant reverse iterator to prior the first element
-	inline ConstReverseIterator rEnd() const { return ConstReverseIterator(ConstIterator(array_ - 1)); }
+	/// Returns a constant reverse iterator to the end
+	inline ConstReverseIterator rEnd() const { return ConstReverseIterator(cBegin()); }
 
-	/// Returns a constant iterator to the first element
+	/// Returns a constant iterator to the beginning
 	inline ConstIterator cBegin() const { return ConstIterator(array_); }
-	/// Returns a constant reverse iterator to the last element
-	inline ConstReverseIterator crBegin() const { return ConstReverseIterator(ConstIterator(array_ + size_ - 1)); }
-	/// Returns a constant iterator to past the last lement
+	/// Returns a constant reverse iterator to the beginning
+	inline ConstReverseIterator crBegin() const { return ConstReverseIterator(cEnd()); }
+	/// Returns a constant iterator to past the end
 	inline ConstIterator cEnd() const { return ConstIterator(array_ + size_); }
-	/// Returns a constant reverse iterator to prior the first element
-	inline ConstReverseIterator crEnd() const { return ConstReverseIterator(ConstIterator(array_ - 1)); }
+	/// Returns a constant reverse iterator to the end
+	inline ConstReverseIterator crEnd() const { return ConstReverseIterator(cBegin()); }
 
 	/// Returns true if the array is empty
 	inline bool isEmpty() const { return size_ == 0; }

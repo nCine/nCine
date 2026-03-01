@@ -105,32 +105,32 @@ class List
 		nctl::swap(first.sentinel_.next_, second.sentinel_.next_);
 	}
 
-	/// Returns an iterator to the first element
+	/// Returns an iterator to the beginning
 	inline Iterator begin() { return Iterator(static_cast<ListNode<T> *>(sentinel_.next_)); }
-	/// Returns a reverse iterator to the last element
-	inline ReverseIterator rBegin() { return ReverseIterator(Iterator(static_cast<ListNode<T> *>(sentinel_.previous_))); }
-	/// Returns an iterator to the end of the list sentinel (valid for reverse traversal too)
+	/// Returns a reverse iterator to the beginning
+	inline ReverseIterator rBegin() { return ReverseIterator(end()); }
+	/// Returns an iterator to the end (valid for reverse traversal too)
 	inline Iterator end() { return Iterator(static_cast<ListNode<T> *>(&sentinel_)); }
-	/// Returns a reverse iterator to the end of the list sentinel
-	inline ReverseIterator rEnd() { return ReverseIterator(end()); }
+	/// Returns a reverse iterator to the end
+	inline ReverseIterator rEnd() { return ReverseIterator(begin()); }
 
-	/// Returns a constant iterator to the first element
+	/// Returns a constant iterator to the beginning
 	inline ConstIterator begin() const { return ConstIterator(static_cast<ListNode<T> *>(sentinel_.next_)); }
-	/// Returns a constant reverse iterator to the last element
-	inline ConstReverseIterator rBegin() const { return ConstReverseIterator(ConstIterator(static_cast<ListNode<T> *>(sentinel_.previous_))); }
-	/// Returns a constant iterator to the end of the list sentinel (valid reverse traversal too)
+	/// Returns a constant reverse iterator to the beginning
+	inline ConstReverseIterator rBegin() const { return ConstReverseIterator(cEnd()); }
+	/// Returns a constant iterator to the end (valid for reverse traversal too)
 	inline ConstIterator end() const { return ConstIterator(static_cast<ListNode<T> *>(const_cast<BaseListNode *>(&sentinel_))); }
-	/// Returns a constant reverse iterator to the end of the list sentinel
-	inline ConstReverseIterator rEnd() const { return ConstReverseIterator(end()); }
+	/// Returns a constant reverse iterator to the end
+	inline ConstReverseIterator rEnd() const { return ConstReverseIterator(cBegin()); }
 
-	/// Returns a constant iterator to the first element
+	/// Returns a constant iterator to the beginning
 	inline ConstIterator cBegin() const { return ConstIterator(static_cast<ListNode<T> *>(sentinel_.next_)); }
-	/// Returns a constant reverse iterator to the last element
-	inline ConstReverseIterator crBegin() const { return ConstReverseIterator(ConstIterator(static_cast<ListNode<T> *>(sentinel_.previous_))); }
-	/// Returns a constant iterator to the end of the list sentinel (valid reverse traversal too)
+	/// Returns a constant reverse iterator to the beginning
+	inline ConstReverseIterator crBegin() const { return ConstReverseIterator(cEnd()); }
+	/// Returns a constant iterator to the end (valid for reverse traversal too)
 	inline ConstIterator cEnd() const { return ConstIterator(static_cast<ListNode<T> *>(const_cast<BaseListNode *>(&sentinel_))); }
-	/// Returns a constant reverse iterator to the end of the list sentinel
-	inline ConstReverseIterator crEnd() const { return ConstReverseIterator(end()); }
+	/// Returns a constant reverse iterator to the end
+	inline ConstReverseIterator crEnd() const { return ConstReverseIterator(cBegin); }
 
 	/// Returns true if the list is empty
 	inline bool isEmpty() const { return (sentinel_.next_ == &sentinel_); }

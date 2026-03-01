@@ -14,6 +14,54 @@ class HashMapListIteratorTest : public ::testing::Test
 	HashMapTestType hashmap_;
 };
 
+TEST_F(HashMapListIteratorTest, BeginIteratorInvariant)
+{
+	HashMapTestType::ConstIterator it = hashmap_.begin();
+	HashMapTestType::ConstIterator copy = it;
+	++it;
+	--it;
+
+	printf("Increment and then decrement from a begin iterator: %d\n", it == copy);
+	ASSERT_EQ(it, copy);
+}
+
+TEST_F(HashMapListIteratorTest, EndIteratorInvariants)
+{
+	HashMapTestType::ConstIterator it = hashmap_.end();
+	HashMapTestType::ConstIterator copy = it;
+	--it;
+	++it;
+
+	printf("Decrement and then increment from an end iterator: %d\n", it == copy);
+	ASSERT_EQ(it, copy);
+}
+
+TEST_F(HashMapListIteratorTest, ReverseIteratorInvariants)
+{
+	printf("Reverse begin iterator should be the same as the end iterator: %d\n", hashmap_.rBegin().base() == hashmap_.end());
+	ASSERT_EQ(hashmap_.rBegin().base(), hashmap_.end());
+	printf("Reverse end iterator should be the same as the begin iterator: %d\n", hashmap_.rEnd().base() == hashmap_.begin());
+	ASSERT_EQ(hashmap_.rEnd().base(), hashmap_.begin());
+
+	HashMapTestType::ConstReverseIterator r = hashmap_.rBegin();
+	for (unsigned int i = 0; i < hashmap_.size(); i++)
+		++r;
+
+	printf("Reverse iterator should have reached the end: %d\n", r == hashmap_.rEnd());
+	ASSERT_EQ(r, hashmap_.rEnd());
+	printf("Reverse iterator should have be the same as the begin iterator: %d\n", r.base() == hashmap_.begin());
+	ASSERT_EQ(r.base(), hashmap_.begin());
+}
+
+TEST_F(HashMapListIteratorTest, ReverseIteratorInvariantsEmpty)
+{
+	HashMapTestType newHashmap(Capacity);
+	printf("Reverse begin iterator should be the same as the end iterator: %d\n", newHashmap.rBegin().base() == newHashmap.end());
+	ASSERT_EQ(newHashmap.rBegin().base(), newHashmap.end());
+	printf("Reverse end iterator should be the same as the begin iterator: %d\n", newHashmap.rEnd().base() == newHashmap.begin());
+	ASSERT_EQ(newHashmap.rEnd().base(), newHashmap.begin());
+}
+
 TEST_F(HashMapListIteratorTest, ForLoopIteration)
 {
 	int n = 0;
@@ -46,8 +94,11 @@ TEST_F(HashMapListIteratorTest, ReverseForLoopIteration)
 	printf("Reverse iterating through elements with for loop:\n");
 	for (HashMapTestType::ConstReverseIterator r = hashmap_.rBegin(); r != hashmap_.rEnd(); ++r)
 	{
-		printf(" [%d] hash: %u, key: %d, value: %d\n", n, r.base().hash(), r.base().key(), r.base().value());
-		ASSERT_EQ(r.base().key(), n);
+		HashMapTestType::ConstIterator it = r.base();
+		--it;
+
+		printf(" [%d] hash: %u, key: %d, value: %d\n", n, it.hash(), it.key(), it.value());
+		ASSERT_EQ(it.key(), n);
 		ASSERT_EQ(*r, KeyValueDifference + n);
 		n--;
 	}
@@ -103,8 +154,11 @@ TEST_F(HashMapListIteratorTest, ReverseWhileLoopIteration)
 	HashMapTestType::ConstReverseIterator r = hashmap_.rBegin();
 	while (r != hashmap_.rEnd())
 	{
-		printf(" [%d] hash: %u, key: %d, value: %d\n", n, r.base().hash(), r.base().key(), r.base().value());
-		ASSERT_EQ(r.base().key(), n);
+		HashMapTestType::ConstIterator it = r.base();
+		--it;
+
+		printf(" [%d] hash: %u, key: %d, value: %d\n", n, it.hash(), it.key(), it.value());
+		ASSERT_EQ(it.key(), n);
 		ASSERT_EQ(*r, KeyValueDifference + n);
 		++r;
 		--n;
