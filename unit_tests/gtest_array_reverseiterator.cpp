@@ -14,6 +14,32 @@ class ArrayReverseIteratorTest : public ::testing::Test
 	nctl::Array<int> array_;
 };
 
+TEST_F(ArrayReverseIteratorTest, ReverseIteratorInvariants)
+{
+	printf("Reverse begin iterator should be the same as the end iterator: %d\n", array_.rBegin().base() == array_.end());
+	ASSERT_EQ(array_.rBegin().base(), array_.end());
+	printf("Reverse end iterator should be the same as the begin iterator: %d\n", array_.rEnd().base() == array_.begin());
+	ASSERT_EQ(array_.rEnd().base(), array_.begin());
+
+	nctl::Array<int>::ConstReverseIterator r = array_.rBegin();
+	for (unsigned int i = 0; i < array_.size(); i++)
+		++r;
+
+	printf("Reverse iterator should have reached the end: %d\n", r == array_.rEnd());
+	ASSERT_EQ(r, array_.rEnd());
+	printf("Reverse iterator should have be the same as the begin iterator: %d\n", r.base() == array_.begin());
+	ASSERT_EQ(r.base(), array_.begin());
+}
+
+TEST_F(ArrayReverseIteratorTest, ReverseIteratorInvariantsEmpty)
+{
+	nctl::Array<int> newArray;
+	printf("Reverse begin iterator should be the same as the end iterator: %d\n", newArray.rBegin().base() == newArray.end());
+	ASSERT_EQ(newArray.rBegin().base(), newArray.end());
+	printf("Reverse end iterator should be the same as the begin iterator: %d\n", newArray.rEnd().base() == newArray.begin());
+	ASSERT_EQ(newArray.rEnd().base(), newArray.begin());
+}
+
 TEST_F(ArrayReverseIteratorTest, ForLoopIteration)
 {
 	int n = Capacity - 1;

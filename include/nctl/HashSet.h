@@ -65,31 +65,31 @@ class HashSet
 		nctl::swap(first.keys_, second.keys_);
 	}
 
-	/// Returns a constant iterator to the first element
-	ConstIterator begin();
-	/// Returns a reverse constant iterator to the last element
-	ConstReverseIterator rBegin();
-	/// Returns a constant iterator to past the last element
+	/// Returns an iterator to the beginning
+	Iterator begin();
+	/// Returns a reverse iterator to the beginning
+	inline ReverseIterator rBegin() { return ReverseIterator(end()); }
+	/// Returns an iterator to the end
 	ConstIterator end();
-	/// Returns a reverse constant iterator to prior the first element
-	ConstReverseIterator rEnd();
+	/// Returns a reverse iterator to the end
+	inline ReverseIterator rEnd() { return ReverseIterator(begin()); }
 
-	/// Returns a constant iterator to the first element
+	/// Returns a constant iterator to the beginning
 	ConstIterator begin() const;
-	/// Returns a constant reverse iterator to the last element
-	ConstReverseIterator rBegin() const;
-	/// Returns a constant iterator to past the last lement
+	/// Returns a constant reverse iterator to the beginning
+	inline ConstReverseIterator rBegin() const { return ConstReverseIterator(cEnd()); }
+	/// Returns a constant iterator to the end
 	ConstIterator end() const;
-	/// Returns a constant reverse iterator to prior the first element
-	ConstReverseIterator rEnd() const;
+	/// Returns a constant reverse iterator to the end
+	inline ConstReverseIterator rEnd() const { return ConstReverseIterator(cBegin()); }
 
-	/// Returns a constant iterator to the first element
+	/// Returns a constant iterator to the beginning
 	inline ConstIterator cBegin() const { return begin(); }
-	/// Returns a constant reverse iterator to the last element
+	/// Returns a constant reverse iterator to the beginning
 	inline ConstReverseIterator crBegin() const { return rBegin(); }
-	/// Returns a constant iterator to past the last lement
+	/// Returns a constant iterator to the end
 	inline ConstIterator cEnd() const { return end(); }
-	/// Returns a constant reverse iterator to prior the first element
+	/// Returns a constant reverse iterator to the end
 	inline ConstReverseIterator crEnd() const { return rEnd(); }
 
 	/// Inserts an element if not already in
@@ -159,30 +159,16 @@ class HashSet
 };
 
 template <class K, class HashFunc>
-inline typename HashSet<K, HashFunc>::ConstIterator HashSet<K, HashFunc>::begin()
+inline typename HashSet<K, HashFunc>::Iterator HashSet<K, HashFunc>::begin()
 {
-	ConstIterator iterator(this, ConstIterator::SentinelTagInit::BEGINNING);
+	Iterator iterator(this, Iterator::SentinelTagInit::BEGINNING);
 	return ++iterator;
 }
 
 template <class K, class HashFunc>
-typename HashSet<K, HashFunc>::ConstReverseIterator HashSet<K, HashFunc>::rBegin()
+typename HashSet<K, HashFunc>::Iterator HashSet<K, HashFunc>::end()
 {
-	ConstIterator iterator(this, ConstIterator::SentinelTagInit::END);
-	return ConstReverseIterator(--iterator);
-}
-
-template <class K, class HashFunc>
-typename HashSet<K, HashFunc>::ConstIterator HashSet<K, HashFunc>::end()
-{
-	return ConstIterator(this, ConstIterator::SentinelTagInit::END);
-}
-
-template <class K, class HashFunc>
-typename HashSet<K, HashFunc>::ConstReverseIterator HashSet<K, HashFunc>::rEnd()
-{
-	ConstIterator iterator(this, ConstIterator::SentinelTagInit::BEGINNING);
-	return ConstReverseIterator(iterator);
+	return Iterator(this, Iterator::SentinelTagInit::END);
 }
 
 template <class K, class HashFunc>
@@ -193,23 +179,9 @@ typename HashSet<K, HashFunc>::ConstIterator HashSet<K, HashFunc>::begin() const
 }
 
 template <class K, class HashFunc>
-typename HashSet<K, HashFunc>::ConstReverseIterator HashSet<K, HashFunc>::rBegin() const
-{
-	ConstIterator iterator(this, ConstIterator::SentinelTagInit::END);
-	return ConstReverseIterator(--iterator);
-}
-
-template <class K, class HashFunc>
 typename HashSet<K, HashFunc>::ConstIterator HashSet<K, HashFunc>::end() const
 {
 	return ConstIterator(this, ConstIterator::SentinelTagInit::END);
-}
-
-template <class K, class HashFunc>
-typename HashSet<K, HashFunc>::ConstReverseIterator HashSet<K, HashFunc>::rEnd() const
-{
-	ConstIterator iterator(this, ConstIterator::SentinelTagInit::BEGINNING);
-	return ConstReverseIterator(iterator);
 }
 
 template <class K, class HashFunc>

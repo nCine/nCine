@@ -10,6 +10,55 @@ class CArrayIteratorTest : public ::testing::Test
 	int array_[Capacity];
 };
 
+TEST_F(CArrayIteratorTest, BeginIteratorInvariant)
+{
+	nctl::ArrayIterator<int, true> it = nctl::cBegin(array_);
+	nctl::ArrayIterator<int, true> copy = it;
+	++it;
+	--it;
+
+	printf("Increment and then decrement from a begin iterator: %d\n", it == copy);
+	ASSERT_EQ(it, copy);
+}
+
+TEST_F(CArrayIteratorTest, EndIteratorInvariants)
+{
+	nctl::ArrayIterator<int, true> it = nctl::cEnd(array_);
+	nctl::ArrayIterator<int, true> copy = it;
+	--it;
+	++it;
+
+	printf("Decrement and then increment from an end iterator: %d\n", it == copy);
+	ASSERT_EQ(it, copy);
+}
+
+TEST_F(CArrayIteratorTest, ReverseIteratorInvariants)
+{
+	printf("Reverse begin iterator should be the same as the end iterator: %d\n", nctl::crBegin(array_).base() == nctl::cEnd(array_));
+	ASSERT_EQ(nctl::crBegin(array_).base(), nctl::cEnd(array_));
+	printf("Reverse end iterator should be the same as the begin iterator: %d\n", nctl::crEnd(array_).base() == nctl::cBegin(array_));
+	ASSERT_EQ(nctl::crEnd(array_).base(), nctl::cBegin(array_));
+
+	nctl::ReverseIterator<nctl::ArrayIterator<int, true>> r = nctl::crBegin(array_);
+	for (unsigned int i = 0; i < Capacity; i++)
+		++r;
+
+	printf("Reverse iterator should have reached the end: %d\n", r == nctl::crEnd(array_));
+	ASSERT_EQ(r, nctl::crEnd(array_));
+	printf("Reverse iterator should have be the same as the begin iterator: %d\n", r.base() == nctl::cBegin(array_));
+	ASSERT_EQ(r.base(), nctl::cBegin(array_));
+}
+
+TEST_F(CArrayIteratorTest, ReverseIteratorInvariantsEmpty)
+{
+	int newArray[1];
+
+	printf("Reverse begin iterator should be the same as the end iterator: %d\n", nctl::crBegin(newArray).base() == nctl::cEnd(newArray));
+	ASSERT_EQ(nctl::crBegin(newArray).base(), nctl::cEnd(newArray));
+	printf("Reverse end iterator should be the same as the begin iterator: %d\n", nctl::crEnd(newArray).base() == nctl::cBegin(newArray));
+	ASSERT_EQ(nctl::crEnd(newArray).base(), nctl::cBegin(newArray));
+}
+
 TEST_F(CArrayIteratorTest, ForLoopIteration)
 {
 	int n = FirstElement;

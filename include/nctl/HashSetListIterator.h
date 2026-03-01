@@ -68,13 +68,7 @@ class HashSetListIterator
 	/// Inequality operator
 	friend inline bool operator!=(const HashSetListIterator &lhs, const HashSetListIterator &rhs)
 	{
-		if (lhs.tag_ == SentinelTag::REGULAR && rhs.tag_ == SentinelTag::REGULAR)
-		{
-			return (lhs.hashSet_ != rhs.hashSet_ || lhs.bucketIndex_ != rhs.bucketIndex_ ||
-			        lhs.listIterator_ != rhs.listIterator_ || lhs.atFirstNode_ != rhs.atFirstNode_);
-		}
-		else
-			return (lhs.tag_ != rhs.tag_);
+		return !(lhs == rhs);
 	}
 
 	/// Returns the hashset node currently pointed by the iterator
@@ -237,23 +231,27 @@ void HashSetListIterator<K, HashFunc>::next()
 	}
 }
 
+/*! It should be impossible to reach the beginning sentinel by calling this method on an iterator pointing to the first element. */
 template <class K, class HashFunc>
 void HashSetListIterator<K, HashFunc>::previous()
 {
+	ASSERT(tag_ != SentinelTag::BEGINNING);
+
 	if (tag_ == SentinelTag::END)
 	{
 		findLastValid();
 		return;
 	}
-	else if (tag_ == SentinelTag::BEGINNING)
-		return;
 
 	typename HashSetListHelperTraits<K, HashFunc>::BucketPtr bucket = &(hashSet_->buckets_[bucketIndex_]);
 
 	if (atFirstNode_)
 	{
 		if (bucketIndex_ == 0)
-			tag_ = SentinelTag::BEGINNING;
+		{
+			listIterator_ = typename HashSetListHelperTraits<K, HashFunc>::ListIteratorType(nullptr);
+			return;
+		}
 		else
 		{
 			do
@@ -263,7 +261,7 @@ void HashSetListIterator<K, HashFunc>::previous()
 		}
 
 		if (bucket->size() == 0)
-			tag_ = SentinelTag::BEGINNING;
+			return;
 		else if (bucket->size() > 1)
 		{
 			atFirstNode_ = false;
@@ -274,7 +272,10 @@ void HashSetListIterator<K, HashFunc>::previous()
 		--listIterator_;
 
 	if (listIterator_ == bucket->collisionList_.end()) // nullptr sentinel
+	{
 		atFirstNode_ = true;
+		listIterator_ = typename HashSetListHelperTraits<K, HashFunc>::ListIteratorType(nullptr);
+	}
 }
 
 template <class K, class HashFunc>
@@ -309,7 +310,7 @@ void HashSetListIterator<K, HashFunc>::findLastValid()
 		atFirstNode_ = false;
 	}
 	else if (bucket->size() == 0)
-		tag_ = SentinelTag::BEGINNING;
+		return;
 }
 
 }

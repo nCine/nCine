@@ -190,52 +190,60 @@ inline typename ArrayIterator<T, IsConst>::Reference ArrayIterator<T, IsConst>::
 // C-STYLE ARRAYS
 ///////////////////////////////////////////////////////////
 
+/// Returns an iterator to the beginning
 template <class T, unsigned int N>
 ArrayIterator<T, false> begin(T (&array)[N])
 {
 	return ArrayIterator<T, false>(array);
 }
 
-template <class T, unsigned int N>
-ReverseIterator<ArrayIterator<T, false>> rBegin(T (&array)[N])
-{
-	return ReverseIterator<ArrayIterator<T, false>>(ArrayIterator<T, false>(array + N - 1));
-}
-
+/// Returns a constant iterator to the beginning
 template <class T, unsigned int N>
 const ArrayIterator<T, true> cBegin(T (&array)[N])
 {
 	return ArrayIterator<T, true>(array);
 }
 
-template <class T, unsigned int N>
-const ReverseIterator<ArrayIterator<T, true>> crBegin(T (&array)[N])
-{
-	return ReverseIterator<ArrayIterator<T, true>>(ArrayIterator<T, true>(array + N - 1));
-}
-
+/// Returns an iterator to the end
 template <class T, unsigned int N>
 ArrayIterator<T, false> end(T (&array)[N])
 {
 	return ArrayIterator<T, false>(array + N);
 }
 
-template <class T, unsigned int N>
-ReverseIterator<ArrayIterator<T, false>> rEnd(T (&array)[N])
-{
-	return ReverseIterator<ArrayIterator<T, false>>(ArrayIterator<T, false>(array - 1));
-}
-
+/// Returns a constant iterator to past the end
 template <class T, unsigned int N>
 const ArrayIterator<T, true> cEnd(T (&array)[N])
 {
 	return ArrayIterator<T, true>(array + N);
 }
 
+/// Returns a reverse iterator to the beginning
+template <class T, unsigned int N>
+ReverseIterator<ArrayIterator<T, false>> rBegin(T (&array)[N])
+{
+	return ReverseIterator<ArrayIterator<T, false>>(end(array));
+}
+
+/// Returns a constant reverse iterator to the beginning
+template <class T, unsigned int N>
+const ReverseIterator<ArrayIterator<T, true>> crBegin(T (&array)[N])
+{
+	return ReverseIterator<ArrayIterator<T, true>>(cEnd(array));
+}
+
+/// Returns a reverse iterator to the end
+template <class T, unsigned int N>
+ReverseIterator<ArrayIterator<T, false>> rEnd(T (&array)[N])
+{
+	return ReverseIterator<ArrayIterator<T, false>>(begin(array));
+}
+
+/// Returns a constant reverse iterator to the end
 template <class T, unsigned int N>
 const ReverseIterator<ArrayIterator<T, true>> crEnd(T (&array)[N])
 {
-	return ReverseIterator<ArrayIterator<T, true>>(ArrayIterator<T, true>(array - 1));
+	return ReverseIterator<ArrayIterator<T, true>>(cBegin(array));
 }
 
 }

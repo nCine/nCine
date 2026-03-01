@@ -60,31 +60,31 @@ class SparseSet
 		nctl::swap(first.dense_, second.dense_);
 	}
 
-	/// Returns a constant iterator to the first element
+	/// Returns an iterator to the beginning
 	ConstIterator begin();
-	/// Returns a reverse constant iterator to the last element
-	ConstReverseIterator rBegin();
-	/// Returns a constant iterator to past the last element
+	/// Returns a reverse iterator to the beginning
+	inline ConstReverseIterator rBegin() { return ReverseIterator(end()); }
+	/// Returns an iterator to the end
 	ConstIterator end();
-	/// Returns a reverse constant iterator to prior the first element
-	ConstReverseIterator rEnd();
+	/// Returns a reverse iterator to the end
+	inline ConstReverseIterator rEnd() { return ReverseIterator(begin()); }
 
-	/// Returns a constant iterator to the first element
+	/// Returns a constant iterator to the beginning
 	ConstIterator begin() const;
-	/// Returns a constant reverse iterator to the last element
-	ConstReverseIterator rBegin() const;
-	/// Returns a constant iterator to past the last lement
+	/// Returns a constant reverse iterator to the beginning
+	inline ConstReverseIterator rBegin() const { return ConstReverseIterator(cEnd()); }
+	/// Returns a constant iterator to the end
 	ConstIterator end() const;
-	/// Returns a constant reverse iterator to prior the first element
-	ConstReverseIterator rEnd() const;
+	/// Returns a constant reverse iterator to the end
+	inline ConstReverseIterator rEnd() const { return ConstReverseIterator(cBegin()); }
 
-	/// Returns a constant iterator to the first element
+	/// Returns a constant iterator to the beginning
 	inline ConstIterator cBegin() const { return begin(); }
-	/// Returns a constant reverse iterator to the last element
+	/// Returns a constant reverse iterator to the beginning
 	inline ConstReverseIterator crBegin() const { return rBegin(); }
-	/// Returns a constant iterator to past the last lement
+	/// Returns a constant iterator to the end
 	inline ConstIterator cEnd() const { return end(); }
-	/// Returns a constant reverse iterator to prior the first element
+	/// Returns a constant reverse iterator to the end
 	inline ConstReverseIterator crEnd() const { return rEnd(); }
 
 	/// Inserts an element if not already in
@@ -135,23 +135,9 @@ inline typename SparseSet<T>::ConstIterator SparseSet<T>::begin()
 }
 
 template <class T>
-typename SparseSet<T>::ConstReverseIterator SparseSet<T>::rBegin()
-{
-	ConstIterator iterator(this, size_ - 1);
-	return ConstReverseIterator(iterator);
-}
-
-template <class T>
 typename SparseSet<T>::ConstIterator SparseSet<T>::end()
 {
 	return ConstIterator(this, size_);
-}
-
-template <class T>
-typename SparseSet<T>::ConstReverseIterator SparseSet<T>::rEnd()
-{
-	ConstIterator iterator(this, -1);
-	return ConstReverseIterator(iterator);
 }
 
 template <class T>
@@ -162,23 +148,9 @@ typename SparseSet<T>::ConstIterator SparseSet<T>::begin() const
 }
 
 template <class T>
-typename SparseSet<T>::ConstReverseIterator SparseSet<T>::rBegin() const
-{
-	ConstIterator iterator(this, size_ - 1);
-	return ConstReverseIterator(iterator);
-}
-
-template <class T>
 typename SparseSet<T>::ConstIterator SparseSet<T>::end() const
 {
 	return ConstIterator(this, size_);
-}
-
-template <class T>
-typename SparseSet<T>::ConstReverseIterator SparseSet<T>::rEnd() const
-{
-	ConstIterator iterator(this, -1);
-	return ConstReverseIterator(iterator);
 }
 
 template <class T>

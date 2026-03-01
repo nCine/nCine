@@ -14,6 +14,28 @@ class ArrayIteratorTest : public ::testing::Test
 	nctl::Array<int> array_;
 };
 
+TEST_F(ArrayIteratorTest, BeginIteratorInvariant)
+{
+	nctl::Array<int>::ConstIterator it = array_.begin();
+	nctl::Array<int>::ConstIterator copy = it;
+	++it;
+	--it;
+
+	printf("Increment and then decrement from a begin iterator: %d\n", it == copy);
+	ASSERT_EQ(it, copy);
+}
+
+TEST_F(ArrayIteratorTest, EndIteratorInvariants)
+{
+	nctl::Array<int>::ConstIterator it = array_.end();
+	nctl::Array<int>::ConstIterator copy = it;
+	--it;
+	++it;
+
+	printf("Decrement and then increment from an end iterator: %d\n", it == copy);
+	ASSERT_EQ(it, copy);
+}
+
 TEST_F(ArrayIteratorTest, ForLoopIteration)
 {
 	int n = FirstElement;

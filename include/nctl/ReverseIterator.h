@@ -110,7 +110,9 @@ struct IteratorTraits<ReverseIterator<Iterator>>
 template <class Iterator>
 inline typename ReverseIterator<Iterator>::Reference ReverseIterator<Iterator>::operator*() const
 {
-	return *it_;
+	Iterator tmp = it_;
+
+	return *(--tmp);
 }
 
 template <class Iterator>
@@ -188,7 +190,9 @@ ReverseIterator<Iterator> ReverseIterator<Iterator>::operator-(int n) const
 template <class Iterator>
 inline typename ReverseIterator<Iterator>::Reference ReverseIterator<Iterator>::operator[](int n) const
 {
-	return *(it_ - n);
+	Iterator tmp = it_;
+
+	return *(tmp - 1 - n);
 }
 
 template <class Iterator>

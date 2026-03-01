@@ -55,32 +55,32 @@ class DLL_PUBLIC String
 		nctl::swap(first.capacity_, second.capacity_);
 	}
 
-	/// Returns an iterator to the first character
+	/// Returns an iterator to the beginning
 	inline Iterator begin() { return Iterator(data()); }
-	/// Returns a reverse iterator to the last character
-	inline ReverseIterator rBegin() { return ReverseIterator(Iterator(data() + length_ - 1)); }
-	/// Returns an iterator to the termination character
+	/// Returns a reverse iterator to the beginning
+	inline ReverseIterator rBegin() { return ReverseIterator(end()); }
+	/// Returns an iterator to the end
 	inline Iterator end() { return Iterator(data() + length_); }
-	/// Returns a reverse iterator to the byte preceding the first character
-	inline ReverseIterator rEnd() { return ReverseIterator(Iterator(data() - 1)); }
+	/// Returns a reverse iterator to the end
+	inline ReverseIterator rEnd() { return ReverseIterator(begin()); }
 
-	/// Returns a constant iterator to the first character
+	/// Returns a constant iterator to the beginning
 	inline ConstIterator begin() const { return ConstIterator(data()); }
-	/// Returns a constant reverse iterator to the last character
-	inline ConstReverseIterator rBegin() const { return ConstReverseIterator(ConstIterator(data() + length_ - 1)); }
-	/// Returns a constant iterator to the termination character
+	/// Returns a constant reverse iterator to the beginning
+	inline ConstReverseIterator rBegin() const { return ConstReverseIterator(cEnd()); }
+	/// Returns a constant iterator to the end
 	inline ConstIterator end() const { return ConstIterator(data() + length_); }
-	/// Returns a constant reverse iterator to the byte preceding the first character
-	inline ConstReverseIterator rEnd() const { return ConstReverseIterator(ConstIterator(data() - 1)); }
+	/// Returns a constant reverse iterator to the end
+	inline ConstReverseIterator rEnd() const { return ConstReverseIterator(cBegin()); }
 
-	/// Returns a constant iterator to the first character
+	/// Returns a constant iterator to the beginning
 	inline ConstIterator cBegin() const { return ConstIterator(data()); }
-	/// Returns a constant reverse iterator to the last character
-	inline ConstReverseIterator crBegin() const { return ConstReverseIterator(ConstIterator(data() + length_ - 1)); }
-	/// Returns a constant iterator to the termination character
+	/// Returns a constant reverse iterator to the beginning
+	inline ConstReverseIterator crBegin() const { return ConstReverseIterator(cEnd()); }
+	/// Returns a constant iterator to the end
 	inline ConstIterator cEnd() const { return ConstIterator(data() + length_); }
-	/// Returns a constant reverse iterator to the byte preceding the first character
-	inline ConstReverseIterator crEnd() const { return ConstReverseIterator(ConstIterator(data() - 1)); }
+	/// Returns a constant reverse iterator to the end
+	inline ConstReverseIterator crEnd() const { return ConstReverseIterator(cBegin()); }
 
 	/// Returns true if the string is empty
 	inline bool isEmpty() const { return length_ == 0; }

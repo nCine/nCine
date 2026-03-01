@@ -10,6 +10,32 @@ class StaticStringReverseIteratorTest : public ::testing::Test
 	nctl::StaticString<Capacity> string_;
 };
 
+TEST_F(StaticStringReverseIteratorTest, ReverseIteratorInvariants)
+{
+	printf("Reverse begin iterator should be the same as the end iterator: %d\n", string_.rBegin().base() == string_.end());
+	ASSERT_EQ(string_.rBegin().base(), string_.end());
+	printf("Reverse end iterator should be the same as the begin iterator: %d\n", string_.rEnd().base() == string_.begin());
+	ASSERT_EQ(string_.rEnd().base(), string_.begin());
+
+	nctl::StaticString<Capacity>::ConstReverseIterator r = string_.rBegin();
+	for (unsigned int i = 0; i < string_.length(); i++)
+		++r;
+
+	printf("Reverse iterator should have reached the end: %d\n", r == string_.rEnd());
+	ASSERT_EQ(r, string_.rEnd());
+	printf("Reverse iterator should have be the same as the begin iterator: %d\n", r.base() == string_.begin());
+	ASSERT_EQ(r.base(), string_.begin());
+}
+
+TEST_F(StaticStringReverseIteratorTest, ReverseIteratorInvariantsEmpty)
+{
+	nctl::StaticString<Capacity> newString;
+	printf("Reverse begin iterator should be the same as the end iterator: %d\n", newString.rBegin().base() == newString.end());
+	ASSERT_EQ(newString.rBegin().base(), newString.end());
+	printf("Reverse end iterator should be the same as the begin iterator: %d\n", newString.rEnd().base() == newString.begin());
+	ASSERT_EQ(newString.rEnd().base(), newString.begin());
+}
+
 TEST_F(StaticStringReverseIteratorTest, ForLoopIteration)
 {
 	unsigned int n = string_.length() - 1;

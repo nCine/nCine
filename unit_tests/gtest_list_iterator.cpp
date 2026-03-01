@@ -13,6 +13,54 @@ class ListIteratorTest : public ::testing::Test
 	nctl::List<int> list_;
 };
 
+TEST_F(ListIteratorTest, BeginIteratorInvariant)
+{
+	nctl::List<int>::ConstIterator it = list_.begin();
+	nctl::List<int>::ConstIterator copy = it;
+	++it;
+	--it;
+
+	printf("Increment and then decrement from a begin iterator: %d\n", it == copy);
+	ASSERT_EQ(it, copy);
+}
+
+TEST_F(ListIteratorTest, EndIteratorInvariants)
+{
+	nctl::List<int>::ConstIterator it = list_.end();
+	nctl::List<int>::ConstIterator copy = it;
+	--it;
+	++it;
+
+	printf("Decrement and then increment from an end iterator: %d\n", it == copy);
+	ASSERT_EQ(it, copy);
+}
+
+TEST_F(ListIteratorTest, ReverseIteratorInvariants)
+{
+	printf("Reverse begin iterator should be the same as the end iterator: %d\n", list_.rBegin().base() == list_.end());
+	ASSERT_EQ(list_.rBegin().base(), list_.end());
+	printf("Reverse end iterator should be the same as the begin iterator: %d\n", list_.rEnd().base() == list_.begin());
+	ASSERT_EQ(list_.rEnd().base(), list_.begin());
+
+	nctl::List<int>::ConstReverseIterator r = list_.rBegin();
+	for (unsigned int i = 0; i < list_.size(); i++)
+		++r;
+
+	printf("Reverse iterator should have reached the end: %d\n", r == list_.rEnd());
+	ASSERT_EQ(r, list_.rEnd());
+	printf("Reverse iterator should have be the same as the begin iterator: %d\n", r.base() == list_.begin());
+	ASSERT_EQ(r.base(), list_.begin());
+}
+
+TEST_F(ListIteratorTest, ReverseIteratorInvariantsEmpty)
+{
+	nctl::List<int> newList;
+	printf("Reverse begin iterator should be the same as the end iterator: %d\n", newList.rBegin().base() == newList.end());
+	ASSERT_EQ(newList.rBegin().base(), newList.end());
+	printf("Reverse end iterator should be the same as the begin iterator: %d\n", newList.rEnd().base() == newList.begin());
+	ASSERT_EQ(newList.rEnd().base(), newList.begin());
+}
+
 TEST_F(ListIteratorTest, ForLoopIteration)
 {
 	int n = FirstElement;

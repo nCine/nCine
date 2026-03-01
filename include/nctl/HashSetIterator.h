@@ -60,10 +60,7 @@ class HashSetIterator
 	/// Inequality operator
 	friend inline bool operator!=(const HashSetIterator &lhs, const HashSetIterator &rhs)
 	{
-		if (lhs.tag_ == SentinelTag::REGULAR && rhs.tag_ == SentinelTag::REGULAR)
-			return (lhs.hashSet_ != rhs.hashSet_ || lhs.bucketIndex_ != rhs.bucketIndex_);
-		else
-			return (lhs.tag_ != rhs.tag_);
+		return !(lhs == rhs);
 	}
 
 	/// Returns the key associated to the currently pointed element
@@ -197,16 +194,16 @@ void HashSetIterator<K, HashFunc>::next()
 		tag_ = SentinelTag::END;
 }
 
+/*! It should be impossible to reach the beginning sentinel by calling this method on an iterator pointing to the first element. */
 template <class K, class HashFunc>
 void HashSetIterator<K, HashFunc>::previous()
 {
+	ASSERT(tag_ != SentinelTag::BEGINNING);
+
 	if (tag_ == SentinelTag::REGULAR)
 	{
 		if (bucketIndex_ == 0)
-		{
-			tag_ = SentinelTag::BEGINNING;
 			return;
-		}
 		else
 			bucketIndex_--;
 	}
@@ -215,15 +212,13 @@ void HashSetIterator<K, HashFunc>::previous()
 		tag_ = SentinelTag::REGULAR;
 		bucketIndex_ = hashSet_->capacity() - 1;
 	}
-	else if (tag_ == SentinelTag::BEGINNING)
-		return;
 
 	// Search the first non empty index starting from the current one
 	while (bucketIndex_ > 0 && hashSet_->hashes_[bucketIndex_] == NullHash)
 		bucketIndex_--;
 
 	if (hashSet_->hashes_[bucketIndex_] == NullHash)
-		tag_ = SentinelTag::BEGINNING;
+		return;
 }
 
 }
