@@ -11,7 +11,7 @@ class HashSetCStringTest : public ::testing::Test
   protected:
 	void SetUp() override { initHashSet(cstrHashset_); }
 
-	nctl::HashSet<const char *> cstrHashset_;
+	HashSetCStrType cstrHashset_;
 };
 
 TEST_F(HashSetCStringTest, InsertElements)

@@ -69,6 +69,7 @@ list(APPEND TESTS
 	gtest_color gtest_colorf gtest_colorhdr
 	gtest_random gtest_filesystem gtest_pointermath gtest_bitset
 	gtest_optional gtest_optional_movable
+	gtest_pair gtest_pair_movable
 )
 
 if(NOT (CMAKE_BUILD_TYPE MATCHES Release AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"))

@@ -227,8 +227,12 @@ bool BinaryShaderCache::retrieveShaderInfo(uint64_t shaderHashName, ShaderInfo &
 	if (isEnabled_ == false || isAvailable_ == false)
 		return false;
 
-	const bool contains = shaderInfos_.contains(shaderHashName, shaderInfo);
-	return contains;
+	const ShaderInfo *shaderInfoPtr = shaderInfos_.find(shaderHashName);
+	const bool found = (shaderInfoPtr != nullptr);
+	if (found)
+		shaderInfo = *shaderInfoPtr;
+
+	return found;
 }
 
 bool BinaryShaderCache::registerShaderInfo(uint64_t shaderHashName, uint32_t binaryFormat, const char *name, unsigned int batchSize)

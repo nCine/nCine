@@ -10,15 +10,16 @@ namespace {
 
 const unsigned int Capacity = 32;
 const unsigned int Size = 6;
+using HashSetStrType = nctl::StaticHashSet<nctl::String, Capacity>;
 const char *Keys[Size] = { "A", "a", "B", "C", "AB", "BA" };
 
-void initHashSet(nctl::StaticHashSet<nctl::String, Capacity> &strHashset)
+void initHashSet(HashSetStrType &strHashset)
 {
 	for (unsigned int i = 0; i < Size; i++)
 		strHashset.insert(Keys[i]);
 }
 
-void printHashSet(nctl::StaticHashSet<nctl::String, Capacity> &strHashset)
+void printHashSet(const HashSetStrType &strHashset)
 {
 	unsigned int n = 0;
 
@@ -27,20 +28,20 @@ void printHashSet(nctl::StaticHashSet<nctl::String, Capacity> &strHashset)
 	printf("\n");
 }
 
-unsigned int calcSize(const nctl::StaticHashSet<nctl::String, Capacity> &strHashset)
+unsigned int calcSize(const HashSetStrType &strHashset)
 {
 	unsigned int length = 0;
 
-	for (typename nctl::StaticHashSet<nctl::String, Capacity>::ConstIterator i = strHashset.begin(); i != strHashset.end(); ++i)
+	for (HashSetStrType::ConstIterator i = strHashset.begin(); i != strHashset.end(); ++i)
 		length++;
 
 	return length;
 }
 
-void assertHashSetsAreEqual(const nctl::StaticHashSet<nctl::String, Capacity> &strHashset1, const nctl::StaticHashSet<nctl::String, Capacity> &strHashset2)
+void assertHashSetsAreEqual(const HashSetStrType &strHashset1, const HashSetStrType &strHashset2)
 {
-	nctl::StaticHashSet<nctl::String, Capacity>::ConstIterator strHashset1It = strHashset1.begin();
-	nctl::StaticHashSet<nctl::String, Capacity>::ConstIterator strHashset2It = strHashset2.begin();
+	HashSetStrType::ConstIterator strHashset1It = strHashset1.begin();
+	HashSetStrType::ConstIterator strHashset2It = strHashset2.begin();
 	while (strHashset1It != strHashset1.end())
 	{
 		ASSERT_EQ(strHashset1It.key(), strHashset2It.key());

@@ -7,7 +7,7 @@ class StaticHashSetCStringTest : public ::testing::Test
   protected:
 	void SetUp() override { initHashSet(cstrHashset_); }
 
-	nctl::StaticHashSet<const char *, Capacity> cstrHashset_;
+	HashSetCStrType cstrHashset_;
 };
 
 TEST_F(StaticHashSetCStringTest, InsertElements)

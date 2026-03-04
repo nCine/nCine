@@ -295,11 +295,9 @@ GLVertexFormat::Attribute *GLShaderProgram::attribute(const char *name)
 	ASSERT(name);
 	GLVertexFormat::Attribute *vertexAttribute = nullptr;
 
-	int location = -1;
-	const bool attributeFound = attributeLocations_.contains(name, location);
-
-	if (attributeFound)
-		vertexAttribute = &vertexFormat_[location];
+	const int *location = attributeLocations_.find(name);
+	if (location != nullptr)
+		vertexAttribute = &vertexFormat_[*location];
 
 	return vertexAttribute;
 }
