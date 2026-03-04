@@ -11,41 +11,43 @@ namespace {
 const unsigned int Capacity = 32;
 const unsigned int Size = 10;
 const int KeyValueDifference = 10;
-using HashMapTestType = nctl::HashMapList<int, int, nctl::FixedHashFunc<int>>;
+template <class HashFunc> using HashMapType = nctl::HashMapList<int, int, HashFunc>;
+using HashMapTestType = HashMapType<nctl::FixedHashFunc<int>>;
+using PairType = nctl::Pair<int, int>;
 
 template <class HashFunc>
-void initHashMap(nctl::HashMapList<int, int, HashFunc> &hashmap)
+void initHashMap(HashMapType<HashFunc> &hashmap)
 {
 	for (unsigned int i = 0; i < Size; i++)
 		hashmap[i] = i + KeyValueDifference;
 }
 
 template <class HashFunc>
-void printHashMap(const nctl::HashMapList<int, int, HashFunc> &hashmap)
+void printHashMap(const HashMapType<HashFunc> &hashmap)
 {
 	unsigned int n = 0;
 
-	for (typename nctl::HashMapList<int, int, HashFunc>::ConstIterator i = hashmap.begin(); i != hashmap.end(); ++i)
+	for (typename HashMapType<HashFunc>::ConstIterator i = hashmap.begin(); i != hashmap.end(); ++i)
 		printf("[%u] hash: %u, key: %d, value: %d\n", n++, i.hash(), i.key(), i.value());
 	printf("\n");
 }
 
 template <class HashFunc>
-unsigned int calcSize(const nctl::HashMapList<int, int, HashFunc> &hashmap)
+unsigned int calcSize(const HashMapType<HashFunc> &hashmap)
 {
 	unsigned int length = 0;
 
-	for (typename nctl::HashMapList<int, int, HashFunc>::ConstIterator i = hashmap.begin(); i != hashmap.end(); ++i)
+	for (typename HashMapType<HashFunc>::ConstIterator i = hashmap.begin(); i != hashmap.end(); ++i)
 		length++;
 
 	return length;
 }
 
 template <class HashFunc>
-void assertHashMapsAreEqual(const nctl::HashMapList<int, int, HashFunc> &hashmap1, const nctl::HashMapList<int, int, HashFunc> &hashmap2)
+void assertHashMapsAreEqual(const HashMapType<HashFunc> &hashmap1, const HashMapType<HashFunc> &hashmap2)
 {
-	typename nctl::HashMapList<int, int, HashFunc>::ConstIterator hashmap1It = hashmap1.begin();
-	typename nctl::HashMapList<int, int, HashFunc>::ConstIterator hashmap2It = hashmap2.begin();
+	typename HashMapType<HashFunc>::ConstIterator hashmap1It = hashmap1.begin();
+	typename HashMapType<HashFunc>::ConstIterator hashmap2It = hashmap2.begin();
 	while (hashmap1It != hashmap1.end())
 	{
 		ASSERT_EQ(hashmap1It.key(), hashmap2It.key());

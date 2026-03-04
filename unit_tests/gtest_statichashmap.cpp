@@ -71,11 +71,61 @@ TEST_F(StaticHashMapTest, InsertElements)
 	ASSERT_EQ(calcSize(hashmap_), Size * 2);
 }
 
+TEST_F(StaticHashMapTest, InsertConstElements)
+{
+	printf("Inserting const elements\n");
+	for (unsigned int i = Size; i < Size * 2; i++)
+	{
+		const int value = i + KeyValueDifference;
+		hashmap_.insert(i, value);
+	}
+
+	for (unsigned int i = 0; i < Size * 2; i++)
+		ASSERT_EQ(hashmap_[i], i + KeyValueDifference);
+
+	ASSERT_EQ(hashmap_.size(), Size * 2);
+	ASSERT_EQ(calcSize(hashmap_), Size * 2);
+}
+
+TEST_F(StaticHashMapTest, InsertPairs)
+{
+	printf("Inserting elements as pairs\n");
+	for (unsigned int i = Size; i < Size * 2; i++)
+	{
+		PairType pair(i, i + KeyValueDifference);
+		hashmap_.insert(pair);
+	}
+
+	for (unsigned int i = 0; i < Size * 2; i++)
+		ASSERT_EQ(hashmap_[i], i + KeyValueDifference);
+
+	ASSERT_EQ(hashmap_.size(), Size * 2);
+	ASSERT_EQ(calcSize(hashmap_), Size * 2);
+}
+
 TEST_F(StaticHashMapTest, FailInsertElements)
 {
 	printf("Trying to insert elements already in the hashmap\n");
 	for (unsigned int i = 0; i < Size * 2; i++)
 		hashmap_.insert(i, i + 2 * KeyValueDifference);
+
+	for (unsigned int i = 0; i < Size; i++)
+		ASSERT_EQ(hashmap_[i], i + KeyValueDifference);
+	for (unsigned int i = Size; i < Size * 2; i++)
+		ASSERT_EQ(hashmap_[i], i + 2 * KeyValueDifference);
+
+	ASSERT_EQ(hashmap_.size(), Size * 2);
+	ASSERT_EQ(calcSize(hashmap_), Size * 2);
+}
+
+TEST_F(StaticHashMapTest, FailInsertConstElements)
+{
+	printf("Trying to insert const elements already in the hashmap\n");
+	for (unsigned int i = 0; i < Size * 2; i++)
+	{
+		const int value = i + 2 * KeyValueDifference;
+		hashmap_.insert(i, value);
+	}
 
 	for (unsigned int i = 0; i < Size; i++)
 		ASSERT_EQ(hashmap_[i], i + KeyValueDifference);
@@ -123,9 +173,8 @@ TEST_F(StaticHashMapTest, RemoveElements)
 	hashmap_.remove(7);
 	printHashMap(hashmap_);
 
-	int value = 0;
-	ASSERT_FALSE(hashmap_.contains(5, value));
-	ASSERT_FALSE(hashmap_.contains(7, value));
+	ASSERT_FALSE(hashmap_.contains(5));
+	ASSERT_FALSE(hashmap_.contains(7));
 	ASSERT_EQ(hashmap_.size(), Size - 2);
 	ASSERT_EQ(calcSize(hashmap_), Size - 2);
 }
@@ -195,20 +244,17 @@ TEST_F(StaticHashMapTest, SelfAssignment)
 TEST_F(StaticHashMapTest, Contains)
 {
 	const int key = 1;
-	int value = 0;
-	const bool found = hashmap_.contains(key, value);
-	printf("Key %d is in the hashmap: %d - Value: %d\n", key, found, value);
+	const bool found = hashmap_.contains(key);
+	printf("Key %d is in the hashmap: %d\n", key, found);
 
 	ASSERT_TRUE(found);
-	ASSERT_EQ(value, key + KeyValueDifference);
 }
 
 TEST_F(StaticHashMapTest, DoesNotContain)
 {
 	const int key = 10;
-	int value = 0;
-	const bool found = hashmap_.contains(key, value);
-	printf("Key %d is in the hashmap: %d - Value: %d\n", key, found, value);
+	const bool found = hashmap_.contains(key);
+	printf("Key %d is in the hashmap: %d\n", key, found);
 
 	ASSERT_FALSE(found);
 }
@@ -293,9 +339,9 @@ TEST_F(StaticHashMapTest, StressRemove)
 
 		int value = 0;
 		for (int j = i + 1; j < LastElement; j++)
-			ASSERT_TRUE(newHashmap.contains(j, value));
+			ASSERT_TRUE(newHashmap.contains(j));
 		for (int j = 0; j < i + 1; j++)
-			ASSERT_FALSE(newHashmap.contains(j, value));
+			ASSERT_FALSE(newHashmap.contains(j));
 	}
 
 	ASSERT_EQ(newHashmap.size(), 0);
@@ -318,9 +364,9 @@ TEST_F(StaticHashMapTest, StressReverseRemove)
 
 		int value = 0;
 		for (int j = i - 1; j >= 0; j--)
-			ASSERT_TRUE(newHashmap.contains(j, value));
+			ASSERT_TRUE(newHashmap.contains(j));
 		for (int j = LastElement; j >= i; j--)
-			ASSERT_FALSE(newHashmap.contains(j, value));
+			ASSERT_FALSE(newHashmap.contains(j));
 	}
 
 	ASSERT_EQ(newHashmap.size(), 0);

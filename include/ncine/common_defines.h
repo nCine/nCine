@@ -41,4 +41,16 @@
 	#define NODISCARD
 #endif
 
+#if defined(_MSC_VER)
+	#define NCINE_CPP_VERSION _MSVC_LANG
+#else
+	#define NCINE_CPP_VERSION __cplusplus
+#endif
+
+#if NCINE_CPP_VERSION >= 201402L
+	#define CONSTEXPR14 constexpr
+#else
+	#define CONSTEXPR14
+#endif
+
 #endif

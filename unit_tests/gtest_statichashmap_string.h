@@ -10,38 +10,40 @@ namespace {
 
 const unsigned int Capacity = 32;
 const unsigned int Size = 6;
+using HashMapStrType = nctl::StaticHashMap<nctl::String, nctl::String, Capacity>;
+using PairStrType = nctl::Pair<nctl::String, nctl::String>;
 const char *Keys[Size] = { "A", "a", "B", "C", "AB", "BA" };
 const char *Values[Size] = { "AAAA", "aaaa", "BBBB", "CCCC", "ABABABAB", "BABABABA" };
 
-void initHashMap(nctl::StaticHashMap<nctl::String, nctl::String, Capacity> &strHashmap)
+void initHashMap(HashMapStrType &strHashmap)
 {
 	for (unsigned int i = 0; i < Size; i++)
 		strHashmap[Keys[i]] = Values[i];
 }
 
-void printHashMap(nctl::StaticHashMap<nctl::String, nctl::String, Capacity> &strHashmap)
+void printHashMap(const HashMapStrType &strHashmap)
 {
 	unsigned int n = 0;
 
-	for (nctl::StaticHashMap<nctl::String, nctl::String, Capacity>::ConstIterator i = strHashmap.begin(); i != strHashmap.end(); ++i)
+	for (HashMapStrType::ConstIterator i = strHashmap.begin(); i != strHashmap.end(); ++i)
 		printf("[%u] hash: %u, key: %s, value: %s\n", n++, i.hash(), i.key().data(), i.value().data());
 	printf("\n");
 }
 
-unsigned int calcSize(const nctl::StaticHashMap<nctl::String, nctl::String, Capacity> &strHashmap)
+unsigned int calcSize(const HashMapStrType &strHashmap)
 {
 	unsigned int length = 0;
 
-	for (typename nctl::StaticHashMap<nctl::String, nctl::String, Capacity>::ConstIterator i = strHashmap.begin(); i != strHashmap.end(); ++i)
+	for (HashMapStrType::ConstIterator i = strHashmap.begin(); i != strHashmap.end(); ++i)
 		length++;
 
 	return length;
 }
 
-void assertHashMapsAreEqual(const nctl::StaticHashMap<nctl::String, nctl::String, Capacity> &strHashmap1, const nctl::StaticHashMap<nctl::String, nctl::String, Capacity> &strHashmap2)
+void assertHashMapsAreEqual(const HashMapStrType &strHashmap1, const HashMapStrType &strHashmap2)
 {
-	nctl::StaticHashMap<nctl::String, nctl::String, Capacity>::ConstIterator strHashmap1It = strHashmap1.begin();
-	nctl::StaticHashMap<nctl::String, nctl::String, Capacity>::ConstIterator strHashmap2It = strHashmap2.begin();
+	HashMapStrType::ConstIterator strHashmap1It = strHashmap1.begin();
+	HashMapStrType::ConstIterator strHashmap2It = strHashmap2.begin();
 	while (strHashmap1It != strHashmap1.end())
 	{
 		ASSERT_EQ(strHashmap1It.key(), strHashmap2It.key());

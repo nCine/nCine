@@ -11,7 +11,7 @@ class HashSetStringTest : public ::testing::Test
   protected:
 	void SetUp() override { initHashSet(strHashset_); }
 
-	nctl::HashSet<nctl::String> strHashset_;
+	HashSetStrType strHashset_;
 };
 
 TEST_F(HashSetStringTest, Capacity)
@@ -66,7 +66,7 @@ TEST_F(HashSetStringTest, RemoveElements)
 TEST_F(HashSetStringTest, CopyConstruction)
 {
 	printf("Creating a new hashset with copy construction\n");
-	nctl::HashSet<nctl::String> newstrHashset(strHashset_);
+	HashSetStrType newstrHashset(strHashset_);
 	printHashSet(newstrHashset);
 
 	assertHashSetsAreEqual(strHashset_, newstrHashset);
@@ -75,7 +75,7 @@ TEST_F(HashSetStringTest, CopyConstruction)
 TEST_F(HashSetStringTest, MoveConstruction)
 {
 	printf("Creating a new hashset with move construction\n");
-	nctl::HashSet<nctl::String> newStrHashset = nctl::move(strHashset_);
+	HashSetStrType newStrHashset = nctl::move(strHashset_);
 	printHashSet(newStrHashset);
 
 	ASSERT_EQ(strHashset_.size(), 0);
@@ -87,7 +87,7 @@ TEST_F(HashSetStringTest, MoveConstruction)
 TEST_F(HashSetStringTest, AssignmentOperator)
 {
 	printf("Creating a new hashset with the assignment operator\n");
-	nctl::HashSet<nctl::String> newstrHashset(Capacity);
+	HashSetStrType newstrHashset(Capacity);
 	newstrHashset = strHashset_;
 	printHashSet(newstrHashset);
 
@@ -97,7 +97,7 @@ TEST_F(HashSetStringTest, AssignmentOperator)
 TEST_F(HashSetStringTest, MoveAssignmentOperator)
 {
 	printf("Creating a new hashset with the move assignment operator\n");
-	nctl::HashSet<nctl::String> newStrHashset(Capacity);
+	HashSetStrType newStrHashset(Capacity);
 	newStrHashset = nctl::move(strHashset_);
 	printHashSet(newStrHashset);
 

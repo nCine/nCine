@@ -318,16 +318,14 @@ bool LuaStateManager::runFromMemory(const char *bufferName, const char *bufferPt
 
 LuaTypes::UserDataType LuaStateManager::trackedType(void *pointer) const
 {
-	LuaTypes::UserDataType type = LuaTypes::UserDataType::UNKNOWN;
-	trackedUserDatas_.contains(pointer, type);
-	return type;
+	const LuaTypes::UserDataType *type = trackedUserDatas_.find(pointer);
+	return (type != nullptr) ? *type : LuaTypes::UserDataType::UNKNOWN;
 }
 
 LuaTypes::UserDataType LuaStateManager::untrackedType(void *pointer) const
 {
-	LuaTypes::UserDataType type = LuaTypes::UserDataType::UNKNOWN;
-	untrackedUserDatas_.contains(pointer, type);
-	return type;
+	const LuaTypes::UserDataType *type = untrackedUserDatas_.find(pointer);
+	return (type != nullptr) ? *type : LuaTypes::UserDataType::UNKNOWN;
 }
 
 LuaStateManager *LuaStateManager::manager(lua_State *L)

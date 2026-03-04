@@ -4,9 +4,10 @@
 #include <new>
 #include <ncine/common_macros.h>
 #include "HashFunctions.h"
+#include "Pair.h"
 #include "ReverseIterator.h"
 #include <cstring> // for memcpy()
-#include <nctl/PointerMath.h>
+#include "PointerMath.h"
 
 #include <ncine/config.h>
 #if NCINE_WITH_ALLOCATORS
@@ -34,8 +35,10 @@ class HashMap
 	/// Reverse constant iterator type
 	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
+	/// Constructs an hashmap with explicit capacity
 	explicit HashMap(unsigned int capacity);
 #if NCINE_WITH_ALLOCATORS
+	/// Constructs an hashmap with explicit capacity and a custom allocator
 	HashMap(unsigned int capacity, IAllocator &alloc);
 #endif
 	~HashMap();
@@ -93,10 +96,12 @@ class HashMap
 
 	/// Subscript operator
 	T &operator[](const K &key);
-	/// Inserts an element if no other has the same key
-	bool insert(const K &key, const T &value);
-	/// Moves an element if no other has the same key
-	bool insert(const K &key, T &&value);
+	/// Inserts an element if no other has the same key and returns `true` on success
+	inline bool insert(const K &key, const T &value) { return insertImpl(key, value); }
+	/// Moves an element if no other has the same key and returns `true` on success
+	inline bool insert(const K &key, T &&value) { return insertImpl(key, nctl::move(value)); }
+	/// Inserts an element from a pair, if no other has the same key, and returns `true` on success
+	inline bool insert(const Pair<K, T> &pair) { return insertImpl(pair.first, pair.second); }
 	/// Constructs an element if no other has the same key
 	template <typename... Args> bool emplace(const K &key, Args &&... args);
 
@@ -114,11 +119,11 @@ class HashMap
 	/// Clears the hashmap
 	void clear();
 	/// Checks whether an element is in the hashmap or not
-	bool contains(const K &key, T &returnedValue) const;
-	/// Checks whether an element is in the hashmap or not
 	T *find(const K &key);
 	/// Checks whether an element is in the hashmap or not (read-only)
 	const T *find(const K &key) const;
+	/// Checks whether an element is in the hashmap or not
+	bool contains(const K &key) const;
 	/// Removes a key from the hashmap, if it exists
 	bool remove(const K &key);
 
@@ -127,6 +132,21 @@ class HashMap
 
   private:
 	static const unsigned int AlignmentBytes = sizeof(int);
+
+	/// The returning structure after probing for a key
+	struct ProbeResult
+	{
+		/// The ideal bucket index for the hash
+		unsigned int ideal;
+		/// Only valid if the found flag is true
+		unsigned int found;
+		/// First empty node in a chain
+		unsigned int empty;
+		/// Previous node in a chain (for delta patching)
+		unsigned int prev;
+		/// True if the node contains a value
+		bool foundFlag;
+	};
 
 	/// The template class for the node stored inside the hashmap
 	class Node
@@ -165,14 +185,17 @@ class HashMap
 	void initValues();
 	void destructNodes();
 	void deallocate();
-	bool findBucketIndex(const K &key, unsigned int &foundIndex, unsigned int &prevFoundIndex) const;
-	inline bool findBucketIndex(const K &key, unsigned int &foundIndex) const;
+
+	ProbeResult probe(const K &key, hash_t hash) const;
+	unsigned int patchDeltas(const ProbeResult &r);
 	unsigned int addDelta1(unsigned int bucketIndex) const;
 	unsigned int addDelta2(unsigned int bucketIndex) const;
 	unsigned int calcNewDelta(unsigned int bucketIndex, unsigned int newIndex) const;
 	unsigned int linearSearch(unsigned int index, hash_t hash, const K &key) const;
 	bool bucketFoundOrEmpty(unsigned int index, hash_t hash, const K &key) const;
 	bool bucketFound(unsigned int index, hash_t hash, const K &key) const;
+	template <class ValueArg> bool insertImpl(const K &key, ValueArg &&value);
+
 	T &addNode(unsigned int index, hash_t hash, const K &key);
 	void insertNode(unsigned int index, hash_t hash, const K &key, const T &value);
 	void insertNode(unsigned int index, hash_t hash, const K &key, T &&value);
@@ -373,162 +396,13 @@ template <class K, class T, class HashFunc>
 T &HashMap<K, T, HashFunc>::operator[](const K &key)
 {
 	const hash_t hash = hashFunc_(key);
-	int unsigned bucketIndex = hash % capacity_;
+	const ProbeResult r = probe(key, hash);
 
-	if (bucketFoundOrEmpty(bucketIndex, hash, key) == false)
-	{
-		if (delta1_[bucketIndex] != 0)
-		{
-			bucketIndex = addDelta1(bucketIndex);
-			if (bucketFound(bucketIndex, hash, key) == false)
-			{
-				while (delta2_[bucketIndex] != 0)
-				{
-					bucketIndex = addDelta2(bucketIndex);
-					// Found at ideal index + delta1 + (n * delta2)
-					if (bucketFound(bucketIndex, hash, key))
-						return nodes_[bucketIndex].value;
-				}
+	if (r.foundFlag)
+		return nodes_[r.found].value;
 
-				// Adding at ideal index + delta1 + (n * delta2)
-				const unsigned int newIndex = linearSearch(bucketIndex + 1, hash, key);
-				delta2_[bucketIndex] = calcNewDelta(bucketIndex, newIndex);
-				return addNode(newIndex, hash, key);
-			}
-			else
-			{
-				// Found at ideal index + delta1
-				return nodes_[bucketIndex].value;
-			}
-		}
-		else
-		{
-			// Adding at ideal index + delta1
-			const unsigned int newIndex = linearSearch(bucketIndex + 1, hash, key);
-			delta1_[bucketIndex] = calcNewDelta(bucketIndex, newIndex);
-			return addNode(newIndex, hash, key);
-		}
-	}
-	else
-	{
-		// Using the ideal bucket index for the node
-		if (hashes_[bucketIndex] == NullHash)
-			return addNode(bucketIndex, hash, key);
-		else
-			return nodes_[bucketIndex].value;
-	}
-}
-
-/*! \return True if the element has been inserted */
-template <class K, class T, class HashFunc>
-bool HashMap<K, T, HashFunc>::insert(const K &key, const T &value)
-{
-	const hash_t hash = hashFunc_(key);
-	int unsigned bucketIndex = hash % capacity_;
-
-	if (bucketFoundOrEmpty(bucketIndex, hash, key) == false)
-	{
-		if (delta1_[bucketIndex] != 0)
-		{
-			bucketIndex = addDelta1(bucketIndex);
-			if (bucketFound(bucketIndex, hash, key) == false)
-			{
-				while (delta2_[bucketIndex] != 0)
-				{
-					bucketIndex = addDelta2(bucketIndex);
-					// Found at ideal index + delta1 + (n * delta2)
-					if (bucketFound(bucketIndex, hash, key))
-						return false;
-				}
-
-				// Adding at ideal index + delta1 + (n * delta2)
-				const unsigned int newIndex = linearSearch(bucketIndex + 1, hash, key);
-				delta2_[bucketIndex] = calcNewDelta(bucketIndex, newIndex);
-				insertNode(newIndex, hash, key, value);
-				return true;
-			}
-			else
-			{
-				// Found at ideal index + delta1
-				return false;
-			}
-		}
-		else
-		{
-			// Adding at ideal index + delta1
-			const unsigned int newIndex = linearSearch(bucketIndex + 1, hash, key);
-			delta1_[bucketIndex] = calcNewDelta(bucketIndex, newIndex);
-			insertNode(newIndex, hash, key, value);
-			return true;
-		}
-	}
-	else
-	{
-		// Using the ideal bucket index for the node
-		if (hashes_[bucketIndex] == NullHash)
-		{
-			insertNode(bucketIndex, hash, key, value);
-			return true;
-		}
-		else
-			return false;
-	}
-}
-
-/*! \return True if the element has been inserted */
-template <class K, class T, class HashFunc>
-bool HashMap<K, T, HashFunc>::insert(const K &key, T &&value)
-{
-	const hash_t hash = hashFunc_(key);
-	int unsigned bucketIndex = hash % capacity_;
-
-	if (bucketFoundOrEmpty(bucketIndex, hash, key) == false)
-	{
-		if (delta1_[bucketIndex] != 0)
-		{
-			bucketIndex = addDelta1(bucketIndex);
-			if (bucketFound(bucketIndex, hash, key) == false)
-			{
-				while (delta2_[bucketIndex] != 0)
-				{
-					bucketIndex = addDelta2(bucketIndex);
-					// Found at ideal index + delta1 + (n * delta2)
-					if (bucketFound(bucketIndex, hash, key))
-						return false;
-				}
-
-				// Adding at ideal index + delta1 + (n * delta2)
-				const unsigned int newIndex = linearSearch(bucketIndex + 1, hash, key);
-				delta2_[bucketIndex] = calcNewDelta(bucketIndex, newIndex);
-				insertNode(newIndex, hash, key, nctl::move(value));
-				return true;
-			}
-			else
-			{
-				// Found at ideal index + delta1
-				return false;
-			}
-		}
-		else
-		{
-			// Adding at ideal index + delta1
-			const unsigned int newIndex = linearSearch(bucketIndex + 1, hash, key);
-			delta1_[bucketIndex] = calcNewDelta(bucketIndex, newIndex);
-			insertNode(newIndex, hash, key, nctl::move(value));
-			return true;
-		}
-	}
-	else
-	{
-		// Using the ideal bucket index for the node
-		if (hashes_[bucketIndex] == NullHash)
-		{
-			insertNode(bucketIndex, hash, key, nctl::move(value));
-			return true;
-		}
-		else
-			return false;
-	}
+	const unsigned int index = patchDeltas(r);
+	return addNode(index, hash, key);
 }
 
 /*! \return True if the element has been emplaced */
@@ -537,55 +411,14 @@ template <typename... Args>
 bool HashMap<K, T, HashFunc>::emplace(const K &key, Args &&... args)
 {
 	const hash_t hash = hashFunc_(key);
-	int unsigned bucketIndex = hash % capacity_;
+	const ProbeResult r = probe(key, hash);
 
-	if (bucketFoundOrEmpty(bucketIndex, hash, key) == false)
-	{
-		if (delta1_[bucketIndex] != 0)
-		{
-			bucketIndex = addDelta1(bucketIndex);
-			if (bucketFound(bucketIndex, hash, key) == false)
-			{
-				while (delta2_[bucketIndex] != 0)
-				{
-					bucketIndex = addDelta2(bucketIndex);
-					// Found at ideal index + delta1 + (n * delta2)
-					if (bucketFound(bucketIndex, hash, key))
-						return false;
-				}
+	if (r.foundFlag)
+		return false;
 
-				// Adding at ideal index + delta1 + (n * delta2)
-				const unsigned int newIndex = linearSearch(bucketIndex + 1, hash, key);
-				delta2_[bucketIndex] = calcNewDelta(bucketIndex, newIndex);
-				emplaceNode(newIndex, hash, key, nctl::forward<Args>(args)...);
-				return true;
-			}
-			else
-			{
-				// Found at ideal index + delta1
-				return false;
-			}
-		}
-		else
-		{
-			// Adding at ideal index + delta1
-			const unsigned int newIndex = linearSearch(bucketIndex + 1, hash, key);
-			delta1_[bucketIndex] = calcNewDelta(bucketIndex, newIndex);
-			emplaceNode(newIndex, hash, key, nctl::forward<Args>(args)...);
-			return true;
-		}
-	}
-	else
-	{
-		// Using the ideal bucket index for the node
-		if (hashes_[bucketIndex] == NullHash)
-		{
-			emplaceNode(bucketIndex, hash, key, nctl::forward<Args>(args)...);
-			return true;
-		}
-		else
-			return false;
-	}
+	const unsigned int index = patchDeltas(r);
+	emplaceNode(index, hash, key, nctl::forward<Args>(args)...);
+	return true;
 }
 
 template <class K, class T, class HashFunc>
@@ -595,100 +428,89 @@ void HashMap<K, T, HashFunc>::clear()
 	initValues();
 }
 
-template <class K, class T, class HashFunc>
-bool HashMap<K, T, HashFunc>::contains(const K &key, T &returnedValue) const
-{
-	int unsigned bucketIndex = 0;
-	const bool found = findBucketIndex(key, bucketIndex);
-
-	if (found)
-		returnedValue = nodes_[bucketIndex].value;
-
-	return found;
-}
-
 /*! \note Prefer this method if copying `T` is expensive, but always check the validity of returned pointer. */
 template <class K, class T, class HashFunc>
 T *HashMap<K, T, HashFunc>::find(const K &key)
 {
-	int unsigned bucketIndex = 0;
-	const bool found = findBucketIndex(key, bucketIndex);
-
-	T *returnedPtr = nullptr;
-	if (found)
-		returnedPtr = &nodes_[bucketIndex].value;
-
-	return returnedPtr;
+	const hash_t hash = hashFunc_(key);
+	const ProbeResult r = probe(key, hash);
+	return (r.foundFlag) ? &nodes_[r.found].value : nullptr;
 }
 
 /*! \note Prefer this method if copying `T` is expensive, but always check the validity of returned pointer. */
 template <class K, class T, class HashFunc>
 const T *HashMap<K, T, HashFunc>::find(const K &key) const
 {
-	int unsigned bucketIndex = 0;
-	const bool found = findBucketIndex(key, bucketIndex);
+	const hash_t hash = hashFunc_(key);
+	const ProbeResult r = probe(key, hash);
+	return (r.foundFlag) ? &nodes_[r.found].value : nullptr;
+}
 
-	const T *returnedPtr = nullptr;
-	if (found)
-		returnedPtr = &nodes_[bucketIndex].value;
-
-	return returnedPtr;
+template <class K, class T, class HashFunc>
+bool HashMap<K, T, HashFunc>::contains(const K &key) const
+{
+	return find(key) != nullptr;
 }
 
 /*! \return True if the element has been found and removed */
 template <class K, class T, class HashFunc>
 bool HashMap<K, T, HashFunc>::remove(const K &key)
 {
-	int unsigned foundBucketIndex = 0;
-	int unsigned prevFoundBucketIndex = 0;
-	const bool found = findBucketIndex(key, foundBucketIndex, prevFoundBucketIndex);
+	if (size_ == 0)
+		return false;
+
+	const hash_t hash = hashFunc_(key);
+	const ProbeResult r = probe(key, hash);
+
+	if (!r.foundFlag)
+		return false;
+
+	unsigned int foundBucketIndex = r.found;
+	unsigned int prevFoundBucketIndex = r.prev;
 	unsigned int bucketIndex = foundBucketIndex;
 
-	if (found)
+	// The found bucket is the last of the chain, previous one needs a delta fix
+	if (foundBucketIndex != hashes_[foundBucketIndex] % capacity_ && delta2_[foundBucketIndex] == 0)
 	{
-		// The found bucket is the last of the chain, previous one needs a delta fix
-		if (foundBucketIndex != hashes_[foundBucketIndex] % capacity_ && delta2_[foundBucketIndex] == 0)
-		{
-			if (addDelta1(prevFoundBucketIndex) == foundBucketIndex)
-				delta1_[prevFoundBucketIndex] = 0;
-			else if (addDelta2(prevFoundBucketIndex) == foundBucketIndex)
-				delta2_[prevFoundBucketIndex] = 0;
-		}
-
-		while (delta1_[bucketIndex] != 0 || delta2_[bucketIndex] != 0)
-		{
-			unsigned int lastBucketIndex = bucketIndex;
-			if (delta1_[lastBucketIndex] != 0)
-				lastBucketIndex = addDelta1(lastBucketIndex);
-			if (delta2_[lastBucketIndex] != 0)
-			{
-				unsigned int secondLastBucketIndex = lastBucketIndex;
-				while (delta2_[lastBucketIndex] != 0)
-				{
-					secondLastBucketIndex = lastBucketIndex;
-					lastBucketIndex = addDelta2(lastBucketIndex);
-				}
-				delta2_[secondLastBucketIndex] = 0;
-			}
-			else
-				delta1_[bucketIndex] = 0;
-
-			if (bucketIndex != lastBucketIndex)
-			{
-				nodes_[bucketIndex].key = nctl::move(nodes_[lastBucketIndex].key);
-				nodes_[bucketIndex].value = nctl::move(nodes_[lastBucketIndex].value);
-				hashes_[bucketIndex] = hashes_[lastBucketIndex];
-			}
-
-			bucketIndex = lastBucketIndex;
-		}
-
-		hashes_[bucketIndex] = NullHash;
-		destructObject(nodes_ + bucketIndex);
-		size_--;
+		if (addDelta1(prevFoundBucketIndex) == foundBucketIndex)
+			delta1_[prevFoundBucketIndex] = 0;
+		else if (addDelta2(prevFoundBucketIndex) == foundBucketIndex)
+			delta2_[prevFoundBucketIndex] = 0;
 	}
 
-	return found;
+	while (delta1_[bucketIndex] != 0 || delta2_[bucketIndex] != 0)
+	{
+		unsigned int lastBucketIndex = bucketIndex;
+		if (delta1_[lastBucketIndex] != 0)
+			lastBucketIndex = addDelta1(lastBucketIndex);
+		if (delta2_[lastBucketIndex] != 0)
+		{
+			unsigned int secondLastBucketIndex = lastBucketIndex;
+			while (delta2_[lastBucketIndex] != 0)
+			{
+				secondLastBucketIndex = lastBucketIndex;
+				lastBucketIndex = addDelta2(lastBucketIndex);
+			}
+			delta2_[secondLastBucketIndex] = 0;
+		}
+		else
+			delta1_[bucketIndex] = 0;
+
+		if (bucketIndex != lastBucketIndex)
+		{
+			nodes_[bucketIndex].key = nctl::move(nodes_[lastBucketIndex].key);
+			nodes_[bucketIndex].value = nctl::move(nodes_[lastBucketIndex].value);
+			hashes_[bucketIndex] = hashes_[lastBucketIndex];
+		}
+
+		bucketIndex = lastBucketIndex;
+	}
+
+	hashes_[bucketIndex] = NullHash;
+	destructObject(nodes_ + bucketIndex);
+	size_--;
+
+	return true;
 }
 
 template <class K, class T, class HashFunc>
@@ -776,60 +598,88 @@ void HashMap<K, T, HashFunc>::deallocate()
 }
 
 template <class K, class T, class HashFunc>
-bool HashMap<K, T, HashFunc>::findBucketIndex(const K &key, unsigned int &foundIndex, unsigned int &prevFoundIndex) const
+typename HashMap<K, T, HashFunc>::ProbeResult
+HashMap<K, T, HashFunc>::probe(const K &key, hash_t hash) const
 {
-	if (size_ == 0)
-		return false;
+	ProbeResult r{};
+	r.ideal = hash % capacity_;
+	r.prev = r.ideal;
 
-	bool found = false;
-	const hash_t hash = hashFunc_(key);
-	foundIndex = hash % capacity_;
-	prevFoundIndex = foundIndex;
+	unsigned int bucketIndex = r.ideal;
 
-	if (bucketFoundOrEmpty(foundIndex, hash, key) == false)
+	if (bucketFoundOrEmpty(bucketIndex, hash, key) == false)
 	{
-		if (delta1_[foundIndex] != 0)
+		if (delta1_[bucketIndex] != 0)
 		{
-			prevFoundIndex = foundIndex;
-			foundIndex = addDelta1(foundIndex);
-			if (bucketFound(foundIndex, hash, key) == false)
+			bucketIndex = addDelta1(bucketIndex);
+			if (bucketFound(bucketIndex, hash, key) == false)
 			{
-				while (delta2_[foundIndex] != 0)
+				while (delta2_[bucketIndex] != 0)
 				{
-					prevFoundIndex = foundIndex;
-					foundIndex = addDelta2(foundIndex);
-					if (bucketFound(foundIndex, hash, key))
+					bucketIndex = addDelta2(bucketIndex);
+					// Found at ideal index + delta1 + (n * delta2)
+					if (bucketFound(bucketIndex, hash, key))
 					{
-						// Found at ideal index + delta1 + (n * delta2)
-						found = true;
-						break;
+						r.found = bucketIndex;
+						r.foundFlag = true;
+						return r;
 					}
 				}
+
+				// At this point, bucketIndex is the tail
+				r.prev = bucketIndex; // for `patchDeltas()` to work
+
+				// Adding at ideal index + delta1 + (n * delta2)
+				r.empty = linearSearch(bucketIndex + 1, hash, key);
+				r.foundFlag = false;
+				return r;
 			}
 			else
 			{
 				// Found at ideal index + delta1
-				found = true;
+				r.found = bucketIndex;
+				r.foundFlag = true;
+				return r;
 			}
+		}
+		else
+		{
+			// Adding at ideal index + delta1
+			r.empty = linearSearch(bucketIndex + 1, hash, key);
+			r.foundFlag = false;
+			return r;
 		}
 	}
 	else
 	{
-		if (hashes_[foundIndex] != NullHash)
+		// Using the ideal bucket index for the node
+		if (hashes_[bucketIndex] == NullHash)
 		{
-			// Found at ideal bucket index
-			found = true;
+			r.empty = bucketIndex;
+			r.foundFlag = false;
+			return r;
+		}
+		else
+		{
+			r.found = bucketIndex;
+			r.foundFlag = true;
+			return r;
 		}
 	}
-
-	return found;
 }
 
 template <class K, class T, class HashFunc>
-bool HashMap<K, T, HashFunc>::findBucketIndex(const K &key, unsigned int &foundIndex) const
+unsigned int HashMap<K, T, HashFunc>::patchDeltas(const ProbeResult &r)
 {
-	unsigned int prevFoundIndex = 0;
-	return findBucketIndex(key, foundIndex, prevFoundIndex);
+	if (r.ideal == r.empty)
+		return r.empty;
+
+	if (delta1_[r.ideal] == 0)
+		delta1_[r.ideal] = calcNewDelta(r.ideal, r.empty);
+	else // r.prev must be the tail
+		delta2_[r.prev] = calcNewDelta(r.prev, r.empty);
+
+	return r.empty;
 }
 
 template <class K, class T, class HashFunc>
@@ -891,6 +741,21 @@ template <class K, class T, class HashFunc>
 bool HashMap<K, T, HashFunc>::bucketFound(unsigned int index, hash_t hash, const K &key) const
 {
 	return (hashes_[index] == hash && equalTo(nodes_[index].key, key));
+}
+
+template <class K, class T, class HashFunc>
+template <class ValueArg>
+bool HashMap<K, T, HashFunc>::insertImpl(const K &key, ValueArg &&value)
+{
+	const hash_t hash = hashFunc_(key);
+	const ProbeResult r = probe(key, hash);
+
+	if (r.foundFlag)
+		return false;
+
+	const unsigned int index = patchDeltas(r);
+	insertNode(index, hash, key, nctl::forward<ValueArg>(value));
+	return true;
 }
 
 template <class K, class T, class HashFunc>

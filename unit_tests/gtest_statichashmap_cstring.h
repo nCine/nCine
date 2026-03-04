@@ -9,6 +9,7 @@ namespace {
 
 const unsigned int Capacity = 32;
 const unsigned int Size = 6;
+using HashMapCStrType = nctl::StaticHashMap<const char *, const char *, Capacity>;
 const char *Keys[Size] = { "A", "a", "B", "C", "AB", "BA" };
 const unsigned int KeyCapacity = 3;
 const char *Values[Size] = { "AAAA", "aaaa", "BBBB", "CCCC", "ABABABAB", "BABABABA" };
@@ -16,7 +17,7 @@ const unsigned int ValueCapacity = 9;
 /// A new set of C-style string keys, same in content but different in memory address
 char KeysCopy[Size][KeyCapacity];
 
-void initHashMap(nctl::StaticHashMap<const char *, const char *, Capacity> &cstrHashmap)
+void initHashMap(HashMapCStrType &cstrHashmap)
 {
 	for (unsigned int i = 0; i < Size; i++)
 	{
@@ -25,20 +26,20 @@ void initHashMap(nctl::StaticHashMap<const char *, const char *, Capacity> &cstr
 	}
 }
 
-void printHashMap(nctl::StaticHashMap<const char *, const char *, Capacity> &cstrHashmap)
+void printHashMap(const HashMapCStrType &cstrHashmap)
 {
 	unsigned int n = 0;
 
-	for (nctl::StaticHashMap<const char *, const char *, Capacity>::ConstIterator i = cstrHashmap.begin(); i != cstrHashmap.end(); ++i)
+	for (HashMapCStrType::ConstIterator i = cstrHashmap.begin(); i != cstrHashmap.end(); ++i)
 		printf("[%u] hash: %u, key: %s, value: %s\n", n++, i.hash(), i.key(), i.value());
 	printf("\n");
 }
 
-unsigned int calcSize(const nctl::StaticHashMap<const char *, const char *, Capacity> &cstrHashmap)
+unsigned int calcSize(const HashMapCStrType &cstrHashmap)
 {
 	unsigned int length = 0;
 
-	for (typename nctl::StaticHashMap<const char *, const char *, Capacity>::ConstIterator i = cstrHashmap.begin(); i != cstrHashmap.end(); ++i)
+	for (HashMapCStrType::ConstIterator i = cstrHashmap.begin(); i != cstrHashmap.end(); ++i)
 		length++;
 
 	return length;

@@ -119,6 +119,22 @@ TEST_F(HashMapListTest, InsertConstElements)
 	ASSERT_EQ(calcSize(hashmap_), Size * 2);
 }
 
+TEST_F(HashMapListTest, InsertPairs)
+{
+	printf("Inserting elements as pairs\n");
+	for (unsigned int i = Size; i < Size * 2; i++)
+	{
+		PairType pair(i, i + KeyValueDifference);
+		hashmap_.insert(pair);
+	}
+
+	for (unsigned int i = 0; i < Size * 2; i++)
+		ASSERT_EQ(hashmap_[i], i + KeyValueDifference);
+
+	ASSERT_EQ(hashmap_.size(), Size * 2);
+	ASSERT_EQ(calcSize(hashmap_), Size * 2);
+}
+
 TEST_F(HashMapListTest, FailInsertElements)
 {
 	printf("Trying to insert elements already in the hashmap\n");
@@ -189,9 +205,8 @@ TEST_F(HashMapListTest, RemoveElements)
 	hashmap_.remove(7);
 	printHashMap(hashmap_);
 
-	int value = 0;
-	ASSERT_FALSE(hashmap_.contains(5, value));
-	ASSERT_FALSE(hashmap_.contains(7, value));
+	ASSERT_FALSE(hashmap_.contains(5));
+	ASSERT_FALSE(hashmap_.contains(7));
 	ASSERT_EQ(hashmap_.size(), Size - 2);
 	ASSERT_EQ(calcSize(hashmap_), Size - 2);
 }
@@ -303,20 +318,17 @@ TEST_F(HashMapListTest, SelfAssignment)
 TEST_F(HashMapListTest, Contains)
 {
 	const int key = 1;
-	int value = 0;
-	const bool found = hashmap_.contains(key, value);
-	printf("Key %d is in the hashmap: %d - Value: %d\n", key, found, value);
+	const bool found = hashmap_.contains(key);
+	printf("Key %d is in the hashmap: %d\n", key, found);
 
 	ASSERT_TRUE(found);
-	ASSERT_EQ(value, key + KeyValueDifference);
 }
 
 TEST_F(HashMapListTest, DoesNotContain)
 {
 	const int key = 10;
-	int value = 0;
-	const bool found = hashmap_.contains(key, value);
-	printf("Key %d is in the hashmap: %d - Value: %d\n", key, found, value);
+	const bool found = hashmap_.contains(key);
+	printf("Key %d is in the hashmap: %d\n", key, found);
 
 	ASSERT_FALSE(found);
 }
