@@ -26,6 +26,7 @@ class StaticHashSet
 	/// Reverse constant iterator type
 	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
+	/// Constructs an empty hashset
 	inline StaticHashSet()
 	    : size_(0) { init(); }
 	inline ~StaticHashSet() { destructKeys(); }
@@ -66,10 +67,10 @@ class StaticHashSet
 	/// Returns a constant reverse iterator to the end
 	inline ConstReverseIterator crEnd() const { return rEnd(); }
 
-	/// Inserts an element if not already in
-	bool insert(const K &key);
-	/// Moves an element if not already in
-	bool insert(K &&key);
+	/// Inserts an element if not already in and returns `true` on success
+	inline bool insert(const K &key) { return insertImpl(key); }
+	/// Moves an element if not already in and returns `true` on success
+	inline bool insert(K &&key) { return insertImpl(nctl::move(key)); }
 
 	/// Returns the capacity of the hashset
 	inline unsigned int capacity() const { return Capacity; }
@@ -94,6 +95,21 @@ class StaticHashSet
 	bool remove(const K &key);
 
   private:
+	/// The returning structure after probing for a key
+	struct ProbeResult
+	{
+		/// The ideal bucket index for the hash
+		unsigned int ideal;
+		/// Only valid if the found flag is true
+		unsigned int found;
+		/// First empty node in a chain
+		unsigned int empty;
+		/// Previous node in a chain (for delta patching)
+		unsigned int prev;
+		/// True if the node contains a value
+		bool foundFlag;
+	};
+
 	unsigned int size_;
 	uint8_t delta1_[Capacity];
 	uint8_t delta2_[Capacity];
@@ -104,14 +120,17 @@ class StaticHashSet
 
 	void init();
 	void destructKeys();
-	bool findBucketIndex(const K &key, unsigned int &foundIndex, unsigned int &prevFoundIndex) const;
-	inline bool findBucketIndex(const K &key, unsigned int &foundIndex) const;
+
+	ProbeResult probe(const K &key, hash_t hash) const;
+	unsigned int patchDeltas(const ProbeResult &r);
 	unsigned int addDelta1(unsigned int bucketIndex) const;
 	unsigned int addDelta2(unsigned int bucketIndex) const;
 	unsigned int calcNewDelta(unsigned int bucketIndex, unsigned int newIndex) const;
 	unsigned int linearSearch(unsigned int index, hash_t hash, const K &key) const;
 	bool bucketFoundOrEmpty(unsigned int index, hash_t hash, const K &key) const;
 	bool bucketFound(unsigned int index, hash_t hash, const K &key) const;
+	template <class KeyArg> bool insertImpl(KeyArg &&key);
+
 	void insertKey(unsigned int index, hash_t hash, const K &key);
 	void insertKey(unsigned int index, hash_t hash, K &&key);
 
@@ -225,118 +244,6 @@ StaticHashSet<K, Capacity, HashFunc> &StaticHashSet<K, Capacity, HashFunc>::oper
 	return *this;
 }
 
-/*! \return True if the element has been inserted */
-template <class K, unsigned int Capacity, class HashFunc>
-bool StaticHashSet<K, Capacity, HashFunc>::insert(const K &key)
-{
-	const hash_t hash = hashFunc_(key);
-	int unsigned bucketIndex = hash % Capacity;
-
-	if (bucketFoundOrEmpty(bucketIndex, hash, key) == false)
-	{
-		if (delta1_[bucketIndex] != 0)
-		{
-			bucketIndex = addDelta1(bucketIndex);
-			if (bucketFound(bucketIndex, hash, key) == false)
-			{
-				while (delta2_[bucketIndex] != 0)
-				{
-					bucketIndex = addDelta2(bucketIndex);
-					// Found at ideal index + delta1 + (n * delta2)
-					if (bucketFound(bucketIndex, hash, key))
-						return false;
-				}
-
-				// Adding at ideal index + delta1 + (n * delta2)
-				const unsigned int newIndex = linearSearch(bucketIndex + 1, hash, key);
-				delta2_[bucketIndex] = calcNewDelta(bucketIndex, newIndex);
-				insertKey(newIndex, hash, key);
-				return true;
-			}
-			else
-			{
-				// Found at ideal index + delta1
-				return false;
-			}
-		}
-		else
-		{
-			// Adding at ideal index + delta1
-			const unsigned int newIndex = linearSearch(bucketIndex + 1, hash, key);
-			delta1_[bucketIndex] = calcNewDelta(bucketIndex, newIndex);
-			insertKey(newIndex, hash, key);
-			return true;
-		}
-	}
-	else
-	{
-		// Using the ideal bucket index for the node
-		if (hashes_[bucketIndex] == NullHash)
-		{
-			insertKey(bucketIndex, hash, key);
-			return true;
-		}
-		else
-			return false;
-	}
-}
-
-/*! \return True if the element has been inserted */
-template <class K, unsigned int Capacity, class HashFunc>
-bool StaticHashSet<K, Capacity, HashFunc>::insert(K &&key)
-{
-	const hash_t hash = hashFunc_(key);
-	int unsigned bucketIndex = hash % Capacity;
-
-	if (bucketFoundOrEmpty(bucketIndex, hash, key) == false)
-	{
-		if (delta1_[bucketIndex] != 0)
-		{
-			bucketIndex = addDelta1(bucketIndex);
-			if (bucketFound(bucketIndex, hash, key) == false)
-			{
-				while (delta2_[bucketIndex] != 0)
-				{
-					bucketIndex = addDelta2(bucketIndex);
-					// Found at ideal index + delta1 + (n * delta2)
-					if (bucketFound(bucketIndex, hash, key))
-						return false;
-				}
-
-				// Adding at ideal index + delta1 + (n * delta2)
-				const unsigned int newIndex = linearSearch(bucketIndex + 1, hash, key);
-				delta2_[bucketIndex] = calcNewDelta(bucketIndex, newIndex);
-				insertKey(newIndex, hash, nctl::move(key));
-				return true;
-			}
-			else
-			{
-				// Found at ideal index + delta1
-				return false;
-			}
-		}
-		else
-		{
-			// Adding at ideal index + delta1
-			const unsigned int newIndex = linearSearch(bucketIndex + 1, hash, key);
-			delta1_[bucketIndex] = calcNewDelta(bucketIndex, newIndex);
-			insertKey(newIndex, hash, nctl::move(key));
-			return true;
-		}
-	}
-	else
-	{
-		// Using the ideal bucket index for the node
-		if (hashes_[bucketIndex] == NullHash)
-		{
-			insertKey(bucketIndex, hash, nctl::move(key));
-			return true;
-		}
-		else
-			return false;
-	}
-}
-
 template <class K, unsigned int Capacity, class HashFunc>
 void StaticHashSet<K, Capacity, HashFunc>::clear()
 {
@@ -344,94 +251,88 @@ void StaticHashSet<K, Capacity, HashFunc>::clear()
 	init();
 }
 
-template <class K, unsigned int Capacity, class HashFunc>
-bool StaticHashSet<K, Capacity, HashFunc>::contains(const K &key) const
-{
-	int unsigned bucketIndex = 0;
-	return findBucketIndex(key, bucketIndex);
-}
-
 /*! \note Prefer this method if copying `T` is expensive, but always check the validity of returned pointer. */
 template <class K, unsigned int Capacity, class HashFunc>
 K *StaticHashSet<K, Capacity, HashFunc>::find(const K &key)
 {
-	int unsigned bucketIndex = 0;
-	const bool found = findBucketIndex(key, bucketIndex);
-
-	K *returnedPtr = nullptr;
-	if (found)
-		returnedPtr = &keys_[bucketIndex];
-
-	return returnedPtr;
+	const hash_t hash = hashFunc_(key);
+	const ProbeResult r = probe(key, hash);
+	return (r.foundFlag) ? &keys_[r.found] : nullptr;
 }
 
 /*! \note Prefer this method if copying `T` is expensive, but always check the validity of returned pointer. */
 template <class K, unsigned int Capacity, class HashFunc>
 const K *StaticHashSet<K, Capacity, HashFunc>::find(const K &key) const
 {
-	int unsigned bucketIndex = 0;
-	const bool found = findBucketIndex(key, bucketIndex);
+	const hash_t hash = hashFunc_(key);
+	const ProbeResult r = probe(key, hash);
+	return (r.foundFlag) ? &keys_[r.found] : nullptr;
+}
 
-	const K *returnedPtr = nullptr;
-	if (found)
-		returnedPtr = &keys_[bucketIndex];
-
-	return returnedPtr;
+template <class K, unsigned int Capacity, class HashFunc>
+bool StaticHashSet<K, Capacity, HashFunc>::contains(const K &key) const
+{
+	return find(key) != nullptr;
 }
 
 /*! \return True if the element has been found and removed */
 template <class K, unsigned int Capacity, class HashFunc>
 bool StaticHashSet<K, Capacity, HashFunc>::remove(const K &key)
 {
-	int unsigned foundBucketIndex = 0;
-	int unsigned prevFoundBucketIndex = 0;
-	const bool found = findBucketIndex(key, foundBucketIndex, prevFoundBucketIndex);
+	if (size_ == 0)
+		return false;
+
+	const hash_t hash = hashFunc_(key);
+	const ProbeResult r = probe(key, hash);
+
+	if (!r.foundFlag)
+		return false;
+
+	unsigned int foundBucketIndex = r.found;
+	unsigned int prevFoundBucketIndex = r.prev;
 	unsigned int bucketIndex = foundBucketIndex;
 
-	if (found)
+	// The found bucket is the last of the chain, previous one needs a delta fix
+	if (foundBucketIndex != hashes_[foundBucketIndex] % Capacity && delta2_[foundBucketIndex] == 0)
 	{
-		// The found bucket is the last of the chain, previous one needs a delta fix
-		if (foundBucketIndex != hashes_[foundBucketIndex] % Capacity && delta2_[foundBucketIndex] == 0)
-		{
-			if (addDelta1(prevFoundBucketIndex) == foundBucketIndex)
-				delta1_[prevFoundBucketIndex] = 0;
-			else if (addDelta2(prevFoundBucketIndex) == foundBucketIndex)
-				delta2_[prevFoundBucketIndex] = 0;
-		}
-
-		while (delta1_[bucketIndex] != 0 || delta2_[bucketIndex] != 0)
-		{
-			unsigned int lastBucketIndex = bucketIndex;
-			if (delta1_[lastBucketIndex] != 0)
-				lastBucketIndex = addDelta1(lastBucketIndex);
-			if (delta2_[lastBucketIndex] != 0)
-			{
-				unsigned int secondLastBucketIndex = lastBucketIndex;
-				while (delta2_[lastBucketIndex] != 0)
-				{
-					secondLastBucketIndex = lastBucketIndex;
-					lastBucketIndex = addDelta2(lastBucketIndex);
-				}
-				delta2_[secondLastBucketIndex] = 0;
-			}
-			else
-				delta1_[bucketIndex] = 0;
-
-			if (bucketIndex != lastBucketIndex)
-			{
-				keys_[bucketIndex] = nctl::move(keys_[lastBucketIndex]);
-				hashes_[bucketIndex] = hashes_[lastBucketIndex];
-			}
-
-			bucketIndex = lastBucketIndex;
-		}
-
-		hashes_[bucketIndex] = NullHash;
-		destructObject(keys_ + bucketIndex);
-		size_--;
+		if (addDelta1(prevFoundBucketIndex) == foundBucketIndex)
+			delta1_[prevFoundBucketIndex] = 0;
+		else if (addDelta2(prevFoundBucketIndex) == foundBucketIndex)
+			delta2_[prevFoundBucketIndex] = 0;
 	}
 
-	return found;
+	while (delta1_[bucketIndex] != 0 || delta2_[bucketIndex] != 0)
+	{
+		unsigned int lastBucketIndex = bucketIndex;
+		if (delta1_[lastBucketIndex] != 0)
+			lastBucketIndex = addDelta1(lastBucketIndex);
+		if (delta2_[lastBucketIndex] != 0)
+		{
+			unsigned int secondLastBucketIndex = lastBucketIndex;
+			while (delta2_[lastBucketIndex] != 0)
+			{
+				secondLastBucketIndex = lastBucketIndex;
+				lastBucketIndex = addDelta2(lastBucketIndex);
+			}
+			delta2_[secondLastBucketIndex] = 0;
+		}
+		else
+			delta1_[bucketIndex] = 0;
+
+		if (bucketIndex != lastBucketIndex)
+		{
+			keys_[bucketIndex] = nctl::move(keys_[lastBucketIndex]);
+			hashes_[bucketIndex] = hashes_[lastBucketIndex];
+		}
+
+		bucketIndex = lastBucketIndex;
+	}
+
+	hashes_[bucketIndex] = NullHash;
+	destructObject(keys_ + bucketIndex);
+	size_--;
+
+	return true;
 }
 
 template <class K, unsigned int Capacity, class HashFunc>
@@ -460,60 +361,88 @@ void StaticHashSet<K, Capacity, HashFunc>::destructKeys()
 }
 
 template <class K, unsigned int Capacity, class HashFunc>
-bool StaticHashSet<K, Capacity, HashFunc>::findBucketIndex(const K &key, unsigned int &foundIndex, unsigned int &prevFoundIndex) const
+typename StaticHashSet<K, Capacity, HashFunc>::ProbeResult
+StaticHashSet<K, Capacity, HashFunc>::probe(const K &key, hash_t hash) const
 {
-	if (size_ == 0)
-		return false;
+	ProbeResult r{};
+	r.ideal = hash % Capacity;
+	r.prev = r.ideal;
 
-	bool found = false;
-	const hash_t hash = hashFunc_(key);
-	foundIndex = hash % Capacity;
-	prevFoundIndex = foundIndex;
+	unsigned int bucketIndex = r.ideal;
 
-	if (bucketFoundOrEmpty(foundIndex, hash, key) == false)
+	if (bucketFoundOrEmpty(bucketIndex, hash, key) == false)
 	{
-		if (delta1_[foundIndex] != 0)
+		if (delta1_[bucketIndex] != 0)
 		{
-			prevFoundIndex = foundIndex;
-			foundIndex = addDelta1(foundIndex);
-			if (bucketFound(foundIndex, hash, key) == false)
+			bucketIndex = addDelta1(bucketIndex);
+			if (bucketFound(bucketIndex, hash, key) == false)
 			{
-				while (delta2_[foundIndex] != 0)
+				while (delta2_[bucketIndex] != 0)
 				{
-					prevFoundIndex = foundIndex;
-					foundIndex = addDelta2(foundIndex);
-					if (bucketFound(foundIndex, hash, key))
+					bucketIndex = addDelta2(bucketIndex);
+					// Found at ideal index + delta1 + (n * delta2)
+					if (bucketFound(bucketIndex, hash, key))
 					{
-						// Found at ideal index + delta1 + (n * delta2)
-						found = true;
-						break;
+						r.found = bucketIndex;
+						r.foundFlag = true;
+						return r;
 					}
 				}
+
+				// At this point, bucketIndex is the tail
+				r.prev = bucketIndex; // for `patchDeltas()` to work
+
+				// Adding at ideal index + delta1 + (n * delta2)
+				r.empty = linearSearch(bucketIndex + 1, hash, key);
+				r.foundFlag = false;
+				return r;
 			}
 			else
 			{
 				// Found at ideal index + delta1
-				found = true;
+				r.found = bucketIndex;
+				r.foundFlag = true;
+				return r;
 			}
+		}
+		else
+		{
+			// Adding at ideal index + delta1
+			r.empty = linearSearch(bucketIndex + 1, hash, key);
+			r.foundFlag = false;
+			return r;
 		}
 	}
 	else
 	{
-		if (hashes_[foundIndex] != NullHash)
+		// Using the ideal bucket index for the node
+		if (hashes_[bucketIndex] == NullHash)
 		{
-			// Found at ideal bucket index
-			found = true;
+			r.empty = bucketIndex;
+			r.foundFlag = false;
+			return r;
+		}
+		else
+		{
+			r.found = bucketIndex;
+			r.foundFlag = true;
+			return r;
 		}
 	}
-
-	return found;
 }
 
 template <class K, unsigned int Capacity, class HashFunc>
-bool StaticHashSet<K, Capacity, HashFunc>::findBucketIndex(const K &key, unsigned int &foundIndex) const
+unsigned int StaticHashSet<K, Capacity, HashFunc>::patchDeltas(const ProbeResult &r)
 {
-	unsigned int prevFoundIndex = 0;
-	return findBucketIndex(key, foundIndex, prevFoundIndex);
+	if (r.ideal == r.empty)
+		return r.empty;
+
+	if (delta1_[r.ideal] == 0)
+		delta1_[r.ideal] = calcNewDelta(r.ideal, r.empty);
+	else // r.prev must be the tail
+		delta2_[r.prev] = calcNewDelta(r.prev, r.empty);
+
+	return r.empty;
 }
 
 template <class K, unsigned int Capacity, class HashFunc>
@@ -575,6 +504,21 @@ template <class K, unsigned int Capacity, class HashFunc>
 bool StaticHashSet<K, Capacity, HashFunc>::bucketFound(unsigned int index, hash_t hash, const K &key) const
 {
 	return (hashes_[index] == hash && equalTo(keys_[index], key));
+}
+
+template <class K, unsigned int Capacity, class HashFunc>
+template <class KeyArg>
+bool StaticHashSet<K, Capacity, HashFunc>::insertImpl(KeyArg &&key)
+{
+	const hash_t hash = hashFunc_(key);
+	const ProbeResult r = probe(key, hash);
+
+	if (r.foundFlag)
+		return false;
+
+	const unsigned int index = patchDeltas(r);
+	insertKey(index, hash, nctl::forward<KeyArg>(key));
+	return true;
 }
 
 template <class K, unsigned int Capacity, class HashFunc>

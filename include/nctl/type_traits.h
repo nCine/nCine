@@ -78,15 +78,70 @@ struct removeReference
 {
 	using type = T;
 };
+
 template <class T>
 struct removeReference<T &>
 {
 	using type = T;
 };
+
 template <class T>
 struct removeReference<T &&>
 {
 	using type = T;
+};
+
+template <class T>
+struct removeExtent
+{
+	typedef T type;
+};
+
+template <class T>
+struct removeExtent<T[]>
+{
+	typedef T type;
+};
+
+template <class T, unsigned int N>
+struct removeExtent<T[N]>
+{
+	typedef T type;
+};
+
+template <class T>
+using removeExtentT = typename removeExtent<T>::type;
+
+template <class T>
+struct decayArray
+{
+	using type = T;
+};
+
+template <class T>
+struct decayArray<T[]>
+{
+	using type = T*;
+};
+
+template <class T, unsigned int N>
+struct decayArray<T[N]>
+{
+	using type = T*;
+};
+
+template <class T, class... Args>
+struct decayArray<T(Args...)>
+{
+	using type = T(*)(Args...);
+};
+
+template <class T>
+struct Decay
+{
+	using NoRef = typename removeReference<T>::type;
+	using NoCV = typename removeCv<NoRef>::type;
+	using Type = typename decayArray<NoCV>::type;
 };
 
 template <class T>
@@ -99,24 +154,6 @@ struct isLValueReference<T &>
 {
 	static constexpr bool value = true;
 };
-
-template <class T>
-struct removeExtent
-{
-	typedef T type;
-};
-template <class T>
-struct removeExtent<T[]>
-{
-	typedef T type;
-};
-template <class T, unsigned int N>
-struct removeExtent<T[N]>
-{
-	typedef T type;
-};
-template <class T>
-using removeExtentT = typename removeExtent<T>::type;
 
 template <class T>
 struct addLValueReference : decltype(detail::tryAddLValueReference<T>(0))
