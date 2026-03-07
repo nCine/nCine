@@ -123,6 +123,18 @@ TEST_F(ListOperationsTest, SelfAssignment)
 	assertListMatchesArray(list_, array);
 }
 
+TEST_F(ListOperationsTest, SelfMoveAssignment)
+{
+	printf("Assigning the list to itself with the move assignment operator\n");
+	list_ = nctl::move(list_);
+	printList(list_);
+
+	ASSERT_EQ(list_.size(), Length);
+	ASSERT_EQ(calcLength(list_), Length);
+	int array[Length] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	assertListMatchesArray(list_, array);
+}
+
 TEST_F(ListOperationsTest, RemoveOddNumbers)
 {
 	printf("Removing all odd numbers from the list\n");

@@ -202,6 +202,16 @@ TEST_F(StaticStringOperationsTest, SelfAssignment)
 	ASSERT_STREQ(string_.data(), String1Literal);
 }
 
+TEST_F(StaticStringOperationsTest, SelfMoveAssignment)
+{
+	string_ = nctl::move(string_);
+	printString("Assigning the string to itself with the move assignment operator: ", string_);
+
+	ASSERT_EQ(string_.capacity(), Capacity);
+	ASSERT_EQ(string_.length(), String1Length);
+	ASSERT_STREQ(string_.data(), String1Literal);
+}
+
 TEST_F(StaticStringOperationsTest, AssignLongCStringTruncate)
 {
 	nctl::StaticString<Capacity> newString;

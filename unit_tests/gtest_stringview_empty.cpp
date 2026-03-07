@@ -136,6 +136,16 @@ TEST_F(StringViewEmptyTest, SelfAssignment)
 	ASSERT_STREQ(emptyStringView_.data(), "");
 }
 
+TEST_F(StringViewEmptyTest, SelfMoveAssignment)
+{
+	emptyStringView_ = nctl::move(emptyStringView_);
+	printStringView("Assigning the empty string view to itself with the move assignment operator: ", emptyStringView_);
+
+	ASSERT_EQ(emptyStringView_.capacity(), 1);
+	ASSERT_EQ(emptyStringView_.length(), 0);
+	ASSERT_STREQ(emptyStringView_.data(), "");
+}
+
 TEST_F(StringViewEmptyTest, AssignCString)
 {
 	char longString[] = "String2...String2";
