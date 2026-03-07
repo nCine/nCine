@@ -29,6 +29,8 @@ namespace detail {
 
 }
 
+using ptrDiffType = decltype(static_cast<int *>(nullptr) - static_cast<int *>(nullptr));
+
 template <class T, T v>
 struct integralConstant
 {
@@ -164,6 +166,16 @@ struct addRValueReference : decltype(detail::tryAddRValueReference<T>(0))
 template <class T>
 typename addRValueReference<T>::type declVal();
 
+template <class From, class To>
+struct isConvertible
+{
+#if defined(_MSC_VER)
+	static constexpr bool value = __is_convertible_to(From, To);
+#else
+	static constexpr bool value = __is_convertible(From, To);
+#endif
+};
+
 template <class T>
 struct isEmpty
 {
@@ -256,6 +268,8 @@ struct enableIf<true, T>
 {
 	using type = T;
 };
+template <bool Condition, typename T = void>
+using enableIfT = typename enableIf<Condition, T>::type;
 
 template <typename T, typename U> struct isSame : falseType {};
 template <typename T> struct isSame<T, T> : trueType {};
