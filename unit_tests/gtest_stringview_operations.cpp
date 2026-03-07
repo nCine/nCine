@@ -202,6 +202,16 @@ TEST_F(StringViewOperationsTest, SelfAssignment)
 	ASSERT_STREQ(stringView_.data(), String1Literal);
 }
 
+TEST_F(StringViewOperationsTest, SelfMoveAssignment)
+{
+	stringView_ = nctl::move(stringView_);
+	printStringView("Assigning the string view to itself with the move assignment operator: ", stringView_);
+
+	ASSERT_EQ(stringView_.capacity(), String1Length + 1);
+	ASSERT_EQ(stringView_.length(), String1Length);
+	ASSERT_STREQ(stringView_.data(), String1Literal);
+}
+
 TEST_F(StringViewOperationsTest, AssignLongCStringExtend)
 {
 	char longString[] = "String2...String2";

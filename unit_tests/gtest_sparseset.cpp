@@ -270,6 +270,23 @@ TEST_F(SparseSetTest, SelfAssignment)
 	sparseset_ = sparseset_;
 	printSparseSet(sparseset_);
 
+	for (unsigned int i = 0; i < sparseset_.size(); i++)
+		ASSERT_TRUE(sparseset_.contains(i));
+
+	ASSERT_EQ(sparseset_.size(), Size);
+	ASSERT_EQ(calcSize(sparseset_), Size);
+	ASSERT_EQ(sparseset_.capacity(), Capacity);
+}
+
+TEST_F(SparseSetTest, SelfMoveAssignment)
+{
+	printf("Assigning the sparseset to itself with the move assignment operator\n");
+	sparseset_ = nctl::move(sparseset_);
+	printSparseSet(sparseset_);
+
+	for (unsigned int i = 0; i < sparseset_.size(); i++)
+		ASSERT_TRUE(sparseset_.contains(i));
+
 	ASSERT_EQ(sparseset_.size(), Size);
 	ASSERT_EQ(calcSize(sparseset_), Size);
 	ASSERT_EQ(sparseset_.capacity(), Capacity);
