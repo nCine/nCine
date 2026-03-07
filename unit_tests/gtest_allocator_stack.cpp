@@ -13,7 +13,7 @@ class AllocatorStackTest : public ::testing::Test
 	nctl::StackAllocator allocator_;
 };
 
-#ifdef NCINE_DEBUG
+#if STACK_DEBUG
 TEST(AllocatorStackDeathTest, DeallocateOutOfOrder)
 {
 	uint8_t buffer[BufferSize];
@@ -88,7 +88,7 @@ TEST_F(AllocatorStackTest, CurrentPointer)
 	printf("Allocating %lu bytes with the StackAllocator\n", Bytes);
 	ElementType *ptr = reinterpret_cast<ElementType *>(allocator_.allocate(Bytes));
 	ASSERT_EQ(uintptr_t(allocator_.current()), uintptr_t(ptr) + Bytes);
-#ifdef NCINE_DEBUG
+#if STACK_DEBUG
 	ASSERT_EQ(allocator_.previous(), ptr);
 #endif
 

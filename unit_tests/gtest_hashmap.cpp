@@ -374,6 +374,22 @@ TEST_F(HashMapTest, SelfAssignment)
 	hashmap_ = hashmap_;
 	printHashMap(hashmap_);
 
+	for (unsigned int i = 0; i < Size; i++)
+		ASSERT_EQ(hashmap_[i], i + KeyValueDifference);
+
+	ASSERT_EQ(hashmap_.size(), Size);
+	ASSERT_EQ(calcSize(hashmap_), Size);
+}
+
+TEST_F(HashMapTest, SelfMoveAssignment)
+{
+	printf("Assigning the hashmap to itself with the move assignment operator\n");
+	hashmap_ = nctl::move(hashmap_);
+	printHashMap(hashmap_);
+
+	for (unsigned int i = 0; i < Size; i++)
+		ASSERT_EQ(hashmap_[i], i + KeyValueDifference);
+
 	ASSERT_EQ(hashmap_.size(), Size);
 	ASSERT_EQ(calcSize(hashmap_), Size);
 }

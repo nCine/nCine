@@ -278,6 +278,22 @@ TEST_F(HashSetListTest, SelfAssignment)
 	hashset_ = hashset_;
 	printHashSet(hashset_);
 
+	for (unsigned int i = 0; i < Size; i++)
+		ASSERT_TRUE(hashset_.contains(i));
+
+	ASSERT_EQ(hashset_.size(), Size);
+	ASSERT_EQ(calcSize(hashset_), Size);
+}
+
+TEST_F(HashSetListTest, SelfMoveAssignment)
+{
+	printf("Assigning the hashset to itself with the move assignment operator\n");
+	hashset_ = nctl::move(hashset_);
+	printHashSet(hashset_);
+
+	for (unsigned int i = 0; i < Size; i++)
+		ASSERT_TRUE(hashset_.contains(i));
+
 	ASSERT_EQ(hashset_.size(), Size);
 	ASSERT_EQ(calcSize(hashset_), Size);
 }

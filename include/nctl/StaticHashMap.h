@@ -234,6 +234,9 @@ StaticHashMap<K, T, Capacity, HashFunc>::StaticHashMap(StaticHashMap<K, T, Capac
 template <class K, class T, unsigned int Capacity, class HashFunc>
 StaticHashMap<K, T, Capacity, HashFunc> &StaticHashMap<K, T, Capacity, HashFunc>::operator=(const StaticHashMap<K, T, Capacity, HashFunc> &other)
 {
+	if (this == &other)
+		return *this;
+
 	for (unsigned int i = 0; i < Capacity; i++)
 	{
 		if (other.hashes_[i] != NullHash)
@@ -258,6 +261,9 @@ StaticHashMap<K, T, Capacity, HashFunc> &StaticHashMap<K, T, Capacity, HashFunc>
 template <class K, class T, unsigned int Capacity, class HashFunc>
 StaticHashMap<K, T, Capacity, HashFunc> &StaticHashMap<K, T, Capacity, HashFunc>::operator=(StaticHashMap<K, T, Capacity, HashFunc> &&other)
 {
+	if (this == &other)
+		return *this;
+
 	for (unsigned int i = 0; i < Capacity; i++)
 	{
 		if (other.hashes_[i] != NullHash)

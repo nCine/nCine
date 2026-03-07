@@ -204,6 +204,9 @@ StaticHashSet<K, Capacity, HashFunc>::StaticHashSet(StaticHashSet<K, Capacity, H
 template <class K, unsigned int Capacity, class HashFunc>
 StaticHashSet<K, Capacity, HashFunc> &StaticHashSet<K, Capacity, HashFunc>::operator=(const StaticHashSet<K, Capacity, HashFunc> &other)
 {
+	if (this == &other)
+		return *this;
+
 	for (unsigned int i = 0; i < Capacity; i++)
 	{
 		if (other.hashes_[i] != NullHash)
@@ -228,6 +231,9 @@ StaticHashSet<K, Capacity, HashFunc> &StaticHashSet<K, Capacity, HashFunc>::oper
 template <class K, unsigned int Capacity, class HashFunc>
 StaticHashSet<K, Capacity, HashFunc> &StaticHashSet<K, Capacity, HashFunc>::operator=(StaticHashSet<K, Capacity, HashFunc> &&other)
 {
+	if (this == &other)
+		return *this;
+
 	for (unsigned int i = 0; i < Capacity; i++)
 	{
 		if (other.hashes_[i] != NullHash)

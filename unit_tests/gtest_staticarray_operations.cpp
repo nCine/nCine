@@ -146,6 +146,16 @@ TEST_F(StaticArrayOperationsTest, SelfAssignment)
 	ASSERT_TRUE(isUnmodified(array_));
 }
 
+TEST_F(StaticArrayOperationsTest, SelfMoveAssignment)
+{
+	printf("Assigning the array to itself with the move assignment operator\n");
+	array_ = nctl::move(array_);
+	printArray(array_);
+
+	ASSERT_EQ(array_.size(), Capacity);
+	ASSERT_TRUE(isUnmodified(array_));
+}
+
 TEST_F(StaticArrayOperationsTest, RemoveFirstWithIterator)
 {
 	printf("Removing the first element with an iterator\n");
