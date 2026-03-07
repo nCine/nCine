@@ -2,6 +2,7 @@
 #define CLASS_NCTL_STATICARRAY
 
 #include <new>
+#include <initializer_list>
 #include <ncine/common_macros.h>
 #include "ArrayIterator.h"
 #include "ReverseIterator.h"
@@ -38,13 +39,10 @@ class StaticArray
 	StaticArray()
 	    : size_(0), capacity_(C) {}
 	/// Constructs an array with the option for it to have the size match its capacity
-	explicit StaticArray(StaticArrayMode mode)
-	    : size_(0), capacity_(C)
-	{
-		if (mode == StaticArrayMode::EXTEND_SIZE)
-			setSize(capacity_);
-	}
-	inline ~StaticArray() { destructArray(array_, size_); }
+	explicit StaticArray(StaticArrayMode mode);
+	/// Constructs an array with an initializer list
+	StaticArray(std::initializer_list<T> initList);
+	~StaticArray() { destructArray(array_, size_); }
 
 	/// Copy constructor
 	StaticArray(const StaticArray &other);
@@ -112,6 +110,8 @@ class StaticArray
 	void popBack();
 	/// Inserts new elements at the specified position from a source range, last not included (shifting elements around)
 	T *insertRange(unsigned int index, const T *firstPtr, const T *lastPtr);
+	/// Inserts new elements at a specified position with an initializer list (shifting elements around)
+	T *insertRange(unsigned int index, std::initializer_list<T> initList);
 	/// Inserts a new element at a specified position (shifting elements around)
 	T *insertAt(unsigned int index, const T &element);
 	/// Move inserts a new element at a specified position (shifting elements around)
@@ -124,6 +124,8 @@ class StaticArray
 	Iterator insert(Iterator position, T &&value);
 	/// Inserts new elements from a source at the position specified by the iterator (shifting elements around)
 	Iterator insert(Iterator position, Iterator first, Iterator last);
+	/// Inserts new elements with an initializer list at the position specified by the iterator (shifting elements around)
+	Iterator insert(Iterator position, std::initializer_list<T> initList);
 	/// Constructs a new element at the position specified by the iterator
 	template <typename... Args> Iterator emplace(Iterator position, Args &&... args);
 
@@ -168,6 +170,21 @@ class StaticArray
 	/// Grows the array size by one and returns a pointer to the new element
 	T *extendOne();
 };
+
+template <class T, unsigned int C>
+StaticArray<T, C>::StaticArray(StaticArrayMode mode)
+    : size_(0), capacity_(C)
+{
+	if (mode == StaticArrayMode::EXTEND_SIZE)
+		setSize(capacity_);
+}
+
+template <class T, unsigned int C>
+StaticArray<T, C>::StaticArray(std::initializer_list<T> initList)
+    : StaticArray()
+{
+	insertRange(0, initList);
+}
 
 template <class T, unsigned int C>
 StaticArray<T, C>::StaticArray(const StaticArray<T, C> &other)
@@ -324,6 +341,17 @@ T *StaticArray<T, C>::insertRange(unsigned int index, const T *firstPtr, const T
 }
 
 template <class T, unsigned int C>
+T *StaticArray<T, C>::insertRange(unsigned int index, std::initializer_list<T> initList)
+{
+	typename std::initializer_list<T>::const_iterator end = initList.end();
+	const unsigned int MaxInsertions = capacity_ - size_;
+	if (end - initList.begin() > MaxInsertions)
+		end = initList.begin() + MaxInsertions;
+
+	return insertRange(index, initList.begin(), end);
+}
+
+template <class T, unsigned int C>
 T *StaticArray<T, C>::insertAt(unsigned int index, const T &element)
 {
 	// Cannot insert at more than one position after the last element
@@ -422,6 +450,15 @@ typename StaticArray<T, C>::Iterator StaticArray<T, C>::insert(Iterator position
 	const T *firstPtr = &(*first);
 	const T *lastPtr = &(*last);
 	T *nextElement = insertRange(index, firstPtr, lastPtr);
+
+	return Iterator(nextElement);
+}
+
+template <class T, unsigned int C>
+typename StaticArray<T, C>::Iterator StaticArray<T, C>::insert(Iterator position, std::initializer_list<T> initList)
+{
+	const unsigned int index = static_cast<unsigned int>(&(*position) - array_);
+	T *nextElement = insertRange(index, initList);
 
 	return Iterator(nextElement);
 }

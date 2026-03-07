@@ -84,6 +84,38 @@ TEST_F(SparseSetTest, InsertElements)
 	ASSERT_EQ(calcSize(sparseset_), Size * 2);
 }
 
+TEST_F(SparseSetTest, InsertInitializerList)
+{
+	printf("Inserting elements with an initializer list\n");
+	const bool allInserted = sparseset_.insert({ 8, 9, 10, 11, 12, 13, 14, 15 });
+	printSparseSet(sparseset_);
+
+	for (unsigned int i = 0; i < Size * 2; i++)
+		ASSERT_TRUE(sparseset_.contains(i));
+
+	ASSERT_TRUE(allInserted);
+	ASSERT_EQ(sparseset_.size(), Size * 2);
+	ASSERT_EQ(calcSize(sparseset_), Size * 2);
+}
+
+TEST_F(SparseSetTest, InsertInitializerListTruncate)
+{
+	const unsigned int SmallCapacity = 4;
+	SparseSetTestType newSparseset(SmallCapacity, MaxValue);
+
+	printf("Inserting elements with an initializer list longer than its capacity\n");
+	const bool allInserted = newSparseset.insert({ 0, 1, 2, 3, 4 });
+	printSparseSet(sparseset_);
+
+	for (unsigned int i = 0; i < SmallCapacity; i++)
+		ASSERT_TRUE(newSparseset.contains(i));
+
+	ASSERT_FALSE(allInserted);
+	ASSERT_FALSE(newSparseset.contains(4));
+	ASSERT_EQ(newSparseset.size(), SmallCapacity);
+	ASSERT_EQ(calcSize(newSparseset), SmallCapacity);
+}
+
 TEST_F(SparseSetTest, FailInsertElements)
 {
 	printf("Trying to insert elements already in the sparseset\n");
@@ -151,6 +183,33 @@ TEST_F(SparseSetTest, RehashShrink)
 
 	for (unsigned int i = 0; i < Size; i++)
 		ASSERT_TRUE(sparseset_.contains(i));
+}
+
+TEST_F(SparseSetTest, InitializerListConstruction)
+{
+	const unsigned int InitializerListSize = 5;
+	printf("Creating a new sparse set with an initializer list\n");
+	SparseSetTestType newSparseset({ 0, 1, 2, 3, 4 }, Capacity, MaxValue);
+	printSparseSet(newSparseset);
+
+	ASSERT_EQ(newSparseset.size(), InitializerListSize);
+	ASSERT_EQ(calcSize(newSparseset), InitializerListSize);
+	for (unsigned int i = 0; i < newSparseset.size(); i++)
+		ASSERT_TRUE(newSparseset.contains(i));
+}
+
+TEST_F(SparseSetTest, InitializerListConstructionTruncate)
+{
+	const unsigned int SmallCapacity = 4;
+	printf("Creating a new sparse set with an initializer list longer than its capacity\n");
+	SparseSetTestType newSparseset({ 0, 1, 2, 3, 4 }, SmallCapacity, MaxValue);
+	printSparseSet(newSparseset);
+
+	ASSERT_EQ(newSparseset.size(), SmallCapacity);
+	ASSERT_EQ(calcSize(newSparseset), SmallCapacity);
+	for (unsigned int i = 0; i < newSparseset.capacity(); i++)
+		ASSERT_TRUE(newSparseset.contains(i));
+	ASSERT_FALSE(newSparseset.contains(4));
 }
 
 TEST_F(SparseSetTest, CopyConstruction)

@@ -46,6 +46,30 @@ TEST_F(ArrayOperationsTest, Clear)
 	ASSERT_EQ(array_.capacity(), Capacity);
 }
 
+TEST_F(ArrayOperationsTest, InitializerListConstruction)
+{
+	printf("Creating a new array with an initializer list\n");
+	nctl::Array<int> newArray({ 0, 1, 2, 3, 4 }, Capacity);
+	printArray(newArray);
+
+	ASSERT_EQ(newArray.size(), 5);
+	for (unsigned int i = 0; i < newArray.size(); i++)
+		ASSERT_EQ(newArray[i], i);
+}
+
+TEST_F(ArrayOperationsTest, InitializerListConstructionTruncate)
+{
+	printf("Creating a new array with an initializer list longer than its capacity\n");
+	nctl::Array<int> newArray({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
+	                          Capacity, nctl::ArrayMode::FIXED_CAPACITY);
+	printArray(newArray);
+
+	ASSERT_EQ(newArray.capacity(), Capacity);
+	ASSERT_EQ(newArray.size(), Capacity);
+	for (unsigned int i = 0; i < newArray.size(); i++)
+		ASSERT_EQ(newArray[i], i);
+}
+
 TEST_F(ArrayOperationsTest, CopyConstruction)
 {
 	printf("Creating a new array with copy construction\n");
@@ -479,6 +503,62 @@ TEST_F(ArrayOperationsTest, InsertAtConstFrontAndExtendCapacity)
 
 	ASSERT_EQ(newArray.size(), 3);
 	ASSERT_EQ(newArray.capacity(), 4);
+	for (unsigned int i = 0; i < newArray.size(); i++)
+		ASSERT_EQ(newArray[i], static_cast<int>(i));
+}
+
+TEST_F(ArrayOperationsTest, InsertRangeWithInitializerList)
+{
+	nctl::Array<int> newArray(Capacity);
+
+	printf("Inserting a range of elements with an initializer list in a new array\n");
+	newArray.insertRange(0, { 0, 1, 2, 3, 4 });
+	printArray(newArray);
+
+	ASSERT_EQ(newArray.size(), 5);
+	for (unsigned int i = 0; i < newArray.size(); i++)
+		ASSERT_EQ(newArray[i], static_cast<int>(i));
+}
+
+TEST_F(ArrayOperationsTest, InsertRangeWithInitializerListTruncate)
+{
+	nctl::Array<int> newArray(Capacity, nctl::ArrayMode::FIXED_CAPACITY);
+
+	printf("Inserting a range of elements with an initializer list longer than the capacity of the new array\n");
+	newArray.insertRange(0, { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
+	printArray(newArray);
+
+	ASSERT_EQ(newArray.capacity(), Capacity);
+	ASSERT_EQ(newArray.size(), Capacity);
+	for (unsigned int i = 0; i < newArray.size(); i++)
+		ASSERT_EQ(newArray[i], static_cast<int>(i));
+}
+
+TEST_F(ArrayOperationsTest, InsertRangeWithInitializerListAndIterator)
+{
+	nctl::Array<int> newArray(Capacity);
+	nctl::Array<int>::Iterator it = newArray.begin();
+
+	printf("Inserting a range of elements with an initializer list in a new array with an iterator\n");
+	newArray.insert(it, { 0, 1, 2, 3, 4 });
+	printArray(newArray);
+
+	ASSERT_EQ(newArray.size(), 5);
+	for (unsigned int i = 0; i < newArray.size(); i++)
+		ASSERT_EQ(newArray[i], static_cast<int>(i));
+}
+
+TEST_F(ArrayOperationsTest, InsertRangeWithInitializerListAndIteratorTruncate)
+{
+	nctl::Array<int> newArray(Capacity, nctl::ArrayMode::FIXED_CAPACITY);
+	nctl::Array<int>::Iterator it = newArray.begin();
+
+	printf("Inserting a range of elements with an initializer list longer than the capacity of the new array with an iterator\n");
+	newArray.insert(it, { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
+	printArray(newArray);
+
+	ASSERT_EQ(newArray.capacity(), Capacity);
+	ASSERT_EQ(newArray.size(), Capacity);
 	for (unsigned int i = 0; i < newArray.size(); i++)
 		ASSERT_EQ(newArray[i], static_cast<int>(i));
 }

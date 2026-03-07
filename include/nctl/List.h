@@ -1,6 +1,7 @@
 #ifndef CLASS_NCTL_LIST
 #define CLASS_NCTL_LIST
 
+#include <initializer_list>
 #include <ncine/common_macros.h>
 #include "ListIterator.h"
 #include "ReverseIterator.h"
@@ -74,15 +75,22 @@ class List
 	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
 #if !NCINE_WITH_ALLOCATORS
+	/// Constructs an empty list
 	List()
 	    : size_(0) {}
 #else
+	/// Constructs an empty list
 	List()
 	    : List(theDefaultAllocator()) {}
 
+	/// Constructs an empty list with a custom allocator
 	explicit List(IAllocator &alloc)
 	    : alloc_(alloc), size_(0) {}
+	/// Constructs a list with an initializer list and a custom allocator
+	List(std::initializer_list<T> initList, IAllocator &alloc);
 #endif
+	/// Constructs a list with an initializer list
+	List(std::initializer_list<T> initList);
 	~List() { clear(); }
 
 	/// Copy constructor
@@ -163,19 +171,23 @@ class List
 	/// Removes the last element in constant time
 	inline void popBack() { removeNode(sentinel_.previous_); }
 	/// Inserts a new element after the node pointed by the constant iterator
-	ConstIterator insertAfter(Iterator position, const T &element);
+	Iterator insertAfter(Iterator position, const T &element);
 	/// Move inserts a new element after the node pointed by the constant iterator
-	ConstIterator insertAfter(Iterator position, T &&element);
+	Iterator insertAfter(Iterator position, T &&element);
+	/// Inserts new elements with an initializer list after the node pointed by the constant iterator
+	Iterator insertAfter(Iterator position, std::initializer_list<T> initList);
 	/// Constructs a new element after the node pointed by the constant iterator
-	template <typename... Args> ConstIterator emplaceAfter(Iterator position, Args &&... args);
+	template <typename... Args> Iterator emplaceAfter(Iterator position, Args &&... args);
 	/// Inserts a new element before the node pointed by the constant iterator
-	ConstIterator insertBefore(Iterator position, const T &element);
+	Iterator insertBefore(Iterator position, const T &element);
 	/// Move inserts a new element before the node pointed by the constant iterator
-	ConstIterator insertBefore(Iterator position, T &&element);
+	Iterator insertBefore(Iterator position, T &&element);
+	/// Inserts new elements with an initializer list before the node pointed by the constant iterator
+	Iterator insertBefore(Iterator position, std::initializer_list<T> initList);
 	/// Constructs a new element before the node pointed by the constant iterator
-	template <typename... Args> ConstIterator emplaceBefore(Iterator position, Args &&... args);
+	template <typename... Args> Iterator emplaceBefore(Iterator position, Args &&... args);
 	/// Inserts new elements from a source range after the node pointed by the constant iterator, last not included
-	ConstIterator insert(Iterator position, Iterator first, Iterator last);
+	Iterator insert(Iterator position, Iterator first, Iterator last);
 	/// Removes the node pointed by the constant iterator in constant time
 	ConstIterator erase(ConstIterator position);
 	/// Removes the range of nodes pointed by the iterators in constant time
@@ -219,6 +231,22 @@ class List
 	/// Removes a range of nodes in constant time, last not included
 	ListNode<T> *removeRange(ListNode<T> *firstNode, ListNode<T> *lastNode);
 };
+
+#if NCINE_WITH_ALLOCATORS
+template <class T>
+List<T>::List(std::initializer_list<T> initList, IAllocator &alloc)
+    : List(alloc)
+{
+	insertAfter(begin(), initList);
+}
+#endif
+
+template <class T>
+List<T>::List(std::initializer_list<T> initList)
+    : List()
+{
+	insertAfter(begin(), initList);
+}
 
 template <class T>
 List<T>::List(const List<T> &other)
@@ -344,45 +372,66 @@ T &List<T>::back()
 }
 
 template <class T>
-typename List<T>::ConstIterator List<T>::insertAfter(Iterator position, const T &element)
+typename List<T>::Iterator List<T>::insertAfter(Iterator position, const T &element)
 {
-	return ConstIterator(insertAfterNode(position.node_, element));
+	return Iterator(insertAfterNode(position.node_, element));
 }
 
 template <class T>
-typename List<T>::ConstIterator List<T>::insertAfter(Iterator position, T &&element)
+typename List<T>::Iterator List<T>::insertAfter(Iterator position, T &&element)
 {
-	return ConstIterator(insertAfterNode(position.node_, nctl::move(element)));
+	return Iterator(insertAfterNode(position.node_, nctl::move(element)));
 }
 
 template <class T>
-template <typename... Args>
-typename List<T>::ConstIterator List<T>::emplaceAfter(Iterator position, Args &&... args)
+typename List<T>::Iterator List<T>::insertAfter(Iterator position, std::initializer_list<T> initList)
 {
-	return ConstIterator(emplaceAfterNode(position.node_, nctl::forward<Args>(args)...));
-}
+	Iterator nextPosition = position;
+	for (const T &element : initList)
+		nextPosition = insertAfter(nextPosition, element);
 
-template <class T>
-typename List<T>::ConstIterator List<T>::insertBefore(Iterator position, const T &element)
-{
-	return ConstIterator(insertBeforeNode(position.node_, element));
-}
-
-template <class T>
-typename List<T>::ConstIterator List<T>::insertBefore(Iterator position, T &&element)
-{
-	return ConstIterator(insertBeforeNode(position.node_, nctl::move(element)));
+	return nextPosition;
 }
 
 template <class T>
 template <typename... Args>
-typename List<T>::ConstIterator List<T>::emplaceBefore(Iterator position, Args &&... args)
+typename List<T>::Iterator List<T>::emplaceAfter(Iterator position, Args &&... args)
 {
-	return ConstIterator(emplaceBeforeNode(position.node_, nctl::forward<Args>(args)...));
+	return Iterator(emplaceAfterNode(position.node_, nctl::forward<Args>(args)...));
 }
 
 template <class T>
-typename List<T>::ConstIterator List<T>::insert(Iterator position, Iterator first, Iterator last)
+typename List<T>::Iterator List<T>::insertBefore(Iterator position, const T &element)
+{
+	return Iterator(insertBeforeNode(position.node_, element));
+}
+
+template <class T>
+typename List<T>::Iterator List<T>::insertBefore(Iterator position, T &&element)
+{
+	return Iterator(insertBeforeNode(position.node_, nctl::move(element)));
+}
+
+template <class T>
+typename List<T>::Iterator List<T>::insertBefore(Iterator position, std::initializer_list<T> initList)
+{
+	Iterator lastInserted = end();
+
+	for (const T &element : initList)
+		lastInserted = insertBefore(position, element);
+
+	return lastInserted;
+}
+
+template <class T>
+template <typename... Args>
+typename List<T>::Iterator List<T>::emplaceBefore(Iterator position, Args &&... args)
+{
+	return Iterator(emplaceBeforeNode(position.node_, nctl::forward<Args>(args)...));
+}
+
+template <class T>
+typename List<T>::Iterator List<T>::insert(Iterator position, Iterator first, Iterator last)
 {
 	ListNode<T> *node = position.node_;
 	while (first != last)
@@ -391,7 +440,7 @@ typename List<T>::ConstIterator List<T>::insert(Iterator position, Iterator firs
 		++first;
 	}
 
-	return ConstIterator(node);
+	return Iterator(node);
 }
 
 /*! \note The iterator cannot be used after on. */

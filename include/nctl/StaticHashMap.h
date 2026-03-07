@@ -2,6 +2,7 @@
 #define CLASS_NCTL_STATICHASHMAP
 
 #include <new>
+#include <initializer_list>
 #include <ncine/common_macros.h>
 #include "HashFunctions.h"
 #include "Pair.h"
@@ -30,6 +31,9 @@ class StaticHashMap
 	/// Constructs an empty hashmap
 	inline StaticHashMap()
 	    : size_(0) { init(); }
+	/// Constructs an hashmap with an initializer list
+	inline StaticHashMap(std::initializer_list<Pair<K, T>> initList)
+	    : StaticHashMap() { insert(initList); }
 	inline ~StaticHashMap() { destructNodes(); }
 
 	/// Copy constructor
@@ -76,6 +80,8 @@ class StaticHashMap
 	inline bool insert(const K &key, T &&value) { return insertImpl(key, nctl::move(value)); }
 	/// Inserts an element from a pair, if no other has the same key, and returns `true` on success
 	inline bool insert(const Pair<K, T> &pair) { return insertImpl(pair.first, pair.second); }
+	/// Inserts elements from an initializer list of pairs
+	bool insert(std::initializer_list<Pair<K, T>> initList);
 	/// Constructs an element if no other has the same key
 	template <typename... Args> bool emplace(const K &key, Args &&... args);
 
@@ -285,6 +291,24 @@ T &StaticHashMap<K, T, Capacity, HashFunc>::operator[](const K &key)
 
 	const unsigned int index = patchDeltas(r);
 	return addNode(index, hash, key);
+}
+
+/*! \return True if all initializer list elements have been inserted */
+template <class K, class T, unsigned int Capacity, class HashFunc>
+bool StaticHashMap<K, T, Capacity, HashFunc>::insert(std::initializer_list<Pair<K, T>> initList)
+{
+	const unsigned int MaxInsertions = capacity() - size();
+
+	unsigned int numInserted = 0;
+	for (const Pair<K, T> &element : initList)
+	{
+		if (numInserted >= MaxInsertions)
+			break;
+		const bool inserted = insert(element);
+		numInserted += inserted ? 1 : 0;
+	}
+
+	return (numInserted == initList.size());
 }
 
 /*! \return True if the element has been emplaced */

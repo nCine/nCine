@@ -33,9 +33,13 @@ class HashSetList
 
 	/// Constructs an hashset with explicit capacity
 	explicit HashSetList(unsigned int capacity);
+	/// Constructs an hashset with an initializer list and explicit capacity
+	HashSetList(std::initializer_list<K> initList, unsigned int capacity);
 #if NCINE_WITH_ALLOCATORS
 	/// Constructs an hashset with explicit capacity and a custom allocator
 	HashSetList(unsigned int capacity, IAllocator &alloc);
+	/// Constructs an hashset with an initializer list, an explicit capacity, and a custom allocator
+	HashSetList(std::initializer_list<K> initList, unsigned int capacity, IAllocator &alloc);
 #endif
 	~HashSetList() { clear(); }
 
@@ -79,6 +83,8 @@ class HashSetList
 	bool insert(const K &key);
 	/// Moves an element if no other has the same key
 	bool insert(K &&key);
+	/// Inserts elements from an initializer list
+	bool insert(std::initializer_list<K> initList);
 
 	/// Returns true if the hashSet is empty
 	inline bool isEmpty() const { return size_ == 0; }
@@ -462,7 +468,21 @@ HashSetList<K, HashFunc>::HashSetList(unsigned int capacity, IAllocator &alloc)
 	for (unsigned int i = 0; i < capacity; i++)
 		buckets_.emplaceBack(alloc);
 }
+
+template <class K, class HashFunc>
+HashSetList<K, HashFunc>::HashSetList(std::initializer_list<K> initList, unsigned int capacity, IAllocator &alloc)
+    : HashSetList(capacity, alloc)
+{
+	insert(initList);
+}
 #endif
+
+template <class K, class HashFunc>
+HashSetList<K, HashFunc>::HashSetList(std::initializer_list<K> initList, unsigned int capacity)
+    : HashSetList(capacity)
+{
+	insert(initList);
+}
 
 template <class K, class HashFunc>
 HashSetList<K, HashFunc>::HashSetList(const HashSetList<K, HashFunc> &other)
@@ -518,6 +538,16 @@ bool HashSetList<K, HashFunc>::insert(K &&key)
 	const bool inserted = retrieveBucket(hash).insert(hash, nctl::move(key));
 	size_ += inserted ? 1 : 0;
 	return inserted;
+}
+
+/*! \return True if all initializer list elements have been inserted */
+template <class K, class HashFunc>
+bool HashSetList<K, HashFunc>::insert(std::initializer_list<K> initList)
+{
+	bool allInserted = true;
+	for (const K &element : initList)
+		allInserted &= insert(element);
+	return allInserted;
 }
 
 template <class K, class HashFunc>
