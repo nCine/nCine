@@ -2,6 +2,7 @@
 #define CLASS_NCTL_STATICHASHSET
 
 #include <new>
+#include <initializer_list>
 #include <ncine/common_macros.h>
 #include "HashFunctions.h"
 #include "ReverseIterator.h"
@@ -29,6 +30,9 @@ class StaticHashSet
 	/// Constructs an empty hashset
 	inline StaticHashSet()
 	    : size_(0) { init(); }
+	/// Constructs an hashset with an initializer list
+	inline StaticHashSet(std::initializer_list<K> initList)
+	    : StaticHashSet() { insert(initList); }
 	inline ~StaticHashSet() { destructKeys(); }
 
 	/// Copy constructor
@@ -71,6 +75,8 @@ class StaticHashSet
 	inline bool insert(const K &key) { return insertImpl(key); }
 	/// Moves an element if not already in and returns `true` on success
 	inline bool insert(K &&key) { return insertImpl(nctl::move(key)); }
+	/// Inserts elements from an initializer list
+	bool insert(std::initializer_list<K> initList);
 
 	/// Returns the capacity of the hashset
 	inline unsigned int capacity() const { return Capacity; }
@@ -242,6 +248,24 @@ StaticHashSet<K, Capacity, HashFunc> &StaticHashSet<K, Capacity, HashFunc>::oper
 	other.destructKeys();
 
 	return *this;
+}
+
+/*! \return True if all initializer list elements have been inserted */
+template <class K, unsigned int Capacity, class HashFunc>
+bool StaticHashSet<K, Capacity, HashFunc>::insert(std::initializer_list<K> initList)
+{
+	const unsigned int MaxInsertions = capacity() - size();
+
+	unsigned int numInserted = 0;
+	for (const K &element : initList)
+	{
+		if (numInserted >= MaxInsertions)
+			break;
+		const bool inserted = insert(element);
+		numInserted += inserted ? 1 : 0;
+	}
+
+	return (numInserted == initList.size());
 }
 
 template <class K, unsigned int Capacity, class HashFunc>

@@ -247,6 +247,19 @@ TEST_F(ListTest, InsertAfterBeginning)
 	assertListMatchesArray(list_, array);
 }
 
+TEST_F(ListTest, InsertAfterBeginningInitializerList)
+{
+	printf("Insert an initializer list after the beginning of the list\n");
+	list_.insertAfter(list_.begin(), { 11, 12, 13 });
+	printList(list_);
+
+	ASSERT_EQ(list_.size(), Length + 3);
+	ASSERT_EQ(list_.size(), calcLength(list_));
+
+	int array[Length + 3] = { 0, 11, 12, 13, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	assertListMatchesArray(list_, array);
+}
+
 TEST_F(ListTest, EmplaceAfterBeginning)
 {
 	printf("Emplace a node after the beginning of the list\n");
@@ -270,6 +283,19 @@ TEST_F(ListTest, InsertBeforeBeginning)
 	ASSERT_EQ(list_.size(), calcLength(list_));
 
 	int array[Length + 1] = { -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	assertListMatchesArray(list_, array);
+}
+
+TEST_F(ListTest, InsertBeforeBeginningInitializerList)
+{
+	printf("Insert an initializer list before the beginning of the list\n");
+	list_.insertBefore(list_.begin(), { -3, -2, -1 });
+	printList(list_);
+
+	ASSERT_EQ(list_.size(), Length + 3);
+	ASSERT_EQ(list_.size(), calcLength(list_));
+
+	int array[Length + 3] = { -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 	assertListMatchesArray(list_, array);
 }
 
@@ -299,6 +325,19 @@ TEST_F(ListTest, InsertAfterEnd)
 	assertListMatchesArray(list_, array);
 }
 
+TEST_F(ListTest, InsertAfterEndInitializerList)
+{
+	printf("Insert an initializer list after the end of the list\n");
+	list_.insertAfter(list_.end(), { -3, -2, -1 });
+	printList(list_);
+
+	ASSERT_EQ(list_.size(), Length + 3);
+	ASSERT_EQ(list_.size(), calcLength(list_));
+
+	int array[Length + 3] = { -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+	assertListMatchesArray(list_, array);
+}
+
 TEST_F(ListTest, EmplaceAfterEnd)
 {
 	printf("Emplace a node after the end of the list\n");
@@ -322,6 +361,19 @@ TEST_F(ListTest, InsertBeforeEnd)
 	ASSERT_EQ(list_.size(), calcLength(list_));
 
 	int array[Length + 1] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+	assertListMatchesArray(list_, array);
+}
+
+TEST_F(ListTest, InsertBeforeEndInitializerList)
+{
+	printf("Insert an initializer list before the end of the list\n");
+	list_.insertBefore(list_.end(), { 11, 12, 13 });
+	printList(list_);
+
+	ASSERT_EQ(list_.size(), Length + 3);
+	ASSERT_EQ(list_.size(), calcLength(list_));
+
+	int array[Length + 3] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
 	assertListMatchesArray(list_, array);
 }
 

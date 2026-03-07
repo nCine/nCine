@@ -40,6 +40,18 @@ TEST_F(ListOperationsTest, ClearEmpty)
 	ASSERT_EQ(newList.size(), 0);
 }
 
+TEST_F(ListOperationsTest, InitializerListConstruction)
+{
+	printf("Creating a new list with an initializer list\n");
+	nctl::List<int> newList{ 0, 1, 2, 3, 4 };
+	printList(newList);
+
+	ASSERT_EQ(newList.size(), 5);
+	ASSERT_EQ(calcLength(newList), 5);
+	int array[Length] = { 0, 1, 2, 3, 4 };
+	assertListMatchesArray(newList, array);
+}
+
 TEST_F(ListOperationsTest, CopyConstruction)
 {
 	printf("Creating a new list with copy construction\n");

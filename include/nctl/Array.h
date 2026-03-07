@@ -2,6 +2,7 @@
 #define CLASS_NCTL_ARRAY
 
 #include <new>
+#include <initializer_list>
 #include <ncine/common_macros.h>
 #include "ArrayIterator.h"
 #include "ReverseIterator.h"
@@ -45,6 +46,11 @@ class Array
 	/// Constructs an array with explicit capacity
 	explicit Array(unsigned int capacity)
 	    : Array(capacity, ArrayMode::GROWING_CAPACITY) {}
+	/// Constructs an array with an initializer list and explicit capacity
+	Array(std::initializer_list<T> initList, unsigned int capacity)
+	    : Array(initList, capacity, ArrayMode::GROWING_CAPACITY) {}
+	/// Constructs an array with an initializer list, an explicit capacity, and the option for it to be fixed
+	Array(std::initializer_list<T> initList, unsigned int capacity, ArrayMode mode);
 #if !NCINE_WITH_ALLOCATORS
 	/// Constructs an array with explicit capacity and the option for it to be fixed
 	Array(unsigned int capacity, ArrayMode mode);
@@ -57,6 +63,11 @@ class Array
 	    : Array(capacity, ArrayMode::GROWING_CAPACITY, alloc) {}
 	/// Constructs an array with explicit capacity, the option for it to be fixed, and a custom allocator
 	Array(unsigned int capacity, ArrayMode mode, IAllocator &alloc);
+	/// Constructs an array with an initializer list, an explicit capacity, and a custom allocator
+	Array(std::initializer_list<T> initList, unsigned int capacity, IAllocator &alloc)
+	    : Array(initList, capacity, ArrayMode::GROWING_CAPACITY, alloc) {}
+	/// Constructs an array with an initializer list, an explicit capacity, the option for it to be fixed, and a custom allocator
+	Array(std::initializer_list<T> initList, unsigned int capacity, ArrayMode mode, IAllocator &alloc);
 #endif
 	~Array();
 
@@ -143,6 +154,8 @@ class Array
 	void popBack();
 	/// Inserts new elements at the specified position from a source range, last not included (shifting elements around)
 	T *insertRange(unsigned int index, const T *firstPtr, const T *lastPtr);
+	/// Inserts new elements at a specified position with an initializer list (shifting elements around)
+	T *insertRange(unsigned int index, std::initializer_list<T> initList);
 	/// Inserts a new element at a specified position (shifting elements around)
 	T *insertAt(unsigned int index, const T &element);
 	/// Move inserts a new element at a specified position (shifting elements around)
@@ -155,6 +168,8 @@ class Array
 	Iterator insert(Iterator position, T &&value);
 	/// Inserts new elements from a source at the position specified by the iterator (shifting elements around)
 	Iterator insert(Iterator position, Iterator first, Iterator last);
+	/// Inserts new elements with an initializer list at the position specified by the iterator (shifting elements around)
+	Iterator insert(Iterator position, std::initializer_list<T> initList);
 	/// Constructs a new element at the position specified by the iterator
 	template <typename... Args> Iterator emplace(Iterator position, Args &&... args);
 
@@ -211,6 +226,13 @@ class Array
 	T *extendOne();
 };
 
+template <class T>
+Array<T>::Array(std::initializer_list<T> initList, unsigned int capacity, ArrayMode mode)
+    : Array(capacity, mode)
+{
+	insertRange(0, initList);
+}
+
 #if !NCINE_WITH_ALLOCATORS
 template <class T>
 Array<T>::Array(unsigned int capacity, ArrayMode mode)
@@ -227,6 +249,13 @@ Array<T>::Array(unsigned int capacity, ArrayMode mode, IAllocator &alloc)
 {
 	if (capacity > 0)
 		setCapacity(capacity);
+}
+
+template <class T>
+Array<T>::Array(std::initializer_list<T> initList, unsigned int capacity, ArrayMode mode, IAllocator &alloc)
+    : Array(capacity, mode, alloc)
+{
+	insertRange(0, initList);
 }
 #endif
 
@@ -417,6 +446,20 @@ T *Array<T>::insertRange(unsigned int index, const T *firstPtr, const T *lastPtr
 }
 
 template <class T>
+T *Array<T>::insertRange(unsigned int index, std::initializer_list<T> initList)
+{
+	typename std::initializer_list<T>::const_iterator end = initList.end();
+	if (fixedCapacity_)
+	{
+		const unsigned int MaxInsertions = capacity_ - size_;
+		if (end - initList.begin() > MaxInsertions)
+			end = initList.begin() + MaxInsertions;
+	}
+
+	return insertRange(index, initList.begin(), end);
+}
+
+template <class T>
 T *Array<T>::insertAt(unsigned int index, const T &element)
 {
 	// Cannot insert at more than one position after the last element
@@ -530,6 +573,15 @@ typename Array<T>::Iterator Array<T>::insert(Iterator position, Iterator first, 
 	const T *firstPtr = &(*first);
 	const T *lastPtr = &(*last);
 	T *nextElement = insertRange(index, firstPtr, lastPtr);
+
+	return Iterator(nextElement);
+}
+
+template <class T>
+typename Array<T>::Iterator Array<T>::insert(Iterator position, std::initializer_list<T> initList)
+{
+	const unsigned int index = static_cast<unsigned int>(&(*position) - array_);
+	T *nextElement = insertRange(index, initList);
 
 	return Iterator(nextElement);
 }

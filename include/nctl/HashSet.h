@@ -2,6 +2,7 @@
 #define CLASS_NCTL_HASHSET
 
 #include <new>
+#include <initializer_list>
 #include <ncine/common_macros.h>
 #include "HashFunctions.h"
 #include "ReverseIterator.h"
@@ -37,9 +38,13 @@ class HashSet
 
 	/// Constructs an hashset with explicit capacity
 	explicit HashSet(unsigned int capacity);
+	/// Constructs an hashset with an initializer list and explicit capacity
+	HashSet(std::initializer_list<K> initList, unsigned int capacity);
 #if NCINE_WITH_ALLOCATORS
 	/// Constructs an hashset with explicit capacity and a custom allocator
 	HashSet(unsigned int capacity, IAllocator &alloc);
+	/// Constructs an hashset with an initializer list, an explicit capacity, and a custom allocator
+	HashSet(std::initializer_list<K> initList, unsigned int capacity, IAllocator &alloc);
 #endif
 	~HashSet();
 
@@ -98,6 +103,8 @@ class HashSet
 	inline bool insert(const K &key) { return insertImpl(key); }
 	/// Moves an element if not already in and returns `true` on success
 	inline bool insert(K &&key) { return insertImpl(nctl::move(key)); }
+	/// Inserts elements from an initializer list
+	bool insert(std::initializer_list<K> initList);
 
 	/// Returns the capacity of the hashset
 	inline unsigned int capacity() const { return capacity_; }
@@ -229,6 +236,13 @@ HashSet<K, HashFunc>::HashSet(unsigned int capacity)
 	initValues();
 }
 
+template <class K, class HashFunc>
+HashSet<K, HashFunc>::HashSet(std::initializer_list<K> initList, unsigned int capacity)
+    : HashSet(capacity)
+{
+	insert(initList);
+}
+
 #if NCINE_WITH_ALLOCATORS
 template <class K, class HashFunc>
 HashSet<K, HashFunc>::HashSet(unsigned int capacity, IAllocator &alloc)
@@ -243,6 +257,13 @@ HashSet<K, HashFunc>::HashSet(unsigned int capacity, IAllocator &alloc)
 
 	initPointers();
 	initValues();
+}
+
+template <class K, class HashFunc>
+HashSet<K, HashFunc>::HashSet(std::initializer_list<K> initList, unsigned int capacity, IAllocator &alloc)
+    : HashSet(capacity, alloc)
+{
+	insert(initList);
 }
 #endif
 
@@ -353,6 +374,24 @@ HashSet<K, HashFunc> &HashSet<K, HashFunc>::operator=(HashSet<K, HashFunc> &&oth
 		other.clear();
 	}
 	return *this;
+}
+
+/*! \return True if all initializer list elements have been inserted */
+template <class K, class HashFunc>
+bool HashSet<K, HashFunc>::insert(std::initializer_list<K> initList)
+{
+	const unsigned int MaxInsertions = capacity() - size();
+
+	unsigned int numInserted = 0;
+	for (const K &element : initList)
+	{
+		if (numInserted >= MaxInsertions)
+			break;
+		const bool inserted = insert(element);
+		numInserted += inserted ? 1 : 0;
+	}
+
+	return (numInserted == initList.size());
 }
 
 template <class K, class HashFunc>

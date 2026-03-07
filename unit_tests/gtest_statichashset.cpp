@@ -74,6 +74,37 @@ TEST_F(StaticHashSetTest, InsertConstElements)
 	ASSERT_EQ(calcSize(hashset_), Size * 2);
 }
 
+TEST_F(StaticHashSetTest, InsertInitializerList)
+{
+	const unsigned int InitializerListSize = 5;
+	printf("Inserting elements with an initializer list\n");
+	const bool allInserted = hashset_.insert({ 10, 11, 12, 13, 14 });
+	printHashSet(hashset_);
+
+	for (unsigned int i = 0; i < hashset_.size(); i++)
+		ASSERT_TRUE(hashset_.contains(i));
+
+	ASSERT_TRUE(allInserted);
+	ASSERT_EQ(hashset_.size(), Size + InitializerListSize);
+	ASSERT_EQ(calcSize(hashset_), Size + InitializerListSize);
+}
+
+TEST_F(StaticHashSetTest, InsertInitializerListTruncate)
+{
+	const unsigned int SmallCapacity = 4;
+	nctl::StaticHashSet<int, SmallCapacity, nctl::FixedHashFunc<int>> newHashset;
+
+	printf("Inserting elements with an initializer list longer than its capacity\n");
+	const bool allInserted = newHashset.insert({ 0, 1, 2, 3, 4 });
+
+	for (unsigned int i = 0; i < newHashset.capacity(); i++)
+		ASSERT_TRUE(newHashset.contains(i));
+
+	ASSERT_FALSE(allInserted);
+	ASSERT_FALSE(newHashset.contains(4));
+	ASSERT_EQ(newHashset.size(), SmallCapacity);
+}
+
 TEST_F(StaticHashSetTest, FailInsertElements)
 {
 	printf("Trying to insert elements already in the hashset\n");
@@ -116,6 +147,33 @@ TEST_F(StaticHashSetTest, RemoveElements)
 	ASSERT_FALSE(hashset_.contains(7));
 	ASSERT_EQ(hashset_.size(), Size - 2);
 	ASSERT_EQ(calcSize(hashset_), Size - 2);
+}
+
+TEST_F(StaticHashSetTest, InitializerListConstruction)
+{
+	const unsigned int InitializerListSize = 5;
+	printf("Creating a new hashset with an initializer list\n");
+	HashSetTestType newHashset({ 0, 1, 2, 3, 4 });
+	printHashSet(newHashset);
+
+	for (unsigned int i = 0; i < newHashset.size(); i++)
+		ASSERT_TRUE(newHashset.contains(i));
+
+	ASSERT_EQ(newHashset.size(), InitializerListSize);
+	ASSERT_EQ(calcSize(newHashset), InitializerListSize);
+}
+
+TEST_F(StaticHashSetTest, InitializerListConstructionTruncate)
+{
+	const unsigned int SmallCapacity = 4;
+	printf("Creating a new hashmap with an initializer list longer than its capacity\n");
+	nctl::StaticHashSet<int, SmallCapacity, nctl::FixedHashFunc<int>> newHashset({ 0, 1, 2, 3, 4 });
+
+	for (unsigned int i = 0; i < newHashset.capacity(); i++)
+		ASSERT_TRUE(newHashset.contains(i));
+
+	ASSERT_FALSE(newHashset.contains(4));
+	ASSERT_EQ(newHashset.size(), SmallCapacity);
 }
 
 TEST_F(StaticHashSetTest, CopyConstruction)

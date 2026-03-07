@@ -103,6 +103,49 @@ TEST_F(StaticHashMapTest, InsertPairs)
 	ASSERT_EQ(calcSize(hashmap_), Size * 2);
 }
 
+TEST_F(StaticHashMapTest, InsertInitializerList)
+{
+	const unsigned int InitializerListSize = 5;
+	printf("Inserting elements with an initializer list\n");
+	const bool allInserted = hashmap_.insert({
+		{ 10, 10 + KeyValueDifference },
+		{ 11, 11 + KeyValueDifference },
+		{ 12, 12 + KeyValueDifference },
+		{ 13, 13 + KeyValueDifference },
+		{ 14, 14 + KeyValueDifference }
+	});
+	printHashMap(hashmap_);
+
+	for (unsigned int i = 0; i < hashmap_.size(); i++)
+		ASSERT_EQ(hashmap_[i], i + KeyValueDifference);
+
+	ASSERT_TRUE(allInserted);
+	ASSERT_EQ(hashmap_.size(), Size + InitializerListSize);
+	ASSERT_EQ(calcSize(hashmap_), Size + InitializerListSize);
+}
+
+TEST_F(StaticHashMapTest, InsertInitializerListTruncate)
+{
+	const unsigned int SmallCapacity = 4;
+	nctl::StaticHashMap<int, int, SmallCapacity, nctl::FixedHashFunc<int>> newHashmap;
+
+	printf("Inserting elements with an initializer list longer than its capacity\n");
+	const bool allInserted = newHashmap.insert({
+		{ 0, 0 + KeyValueDifference },
+		{ 1, 1 + KeyValueDifference },
+		{ 2, 2 + KeyValueDifference },
+		{ 3, 3 + KeyValueDifference },
+		{ 4, 4 + KeyValueDifference }
+	});
+
+	for (unsigned int i = 0; i < newHashmap.size(); i++)
+		ASSERT_EQ(newHashmap[i], i + KeyValueDifference);
+
+	ASSERT_FALSE(allInserted);
+	ASSERT_FALSE(newHashmap.contains(4));
+	ASSERT_EQ(newHashmap.size(), SmallCapacity);
+}
+
 TEST_F(StaticHashMapTest, FailInsertElements)
 {
 	printf("Trying to insert elements already in the hashmap\n");
@@ -177,6 +220,45 @@ TEST_F(StaticHashMapTest, RemoveElements)
 	ASSERT_FALSE(hashmap_.contains(7));
 	ASSERT_EQ(hashmap_.size(), Size - 2);
 	ASSERT_EQ(calcSize(hashmap_), Size - 2);
+}
+
+TEST_F(StaticHashMapTest, InitializerListConstruction)
+{
+	const unsigned int InitializerListSize = 5;
+	printf("Creating a new hashmap with an initializer list\n");
+	HashMapTestType newHashmap{
+		{ 0, 0 + KeyValueDifference },
+		{ 1, 1 + KeyValueDifference },
+		{ 2, 2 + KeyValueDifference },
+		{ 3, 3 + KeyValueDifference },
+		{ 4, 4 + KeyValueDifference }
+	};
+	printHashMap(newHashmap);
+
+	for (unsigned int i = 0; i < newHashmap.size(); i++)
+		ASSERT_EQ(newHashmap[i], i + KeyValueDifference);
+
+	ASSERT_EQ(newHashmap.size(), InitializerListSize);
+	ASSERT_EQ(calcSize(newHashmap), InitializerListSize);
+}
+
+TEST_F(StaticHashMapTest, InitializerListConstructionTruncate)
+{
+	const unsigned int SmallCapacity = 4;
+	printf("Creating a new hashmap with an initializer list longer than its capacity\n");
+	nctl::StaticHashMap<int, int, SmallCapacity, nctl::FixedHashFunc<int>> newHashmap{
+		{ 0, 0 + KeyValueDifference },
+		{ 1, 1 + KeyValueDifference },
+		{ 2, 2 + KeyValueDifference },
+		{ 3, 3 + KeyValueDifference },
+		{ 4, 4 + KeyValueDifference }
+	};
+
+	for (unsigned int i = 0; i < newHashmap.size(); i++)
+		ASSERT_EQ(newHashmap[i], i + KeyValueDifference);
+
+	ASSERT_FALSE(newHashmap.contains(4));
+	ASSERT_EQ(newHashmap.size(), SmallCapacity);
 }
 
 TEST_F(StaticHashMapTest, CopyConstruction)

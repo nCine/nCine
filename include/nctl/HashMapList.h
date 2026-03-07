@@ -34,9 +34,13 @@ class HashMapList
 
 	/// Constructs an hashmap with explicit capacity
 	explicit HashMapList(unsigned int capacity);
+	/// Constructs an hashmap with an initializer list and explicit capacity
+	HashMapList(std::initializer_list<Pair<K, T>> initList, unsigned int capacity);
 #if NCINE_WITH_ALLOCATORS
 	/// Constructs an hashmap with explicit capacity and a custom allocator
 	HashMapList(unsigned int capacity, IAllocator &alloc);
+	/// Constructs an hashmap with an initializer list, an explicit capacity, and a custom allocator
+	HashMapList(std::initializer_list<Pair<K, T>> initList, unsigned int capacity, IAllocator &alloc);
 #endif
 	~HashMapList() { clear(); }
 
@@ -84,6 +88,8 @@ class HashMapList
 	bool insert(const K &key, T &&value);
 	/// Inserts an element from a pair, if no other has the same key
 	bool insert(const Pair<K, T> &pair);
+	/// Inserts elements from an initializer list of pairs
+	bool insert(std::initializer_list<Pair<K, T>> initList);
 	/// Constructs an element if no other has the same key
 	template <typename... Args> bool emplace(const K &key, Args &&... args);
 
@@ -498,7 +504,21 @@ HashMapList<K, T, HashFunc>::HashMapList(unsigned int capacity, IAllocator &allo
 	for (unsigned int i = 0; i < capacity; i++)
 		buckets_.emplaceBack(alloc);
 }
+
+template <class K, class T, class HashFunc>
+HashMapList<K, T, HashFunc>::HashMapList(std::initializer_list<Pair<K, T>> initList, unsigned int capacity, IAllocator &alloc)
+    : HashMapList(capacity, alloc)
+{
+	insert(initList);
+}
 #endif
+
+template <class K, class T, class HashFunc>
+HashMapList<K, T, HashFunc>::HashMapList(std::initializer_list<Pair<K, T>> initList, unsigned int capacity)
+    : HashMapList(capacity)
+{
+	insert(initList);
+}
 
 template <class K, class T, class HashFunc>
 HashMapList<K, T, HashFunc>::HashMapList(const HashMapList<K, T, HashFunc> &other)
@@ -578,6 +598,16 @@ bool HashMapList<K, T, HashFunc>::insert(const Pair<K, T> &pair)
 	const bool inserted = retrieveBucket(hash).insert(hash, pair.first, pair.second);
 	size_ += inserted ? 1 : 0;
 	return inserted;
+}
+
+/*! \return True if all initializer list elements have been inserted */
+template <class K, class T, class HashFunc>
+bool HashMapList<K, T, HashFunc>::insert(std::initializer_list<Pair<K, T>> initList)
+{
+	bool allInserted = true;
+	for (const Pair<K, T> &element : initList)
+		allInserted &= insert(element);
+	return allInserted;
 }
 
 /*! \return True if the element has been emplaced */

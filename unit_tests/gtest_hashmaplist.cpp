@@ -135,6 +135,27 @@ TEST_F(HashMapListTest, InsertPairs)
 	ASSERT_EQ(calcSize(hashmap_), Size * 2);
 }
 
+TEST_F(HashMapListTest, InsertInitializerList)
+{
+	const unsigned int InitializerListSize = 5;
+	printf("Inserting elements with an initializer list\n");
+	const bool allInserted = hashmap_.insert({
+		{ 10, 10 + KeyValueDifference },
+		{ 11, 11 + KeyValueDifference },
+		{ 12, 12 + KeyValueDifference },
+		{ 13, 13 + KeyValueDifference },
+		{ 14, 14 + KeyValueDifference }
+	});
+	printHashMap(hashmap_);
+
+	for (unsigned int i = 0; i < hashmap_.size(); i++)
+		ASSERT_EQ(hashmap_[i], i + KeyValueDifference);
+
+	ASSERT_TRUE(allInserted);
+	ASSERT_EQ(hashmap_.size(), Size + InitializerListSize);
+	ASSERT_EQ(calcSize(hashmap_), Size + InitializerListSize);
+}
+
 TEST_F(HashMapListTest, FailInsertElements)
 {
 	printf("Trying to insert elements already in the hashmap\n");
@@ -250,6 +271,25 @@ TEST_F(HashMapListTest, RehashShrink)
 
 	for (unsigned int i = 0; i < Size; i++)
 		ASSERT_EQ(hashmap_[i], i + KeyValueDifference);
+}
+
+TEST_F(HashMapListTest, InitializerListConstruction)
+{
+	const unsigned int InitializerListSize = 5;
+	printf("Creating a new hashmap with an initializer list\n");
+	HashMapTestType newHashmap({
+		{ 0, 0 + KeyValueDifference },
+		{ 1, 1 + KeyValueDifference },
+		{ 2, 2 + KeyValueDifference },
+		{ 3, 3 + KeyValueDifference },
+		{ 4, 4 + KeyValueDifference }
+	}, Capacity);
+	printHashMap(newHashmap);
+
+	ASSERT_EQ(newHashmap.size(), InitializerListSize);
+	ASSERT_EQ(calcSize(newHashmap), InitializerListSize);
+	for (unsigned int i = 0; i < newHashmap.size(); i++)
+		ASSERT_EQ(newHashmap[i], i + KeyValueDifference);
 }
 
 TEST_F(HashMapListTest, CopyConstruction)

@@ -1,9 +1,10 @@
 #ifndef CLASS_NCTL_SPARSESET
 #define CLASS_NCTL_SPARSESET
 
+#include <cstring> // for memcpy()
+#include <initializer_list>
 #include <ncine/common_macros.h>
 #include "ReverseIterator.h"
-#include <cstring> // for memcpy()
 
 #include <ncine/config.h>
 #if NCINE_WITH_ALLOCATORS
@@ -32,9 +33,15 @@ class SparseSet
 	/// Reverse constant iterator type
 	using ConstReverseIterator = nctl::ReverseIterator<ConstIterator>;
 
+	/// Constructs a sparse set with an explicit capacity and a maximum value
 	SparseSet(unsigned int capacity, unsigned int maxValue);
+	/// Constructs a sparse set with an initializer list, an explicit capacity, and a maximum value
+	SparseSet(std::initializer_list<T> initList, unsigned int capacity, unsigned int maxValue);
 #if NCINE_WITH_ALLOCATORS
+	/// Constructs a sparse set with an explicit capacity, a maximum value, and a custom allocator
 	SparseSet(unsigned int capacity, unsigned int maxValue, IAllocator &alloc);
+	/// Constructs a sparse set with an initializer list, an explicit capacity, a maximum value, and a custom allocator
+	SparseSet(std::initializer_list<T> initList, unsigned int capacity, unsigned int maxValue, IAllocator &alloc);
 #endif
 	~SparseSet();
 
@@ -89,6 +96,8 @@ class SparseSet
 
 	/// Inserts an element if not already in
 	bool insert(T value);
+	/// Inserts elements with an initializer list
+	bool insert(std::initializer_list<T> initList);
 
 	/// Returns the maximum value of the sparseset
 	inline unsigned int maxValue() const { return maxValue_; }
@@ -174,6 +183,13 @@ SparseSet<T>::SparseSet(unsigned int capacity, unsigned int maxValue)
 #endif
 }
 
+template <class T>
+SparseSet<T>::SparseSet(std::initializer_list<T> initList, unsigned int capacity, unsigned int maxValue)
+    : SparseSet(capacity, maxValue)
+{
+	insert(initList);
+}
+
 #if NCINE_WITH_ALLOCATORS
 template <class T>
 SparseSet<T>::SparseSet(unsigned int capacity, unsigned int maxValue, IAllocator &alloc)
@@ -186,6 +202,13 @@ SparseSet<T>::SparseSet(unsigned int capacity, unsigned int maxValue, IAllocator
 
 	sparse_ = alloc_.newArray<T>(maxValue + 1);
 	dense_ = alloc_.newArray<T>(capacity);
+}
+
+template <class T>
+SparseSet<T>::SparseSet(std::initializer_list<T> initList, unsigned int capacity, unsigned int maxValue, IAllocator &alloc)
+    : SparseSet(capacity, maxValue, alloc)
+{
+	insert(initList);
 }
 #endif
 
@@ -297,6 +320,24 @@ bool SparseSet<T>::insert(T value)
 	size_++;
 
 	return true;
+}
+
+/*! \return True if all initializer list elements have been inserted */
+template <class T>
+bool SparseSet<T>::insert(std::initializer_list<T> initList)
+{
+	const unsigned int MaxInsertions = capacity() - size();
+
+	unsigned int numInserted = 0;
+	for (const T element : initList)
+	{
+		if (numInserted >= MaxInsertions)
+			break;
+		const bool inserted = insert(element);
+		numInserted += inserted ? 1 : 0;
+	}
+
+	return (numInserted == initList.size());
 }
 
 template <class T>

@@ -2,6 +2,7 @@
 #define CLASS_NCTL_HASHMAP
 
 #include <new>
+#include <initializer_list>
 #include <ncine/common_macros.h>
 #include "HashFunctions.h"
 #include "Pair.h"
@@ -37,9 +38,13 @@ class HashMap
 
 	/// Constructs an hashmap with explicit capacity
 	explicit HashMap(unsigned int capacity);
+	/// Constructs an hashmap with an initializer list and explicit capacity
+	HashMap(std::initializer_list<Pair<K, T>> initList, unsigned int capacity);
 #if NCINE_WITH_ALLOCATORS
 	/// Constructs an hashmap with explicit capacity and a custom allocator
 	HashMap(unsigned int capacity, IAllocator &alloc);
+	/// Constructs an hashmap with an initializer list, an explicit capacity, and a custom allocator
+	HashMap(std::initializer_list<Pair<K, T>> initList, unsigned int capacity, IAllocator &alloc);
 #endif
 	~HashMap();
 
@@ -102,6 +107,8 @@ class HashMap
 	inline bool insert(const K &key, T &&value) { return insertImpl(key, nctl::move(value)); }
 	/// Inserts an element from a pair, if no other has the same key, and returns `true` on success
 	inline bool insert(const Pair<K, T> &pair) { return insertImpl(pair.first, pair.second); }
+	/// Inserts elements from an initializer list of pairs
+	bool insert(std::initializer_list<Pair<K, T>> initList);
 	/// Constructs an element if no other has the same key
 	template <typename... Args> bool emplace(const K &key, Args &&... args);
 
@@ -266,6 +273,13 @@ HashMap<K, T, HashFunc>::HashMap(unsigned int capacity)
 	initValues();
 }
 
+template <class K, class T, class HashFunc>
+HashMap<K, T, HashFunc>::HashMap(std::initializer_list<Pair<K, T>> initList, unsigned int capacity)
+    : HashMap(capacity)
+{
+	insert(initList);
+}
+
 #if NCINE_WITH_ALLOCATORS
 template <class K, class T, class HashFunc>
 HashMap<K, T, HashFunc>::HashMap(unsigned int capacity, IAllocator &alloc)
@@ -280,6 +294,13 @@ HashMap<K, T, HashFunc>::HashMap(unsigned int capacity, IAllocator &alloc)
 
 	initPointers();
 	initValues();
+}
+
+template <class K, class T, class HashFunc>
+HashMap<K, T, HashFunc>::HashMap(std::initializer_list<Pair<K, T>> initList, unsigned int capacity, IAllocator &alloc)
+    : HashMap(capacity, alloc)
+{
+	insert(initList);
 }
 #endif
 
@@ -403,6 +424,24 @@ T &HashMap<K, T, HashFunc>::operator[](const K &key)
 
 	const unsigned int index = patchDeltas(r);
 	return addNode(index, hash, key);
+}
+
+/*! \return True if all initializer list elements have been inserted */
+template <class K, class T, class HashFunc>
+bool HashMap<K, T, HashFunc>::insert(std::initializer_list<Pair<K, T>> initList)
+{
+	const unsigned int MaxInsertions = capacity() - size();
+
+	unsigned int numInserted = 0;
+	for (const Pair<K, T> &element : initList)
+	{
+		if (numInserted >= MaxInsertions)
+			break;
+		const bool inserted = insert(element);
+		numInserted += inserted ? 1 : 0;
+	}
+
+	return (numInserted == initList.size());
 }
 
 /*! \return True if the element has been emplaced */
