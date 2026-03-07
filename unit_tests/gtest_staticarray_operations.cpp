@@ -74,6 +74,18 @@ TEST_F(StaticArrayOperationsTest, CopyConstruction)
 		ASSERT_EQ(array_[i], newArray[i]);
 }
 
+TEST_F(StaticArrayOperationsTest, CopyConstructionFromGreaterCapacity)
+{
+	const unsigned int SmallCapacity = 4;
+	printf("Creating a new array with copy construction\n");
+	nctl::StaticArray<int, SmallCapacity> newArray(array_);
+	printArray(newArray);
+
+	ASSERT_EQ(newArray.size(), SmallCapacity);
+	for (unsigned int i = 0; i < newArray.size(); i++)
+		ASSERT_EQ(array_[i], newArray[i]);
+}
+
 TEST_F(StaticArrayOperationsTest, MoveConstruction)
 {
 	printf("Creating a new array with move construction\n");
@@ -95,6 +107,19 @@ TEST_F(StaticArrayOperationsTest, AssignmentOperator)
 
 	ASSERT_EQ(array_.size(), newArray.size());
 	for (unsigned int i = 0; i < array_.size(); i++)
+		ASSERT_EQ(array_[i], newArray[i]);
+}
+
+TEST_F(StaticArrayOperationsTest, AssignmentOperatorFromGreaterCapacity)
+{
+	const unsigned int SmallCapacity = 4;
+	printf("Creating a new array with the assignment operator\n");
+	nctl::StaticArray<int, SmallCapacity> newArray;
+	newArray = array_;
+	printArray(newArray);
+
+	ASSERT_EQ(newArray.size(), SmallCapacity);
+	for (unsigned int i = 0; i < newArray.size(); i++)
 		ASSERT_EQ(array_[i], newArray[i]);
 }
 

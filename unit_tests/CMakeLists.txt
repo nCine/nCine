@@ -70,6 +70,7 @@ list(APPEND TESTS
 	gtest_random gtest_filesystem gtest_pointermath gtest_bitset
 	gtest_optional gtest_optional_movable
 	gtest_pair gtest_pair_movable
+	gtest_span gtest_span_iterator
 )
 
 if(NOT (CMAKE_BUILD_TYPE MATCHES Release AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"))

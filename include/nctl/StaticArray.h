@@ -21,7 +21,7 @@ enum class StaticArrayMode
 };
 
 /// A static array based on templates that stores elements in the stack
-template <class T, unsigned int C>
+template <class T, unsigned int Capacity>
 class StaticArray
 {
   public:
@@ -37,7 +37,7 @@ class StaticArray
 	/// Constructs an empty array with fixed capacity
 	/*! \note Not using a delegating constructor to be able to use non-movable and non-copyable types. */
 	StaticArray()
-	    : size_(0), capacity_(C) {}
+	    : size_(0) {}
 	/// Constructs an array with the option for it to have the size match its capacity
 	explicit StaticArray(StaticArrayMode mode);
 	/// Constructs an array with an initializer list
@@ -52,6 +52,13 @@ class StaticArray
 	StaticArray &operator=(const StaticArray &other);
 	/// Move assignment operator
 	StaticArray &operator=(StaticArray &&other);
+
+	/// Conversion constructor from an array of different capacity
+	template <unsigned int Capacity2>
+	StaticArray(const StaticArray<T, Capacity2> &other);
+	/// Assignment operator from an array of different capacity
+	template <unsigned int Capacity2>
+	StaticArray &operator=(const StaticArray<T, Capacity2> &other);
 
 	/// Returns an iterator to the beginning
 	inline Iterator begin() { return Iterator(array_); }
@@ -86,7 +93,7 @@ class StaticArray
 	/*! The array is filled without gaps until the `Size()`-1 element. */
 	inline unsigned int size() const { return size_; }
 	/// Returns the array capacity
-	inline unsigned int capacity() const { return capacity_; }
+	inline unsigned int capacity() const { return Capacity; }
 	/// Sets a new size for the array (allowing for "holes")
 	void setSize(unsigned int newSize);
 
@@ -162,47 +169,46 @@ class StaticArray
 	inline T *data() { return array_; }
 
   private:
-	unsigned char arrayBuffer_[C * sizeof(T)];
+	unsigned char arrayBuffer_[Capacity * sizeof(T)];
 	T *array_ = reinterpret_cast<T *>(arrayBuffer_);
 	unsigned int size_;
-	unsigned int capacity_;
 
 	/// Grows the array size by one and returns a pointer to the new element
 	T *extendOne();
 };
 
-template <class T, unsigned int C>
-StaticArray<T, C>::StaticArray(StaticArrayMode mode)
-    : size_(0), capacity_(C)
+template <class T, unsigned int Capacity>
+StaticArray<T, Capacity>::StaticArray(StaticArrayMode mode)
+    : size_(0)
 {
 	if (mode == StaticArrayMode::EXTEND_SIZE)
-		setSize(capacity_);
+		setSize(Capacity);
 }
 
-template <class T, unsigned int C>
-StaticArray<T, C>::StaticArray(std::initializer_list<T> initList)
+template <class T, unsigned int Capacity>
+StaticArray<T, Capacity>::StaticArray(std::initializer_list<T> initList)
     : StaticArray()
 {
 	insertRange(0, initList);
 }
 
-template <class T, unsigned int C>
-StaticArray<T, C>::StaticArray(const StaticArray<T, C> &other)
-    : size_(other.size_), capacity_(other.capacity_)
+template <class T, unsigned int Capacity>
+StaticArray<T, Capacity>::StaticArray(const StaticArray<T, Capacity> &other)
+    : size_(other.size_)
 {
 	copyConstructArray(array_, other.array_, size_);
 }
 
-template <class T, unsigned int C>
-StaticArray<T, C>::StaticArray(StaticArray<T, C> &&other)
-    : size_(other.size_), capacity_(other.capacity_)
+template <class T, unsigned int Capacity>
+StaticArray<T, Capacity>::StaticArray(StaticArray<T, Capacity> &&other)
+    : size_(other.size_)
 {
 	moveConstructArray(array_, other.array_, size_);
 	other.clear();
 }
 
-template <class T, unsigned int C>
-StaticArray<T, C> &StaticArray<T, C>::operator=(const StaticArray<T, C> &other)
+template <class T, unsigned int Capacity>
+StaticArray<T, Capacity> &StaticArray<T, Capacity>::operator=(const StaticArray<T, Capacity> &other)
 {
 	if (this == &other)
 		return *this;
@@ -222,8 +228,8 @@ StaticArray<T, C> &StaticArray<T, C>::operator=(const StaticArray<T, C> &other)
 	return *this;
 }
 
-template <class T, unsigned int C>
-StaticArray<T, C> &StaticArray<T, C>::operator=(StaticArray<T, C> &&other)
+template <class T, unsigned int Capacity>
+StaticArray<T, Capacity> &StaticArray<T, Capacity>::operator=(StaticArray<T, Capacity> &&other)
 {
 	if (this == &other)
 		return *this;
@@ -244,14 +250,49 @@ StaticArray<T, C> &StaticArray<T, C>::operator=(StaticArray<T, C> &&other)
 	return *this;
 }
 
-template <class T, unsigned int C>
-void StaticArray<T, C>::setSize(unsigned int newSize)
+/*! \note Copy could be truncated if the other array is bigger than its capacity. */
+template <class T, unsigned int Capacity>
+template <unsigned int Capacity2>
+StaticArray<T, Capacity>::StaticArray(const StaticArray<T, Capacity2> &other)
+{
+	// Self-assignment check is not needed as the other array is surely different
+	const unsigned int newSize = (other.size() < Capacity) ? other.size() : Capacity;
+
+	size_ = newSize;
+	copyConstructArray(array_, other.data(), newSize);
+}
+
+/*! \note Copy could be truncated if the other array is bigger than its capacity. */
+template <class T, unsigned int Capacity>
+template <unsigned int Capacity2>
+StaticArray<T, Capacity> &StaticArray<T, Capacity>::operator=(const StaticArray<T, Capacity2> &other)
+{
+	// Self-assignment check is not needed as the other array is surely different
+	const unsigned int newSize = (other.size() < Capacity) ? other.size() : Capacity;
+
+	if (newSize >= size_)
+	{
+		copyAssignArray(array_, other.data(), size_);
+		copyConstructArray(array_ + size_, other.data() + size_, newSize - size_);
+	}
+	else
+	{
+		copyAssignArray(array_, other.data(), newSize);
+		destructArray(array_ + newSize, size_ - newSize);
+	}
+
+	size_ = newSize;
+	return *this;
+}
+
+template <class T, unsigned int Capacity>
+void StaticArray<T, Capacity>::setSize(unsigned int newSize)
 {
 	const int newElements = newSize - size_;
 
-	if (newSize > capacity_)
+	if (newSize > Capacity)
 	{
-		LOGW_X("Trying to extend the size of a static array beyond its cpacity, from from %u to %u", capacity_, newSize);
+		LOGW_X("Trying to extend the size of a static array beyond its cpacity, from from %u to %u", Capacity, newSize);
 		return;
 	}
 
@@ -263,58 +304,58 @@ void StaticArray<T, C>::setSize(unsigned int newSize)
 }
 
 /*! Size will be set to zero but capacity remains unmodified. */
-template <class T, unsigned int C>
-void StaticArray<T, C>::clear()
+template <class T, unsigned int Capacity>
+void StaticArray<T, Capacity>::clear()
 {
 	destructArray(array_, size_);
 	size_ = 0;
 }
 
-template <class T, unsigned int C>
-const T &StaticArray<T, C>::front() const
+template <class T, unsigned int Capacity>
+const T &StaticArray<T, Capacity>::front() const
 {
 	FATAL_ASSERT_MSG(size_ > 0, "Cannot retrieve an element from an empty array");
 	return array_[0];
 }
 
-template <class T, unsigned int C>
-T &StaticArray<T, C>::front()
+template <class T, unsigned int Capacity>
+T &StaticArray<T, Capacity>::front()
 {
 	FATAL_ASSERT_MSG(size_ > 0, "Cannot retrieve an element from an empty array");
 	return array_[0];
 }
 
-template <class T, unsigned int C>
-const T &StaticArray<T, C>::back() const
+template <class T, unsigned int Capacity>
+const T &StaticArray<T, Capacity>::back() const
 {
 	FATAL_ASSERT_MSG(size_ > 0, "Cannot retrieve an element from an empty array");
 	return array_[size_ - 1];
 }
 
-template <class T, unsigned int C>
-T &StaticArray<T, C>::back()
+template <class T, unsigned int Capacity>
+T &StaticArray<T, Capacity>::back()
 {
 	FATAL_ASSERT_MSG(size_ > 0, "Cannot retrieve an element from an empty array");
 	return array_[size_ - 1];
 }
 
-template <class T, unsigned int C>
+template <class T, unsigned int Capacity>
 template <typename... Args>
-void StaticArray<T, C>::emplaceBack(Args &&... args)
+void StaticArray<T, Capacity>::emplaceBack(Args &&... args)
 {
 	new (extendOne()) T(nctl::forward<Args>(args)...);
 }
 
-template <class T, unsigned int C>
-void StaticArray<T, C>::popBack()
+template <class T, unsigned int Capacity>
+void StaticArray<T, Capacity>::popBack()
 {
 	FATAL_ASSERT_MSG(size_ > 0, "Cannot pop an element from an empty array");
 	destructObject(array_ + size_ - 1);
 	size_--;
 }
 
-template <class T, unsigned int C>
-T *StaticArray<T, C>::insertRange(unsigned int index, const T *firstPtr, const T *lastPtr)
+template <class T, unsigned int Capacity>
+T *StaticArray<T, Capacity>::insertRange(unsigned int index, const T *firstPtr, const T *lastPtr)
 {
 	// Cannot insert at more than one position after the last element
 	FATAL_ASSERT_MSG_X(index <= size_, "Index %u is out of bounds (size: %u)", index, size_);
@@ -323,7 +364,7 @@ T *StaticArray<T, C>::insertRange(unsigned int index, const T *firstPtr, const T
 	const unsigned int numElements = static_cast<unsigned int>(lastPtr - firstPtr);
 	if (numElements == 0)
 		return (array_ + index);
-	FATAL_ASSERT_MSG_X(size_ + numElements <= capacity_, "Can't add element beyond capacity (%d)", capacity_);
+	FATAL_ASSERT_MSG_X(size_ + numElements <= Capacity, "Can't add element beyond capacity (%d)", Capacity);
 
 	// Backwards loop to account for overlapping areas
 	for (unsigned int i = size_ - index; i > 0; i--)
@@ -340,23 +381,23 @@ T *StaticArray<T, C>::insertRange(unsigned int index, const T *firstPtr, const T
 	return (array_ + index + numElements);
 }
 
-template <class T, unsigned int C>
-T *StaticArray<T, C>::insertRange(unsigned int index, std::initializer_list<T> initList)
+template <class T, unsigned int Capacity>
+T *StaticArray<T, Capacity>::insertRange(unsigned int index, std::initializer_list<T> initList)
 {
 	typename std::initializer_list<T>::const_iterator end = initList.end();
-	const unsigned int MaxInsertions = capacity_ - size_;
+	const unsigned int MaxInsertions = Capacity - size_;
 	if (end - initList.begin() > MaxInsertions)
 		end = initList.begin() + MaxInsertions;
 
 	return insertRange(index, initList.begin(), end);
 }
 
-template <class T, unsigned int C>
-T *StaticArray<T, C>::insertAt(unsigned int index, const T &element)
+template <class T, unsigned int Capacity>
+T *StaticArray<T, Capacity>::insertAt(unsigned int index, const T &element)
 {
 	// Cannot insert at more than one position after the last element
 	FATAL_ASSERT_MSG_X(index <= size_, "Index %u is out of bounds (size: %u)", index, size_);
-	FATAL_ASSERT_MSG_X(size_ + 1 <= capacity_, "Can't add element beyond capacity (%d)", capacity_);
+	FATAL_ASSERT_MSG_X(size_ + 1 <= Capacity, "Can't add element beyond capacity (%d)", Capacity);
 
 	if (index < size_)
 	{
@@ -376,12 +417,12 @@ T *StaticArray<T, C>::insertAt(unsigned int index, const T &element)
 	return (array_ + index + 1);
 }
 
-template <class T, unsigned int C>
-T *StaticArray<T, C>::insertAt(unsigned int index, T &&element)
+template <class T, unsigned int Capacity>
+T *StaticArray<T, Capacity>::insertAt(unsigned int index, T &&element)
 {
 	// Cannot insert at more than one position after the last element
 	FATAL_ASSERT_MSG_X(index <= size_, "Index %u is out of bounds (size: %u)", index, size_);
-	FATAL_ASSERT_MSG_X(size_ + 1 <= capacity_, "Can't add element beyond capacity (%d)", capacity_);
+	FATAL_ASSERT_MSG_X(size_ + 1 <= Capacity, "Can't add element beyond capacity (%d)", Capacity);
 
 	if (index < size_)
 	{
@@ -400,13 +441,13 @@ T *StaticArray<T, C>::insertAt(unsigned int index, T &&element)
 	return (array_ + index + 1);
 }
 
-template <class T, unsigned int C>
+template <class T, unsigned int Capacity>
 template <typename... Args>
-T *StaticArray<T, C>::emplaceAt(unsigned int index, Args &&... args)
+T *StaticArray<T, Capacity>::emplaceAt(unsigned int index, Args &&... args)
 {
 	// Cannot emplace at more than one position after the last element
 	FATAL_ASSERT_MSG_X(index <= size_, "Index %u is out of bounds (size: %u)", index, size_);
-	FATAL_ASSERT_MSG_X(size_ + 1 <= capacity_, "Can't add element beyond capacity (%d)", capacity_);
+	FATAL_ASSERT_MSG_X(size_ + 1 <= Capacity, "Can't add element beyond capacity (%d)", Capacity);
 
 	if (index < size_)
 	{
@@ -425,8 +466,8 @@ T *StaticArray<T, C>::emplaceAt(unsigned int index, Args &&... args)
 	return (array_ + index + 1);
 }
 
-template <class T, unsigned int C>
-typename StaticArray<T, C>::Iterator StaticArray<T, C>::insert(Iterator position, const T &value)
+template <class T, unsigned int Capacity>
+typename StaticArray<T, Capacity>::Iterator StaticArray<T, Capacity>::insert(Iterator position, const T &value)
 {
 	const unsigned int index = &(*position) - array_;
 	T *nextElement = insertAt(index, value);
@@ -434,8 +475,8 @@ typename StaticArray<T, C>::Iterator StaticArray<T, C>::insert(Iterator position
 	return Iterator(nextElement);
 }
 
-template <class T, unsigned int C>
-typename StaticArray<T, C>::Iterator StaticArray<T, C>::insert(Iterator position, T &&value)
+template <class T, unsigned int Capacity>
+typename StaticArray<T, Capacity>::Iterator StaticArray<T, Capacity>::insert(Iterator position, T &&value)
 {
 	const unsigned int index = &(*position) - array_;
 	T *nextElement = insertAt(index, nctl::move(value));
@@ -443,8 +484,8 @@ typename StaticArray<T, C>::Iterator StaticArray<T, C>::insert(Iterator position
 	return Iterator(nextElement);
 }
 
-template <class T, unsigned int C>
-typename StaticArray<T, C>::Iterator StaticArray<T, C>::insert(Iterator position, Iterator first, Iterator last)
+template <class T, unsigned int Capacity>
+typename StaticArray<T, Capacity>::Iterator StaticArray<T, Capacity>::insert(Iterator position, Iterator first, Iterator last)
 {
 	const unsigned int index = static_cast<unsigned int>(&(*position) - array_);
 	const T *firstPtr = &(*first);
@@ -454,8 +495,8 @@ typename StaticArray<T, C>::Iterator StaticArray<T, C>::insert(Iterator position
 	return Iterator(nextElement);
 }
 
-template <class T, unsigned int C>
-typename StaticArray<T, C>::Iterator StaticArray<T, C>::insert(Iterator position, std::initializer_list<T> initList)
+template <class T, unsigned int Capacity>
+typename StaticArray<T, Capacity>::Iterator StaticArray<T, Capacity>::insert(Iterator position, std::initializer_list<T> initList)
 {
 	const unsigned int index = static_cast<unsigned int>(&(*position) - array_);
 	T *nextElement = insertRange(index, initList);
@@ -463,9 +504,9 @@ typename StaticArray<T, C>::Iterator StaticArray<T, C>::insert(Iterator position
 	return Iterator(nextElement);
 }
 
-template <class T, unsigned int C>
+template <class T, unsigned int Capacity>
 template <typename... Args>
-typename StaticArray<T, C>::Iterator StaticArray<T, C>::emplace(Iterator position, Args &&... args)
+typename StaticArray<T, Capacity>::Iterator StaticArray<T, Capacity>::emplace(Iterator position, Args &&... args)
 {
 	const unsigned int index = &(*position) - array_;
 	T *nextElement = emplaceAt(index, nctl::forward<Args>(args)...);
@@ -473,8 +514,8 @@ typename StaticArray<T, C>::Iterator StaticArray<T, C>::emplace(Iterator positio
 	return Iterator(nextElement);
 }
 
-template <class T, unsigned int C>
-T *StaticArray<T, C>::removeRange(unsigned int firstIndex, unsigned int lastIndex)
+template <class T, unsigned int Capacity>
+T *StaticArray<T, Capacity>::removeRange(unsigned int firstIndex, unsigned int lastIndex)
 {
 	// Cannot remove past the last element
 	FATAL_ASSERT_MSG_X(firstIndex < size_, "First index %u out of size range", firstIndex);
@@ -489,15 +530,15 @@ T *StaticArray<T, C>::removeRange(unsigned int firstIndex, unsigned int lastInde
 	return (array_ + firstIndex);
 }
 
-template <class T, unsigned int C>
-typename StaticArray<T, C>::Iterator StaticArray<T, C>::erase(Iterator position)
+template <class T, unsigned int Capacity>
+typename StaticArray<T, Capacity>::Iterator StaticArray<T, Capacity>::erase(Iterator position)
 {
 	const unsigned int index = static_cast<unsigned int>(&(*position) - array_);
 	return removeAt(index);
 }
 
-template <class T, unsigned int C>
-typename StaticArray<T, C>::Iterator StaticArray<T, C>::erase(Iterator first, Iterator last)
+template <class T, unsigned int Capacity>
+typename StaticArray<T, Capacity>::Iterator StaticArray<T, Capacity>::erase(Iterator first, Iterator last)
 {
 	const unsigned int firstIndex = static_cast<unsigned int>(&(*first) - array_);
 	const unsigned int lastIndex = static_cast<unsigned int>(&(*last) - array_);
@@ -507,8 +548,8 @@ typename StaticArray<T, C>::Iterator StaticArray<T, C>::erase(Iterator first, It
 }
 
 /*! \note This method is faster than `removeRange()` but it will not preserve the array order */
-template <class T, unsigned int C>
-T *StaticArray<T, C>::unorderedRemoveRange(unsigned int firstIndex, unsigned int lastIndex)
+template <class T, unsigned int Capacity>
+T *StaticArray<T, Capacity>::unorderedRemoveRange(unsigned int firstIndex, unsigned int lastIndex)
 {
 	// Cannot remove past the last element
 	FATAL_ASSERT_MSG_X(firstIndex < size_, "First index %u out of size range", firstIndex);
@@ -525,16 +566,16 @@ T *StaticArray<T, C>::unorderedRemoveRange(unsigned int firstIndex, unsigned int
 }
 
 /*! \note This method is faster than `erase()` but it will not preserve the array order */
-template <class T, unsigned int C>
-typename StaticArray<T, C>::Iterator StaticArray<T, C>::unorderedErase(Iterator position)
+template <class T, unsigned int Capacity>
+typename StaticArray<T, Capacity>::Iterator StaticArray<T, Capacity>::unorderedErase(Iterator position)
 {
 	const unsigned int index = static_cast<unsigned int>(&(*position) - array_);
 	return unorderedRemoveAt(index);
 }
 
 /*! \note This method is faster than `erase()` but it will not preserve the array order */
-template <class T, unsigned int C>
-typename StaticArray<T, C>::Iterator StaticArray<T, C>::unorderedErase(Iterator first, Iterator last)
+template <class T, unsigned int Capacity>
+typename StaticArray<T, Capacity>::Iterator StaticArray<T, Capacity>::unorderedErase(Iterator first, Iterator last)
 {
 	const unsigned int firstIndex = static_cast<unsigned int>(&(*first) - array_);
 	const unsigned int lastIndex = static_cast<unsigned int>(&(*last) - array_);
@@ -543,39 +584,39 @@ typename StaticArray<T, C>::Iterator StaticArray<T, C>::unorderedErase(Iterator 
 	return Iterator(nextElement);
 }
 
-template <class T, unsigned int C>
-const T &StaticArray<T, C>::at(unsigned int index) const
+template <class T, unsigned int Capacity>
+const T &StaticArray<T, Capacity>::at(unsigned int index) const
 {
 	FATAL_ASSERT_MSG_X(index < size_, "Index %u is out of bounds (size: %u)", index, size_);
 	return operator[](index);
 }
 
-template <class T, unsigned int C>
-T &StaticArray<T, C>::at(unsigned int index)
+template <class T, unsigned int Capacity>
+T &StaticArray<T, Capacity>::at(unsigned int index)
 {
 	// Avoid creating "holes" into the array
 	FATAL_ASSERT_MSG_X(index <= size_, "Index %u is out of bounds (size: %u)", index, size_);
 	return operator[](index);
 }
 
-template <class T, unsigned int C>
-const T &StaticArray<T, C>::operator[](unsigned int index) const
+template <class T, unsigned int Capacity>
+const T &StaticArray<T, Capacity>::operator[](unsigned int index) const
 {
 	ASSERT_MSG_X(index < size_, "Index %u is out of bounds (size: %u)", index, size_);
 	return array_[index];
 }
 
-template <class T, unsigned int C>
-T &StaticArray<T, C>::operator[](unsigned int index)
+template <class T, unsigned int Capacity>
+T &StaticArray<T, Capacity>::operator[](unsigned int index)
 {
 	ASSERT_MSG_X(index < size_, "Index %u is out of bounds (size: %u)", index, size_);
 	return array_[index];
 }
 
-template <class T, unsigned int C>
-T *StaticArray<T, C>::extendOne()
+template <class T, unsigned int Capacity>
+T *StaticArray<T, Capacity>::extendOne()
 {
-	FATAL_ASSERT_MSG_X(size_ < capacity_, "Cannot extend static array size beyond capacity (%u elements)", capacity_);
+	FATAL_ASSERT_MSG_X(size_ < Capacity, "Cannot extend static array size beyond capacity (%u elements)", Capacity);
 	size_++;
 	return array_ + size_ - 1;
 }
