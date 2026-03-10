@@ -19,6 +19,7 @@ set(SOURCES
 	${NCINE_ROOT}/src/MemoryFile.cpp
 	${NCINE_ROOT}/src/StandardFile.cpp
 	${NCINE_ROOT}/src/input/IInputManager.cpp
+	${NCINE_ROOT}/src/input/JoyMappingDb.h
 	${NCINE_ROOT}/src/input/JoyMapping.cpp
 	${NCINE_ROOT}/src/threading/IJobSystem.cpp
 	${NCINE_ROOT}/src/graphics/Color.cpp
