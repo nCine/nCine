@@ -8,7 +8,6 @@ set(PRIVATE_HEADERS
 	${NCINE_ROOT}/src/include/StandardFile.h
 	${NCINE_ROOT}/src/include/FileLogger.h
 	${NCINE_ROOT}/src/include/JoyMapping.h
-	${NCINE_ROOT}/src/input/JoyMappingDb.h
 	${NCINE_ROOT}/src/include/GfxCapabilities.h
 	${NCINE_ROOT}/src/include/RenderResources.h
 	${NCINE_ROOT}/src/include/IImageLoader.h
