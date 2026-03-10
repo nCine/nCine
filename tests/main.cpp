@@ -10,8 +10,6 @@
 	#include <windef.h>
 
 	#include <cstdlib> // for `__argc` and `__argv`
-	extern int __argc;
-	extern char **__argv;
 #endif
 
 #if defined(_WIN32) && defined(NO_INTEGRATED_GPU)

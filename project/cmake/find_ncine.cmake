@@ -45,13 +45,13 @@ if(WIN32 AND NCINE_DYNAMIC_LIBRARY)
 	get_target_property(NCINE_IMPLIB ncine::ncine IMPORTED_IMPLIB_${NCINE_CONFIGURATION})
 	message(STATUS "nCine import library: ${NCINE_IMPLIB}")
 endif()
-get_target_property(NCINE_INCLUDE_DIR ncine::ncine INTERFACE_INCLUDE_DIRECTORIES)
-message(STATUS "nCine include directory: ${NCINE_INCLUDE_DIR}")
+get_target_property(NCINE_INCLUDE_DIRS ncine::ncine INTERFACE_INCLUDE_DIRECTORIES)
+message(STATUS "nCine include directories: ${NCINE_INCLUDE_DIRS}")
 get_target_property(NCINE_MAIN_LOCATION ncine::ncine_main IMPORTED_LOCATION_${NCINE_CONFIGURATION})
 message(STATUS "nCine main function library: ${NCINE_MAIN_LOCATION}")
 
 find_file(NCINE_CONFIG_H config.h
-	PATHS ${NCINE_INCLUDE_DIR}
+	PATHS ${NCINE_INCLUDE_DIRS}
 	PATH_SUFFIXES ncine
 	NO_DEFAULT_PATH
 	NO_CMAKE_FIND_ROOT_PATH) # To find the file on Emscripten

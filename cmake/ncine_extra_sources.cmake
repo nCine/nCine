@@ -457,14 +457,14 @@ if(NCINE_WITH_IMGUI)
 	)
 
 	list(APPEND PRIVATE_HEADERS
-		${IMGUI_SOURCE_DIR}/imstb_rectpack.h
-		${IMGUI_SOURCE_DIR}/imstb_textedit.h
-		${IMGUI_SOURCE_DIR}/imstb_truetype.h
 		${NCINE_ROOT}/src/include/ImGuiDrawing.h
 		${NCINE_ROOT}/src/include/ImGuiJoyMappedInput.h
 	)
 
 	list(APPEND SOURCES
+		${IMGUI_SOURCE_DIR}/imstb_rectpack.h
+		${IMGUI_SOURCE_DIR}/imstb_textedit.h
+		${IMGUI_SOURCE_DIR}/imstb_truetype.h
 		${IMGUI_SOURCE_DIR}/imgui.cpp
 		${IMGUI_SOURCE_DIR}/imgui_demo.cpp
 		${IMGUI_SOURCE_DIR}/imgui_draw.cpp
