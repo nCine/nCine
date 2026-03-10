@@ -145,11 +145,11 @@ if(ANDROID)
 	endif()
 
 	# OpenAL is distributed with the engine, if it has audio support
-	if(EXISTS ${NCINE_ANDROID_DIR}/src/main/cpp/openal/${ANDROID_ABI}/libopenal.so)
+	if(EXISTS ${CMAKE_SOURCE_DIR}/openal/${ANDROID_ABI}/libopenal.so)
 		add_library(OpenAL::AL SHARED IMPORTED)
 		set_target_properties(OpenAL::AL PROPERTIES
-			IMPORTED_LOCATION ${NCINE_ANDROID_DIR}/src/main/cpp/openal/${ANDROID_ABI}/libopenal.so
-			INTERFACE_INCLUDE_DIRECTORIES "${NCINE_ANDROID_DIR}/src/main/cpp/openal/include")
+			IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/openal/${ANDROID_ABI}/libopenal.so
+			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_ANDROID_DIR}/openal/include")
 		set(OPENAL_FOUND 1)
 	endif()
 

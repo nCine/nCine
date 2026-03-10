@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
+cmake_policy(SET CMP0177 NEW)
 project(nCine)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
@@ -112,6 +113,12 @@ target_include_directories(ncine
 if(NOT NCINE_DYNAMIC_LIBRARY)
 	target_include_directories(ncine
 		INTERFACE $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/ncine>)
+	if(IS_DIRECTORY ${GENERATED_PRIVATE_INCLUDE_DIR})
+		# If nCine has been built as a static library, projects need to access its private headers
+		get_filename_component(PARENT_GENERATED_PRIVATE_INCLUDE_DIR ${GENERATED_PRIVATE_INCLUDE_DIR} DIRECTORY)
+		target_include_directories(ncine
+			INTERFACE $<BUILD_INTERFACE:${PARENT_GENERATED_PRIVATE_INCLUDE_DIR}>)
+	endif()
 endif()
 if(IS_DIRECTORY ${GENERATED_INCLUDE_DIR})
 	get_filename_component(PARENT_GENERATED_INCLUDE_DIR ${GENERATED_INCLUDE_DIR} DIRECTORY)
