@@ -3,10 +3,11 @@
 
 const unsigned int Capacity = 1024;
 
-using SaxHashSet = nctl::HashSet<unsigned int, nctl::SaxHashFunc<unsigned int>>;
-using JenkinsHashSet = nctl::HashSet<unsigned int, nctl::JenkinsHashFunc<unsigned int>>;
-using FNV1aHashSet = nctl::HashSet<unsigned int, nctl::FNV1aHashFunc<unsigned int>>;
-using HashSetTestType = FNV1aHashSet;
+using SaxHashSet = nctl::HashSet<unsigned int, nctl::deprecated::SaxHashFunc<unsigned int>>;
+using JenkinsHashSet = nctl::HashSet<unsigned int, nctl::deprecated::JenkinsHashFunc<unsigned int>>;
+using FNV1aHashSet = nctl::HashSet<unsigned int, nctl::deprecated::FNV1aHashFunc<unsigned int>>;
+using FastHashSet = nctl::HashSet<unsigned int, nctl::FastHashFunc<unsigned int>>;
+using HashSetTestType = FastHashSet;
 
 static void BM_HashSetCreation(benchmark::State &state)
 {

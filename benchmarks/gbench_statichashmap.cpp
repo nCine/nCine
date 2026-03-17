@@ -4,10 +4,11 @@
 const unsigned int Capacity = 1024;
 const int KeyValueDifference = 10;
 
-using SaxHashMap = nctl::StaticHashMap<unsigned int, unsigned int, Capacity, nctl::SaxHashFunc<unsigned int>>;
-using JenkinsHashMap = nctl::StaticHashMap<unsigned int, unsigned int, Capacity, nctl::JenkinsHashFunc<unsigned int>>;
-using FNV1aHashMap = nctl::StaticHashMap<unsigned int, unsigned int, Capacity, nctl::FNV1aHashFunc<unsigned int>>;
-using HashMapTestType = FNV1aHashMap;
+using SaxHashMap = nctl::StaticHashMap<unsigned int, unsigned int, Capacity, nctl::deprecated::SaxHashFunc<unsigned int>>;
+using JenkinsHashMap = nctl::StaticHashMap<unsigned int, unsigned int, Capacity, nctl::deprecated::JenkinsHashFunc<unsigned int>>;
+using FNV1aHashMap = nctl::StaticHashMap<unsigned int, unsigned int, Capacity, nctl::deprecated::FNV1aHashFunc<unsigned int>>;
+using FastHashMap = nctl::StaticHashMap<unsigned int, unsigned int, Capacity, nctl::FastHashFunc<unsigned int>>;
+using HashMapTestType = FastHashMap;
 
 static void BM_StaticHashMapCreation(benchmark::State &state)
 {

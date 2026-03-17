@@ -48,7 +48,8 @@ if(Threads_FOUND)
 		gbench_bighashmaplist
 		gbench_sparseset
 		gbench_std_rand gbench_random
-		gbench_matrix4x4f)
+		gbench_matrix4x4f
+		gbench_hash_functions)
 
 	if(NCINE_WITH_ALLOCATORS)
 		list(APPEND BENCHMARKS
