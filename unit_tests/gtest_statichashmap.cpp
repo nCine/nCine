@@ -418,7 +418,7 @@ TEST_F(StaticHashMapTest, RemoveAllFromFull)
 
 const int BigCapacity = 512;
 const int LastElement = BigCapacity / 2;
-using HashMapStressTestType = nctl::StaticHashMap<int, int, BigCapacity, nctl::FNV1aHashFunc<int>>;
+using HashMapStressTestType = nctl::StaticHashMap<int, int, BigCapacity, nctl::FastHashFunc<int>>;
 
 TEST_F(StaticHashMapTest, StressRemove)
 {

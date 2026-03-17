@@ -18,7 +18,7 @@ template <class K, class HashFunc> struct HashSetListHelperTraits;
 class String;
 
 /// A template based hashset implementation with separate chaining and list head cell
-template <class K, class HashFunc = FNV1aHashFunc<K>>
+template <class K, class HashFunc = FastHashFunc<K>>
 class HashSetList
 {
   public:

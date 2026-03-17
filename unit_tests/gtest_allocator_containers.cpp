@@ -9,8 +9,8 @@
 
 namespace {
 
-using HashMapType = nctl::HashMap<unsigned int, ElementType, nctl::FNV1aHashFunc<unsigned int>>;
-using HashMapListType = nctl::HashMapList<unsigned int, ElementType, nctl::FNV1aHashFunc<unsigned int>>;
+using HashMapType = nctl::HashMap<unsigned int, ElementType, nctl::FastHashFunc<unsigned int>>;
+using HashMapListType = nctl::HashMapList<unsigned int, ElementType, nctl::FastHashFunc<unsigned int>>;
 using HashSetType = nctl::HashSet<ElementType, ElementTypeStructHashFunc>;
 using HashSetListType = nctl::HashSetList<ElementType, ElementTypeStructHashFunc>;
 

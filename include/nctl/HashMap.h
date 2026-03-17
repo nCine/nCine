@@ -23,7 +23,7 @@ template <class K, class T, class HashFunc, bool IsConst> struct HashMapHelperTr
 class String;
 
 /// A template based hashmap implementation with open addressing and leapfrog probing
-template <class K, class T, class HashFunc = FNV1aHashFunc<K>>
+template <class K, class T, class HashFunc = FastHashFunc<K>>
 class HashMap
 {
   public:

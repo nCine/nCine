@@ -167,57 +167,24 @@ void Material::defineVertexFormat(const GLBufferObject *vbo, const GLBufferObjec
 	shaderProgram_->defineVertexFormat(vbo, ibo, vboOffset);
 }
 
-namespace {
-
-	uint8_t glBlendingFactorToInt(GLenum blendingFactor)
-	{
-		switch (blendingFactor)
-		{
-			case GL_ZERO: return 0;
-			case GL_ONE: return 1;
-			case GL_SRC_COLOR: return 2;
-			case GL_ONE_MINUS_SRC_COLOR: return 3;
-			case GL_DST_COLOR: return 4;
-			case GL_ONE_MINUS_DST_COLOR: return 5;
-			case GL_SRC_ALPHA: return 6;
-			case GL_ONE_MINUS_SRC_ALPHA: return 7;
-			case GL_DST_ALPHA: return 8;
-			case GL_ONE_MINUS_DST_ALPHA: return 9;
-			case GL_CONSTANT_COLOR: return 10;
-			case GL_ONE_MINUS_CONSTANT_COLOR: return 11;
-			case GL_CONSTANT_ALPHA: return 12;
-			case GL_ONE_MINUS_CONSTANT_ALPHA: return 13;
-			case GL_SRC_ALPHA_SATURATE: return 14;
-		}
-		return 0;
-	}
-
-	struct SortHashData
-	{
-		GLuint textures[GLTexture::MaxTextureUnits];
-		GLuint shaderProgram;
-		uint8_t srcBlendingFactor;
-		uint8_t destBlendingFactor;
-		uint64_t padding0;
-	};
-
-}
-
 uint32_t Material::sortKey()
 {
 	static const uint32_t Seed = 1697381921;
-	// Align to 64 bits for `fasthash64()` to properly work on Emscripten without alignment faults
-	static SortHashData hashData alignas(8);
 
+	uint32_t hash = Seed;
 	for (unsigned int i = 0; i < GLTexture::MaxTextureUnits; i++)
-		hashData.textures[i] = (textures_[i] != nullptr) ? textures_[i]->glHandle() : 0;
-	hashData.shaderProgram = shaderProgram_->glHandle();
-	hashData.srcBlendingFactor = glBlendingFactorToInt(srcBlendingFactor_);
-	hashData.destBlendingFactor = glBlendingFactorToInt(destBlendingFactor_);
-	hashData.padding0 = 0;
+	{
+		const GLuint textureHandle = (textures_[i] != nullptr) ? textures_[i]->glHandle() : 0;
+		hash = nctl::fasthash32(&textureHandle, sizeof(textureHandle), hash);
+	}
 
-	// Specify a smaller hash data size so the padding can avoid a buffer overflow
-	return nctl::fasthash32(reinterpret_cast<const void *>(&hashData), sizeof(SortHashData) - sizeof(uint64_t), Seed);
+	const GLuint shaderProgramHandle = shaderProgram_->glHandle();
+	hash = nctl::fasthash32(&shaderProgramHandle, sizeof(shaderProgramHandle), hash);
+
+	hash = nctl::fasthash32(&srcBlendingFactor_, sizeof(srcBlendingFactor_), hash);
+	hash = nctl::fasthash32(&destBlendingFactor_, sizeof(destBlendingFactor_), hash);
+
+	return hash;
 }
 
 }

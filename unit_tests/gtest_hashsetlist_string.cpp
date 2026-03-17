@@ -27,7 +27,7 @@ TEST_F(HashSetListStringTest, BucketSize)
 	const unsigned int bucketSize = strHashset_.bucketSize(Keys[0]);
 	printf("Bucket size for key %s: %u\n", Keys[0], bucketSize);
 
-	ASSERT_EQ(bucketSize, 3u);
+	ASSERT_EQ(bucketSize, 1u);
 }
 
 TEST_F(HashSetListStringTest, InsertElements)
