@@ -6,10 +6,11 @@
 const unsigned int Capacity = 1024;
 const int KeyValueDifference = 10;
 
-using SaxHashMap = nctl::HashMapList<unsigned int, Movable, nctl::SaxHashFunc<unsigned int>>;
-using JenkinsHashMap = nctl::HashMapList<unsigned int, Movable, nctl::JenkinsHashFunc<unsigned int>>;
-using FNV1aHashMap = nctl::HashMapList<unsigned int, Movable, nctl::FNV1aHashFunc<unsigned int>>;
-using HashMapTestType = FNV1aHashMap;
+using SaxHashMap = nctl::HashMapList<unsigned int, Movable, nctl::deprecated::SaxHashFunc<unsigned int>>;
+using JenkinsHashMap = nctl::HashMapList<unsigned int, Movable, nctl::deprecated::JenkinsHashFunc<unsigned int>>;
+using FNV1aHashMap = nctl::HashMapList<unsigned int, Movable, nctl::deprecated::FNV1aHashFunc<unsigned int>>;
+using FastHashMap = nctl::HashMapList<unsigned int, Movable, nctl::FastHashFunc<unsigned int>>;
+using HashMapTestType = FastHashMap;
 
 static void BM_BigHashMapListCreation(benchmark::State &state)
 {

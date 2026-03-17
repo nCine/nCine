@@ -6,9 +6,7 @@
 namespace ncine {
 
 namespace {
-	const uint64_t HashSeed = 0x01000193811C9DC5;
-	unsigned int bufferSize = 0;
-	nctl::UniquePtr<uint8_t[]> bufferPtr;
+	constexpr uint64_t HashSeed = 0x01000193811C9DC5ULL;
 }
 
 Hash64 &hash64()
@@ -23,36 +21,24 @@ Hash64 &hash64()
 
 uint64_t Hash64::hashStrings(unsigned int count, const char **strings, const int *lengths) const
 {
-	uint64_t hash = 0;
+	uint64_t hash = HashSeed;
+
 	for (unsigned int i = 0; i < count; i++)
 	{
 		ASSERT(strings[i] != nullptr);
 		ASSERT(lengths[i] > 0);
 		if (strings[i] != nullptr && lengths[i] > 0)
 		{
-			const unsigned int length = static_cast<unsigned int>(lengths[i]);
-			// Align the length to 64 bits, plus 7 bytes read after that
-			const unsigned int paddedLength = length + 8 - (length % 8) + 7;
-			// Recycling the loading binary buffer for zero-padded shader sources
-			if (bufferSize < paddedLength)
-			{
-				bufferSize = paddedLength;
-				bufferPtr = nctl::makeUnique<uint8_t[]>(bufferSize);
-			}
+			const size_t length = static_cast<size_t>(lengths[i]);
 
-			for (unsigned int j = 0; j < length; j++)
-				bufferPtr[j] = strings[i][j];
-			// Set padding bytes to zero for a deterministic hash
-			for (unsigned int j = length; j < paddedLength; j++)
-				bufferPtr[j] = '\0';
-
-			hash += nctl::fasthash64(bufferPtr.get(), length, HashSeed);
+			hash = nctl::fasthash64(strings[i], length, hash);
 
 			statistics_.HashedStrings++;
 			statistics_.HashedCharacters += lengths[i];
 		}
 	}
-	if (hash != 0)
+
+	if (count > 0)
 		statistics_.HashStringCalls++;
 
 	return hash;
@@ -73,16 +59,13 @@ uint64_t Hash64::hashFileStat(const char *filename) const
 	ASSERT(isReadable);
 	if (isReadable)
 	{
-		const unsigned long int length = nctl::strnlen(filename, fs::MaxPathLength);
-
-		const fs::FileDate d = fs::lastModificationTime(filename);
+		const size_t length = nctl::strnlen(filename, fs::MaxPathLength);
 		const long int s = fs::fileSize(filename);
-		unsigned long int n = 0;
-		for (unsigned int i = 0; i < length; i++)
-			n += static_cast<unsigned int>(filename[i]);
+		const fs::FileDate d = fs::lastModificationTime(filename);
 
-		// Combining file name, size, and date in a unique id
-		hash = (n + s) * 100000000000000 + d.year * 10000000000 + d.month * 100000000 + d.day * 1000000 + d.hour * 10000 + d.minute * 100 + d.second;
+		hash = nctl::fasthash64(filename, length, HashSeed);
+		hash = nctl::fasthash64(&s, sizeof(s), hash);
+		hash = nctl::fasthash64(&d, sizeof(d), hash);
 
 		statistics_.HashedFiles++;
 	}
@@ -98,13 +81,15 @@ uint64_t Hash64::scanHashString(const char *string, unsigned int length) const
 
 	if (string != nullptr && length % 16 == 0)
 	{
-		char stringToParse[17] = "\0";
+		char stringToParse[17];
+		stringToParse[16] = '\0';
+
 		for (unsigned int i = 0; i < length / 16; i++)
 		{
-			for (unsigned j = 0; j < 16; j++)
-				stringToParse[j] = string[i * 16 + j];
-			stringToParse[16] = '\0';
-			hash += strtoull(stringToParse, nullptr, 16);
+			memcpy(stringToParse, &string[i * 16], 16);
+			const uint64_t part = strtoull(stringToParse, nullptr, 16);
+
+			hash ^= part;
 		}
 
 		statistics_.ScannedHashStrings++;

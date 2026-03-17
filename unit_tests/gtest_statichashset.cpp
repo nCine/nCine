@@ -333,7 +333,7 @@ TEST_F(StaticHashSetTest, RemoveAllFromFull)
 
 const int BigCapacity = 512;
 const int LastElement = BigCapacity / 2;
-using HashSetStressTestType = nctl::StaticHashSet<int, BigCapacity, nctl::FNV1aHashFunc<int>>;
+using HashSetStressTestType = nctl::StaticHashSet<int, BigCapacity, nctl::FastHashFunc<int>>;
 
 TEST_F(StaticHashSetTest, StressRemove)
 {

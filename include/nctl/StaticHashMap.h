@@ -15,7 +15,7 @@ template <class K, class T, class HashFunc, unsigned int Capacity, bool IsConst>
 class String;
 
 /// A template based hashmap implementation with open addressing and leapfrog probing (version with static allocation)
-template <class K, class T, unsigned int Capacity, class HashFunc = FNV1aHashFunc<K>>
+template <class K, class T, unsigned int Capacity, class HashFunc = FastHashFunc<K>>
 class StaticHashMap
 {
   public:

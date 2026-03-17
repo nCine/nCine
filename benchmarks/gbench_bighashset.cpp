@@ -5,10 +5,11 @@
 
 const unsigned int Capacity = 1024;
 
-using SaxHashSet = nctl::HashSet<Movable, nctl::SaxHashFunc<Movable>>;
-using JenkinsHashSet = nctl::HashSet<Movable, nctl::JenkinsHashFunc<Movable>>;
-using FNV1aHashSet = nctl::HashSet<Movable, nctl::FNV1aHashFunc<Movable>>;
-using HashSetTestType = FNV1aHashSet;
+using SaxHashSet = nctl::HashSet<Movable, nctl::deprecated::SaxHashFunc<Movable>>;
+using JenkinsHashSet = nctl::HashSet<Movable, nctl::deprecated::JenkinsHashFunc<Movable>>;
+using FNV1aHashSet = nctl::HashSet<Movable, nctl::deprecated::FNV1aHashFunc<Movable>>;
+using FastHashSet = nctl::HashSet<Movable, nctl::FastHashFunc<Movable>>;
+using HashSetTestType = FastHashSet;
 
 static void BM_BigHashSetCopy(benchmark::State &state)
 {

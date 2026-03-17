@@ -14,7 +14,7 @@ template <class K, class HashFunc, unsigned int Capacity> struct StaticHashSetHe
 class String;
 
 /// A template based hashset implementation with open addressing and leapfrog probing (version with static allocation)
-template <class K, unsigned int Capacity, class HashFunc = FNV1aHashFunc<K>>
+template <class K, unsigned int Capacity, class HashFunc = FastHashFunc<K>>
 class StaticHashSet
 {
   public:

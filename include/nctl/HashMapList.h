@@ -19,7 +19,7 @@ template <class K, class T, class HashFunc, bool IsConst> struct HashMapListHelp
 class String;
 
 /// A template based hashmap implementation with separate chaining and list head cell
-template <class K, class T, class HashFunc = FNV1aHashFunc<K>>
+template <class K, class T, class HashFunc = FastHashFunc<K>>
 class HashMapList
 {
   public:

@@ -22,7 +22,7 @@ template <class K, class HashFunc> struct HashSetHelperTraits;
 class String;
 
 /// A template based hashset implementation with open addressing and leapfrog probing
-template <class K, class HashFunc = FNV1aHashFunc<K>>
+template <class K, class HashFunc = FastHashFunc<K>>
 class HashSet
 {
   public:

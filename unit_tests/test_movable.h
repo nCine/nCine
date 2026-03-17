@@ -115,6 +115,22 @@ class Movable
 
 namespace nctl {
 
+/// fast-hash
+/*!
+ * \note Specialized version of the function for Movable objects
+ *
+ * For more information: https://github.com/ztanml/fast-hash
+ */
+template <>
+class FastHashFunc<Movable>
+{
+public:
+	hash_t operator()(const Movable &key) const
+	{
+		return nctl::fasthash32(key.data(), key.size() * sizeof(int), 0x811C9DC5);
+	}
+};
+
 /// Fowler-Noll-Vo Hash (FNV-1a)
 /*!
  * \note Specialized version of the function for Movable objects
@@ -122,7 +138,7 @@ namespace nctl {
  * For more information: http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
  */
 template <>
-class FNV1aHashFunc<Movable>
+class nctl::deprecated::FNV1aHashFunc<Movable>
 {
   public:
 	hash_t operator()(const Movable &key) const
