@@ -1,0 +1,353 @@
+{
+	"version": 6,
+	"configurePresets": [
+		{
+			"name": "base",
+			"hidden": true,
+			"binaryDir": "${sourceDir}/build/${presetName}"
+		},
+		{
+			"name": "minimal_flags",
+			"hidden": true,
+			"cacheVariables": {
+				"NCINE_BUILD_ANDROID": "OFF",
+				"NCINE_BUILD_TESTS": "OFF",
+				"NCINE_DYNAMIC_LIBRARY": "ON",
+				"NCINE_PREFERRED_BACKEND": "GLFW",
+				"NCINE_WITH_SCENEGRAPH": "OFF",
+				"NCINE_WITH_IMGUI": "OFF",
+				"NCINE_WITH_AUDIO": "OFF",
+				"NCINE_WITH_LUA": "OFF",
+				"NCINE_WITH_THREADS": "OFF",
+				"NCINE_WITH_PNG": "OFF",
+				"NCINE_WITH_WEBP": "OFF"
+			}
+		},
+		{
+			"name": "dist_flags",
+			"hidden": true,
+			"cacheVariables": {
+				"NCINE_BUILD_ANDROID": "OFF",
+				"NCINE_BUILD_TESTS": "ON",
+				"NCINE_DYNAMIC_LIBRARY": "ON",
+				"NCINE_LINKTIME_OPTIMIZATION": "ON",
+				"NCINE_STRIP_BINARIES": "ON",
+				"NCINE_PREFERRED_BACKEND": "GLFW"
+			}
+		},
+		{
+			"name": "debug",
+			"hidden": true,
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug"
+			}
+		},
+		{
+			"name": "release",
+			"hidden": true,
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Release"
+			}
+		},
+		{
+			"name": "default_debug",
+			"inherits": ["base", "debug"],
+			"displayName": "nCine-Default-Debug"
+		},
+		{
+			"name": "default_release",
+			"inherits": ["base", "release"],
+			"displayName": "nCine-Default-Release"
+		},
+		{
+			"name": "minimal",
+			"inherits": ["base", "minimal_flags", "release"],
+			"displayName": "nCine-Minimal"
+		},
+		{
+			"name": "unit_tests",
+			"inherits": ["base", "minimal_flags", "debug"],
+			"displayName": "nCine-UnitTests",
+			"cacheVariables": {
+				"NCINE_BUILD_UNIT_TESTS": "ON"
+			}
+		},
+		{
+			"name": "benchmarks",
+			"inherits": ["base", "minimal_flags", "release"],
+			"displayName": "nCine-Benchmarks",
+			"cacheVariables": {
+				"NCINE_BUILD_BENCHMARKS": "ON"
+			}
+		},
+		{
+			"name": "bindist",
+			"inherits": ["base", "dist_flags", "release"],
+			"displayName": "nCine-BinDist",
+			"description": "To build a binary distribution of the nCine",
+			"cacheVariables": {
+				"NCINE_BUILD_ANDROID": "OFF",
+				"NCINE_INSTALL_DEV_SUPPORT": "OFF"
+			}
+		},
+		{
+			"name": "devdist",
+			"inherits": ["base", "dist_flags", "release"],
+			"displayName": "nCine-DevDist",
+			"description": "To build a developer distribution of the nCine",
+			"cacheVariables": {
+				"NCINE_BUILD_ANDROID": "ON",
+				"NCINE_INSTALL_DEV_SUPPORT": "ON",
+				"NCINE_NDK_ARCHITECTURES": "armeabi-v7a;arm64-v8a;x86_64"
+			}
+		},
+		{
+			"name": "luadist",
+			"inherits": ["base", "dist_flags", "release"],
+			"displayName": "nCine-LuaDist",
+			"description": "To build a Lua distribution of the nCine",
+			"cacheVariables": {
+				"NCINE_BUILD_ANDROID": "OFF",
+				"NCINE_INSTALL_DEV_SUPPORT": "OFF",
+				"NCINE_WITH_IMGUI": "OFF",
+				"NCINE_WITH_THREADS": "OFF",
+				"NCINE_WITH_SCRIPTING_API": "ON",
+				"NCINE_STARTUP_TEST": "ncinelua"
+			}
+		},
+		{
+			"name": "static-docking",
+			"inherits": ["base", "minimal_flags", "release"],
+			"displayName": "nCine-Static",
+			"description": "Used to build projects like SpookyGhost or ncTracer",
+			"cacheVariables": {
+				"IMGUI_VERSION_TAG": "docking",
+				"NCINE_BUILD_ANDROID": "ON",
+				"NCINE_DYNAMIC_LIBRARY": "OFF",
+				"NCINE_PREFERRED_BACKEND": "SDL2",
+				"NCINE_WITH_LUA": "ON",
+				"NCINE_WITH_SCRIPTING_API": "OFF",
+				"NCINE_WITH_PNG": "ON"
+			}
+		}
+	],
+	"buildPresets": [
+		{
+			"name": "common",
+			"hidden": true,
+			"inheritConfigureEnvironment": true,
+			"jobs": 0,
+			"verbose": false,
+			"cleanFirst": false
+		},
+		{
+			"name": "debug",
+			"hidden": true,
+			"configuration": "Debug"
+		},
+		{
+			"name": "release",
+			"hidden": true,
+			"configuration": "Release"
+		},
+		{
+			"name": "default_debug",
+			"inherits": ["common", "debug"],
+			"displayName": "nCine-Default-Debug",
+			"configurePreset": "default_debug"
+		},
+		{
+			"name": "default_release",
+			"inherits": ["common", "release"],
+			"displayName": "nCine-Default-Release",
+			"configurePreset": "default_release"
+		},
+		{
+			"name": "unit_tests",
+			"inherits": ["common", "debug"],
+			"displayName": "nCine-UnitTests",
+			"configurePreset": "unit_tests"
+		},
+		{
+			"name": "benchmarks",
+			"inherits": ["common", "release"],
+			"displayName": "nCine-Benchmarks",
+			"configurePreset": "benchmarks"
+		},
+		{
+			"name": "bindist",
+			"inherits": ["common", "release"],
+			"displayName": "nCine-BinDist",
+			"configurePreset": "bindist"
+		},
+		{
+			"name": "devdist",
+			"inherits": ["common", "release"],
+			"displayName": "nCine-DevDist",
+			"configurePreset": "devdist"
+		},
+		{
+			"name": "luadist",
+			"inherits": ["common", "release"],
+			"displayName": "nCine-LuaDist",
+			"configurePreset": "luadist"
+		},
+		{
+			"name": "static-docking",
+			"inherits": ["common", "release"],
+			"displayName": "nCine-Static-Docking",
+			"configurePreset": "static-docking"
+		}
+	],
+	"testPresets": [
+		{
+			"name": "debug",
+			"hidden": true,
+			"configuration": "Debug"
+		},
+		{
+			"name": "release",
+			"hidden": true,
+			"configuration": "Release"
+		},
+		{
+			"name": "unit_tests",
+			"inherits": "debug",
+			"displayName": "nCine-UnitTests",
+			"configurePreset": "unit_tests"
+		}
+	],
+	"packagePresets": [
+		{
+			"name": "bindist",
+			"displayName": "nCine-BinDist",
+			"configurePreset": "bindist"
+		},
+		{
+			"name": "devdist",
+			"displayName": "nCine-DevDist",
+			"configurePreset": "devdist"
+		},
+		{
+			"name": "luadist",
+			"displayName": "nCine-LuaDist",
+			"configurePreset": "luadist"
+		}
+	],
+	"workflowPresets": [
+		{
+			"name": "default_debug",
+			"displayName": "nCine-Default-Debug",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "default_debug"
+				},
+				{
+					"type": "build",
+					"name": "default_debug"
+				}
+			]
+		},
+		{
+			"name": "default_release",
+			"displayName": "nCine-Default-Release",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "default_release"
+				},
+				{
+					"type": "build",
+					"name": "default_release"
+				}
+			]
+		},
+		{
+			"name": "unit_tests",
+			"displayName": "nCine-UnitTests",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "unit_tests"
+				},
+				{
+					"type": "build",
+					"name": "unit_tests"
+				},
+				{
+					"type": "test",
+					"name": "unit_tests"
+				}
+			]
+		},
+		{
+			"name": "benchmarks",
+			"displayName": "nCine-Benchmarks",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "benchmarks"
+				},
+				{
+					"type": "build",
+					"name": "benchmarks"
+				}
+			]
+		},
+		{
+			"name": "bindist",
+			"displayName": "nCine-BinDist",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "bindist"
+				},
+				{
+					"type": "build",
+					"name": "bindist"
+				},
+				{
+					"type": "package",
+					"name": "bindist"
+				}
+			]
+		},
+		{
+			"name": "devdist",
+			"displayName": "nCine-DevDist",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "devdist"
+				},
+				{
+					"type": "build",
+					"name": "devdist"
+				},
+				{
+					"type": "package",
+					"name": "devdist"
+				}
+			]
+		},
+		{
+			"name": "luadist",
+			"displayName": "nCine-LuaDist",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "luadist"
+				},
+				{
+					"type": "build",
+					"name": "luadist"
+				},
+				{
+					"type": "package",
+					"name": "luadist"
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,142 @@
+{
+	"version": 6,
+	"configurePresets": [
+		{
+			"name": "base",
+			"hidden": true,
+			"binaryDir": "${sourceDir}/build/${presetName}"
+		},
+		{
+			"name": "dist_flags",
+			"hidden": true,
+			"cacheVariables": {
+				"NCPROJECT_DATA_DIR_DIST": "ON",
+				"NCPROJECT_BUILD_ANDROID": "OFF",
+				"NCPROJECT_STRIP_BINARIES": "ON"
+			}
+		},
+		{
+			"name": "debug",
+			"hidden": true,
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug"
+			}
+		},
+		{
+			"name": "release",
+			"hidden": true,
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Release"
+			}
+		},
+		{
+			"name": "default_debug",
+			"inherits": ["base", "debug"],
+			"displayName": "ncProject-Default-Debug"
+		},
+		{
+			"name": "default_release",
+			"inherits": ["base", "release"],
+			"displayName": "ncProject-Default-Release"
+		},
+		{
+			"name": "bindist",
+			"inherits": ["base", "dist_flags", "release"],
+			"displayName": "ncProject-BinDist",
+			"description": "To build a binary distribution of the nCine project"
+		}
+	],
+	"buildPresets": [
+		{
+			"name": "common",
+			"hidden": true,
+			"inheritConfigureEnvironment": true,
+			"jobs": 0,
+			"verbose": false,
+			"cleanFirst": false
+		},
+		{
+			"name": "debug",
+			"hidden": true,
+			"configuration": "Debug"
+		},
+		{
+			"name": "release",
+			"hidden": true,
+			"configuration": "Release"
+		},
+		{
+			"name": "default_debug",
+			"inherits": ["common", "debug"],
+			"displayName": "ncProject-Default-Debug",
+			"configurePreset": "default_debug"
+		},
+		{
+			"name": "default_release",
+			"inherits": ["common", "release"],
+			"displayName": "ncProject-Default-Release",
+			"configurePreset": "default_release"
+		},
+		{
+			"name": "bindist",
+			"inherits": ["common", "release"],
+			"displayName": "ncProject-BinDist",
+			"configurePreset": "bindist"
+		}
+	],
+	"packagePresets": [
+		{
+			"name": "bindist",
+			"displayName": "ncProject-BinDist",
+			"configurePreset": "bindist"
+		}
+	],
+	"workflowPresets": [
+		{
+			"name": "default_debug",
+			"displayName": "ncProject-Default-Debug",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "default_debug"
+				},
+				{
+					"type": "build",
+					"name": "default_debug"
+				}
+			]
+		},
+		{
+			"name": "default_release",
+			"displayName": "ncProject-Default-Release",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "default_release"
+				},
+				{
+					"type": "build",
+					"name": "default_release"
+				}
+			]
+		},
+		{
+			"name": "bindist",
+			"displayName": "ncProject-BinDist",
+			"steps": [
+				{
+					"type": "configure",
+					"name": "bindist"
+				},
+				{
+					"type": "build",
+					"name": "bindist"
+				},
+				{
+					"type": "package",
+					"name": "bindist"
+				}
+			]
+		}
+	]
+}

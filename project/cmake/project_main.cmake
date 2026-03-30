@@ -12,11 +12,15 @@ endif()
 include(project_check_info)
 
 # Copy dot files
-foreach(DOT_FILE IN ITEMS ".clang-format" ".editorconfig")
+foreach(DOT_FILE IN ITEMS ".clang-format" ".editorconfig" ".gitignore")
 	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/${DOT_FILE})
 		file(COPY ${NCPROJECT_ROOT}/${DOT_FILE} DESTINATION ${CMAKE_SOURCE_DIR})
 	endif()
 endforeach()
+# Copy `CMakePresets.json`
+if(NOT EXISTS ${CMAKE_SOURCE_DIR}/CMakePresets.json)
+	file(COPY ${NCPROJECT_ROOT}/CMakePresets.json DESTINATION ${CMAKE_SOURCE_DIR})
+endif()
 
 if(COMMAND callback_start)
 	callback_start()
@@ -25,7 +29,16 @@ endif()
 include(project_options)
 
 include(find_ncine)
-include(project_imported_targets)
+
+# imported_targets CMake scripts
+include(imported_targets/project_imported_targets_common)
+include(imported_targets/project_imported_targets_msvc)
+include(imported_targets/project_imported_targets_msys)
+include(imported_targets/project_imported_targets_linux)
+include(imported_targets/project_imported_targets_apple)
+include(imported_targets/project_imported_targets_android)
+include(imported_targets/project_imported_targets_emscripten)
+
 if(NOT ANDROID AND NOT EMSCRIPTEN AND NCINE_WITH_QT5)
 	find_package(Qt5 COMPONENTS Widgets)
 endif()
@@ -59,7 +72,7 @@ if(COMMAND callback_before_target)
 endif()
 
 add_executable(${NCPROJECT_EXE_NAME} WIN32 ${NCPROJECT_SOURCES})
-include(project_generated_sources)
+include(project_sources_generated)
 target_sources(${NCPROJECT_EXE_NAME} PRIVATE ${GENERATED_SOURCES})
 
 if(NOT NCPROJECT_DATA_DIR_DIST) # Don't set the startup project if it wouldn't find the data directory

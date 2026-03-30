@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 project(nCine-Android-${ANDROID_ABI})
 
-include(ncine_imported_targets)
+# imported_targets CMake scripts
+include(imported_targets/ncine_imported_targets_common)
+include(imported_targets/ncine_imported_targets_android)
 
 if(NCINE_DYNAMIC_LIBRARY)
 	add_library(ncine SHARED)
@@ -20,10 +22,20 @@ target_link_libraries(ncine_main PRIVATE ncine)
 
 include(ncine_compiler_options)
 
-include(ncine_headers)
-include(ncine_private_headers)
-include(ncine_sources)
-include(ncine_extra_sources)
+# sources CMake scripts
+include(sources/ncine_sources_nctl)
+include(sources/ncine_sources_base)
+include(sources/ncine_sources_opengl)
+include(sources/ncine_sources_scenegraph)
+include(sources/ncine_sources_platforms)
+include(sources/ncine_sources_audio)
+include(sources/ncine_sources_image_formats)
+include(sources/ncine_sources_threads)
+include(sources/ncine_sources_lua)
+include(sources/ncine_sources_allocators)
+include(sources/ncine_sources_imgui)
+include(sources/ncine_sources_nuklear)
+include(sources/ncine_sources_tool_integrations)
 
 # Convert strings back to the original lists
 string(REPLACE " " ";" GENERATED_SOURCES "${GENERATED_SOURCES}")
