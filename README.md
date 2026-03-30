@@ -84,7 +84,7 @@ Copyright (c) 2011-2026 Angelo Theodorou.
 - GLFW 3.x, SDL 2, Qt 5
 - libpng, libwebp
 - OpenAL-soft, libogg, libvorbis, libvorbisfile
-- Lua 5.4
+- Lua 5.5
 - Dear ImGui, Nuklear
 
 ### Supported Platforms and Compilers
