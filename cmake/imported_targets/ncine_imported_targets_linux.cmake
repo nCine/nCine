@@ -90,6 +90,30 @@ if(UNIX AND NOT APPLE)
 		endif()
 	endif()
 
+	# Older CMake versions cannot find Lua 5.5 reliably
+	if(NCINE_WITH_LUA AND NOT LUA_FOUND)
+		# Wipe FindLua.cmake cached variables
+		unset(LUA_LIBRARY CACHE)
+		unset(LUA_LIBRARIES CACHE)
+		unset(LUA_INCLUDE_DIR CACHE)
+		unset(LUA_INCLUDE_DIRS CACHE)
+
+		find_path(LUA_INCLUDE_DIR
+			NAMES lua.h
+			PATH_SUFFIXES include
+		)
+
+		find_library(LUA_LIBRARY
+			NAMES lua5.5
+			PATH_SUFFIXES lib
+		)
+
+		if(LUA_INCLUDE_DIR AND LUA_LIBRARY)
+			message(STATUS "Found Lua: ${LUA_LIBRARY}")
+			set(LUA_FOUND TRUE)
+		endif()
+	endif()
+
 	if(LUA_FOUND)
 		add_library(Lua::Lua SHARED IMPORTED)
 		set_target_properties(Lua::Lua PROPERTIES

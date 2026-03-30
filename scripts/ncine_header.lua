@@ -1,8 +1,9 @@
 if ncine == nil then
 	local names = { "ncine", "ncine_d", "libncine", "libncine_d" }
-	for i, name in ipairs(names) do
-		local ok, ncine = pcall(require, name)
-		if ok then
+	for _, name in ipairs(names) do
+		local ok, module = pcall(require, name)
+		if ok and module ~= nil then
+			ncine = module
 			break
 		end
 	end
