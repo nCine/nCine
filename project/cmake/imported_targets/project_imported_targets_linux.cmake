@@ -1,0 +1,99 @@
+if(UNIX AND NOT APPLE)
+	function(split_extra_libraries PREFIX LIBRARIES)
+		foreach(LIBRARY ${LIBRARIES})
+			string(REGEX MATCH "^-l" FOUND_LINKER_ARG ${LIBRARY})
+			string(REGEX MATCH "\.a$" FOUND_STATIC_LIB ${LIBRARY})
+			if(NOT FOUND_LINKER_ARG STREQUAL "" OR NOT FOUND_STATIC_LIB STREQUAL "")
+				list(APPEND EXTRA_LIBRARIES ${LIBRARY})
+			else()
+				list(APPEND LIBRARY_FILE ${LIBRARY})
+			endif()
+		endforeach()
+		set(${PREFIX}_EXTRA_LIBRARIES ${EXTRA_LIBRARIES} PARENT_SCOPE)
+		set(${PREFIX}_LIBRARY_FILE ${LIBRARY_FILE} PARENT_SCOPE)
+	endfunction()
+
+	# --------------------------------
+	if(ATOMIC_FOUND)
+		add_library(Atomic::Atomic INTERFACE IMPORTED)
+		set_target_properties(Atomic::Atomic PROPERTIES
+			INTERFACE_LINK_DIRECTORIES ${ATOMIC_DIRECTORY}
+			INTERFACE_LINK_LIBRARIES atomic)
+	endif()
+
+	if(OPENGLES2_FOUND)
+		add_library(EGL::EGL SHARED IMPORTED)
+		set_target_properties(EGL::EGL PROPERTIES
+			IMPORTED_LOCATION ${EGL_LIBRARIES}
+			INTERFACE_INCLUDE_DIRECTORIES ${EGL_INCLUDE_DIR})
+
+		add_library(OpenGLES2::GLES2 SHARED IMPORTED)
+		set_target_properties(OpenGLES2::GLES2 PROPERTIES
+			IMPORTED_LOCATION ${OPENGLES2_LIBRARIES}
+			INTERFACE_INCLUDE_DIRECTORIES ${OPENGLES2_INCLUDE_DIR})
+	endif()
+
+	if(GLFW_FOUND)
+		add_library(GLFW::GLFW SHARED IMPORTED)
+		set_target_properties(GLFW::GLFW PROPERTIES
+			IMPORTED_LOCATION "${GLFW_LIBRARY}" # On macOS it's a list
+			INTERFACE_COMPILE_DEFINITIONS "GLFW_NO_GLU"
+			INTERFACE_INCLUDE_DIRECTORIES ${GLFW_INCLUDE_DIR})
+	endif()
+
+	if(SDL2_FOUND)
+		split_extra_libraries(SDL2 "${SDL2_LIBRARY}")
+		add_library(SDL2::SDL2 SHARED IMPORTED)
+		set_target_properties(SDL2::SDL2 PROPERTIES
+			IMPORTED_LOCATION "${SDL2_LIBRARY_FILE}" # On macOS it's a list
+			INTERFACE_INCLUDE_DIRECTORIES ${SDL2_INCLUDE_DIR}
+			INTERFACE_LINK_LIBRARIES "${SDL2_EXTRA_LIBRARIES}")
+	endif()
+
+	if(WEBP_FOUND)
+		add_library(WebP::WebP SHARED IMPORTED)
+		set_target_properties(WebP::WebP PROPERTIES
+			IMPORTED_LOCATION ${WEBP_LIBRARY}
+			INTERFACE_INCLUDE_DIRECTORIES ${WEBP_INCLUDE_DIR})
+		if(EXISTS ${SHARPYUV_LIBRARY})
+			# Since libwebp 1.3.0, libwebp.so needs some symbols from libsharpyuv.so
+			add_library(WebP::SharpYUV SHARED IMPORTED)
+			set_target_properties(WebP::SharpYUV PROPERTIES
+				IMPORTED_LOCATION ${SHARPYUV_LIBRARY})
+			set_target_properties(WebP::WebP PROPERTIES
+				INTERFACE_LINK_LIBRARIES WebP::SharpYUV)
+		endif()
+	endif()
+
+	if(OPENAL_FOUND)
+		add_library(OpenAL::AL SHARED IMPORTED)
+		set_target_properties(OpenAL::AL PROPERTIES
+			IMPORTED_LOCATION ${OPENAL_LIBRARY}
+			INTERFACE_INCLUDE_DIRECTORIES ${OPENAL_INCLUDE_DIR})
+
+		if(VORBIS_FOUND)
+			add_library(Ogg::Ogg SHARED IMPORTED)
+			set_target_properties(Ogg::Ogg PROPERTIES
+				IMPORTED_LOCATION ${OGG_LIBRARY})
+
+			add_library(Vorbis::Vorbis SHARED IMPORTED)
+			set_target_properties(Vorbis::Vorbis PROPERTIES
+				IMPORTED_LOCATION ${VORBIS_LIBRARY}
+				INTERFACE_INCLUDE_DIRECTORIES ${VORBIS_INCLUDE_DIR}
+				INTERFACE_LINK_LIBRARIES "${OGG_LIBRARY}")
+
+			add_library(Vorbis::Vorbisfile SHARED IMPORTED)
+			set_target_properties(Vorbis::Vorbisfile PROPERTIES
+				IMPORTED_LOCATION ${VORBISFILE_LIBRARY}
+				INTERFACE_INCLUDE_DIRECTORIES ${VORBIS_INCLUDE_DIR}
+				INTERFACE_LINK_LIBRARIES "${VORBIS_LIBRARY}")
+		endif()
+	endif()
+
+	if(LUA_FOUND)
+		add_library(Lua::Lua SHARED IMPORTED)
+		set_target_properties(Lua::Lua PROPERTIES
+			IMPORTED_LOCATION ${LUA_LIBRARY}
+			INTERFACE_INCLUDE_DIRECTORIES ${LUA_INCLUDE_DIR})
+	endif()
+endif()

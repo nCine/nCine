@@ -84,7 +84,10 @@ if(COMMAND callback_after_target)
 endif()
 
 if(NOT NCINE_DYNAMIC_LIBRARY)
-	include(project_imported_targets)
+	# imported_targets CMake scripts
+	include(imported_targets/project_imported_targets_common)
+	include(imported_targets/project_imported_targets_android)
+
 	target_link_libraries(${NCPROJECT_EXE_NAME} PRIVATE
 		${EGL_LIBRARY} ${GLES3_LIBRARY} ${OPENSLES_LIBRARY} ${ZLIB_LIBRARY})
 	if(PNG_FOUND)

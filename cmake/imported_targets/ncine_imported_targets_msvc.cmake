@@ -1,0 +1,142 @@
+if(MSVC)
+	set(EXTERNAL_MSVC_DIR "${PARENT_SOURCE_DIR}/nCine-external" CACHE PATH "Set the path to the MSVC libraries directory")
+	if(NOT IS_DIRECTORY ${EXTERNAL_MSVC_DIR})
+		message(FATAL_ERROR "nCine external MSVC libraries directory not found at: ${EXTERNAL_MSVC_DIR}")
+	else()
+		message(STATUS "nCine external MSVC libraries directory: ${EXTERNAL_MSVC_DIR}")
+	endif()
+
+	set(MSVC_ARCH_SUFFIX "x86")
+	if(MSVC_C_ARCHITECTURE_ID MATCHES 64 OR MSVC_CXX_ARCHITECTURE_ID MATCHES 64)
+		set(MSVC_ARCH_SUFFIX "x64")
+	endif()
+
+	set(MSVC_LIBDIR "${EXTERNAL_MSVC_DIR}/lib/${MSVC_ARCH_SUFFIX}")
+	set(MSVC_BINDIR "${EXTERNAL_MSVC_DIR}/bin/${MSVC_ARCH_SUFFIX}")
+
+	# --------------------------------
+	if(NCINE_WITH_ANGLE AND
+	   EXISTS ${MSVC_LIBDIR}/libEGL.dll.lib AND EXISTS ${MSVC_BINDIR}/libEGL.dll AND
+	   EXISTS ${MSVC_LIBDIR}/libGLESv2.dll.lib AND EXISTS ${MSVC_BINDIR}/libGLESv2.dll)
+
+		add_library(EGL::EGL SHARED IMPORTED)
+		set_target_properties(EGL::EGL PROPERTIES
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/libEGL.dll.lib
+			IMPORTED_LOCATION ${MSVC_BINDIR}/libEGL.dll
+			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include")
+
+		add_library(OpenGLES2::GLES2 SHARED IMPORTED)
+		set_target_properties(OpenGLES2::GLES2 PROPERTIES
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/libGLESv2.dll.lib
+			IMPORTED_LOCATION ${MSVC_BINDIR}/libGLESv2.dll
+			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include")
+		set(ANGLE_FOUND 1)
+	else()
+		if(EXISTS ${MSVC_LIBDIR}/glew32.lib AND EXISTS ${MSVC_BINDIR}/glew32.dll)
+			add_library(GLEW::GLEW SHARED IMPORTED)
+			set_target_properties(GLEW::GLEW PROPERTIES
+				IMPORTED_IMPLIB ${MSVC_LIBDIR}/glew32.lib
+				IMPORTED_LOCATION ${MSVC_BINDIR}/glew32.dll
+				INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include")
+			set(GLEW_FOUND 1)
+		endif()
+	endif()
+
+	if(NCINE_PREFERRED_BACKEND STREQUAL "GLFW" AND
+	    EXISTS ${MSVC_LIBDIR}/glfw3dll.lib AND EXISTS ${MSVC_BINDIR}/glfw3.dll)
+		add_library(GLFW::GLFW SHARED IMPORTED)
+		set_target_properties(GLFW::GLFW PROPERTIES
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/glfw3dll.lib
+			IMPORTED_LOCATION ${MSVC_BINDIR}/glfw3.dll
+			INTERFACE_COMPILE_DEFINITIONS "GLFW_NO_GLU"
+			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include")
+		set(GLFW_FOUND 1)
+	endif()
+
+	if(NCINE_PREFERRED_BACKEND STREQUAL "SDL2" AND
+	    EXISTS ${MSVC_LIBDIR}/SDL2.lib AND EXISTS ${MSVC_LIBDIR}/SDL2main.lib AND
+		EXISTS ${MSVC_BINDIR}/SDL2.dll)
+		add_library(SDL2::SDL2 SHARED IMPORTED)
+		set_target_properties(SDL2::SDL2 PROPERTIES
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/SDL2.lib
+			IMPORTED_LOCATION ${MSVC_BINDIR}/SDL2.dll
+			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include/SDL2"
+			INTERFACE_LINK_LIBRARIES ${MSVC_LIBDIR}/SDL2main.lib)
+		set(SDL2_FOUND 1)
+	endif()
+
+	if(NCINE_WITH_PNG AND
+	    EXISTS ${MSVC_LIBDIR}/libpng16.lib AND EXISTS ${MSVC_LIBDIR}/z.lib AND
+	    EXISTS ${MSVC_BINDIR}/libpng16.dll AND EXISTS ${MSVC_BINDIR}/z.dll)
+		add_library(ZLIB::ZLIB SHARED IMPORTED)
+		set_target_properties(ZLIB::ZLIB PROPERTIES
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/z.lib
+			IMPORTED_LOCATION ${MSVC_BINDIR}/z.dll)
+		add_library(PNG::PNG SHARED IMPORTED)
+		set_target_properties(PNG::PNG PROPERTIES
+			IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/libpng16.lib
+			IMPORTED_LOCATION ${MSVC_BINDIR}/libpng16.dll
+			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include"
+			INTERFACE_LINK_LIBRARIES ZLIB::ZLIB)
+		set(PNG_FOUND 1)
+	endif()
+
+	if(NCINE_WITH_WEBP AND
+	    EXISTS ${MSVC_LIBDIR}/libwebp.lib AND EXISTS ${MSVC_BINDIR}/libwebp.dll)
+		add_library(WebP::WebP SHARED IMPORTED)
+		set_target_properties(WebP::WebP PROPERTIES
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/libwebp.lib
+			IMPORTED_LOCATION ${MSVC_BINDIR}/libwebp.dll
+			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include")
+		if (EXISTS ${MSVC_LIBDIR}/libsharpyuv.lib AND EXISTS ${MSVC_BINDIR}/libsharpyuv.dll)
+			add_library(WebP::SharpYUV SHARED IMPORTED)
+			set_target_properties(WebP::SharpYUV PROPERTIES
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/libsharpyuv.lib
+			IMPORTED_LOCATION ${MSVC_BINDIR}/libsharpyuv.dll)
+			set_target_properties(WebP::WebP PROPERTIES INTERFACE_LINK_LIBRARIES WebP::SharpYUV)
+		endif()
+		set(WEBP_FOUND 1)
+	endif()
+
+	if(NCINE_WITH_AUDIO AND EXISTS ${MSVC_LIBDIR}/OpenAL32.lib AND EXISTS ${MSVC_BINDIR}/OpenAL32.dll)
+		add_library(OpenAL::AL SHARED IMPORTED)
+		set_target_properties(OpenAL::AL PROPERTIES
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/OpenAL32.lib
+			IMPORTED_LOCATION ${MSVC_BINDIR}/OpenAL32.dll
+			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include")
+		set(OPENAL_FOUND 1)
+
+		if(NCINE_WITH_VORBIS AND
+		    EXISTS ${MSVC_LIBDIR}/ogg.lib AND EXISTS ${MSVC_LIBDIR}/vorbis.lib AND EXISTS ${MSVC_LIBDIR}/vorbisfile.lib AND
+		    EXISTS ${MSVC_BINDIR}/ogg.dll AND EXISTS ${MSVC_BINDIR}/vorbis.dll AND EXISTS ${MSVC_BINDIR}/vorbisfile.dll)
+			add_library(Ogg::Ogg SHARED IMPORTED)
+			set_target_properties(Ogg::Ogg PROPERTIES
+				IMPORTED_IMPLIB ${MSVC_LIBDIR}/ogg.lib
+				IMPORTED_LOCATION ${MSVC_BINDIR}/ogg.dll)
+
+			add_library(Vorbis::Vorbis SHARED IMPORTED)
+			set_target_properties(Vorbis::Vorbis PROPERTIES
+				IMPORTED_IMPLIB ${MSVC_LIBDIR}/vorbis.lib
+				IMPORTED_LOCATION ${MSVC_BINDIR}/vorbis.dll
+				INTERFACE_LINK_LIBRARIES Ogg::Ogg)
+
+			add_library(Vorbis::Vorbisfile SHARED IMPORTED)
+			set_target_properties(Vorbis::Vorbisfile PROPERTIES
+				IMPORTED_IMPLIB ${MSVC_LIBDIR}/vorbisfile.lib
+				IMPORTED_LOCATION ${MSVC_BINDIR}/vorbisfile.dll
+				INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include"
+				INTERFACE_LINK_LIBRARIES Vorbis::Vorbis)
+			set(VORBIS_FOUND 1)
+		endif()
+	endif()
+
+	if(NCINE_WITH_LUA AND EXISTS ${MSVC_LIBDIR}/lua54.lib AND EXISTS ${MSVC_BINDIR}/lua54.dll)
+		add_library(Lua::Lua SHARED IMPORTED)
+		set_target_properties(Lua::Lua PROPERTIES
+			IMPORTED_IMPLIB ${MSVC_LIBDIR}/lua54.lib
+			IMPORTED_LOCATION ${MSVC_BINDIR}/lua54.dll
+			INTERFACE_INCLUDE_DIRECTORIES "${EXTERNAL_MSVC_DIR}/include")
+		set(LUA_FOUND 1)
+	endif()
+endif()
