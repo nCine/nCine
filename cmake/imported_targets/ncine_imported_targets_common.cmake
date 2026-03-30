@@ -48,8 +48,8 @@ if(NOT MSVC AND NOT ANDROID)
 		endif()
 	endif()
 	if(NCINE_WITH_LUA)
-		# Older CMake versions do not support Lua 5.4 if not required explicitly
-		find_package(Lua 5.4)
+		# Older CMake versions do not support Lua 5.4 or newer if not required explicitly
+		find_package(Lua 5.5)
 		if(NOT LUA_FOUND)
 			find_package(Lua)
 		endif()

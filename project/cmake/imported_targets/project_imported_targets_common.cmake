@@ -29,8 +29,8 @@ if(NOT NCINE_DYNAMIC_LIBRARY OR (NOT CMAKE_SKIP_RPATH AND NOT CMAKE_SKIP_INSTALL
 		find_package(WebP)
 		find_package(Vorbis)
 
-		# Older CMake versions do not support Lua 5.4 if not required explicitly
-		find_package(Lua 5.4)
+		# Older CMake versions do not support Lua 5.4 or newer if not required explicitly
+		find_package(Lua 5.5)
 		if(NOT LUA_FOUND)
 			find_package(Lua)
 		endif()

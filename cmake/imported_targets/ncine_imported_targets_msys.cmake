@@ -153,7 +153,7 @@ if(MINGW OR MSYS)
 	endif()
 
 	if(LUA_FOUND)
-		set_msys_dll(LUA "liblua54;lua54")
+		set_msys_dll(LUA "liblua55;lua55")
 		add_library(Lua::Lua SHARED IMPORTED)
 		set_target_properties(Lua::Lua PROPERTIES
 			IMPORTED_IMPLIB ${LUA_LIBRARY}

@@ -114,6 +114,26 @@ namespace LuaNames {
 #endif
 }
 
+namespace {
+	lua_State *luaNewStateWrapper(lua_Alloc func, void *ud, unsigned int seed)
+	{
+#if LUA_VERSION_NUM >= 505
+		return lua_newstate(func, ud, seed);
+#else
+		return lua_newstate(func, ud);
+#endif
+	}
+
+	lua_State *luaNewStateWrapper(lua_Alloc func, void *ud)
+	{
+#if LUA_VERSION_NUM >= 505
+		return lua_newstate(func, ud, luaL_makeseed(nullptr));
+#else
+		return lua_newstate(func, ud);
+#endif
+	}
+}
+
 ///////////////////////////////////////////////////////////
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
@@ -125,7 +145,7 @@ nctl::Array<LuaStateManager::StateToManager> LuaStateManager::managers_(2);
 ///////////////////////////////////////////////////////////
 
 LuaStateManager::LuaStateManager(ApiType apiType, StatisticsTracking statsTracking, StandardLibraries stdLibraries)
-    : LuaStateManager(lua_newstate(statsTracking == StatisticsTracking::ENABLED ? luaAllocatorWithStatistics : luaAllocator, nullptr),
+    : LuaStateManager(luaNewStateWrapper(statsTracking == StatisticsTracking::ENABLED ? luaAllocatorWithStatistics : luaAllocator, nullptr),
                       apiType, statsTracking, stdLibraries)
 {
 	closeOnDestruction_ = true;
@@ -156,7 +176,7 @@ void LuaStateManager::reopen(ApiType apiType, StatisticsTracking statsTracking, 
 {
 	shutdown();
 
-	L_ = lua_newstate(statsTracking == StatisticsTracking::ENABLED ? luaAllocatorWithStatistics : luaAllocator, nullptr);
+	L_ = luaNewStateWrapper(statsTracking == StatisticsTracking::ENABLED ? luaAllocatorWithStatistics : luaAllocator, nullptr);
 
 #ifndef WITH_SCRIPTING_API
 	apiType = ApiType::NONE;
