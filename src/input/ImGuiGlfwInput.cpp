@@ -691,7 +691,10 @@ void ImGuiGlfwInput::updateMouseCursor()
 {
 	ImGuiIO &io = ImGui::GetIO();
 	if ((io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange) || glfwGetInputMode(window_, GLFW_CURSOR) == GLFW_CURSOR_DISABLED)
+	{
+		lastMouseCursor_ = nullptr; // Invalidate so that if user changes underlying cursor we will update it next time we can.
 		return;
+	}
 
 	ImGuiMouseCursor imguiCursor = ImGui::GetMouseCursor();
 	// (those braces are here to reduce diff with multi-viewports support in 'docking' branch)
