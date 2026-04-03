@@ -10,13 +10,13 @@ namespace nctl {
 /// A group of functions to perform pointer math operations
 namespace PointerMath
 {
-	inline void *add(void *ptr, size_t amount) { return reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(ptr) + amount); }
-	inline void *subtract(void *ptr, size_t amount) { return reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(ptr) - amount); }
+	inline void *add(const void *ptr, size_t amount) { return reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(ptr) + amount); }
+	inline void *subtract(const void *ptr, size_t amount) { return reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(ptr) - amount); }
 
-	inline uintptr_t add(void *first, void *second) { return reinterpret_cast<uintptr_t>(first) + reinterpret_cast<uintptr_t>(second); }
-	inline uintptr_t subtract(void *first, void *second) { return reinterpret_cast<uintptr_t>(first) - reinterpret_cast<uintptr_t>(second); }
+	inline uintptr_t add(const void *first, const void *second) { return reinterpret_cast<uintptr_t>(first) + reinterpret_cast<uintptr_t>(second); }
+	inline uintptr_t subtract(const void *first, const void *second) { return reinterpret_cast<uintptr_t>(first) - reinterpret_cast<uintptr_t>(second); }
 
-	inline void *align(void *ptr, uint8_t alignment)
+	inline void *align(const void *ptr, uint8_t alignment)
 	{
 		return reinterpret_cast<void *>((reinterpret_cast<uintptr_t>(ptr) +
 		                                 static_cast<uintptr_t>(alignment - 1)) &

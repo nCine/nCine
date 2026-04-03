@@ -81,7 +81,7 @@ void parseCpuRangeList(const char *str, nctl::Array<unsigned char> &cpuPresentAr
 int parseInt(const char *str)
 {
 	const char *p = str;
-	while (*p && !isdigit((unsigned char)*p))
+	while (*p && !isdigit(static_cast<unsigned char>(*p)))
 		p++;
 	return atoi(p);
 }
