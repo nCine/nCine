@@ -1,4 +1,3 @@
----
 AccessModifierOffset: -2
 AlignAfterOpenBracket: Align
 AlignArrayOfStructures: Left
@@ -12,12 +11,13 @@ AlignConsecutiveTableGenBreakingDAGArgColons: None
 AlignConsecutiveTableGenCondOperatorColons: None
 AlignConsecutiveTableGenDefinitionColons: None
 AlignEscapedNewlines: DontAlign
-AlignOperands: true
+AlignOperands: DontAlign
 AlignTrailingComments: false
 AllowAllArgumentsOnNextLine: true
 AllowAllConstructorInitializersOnNextLine: true
 AllowAllParametersOfDeclarationOnNextLine: true
 AllowBreakBeforeNoexceptSpecifier: Never
+#AllowBreakBeforeQtProperty: false # clang-format 22
 AllowShortBlocksOnASingleLine: true
 AllowShortCaseExpressionOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
@@ -33,7 +33,7 @@ AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: false
 # AttributeMacros:
 BinPackArguments: true
-# BinPackLongBracedList: true # clan-format 21
+BinPackLongBracedList: true # clang-format 21
 BinPackParameters: true
 BitFieldColonSpacing: After
 BraceWrapping:
@@ -59,13 +59,23 @@ BracedInitializerIndentWidth: 4
 BreakAdjacentStringLiterals: false
 BreakAfterAttributes: Always
 BreakAfterJavaFieldAnnotations: false
+#BreakAfterOpenBracketBracedList: true # clang-format 22
+#BreakAfterOpenBracketFunction: false # clang-format 22
+#BreakAfterOpenBracketIf: false # clang-format 22
+#BreakAfterOpenBracketLoop: false # clang-format 22
+#BreakAfterOpenBracketSwitch: false # clang-format 22
 BreakAfterReturnType: Automatic
 BreakArrays: false
 BreakBeforeBinaryOperators: None
 BreakBeforeBraces: Custom # Allman
+#BreakBeforeCloseBracketBracedList: true # clang-format 22
+#BreakBeforeCloseBracketFunction: false # clang-format 22
+#BreakBeforeCloseBracketIf: false # clang-format 22
+#BreakBeforeCloseBracketLoop: false # clang-format 22
+#BreakBeforeCloseBracketSwitch: false # clang-format 22
 BreakBeforeConceptDeclarations: true
 BreakBeforeInlineASMColon: OnlyMultiline
-# BreakBeforeTemplateCloser: true # clang-format 21
+BreakBeforeTemplateCloser: true # clang-format 21
 BreakBeforeTernaryOperators: true
 BreakBinaryOperations: Never # clang-format 20
 BreakConstructorInitializers: BeforeColon
@@ -75,7 +85,7 @@ BreakStringLiterals: false
 BreakTemplateDeclarations: MultiLine
 ColumnLimit: 0
 # CommentPragmas:
-CompactNamespaces: true
+CompactNamespaces: false
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 4
@@ -84,7 +94,7 @@ DerivePointerAlignment: false
 DisableFormat: false
 EmptyLineAfterAccessModifier: Never
 EmptyLineBeforeAccessModifier: LogicalBlock
-# EnumTrailingComma: Remove # clang-format 21
+EnumTrailingComma: Remove # clang-format 21
 ExperimentalAutoDetectBinPacking: false
 FixNamespaceComments: false
 ForEachMacros:
@@ -143,10 +153,16 @@ LineEnding: DeriveLF
 MacroBlockBegin: ''
 MacroBlockEnd: ''
 # Macros:
+# MacrosSkippedByRemoveParentheses: # clang-format 21
 MainIncludeChar: Quote
 MaxEmptyLinesToKeep: 1
-NamespaceIndentation: Inner
+NamespaceIndentation: None
 # NamespaceMacros:
+NumericLiteralCase:
+  ExponentLetter: Lower
+  HexDigit: Lower
+  Prefix: Lower
+  Suffix: Lower
 ObjCBinPackProtocolList: Auto
 ObjCBlockIndentWidth: 2
 ObjCBreakBeforeNestedBlockParam: false
@@ -158,14 +174,14 @@ PPIndentWidth: 4
 PackConstructorInitializers:  BinPack
 PenaltyBreakAssignment: 2
 PenaltyBreakBeforeFirstCallParameter: 19
-PenaltyBreakBeforeMemberAccess: 10000 # clang-format 20
+PenaltyBreakBeforeMemberAccess: 200 # clang-format 20
 PenaltyBreakComment: 300
 PenaltyBreakFirstLessLess: 120
 PenaltyBreakOpenParenthesis: 50
 PenaltyBreakScopeResolution: 1000
 PenaltyBreakString: 1000
 PenaltyBreakTemplateDeclaration: 10
-PenaltyExcessCharacter: 1000000
+PenaltyExcessCharacter: 1000
 PenaltyIndentedWhitespace: 10
 PenaltyReturnTypeOnItsOwnLine: 60
 PointerAlignment: Right
@@ -173,10 +189,10 @@ QualifierAlignment: Custom
 QualifierOrder: ['friend', 'static', 'inline', 'constexpr', 'const', 'restrict', 'volatile', 'type']
 # RawStringFormats:
 ReferenceAlignment: Pointer
-ReflowComments: true
+ReflowComments: Never
 RemoveBracesLLVM: false
 RemoveEmptyLinesInUnwrappedLines: true #clang-format 20
-RemoveParentheses: MultipleParentheses
+RemoveParentheses: Leave
 RemoveSemicolon: false
 RequiresClausePosition: OwnLine
 RequiresExpressionIndentation: OuterScope
@@ -188,7 +204,7 @@ SortJavaStaticImport: Before
 SortUsingDeclarations: true
 SpaceAfterCStyleCast: false
 SpaceAfterLogicalNot: false
-# SpaceAfterOperatorKeyword: false # clang-formmat 21
+SpaceAfterOperatorKeyword: false # clang-formmat 21
 SpaceAfterTemplateKeyword: true
 SpaceAroundPointerQualifiers: Both
 SpaceBeforeAssignmentOperators: true
@@ -201,7 +217,8 @@ SpaceBeforeParens: ControlStatements
 # SpaceBeforeParensOptions:
 SpaceBeforeRangeBasedForLoopColon: true
 SpaceBeforeSquareBrackets: false
-SpaceInEmptyBlock: false
+SpaceInEmptyBlock: false # deprecated
+SpaceInEmptyBraces: Never
 SpacesBeforeTrailingComments: 1
 SpacesInAngles: false
 SpacesInContainerLiterals: true
