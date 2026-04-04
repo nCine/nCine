@@ -1,16 +1,19 @@
-#define NCINE_INCLUDE_OPENGL
-#include "common_headers.h"
 #include "common_macros.h"
 #include "IGfxDevice.h"
-#include "GLDepthTest.h"
-#include "GLBlending.h"
-#include "GLViewport.h"
+#ifdef WITH_OPENGL
+	#define NCINE_INCLUDE_OPENGL
+	#include "common_headers.h"
 
-#if defined(WITH_SCENEGRAPH) || defined(__EMSCRIPTEN__)
+	#include "GLDepthTest.h"
+	#include "GLBlending.h"
+	#include "GLViewport.h"
+#endif
+
+#if (defined(WITH_SCENEGRAPH) && defined(WITH_OPENGL)) || defined(__EMSCRIPTEN__)
 	#include "Application.h"
 #endif
 
-#if defined(WITH_QT5) || defined(WITH_QT6)
+#if (defined(WITH_QT5) || defined(WITH_QT6)) && defined(WITH_OPENGL)
 	#include "GLClearColor.h"
 #endif
 
@@ -176,7 +179,9 @@ void IGfxDevice::initWindowScaling(const WindowMode &windowMode)
 
 void IGfxDevice::initGLViewport()
 {
+#ifdef WITH_OPENGL
 	GLViewport::initRect(0, 0, drawableWidth_, drawableHeight_);
+#endif
 }
 
 int IGfxDevice::containingMonitorIndex(int x, int y, int width, int height) const
@@ -222,29 +227,33 @@ int IGfxDevice::containingMonitorIndex(int x, int y) const
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+#ifdef WITH_OPENGL
 void IGfxDevice::setupGL()
 {
 	glDisable(GL_DITHER);
 	GLBlending::setBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	GLDepthTest::enable();
 }
+#endif
 
 void IGfxDevice::update()
 {
+#ifdef WITH_OPENGL
 	swapBuffers();
 
 	// If the scenegraph is not enabled or not compiled,
 	// the screen needs to be cleared at some point.
-#if defined(WITH_SCENEGRAPH)
+	#if defined(WITH_SCENEGRAPH)
 	if (theApplication().appConfiguration().features.scenegraph == false)
-#endif
+	#endif
 	{
-#if defined(WITH_QT5) || defined(WITH_QT6)
+	#if defined(WITH_QT5) || defined(WITH_QT6)
 		GLClearColor::setColor(0.0f, 0.0f, 0.0f, 1.0f);
-#else
+	#else
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-#endif
+	#endif
 	}
+#endif
 }
 
 bool IGfxDevice::scaleWindowSize(bool windowScaling)

@@ -4,11 +4,14 @@
 #include "FileSystem.h"
 #include "ArrayIndexer.h"
 #include "GfxCapabilities.h"
-#include "RenderResources.h"
-#include "GLDebug.h"
 #include "Timer.h" // for `sleep()`
 #include "FrameTimer.h"
 #include <nctl/StaticString.h>
+
+#ifdef WITH_OPENGL
+	#include "RenderResources.h"
+	#include "GLDebug.h"
+#endif
 
 #ifdef WITH_ALLOCATORS
 	#include "IInputManager.h"
@@ -167,6 +170,12 @@ namespace {
 #ifdef WITH_SCRIPTING_API
 		LOGD("WITH_SCRIPTING_API");
 #endif
+#ifdef WITH_OPENGL
+		LOGD("WITH_OPENGL");
+#endif
+#ifdef WITH_VULKAN
+		LOGD("WITH_VULKAN");
+#endif
 #ifdef WITH_SCENEGRAPH
 		LOGD("WITH_SCENEGRAPH");
 #endif
@@ -271,8 +280,10 @@ void Application::initCommon()
 			theServiceLocator().registerJobSystem(nctl::makeUnique<JobSystem>(appCfg_.jobSystem.numThreads));
 	}
 #endif
+#ifdef WITH_OPENGL
 	theServiceLocator().registerGfxCapabilities(nctl::makeUnique<GfxCapabilities>());
 	GLDebug::init(theServiceLocator().gfxCapabilities());
+#endif
 
 #ifdef WITH_RENDERDOC
 	RenderDocCapture::init();
@@ -285,8 +296,10 @@ void Application::initCommon()
 
 	frameTimer_ = nctl::makeUnique<FrameTimer>(appCfg_.profileTextUpdateTime, appCfg_.logging.frameTimerInterval);
 
+#ifdef WITH_OPENGL
 	// Create a minimal set of render resources before compiling the first shader
 	RenderResources::createMinimal(); // they are required for rendering even without a scenegraph
+#endif
 
 #ifdef WITH_IMGUI
 	imguiDrawing_ = nctl::makeUnique<ImGuiDrawing>(appCfg_.features.scenegraph);
@@ -298,7 +311,9 @@ void Application::initCommon()
 #ifdef WITH_SCENEGRAPH
 	if (appCfg_.features.scenegraph)
 	{
+	#ifdef WITH_OPENGL
 		gfxDevice_->setupGL();
+	#endif
 		RenderResources::create();
 		rootNode_ = nctl::makeUnique<SceneNode>();
 		screenViewport_ = nctl::makeUnique<ScreenViewport>();
@@ -521,7 +536,9 @@ void Application::shutdownCommon()
 	screenViewport_.reset(nullptr);
 	rootNode_.reset(nullptr);
 #endif
+#ifdef WITH_OPENGL
 	RenderResources::dispose();
+#endif
 	frameTimer_.reset(nullptr);
 	inputManager_.reset(nullptr);
 	gfxDevice_.reset(nullptr);
