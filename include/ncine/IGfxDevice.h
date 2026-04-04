@@ -1,6 +1,7 @@
 #ifndef CLASS_NCINE_IGFXDEVICE
 #define CLASS_NCINE_IGFXDEVICE
 
+#include <ncine/config.h>
 #include "Vector2.h"
 #include "Rect.h"
 #include "DisplayMode.h"
@@ -12,7 +13,23 @@ class EmscriptenFullscreenChangeEvent;
 class EmscriptenFocusEvent;
 #endif
 
+#if NCINE_WITH_VULKAN
+	#include <nctl/Array.h>
+
+struct VkInstance_T;
+using VkInstance = VkInstance_T *;
+
+struct VkSurfaceKHR_T;
+using VkSurfaceKHR = VkSurfaceKHR_T *;
+
+struct VkAllocationCallbacks;
+#endif
+
 namespace ncine {
+
+namespace grail {
+	class Device;
+}
 
 class Colorf;
 
@@ -21,7 +38,7 @@ class DLL_PUBLIC IGfxDevice
 {
   public:
 	static const unsigned int MaxMonitors = 4;
-#if defined(WITH_QT5)
+#if NCINE_WITH_QT5
 	// Qt5 cannot query the list of supported video modes of a monitor
 	static const unsigned int MaxVideoModes = 1;
 #elif defined(__ANDROID__)
@@ -260,11 +277,16 @@ class DLL_PUBLIC IGfxDevice
 	inline virtual void updateMonitors() {}
 
   private:
+#if NCINE_WITH_OPENGL
 	/// Sets up the initial OpenGL state for the scenegraph
 	virtual void setupGL();
 
 	/// Swaps back and front buffers
 	virtual void swapBuffers() = 0;
+#elif NCINE_WITH_VULKAN
+	virtual unsigned int addVulkanInstanceExtensions(nctl::Array<const char *> &instanceExtensions) = 0;
+	virtual bool createVulkanSurface(VkInstance instance, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface) = 0;
+#endif
 
 	/// Updates the screen by swapping back and front buffers
 	void update();
@@ -273,7 +295,9 @@ class DLL_PUBLIC IGfxDevice
 	bool scaleWindowSize(bool windowScaling);
 
 	friend class Application;
-#if defined(WITH_SDL)
+	friend class grail::Device;
+
+#if NCINE_WITH_SDL
 	friend class PCApplication;
 #endif
 

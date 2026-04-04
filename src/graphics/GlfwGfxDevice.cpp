@@ -2,6 +2,11 @@
 	#define GLEW_NO_GLU
 	#include <GL/glew.h>
 #endif
+#if defined(WITH_VULKAN)
+	#define NCINE_INCLUDE_VULKAN
+	#include "common_headers.h"
+	#define GLFW_INCLUDE_NONE
+#endif
 #include <GLFW/glfw3.h>
 
 #include "common_macros.h"
@@ -65,10 +70,12 @@ GlfwGfxDevice::~GlfwGfxDevice()
 
 void GlfwGfxDevice::setSwapInterval(int interval)
 {
+#ifdef WITH_OPENGL
 	glfwSwapInterval(interval);
-#ifdef _WIN32
+	#ifdef _WIN32
 	// The swap interval is reset after going full screen on Windows (https://github.com/glfw/glfw/issues/1072)
 	swapInterval_ = interval;
+	#endif
 #endif
 }
 
@@ -276,10 +283,31 @@ bool GlfwGfxDevice::setVideoMode(unsigned int modeIndex)
 	return false;
 }
 
+#if defined(WITH_OPENGL)
 void GlfwGfxDevice::swapBuffers()
 {
 	glfwSwapBuffers(windowHandle_);
 }
+#elif defined(WITH_VULKAN)
+unsigned int GlfwGfxDevice::addVulkanInstanceExtensions(nctl::Array<const char *> &instanceExtensions)
+{
+	ASSERT(glfwVulkanSupported() == GLFW_TRUE);
+	uint32_t extensionCount = 0;
+	const char **requiredInstanceExtensions = nullptr;
+
+	requiredInstanceExtensions = glfwGetRequiredInstanceExtensions(&extensionCount);
+	for (uint32_t i = 0; i < extensionCount; i++)
+		instanceExtensions.pushBack(requiredInstanceExtensions[i]);
+
+	return extensionCount;
+}
+
+bool GlfwGfxDevice::createVulkanSurface(VkInstance instance, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface)
+{
+	ASSERT(glfwVulkanSupported() == GLFW_TRUE);
+	return (glfwCreateWindowSurface(instance, windowHandle_, allocator, surface) == VK_SUCCESS);
+}
+#endif
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
@@ -291,7 +319,7 @@ void GlfwGfxDevice::initGraphics()
 	glfwInitHint(GLFW_JOYSTICK_HAT_BUTTONS, GLFW_FALSE);
 #endif
 	glfwSetErrorCallback(errorCallback);
-	FATAL_ASSERT_MSG(glfwInit() == GL_TRUE, "glfwInit() failed");
+	FATAL_ASSERT_MSG(glfwInit() == GLFW_TRUE, "glfwInit() failed");
 }
 
 void GlfwGfxDevice::initDevice(const WindowMode &windowMode)
@@ -322,6 +350,7 @@ void GlfwGfxDevice::initDevice(const WindowMode &windowMode)
 
 	// setting window hints and creating a window with GLFW
 	glfwWindowHint(GLFW_RESIZABLE, isResizable_ ? GLFW_TRUE : GLFW_FALSE);
+#if defined(WITH_OPENGL)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, static_cast<int>(glContextInfo_.majorVersion));
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, static_cast<int>(glContextInfo_.minorVersion));
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, glContextInfo_.debugContext ? GLFW_TRUE : GLFW_FALSE);
@@ -331,15 +360,18 @@ void GlfwGfxDevice::initDevice(const WindowMode &windowMode)
 	glfwWindowHint(GLFW_ALPHA_BITS, static_cast<int>(displayMode_.alphaBits()));
 	glfwWindowHint(GLFW_DEPTH_BITS, static_cast<int>(displayMode_.depthBits()));
 	glfwWindowHint(GLFW_STENCIL_BITS, static_cast<int>(displayMode_.stencilBits()));
-#if defined(WITH_OPENGLES)
+	#if defined(WITH_OPENGLES)
 	glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
-#elif defined(__EMSCRIPTEN__)
+	#elif defined(__EMSCRIPTEN__)
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
 	glfwWindowHint(GLFW_FOCUSED, GLFW_TRUE);
-#else
+	#else
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, glContextInfo_.forwardCompatible ? GLFW_TRUE : GLFW_FALSE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, glContextInfo_.coreProfile ? GLFW_OPENGL_CORE_PROFILE : GLFW_OPENGL_COMPAT_PROFILE);
+	#endif
+#elif defined(WITH_VULKAN)
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 #endif
 
 #if GLFW_VERSION_COMBINED >= 3400
@@ -370,12 +402,14 @@ void GlfwGfxDevice::initDevice(const WindowMode &windowMode)
 #endif
 
 	glfwGetFramebufferSize(windowHandle_, &drawableWidth_, &drawableHeight_);
+#ifdef WITH_OPENGL
 	initGLViewport();
 
 	glfwMakeContextCurrent(windowHandle_);
 
 	const int interval = displayMode_.hasVSync() ? 1 : 0;
 	glfwSwapInterval(interval);
+#endif
 
 #ifdef WITH_GLEW
 	const GLenum err = glewInit();

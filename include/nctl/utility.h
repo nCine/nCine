@@ -55,6 +55,12 @@ inline bool equalTo<char>(const char *a, const char *b)
 	return (*a == *b);
 }
 
+template <typename T, size_t N>
+constexpr size_t arraySize(const T (&)[N]) noexcept
+{
+	return N;
+}
+
 namespace detail {
 
 // ---- Tags ----
