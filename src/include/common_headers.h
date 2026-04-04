@@ -15,6 +15,8 @@
 		#include <GL/gl.h>
 		#include <GL/glext.h>
 	#endif
+#elif defined(NCINE_INCLUDE_VULKAN)
+	#include <volk/volk.h>
 #endif
 
 #if defined(NCINE_INCLUDE_OPENAL)

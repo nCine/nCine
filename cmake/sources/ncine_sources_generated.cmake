@@ -1,4 +1,4 @@
-# Has to be included after ncine_get_version.cmake
+# Has to be included after `ncine_get_version.cmake`
 
 set(GENERATED_SOURCE_DIR "${CMAKE_BINARY_DIR}/generated")
 set(GENERATED_INCLUDE_DIR "${GENERATED_SOURCE_DIR}/include/ncine")
@@ -125,6 +125,9 @@ list(APPEND GENERATED_SOURCES ${VERSION_CPP_FILE})
 
 # Build a list of required shaders
 set(NCINE_SRC_SHADERS_DIR "src/shaders")
+if(NOT EXISTS ${CMAKE_SOURCE_DIR}/${NCINE_SRC_SHADERS_DIR})
+	message(FATAL_ERROR "The shaders directory \"${CMAKE_SOURCE_DIR}/${NCINE_SRC_SHADERS_DIR}\" does not exist")
+endif()
 if(NCINE_WITH_SCENEGRAPH)
 	set(SHADER_FILES_GLOB_EXPRESSIONS "${NCINE_SRC_SHADERS_DIR}/*.glsl")
 else()
@@ -388,6 +391,12 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/config.h.in)
 	endif()
 	if(NCINE_WITH_SCRIPTING_API)
 		message(STATUS "NCINE_WITH_SCRIPTING_API: " ${NCINE_WITH_SCRIPTING_API})
+	endif()
+	if(NCINE_WITH_OPENGL)
+		message(STATUS "NCINE_WITH_OPENGL: " ${NCINE_WITH_OPENGL})
+	endif()
+	if(NCINE_WITH_VULKAN)
+		message(STATUS "NCINE_WITH_VULKAN: " ${NCINE_WITH_VULKAN})
 	endif()
 	if(NCINE_WITH_SCENEGRAPH)
 		message(STATUS "NCINE_WITH_SCENEGRAPH: " ${NCINE_WITH_SCENEGRAPH})

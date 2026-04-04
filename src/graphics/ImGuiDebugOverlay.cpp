@@ -519,6 +519,12 @@ void ImGuiDebugOverlay::guiPreprocessorDefines()
 #ifdef WITH_SCRIPTING_API
 			ImGui::TextUnformatted("WITH_SCRIPTING_API");
 #endif
+#ifdef WITH_OPENGL
+			ImGui::TextUnformatted("WITH_OPENGL");
+#endif
+#ifdef WITH_VULKAN
+			ImGui::TextUnformatted("WITH_VULKAN");
+#endif
 #ifdef WITH_SCENEGRAPH
 			ImGui::TextUnformatted("WITH_SCENEGRAPH");
 #endif

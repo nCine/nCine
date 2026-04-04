@@ -12,6 +12,10 @@
 	#include <emscripten/html5.h>
 #endif
 
+#ifdef WITH_VULKAN
+	#include <SDL2/SDL_vulkan.h>
+#endif
+
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
@@ -187,10 +191,31 @@ bool SdlGfxDevice::setVideoMode(unsigned int modeIndex)
 	return false;
 }
 
+#if defined(WITH_OPENGL)
 void SdlGfxDevice::swapBuffers()
 {
 	SDL_GL_SwapWindow(windowHandle_);
 }
+#elif defined(WITH_VULKAN)
+unsigned int SdlGfxDevice::addVulkanInstanceExtensions(nctl::Array<const char *> &instanceExtensions)
+{
+	uint32_t extensionCount = 0;
+	SDL_Vulkan_GetInstanceExtensions(windowHandle_, &extensionCount, nullptr);
+
+	nctl::UniquePtr<const char *[]> extensionNames = nctl::makeUnique<const char *[]>(extensionCount);
+	SDL_Vulkan_GetInstanceExtensions(windowHandle_, &extensionCount, extensionNames.get());
+
+	for (uint32_t i = 0; i < extensionCount; i++)
+		instanceExtensions.pushBack(extensionNames[i]);
+
+	return extensionCount;
+}
+
+bool SdlGfxDevice::createVulkanSurface(VkInstance instance, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface)
+{
+	return (SDL_Vulkan_CreateSurface(windowHandle_, instance, surface) == SDL_TRUE);
+}
+#endif
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
@@ -206,6 +231,8 @@ void SdlGfxDevice::initDevice(const WindowMode &windowMode)
 {
 	// At this point `updateMonitors()` has already been called by `initWindowScaling()`
 
+	Uint32 flags = 0;
+#ifdef WITH_OPENGL
 	SDL_SetHint(SDL_HINT_VIDEO_X11_FORCE_EGL, "1");
 	// setting OpenGL attributes
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, displayMode_.redBits());
@@ -217,22 +244,26 @@ void SdlGfxDevice::initDevice(const WindowMode &windowMode)
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, displayMode_.stencilBits());
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, glContextInfo_.majorVersion);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, glContextInfo_.minorVersion);
-#if defined(WITH_OPENGLES)
+	#if defined(WITH_OPENGLES)
 	SDL_SetHint(SDL_HINT_OPENGL_ES_DRIVER, "1");
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-#elif defined(__EMSCRIPTEN__)
+	#elif defined(__EMSCRIPTEN__)
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-#else
+	#else
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, glContextInfo_.coreProfile
 	                                                     ? SDL_GL_CONTEXT_PROFILE_CORE
 	                                                     : SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
-#endif
+	#endif
 	if (glContextInfo_.forwardCompatible == false)
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
 	if (glContextInfo_.debugContext)
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
-	Uint32 flags = SDL_WINDOW_OPENGL;
+	flags = SDL_WINDOW_OPENGL;
+#elif WITH_VULKAN
+	flags = SDL_WINDOW_VULKAN | SDL_WINDOW_SHOWN;
+#endif
+
 #ifndef __EMSCRIPTEN__
 	if (windowMode.hasWindowScaling)
 		flags |= SDL_WINDOW_ALLOW_HIGHDPI;
@@ -303,7 +334,9 @@ void SdlGfxDevice::initDevice(const WindowMode &windowMode)
 
 	SDL_GetWindowSize(windowHandle_, &width_, &height_);
 	SDL_GL_GetDrawableSize(windowHandle_, &drawableWidth_, &drawableHeight_);
+#ifdef WITH_OPENGL
 	initGLViewport();
+#endif
 
 	SDL_SetWindowResizable(windowHandle_, isResizable_ ? SDL_TRUE : SDL_FALSE);
 
@@ -316,11 +349,13 @@ void SdlGfxDevice::initDevice(const WindowMode &windowMode)
 	}
 #endif
 
+#ifdef WITH_OPENGL
 	glContextHandle_ = SDL_GL_CreateContext(windowHandle_);
 	FATAL_ASSERT_MSG_X(glContextHandle_, "SDL_GL_CreateContext failed: %s", SDL_GetError());
 
 	const int interval = displayMode_.hasVSync() ? 1 : 0;
 	SDL_GL_SetSwapInterval(interval);
+#endif
 
 #ifdef WITH_GLEW
 	const GLenum err = glewInit();

@@ -41,7 +41,12 @@ class SdlGfxDevice : public IGfxDevice
 	const VideoMode &currentVideoMode(unsigned int monitorIndex) const override;
 	bool setVideoMode(unsigned int modeIndex) override;
 
+#if defined(WITH_OPENGL)
 	void swapBuffers() override;
+#elif defined(WITH_VULKAN)
+	unsigned int addVulkanInstanceExtensions(nctl::Array<const char *> &instanceExtensions) override;
+	bool createVulkanSurface(VkInstance instance, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface) override;
+#endif
 
   private:
 	/// SDL2 window handle

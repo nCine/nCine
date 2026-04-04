@@ -41,6 +41,9 @@ if(NCINE_WITH_LUA)
 	option(NCINE_WITH_SCRIPTING_API "Enable Lua scripting API" ON)
 endif()
 
+set(NCINE_GRAPHICS_API "OPENGL" CACHE STRING "Specify the preferred graphics API backend")
+set_property(CACHE NCINE_GRAPHICS_API PROPERTY STRINGS "OPENGL;VULKAN")
+
 option(NCINE_WITH_SCENEGRAPH "Enable the scenegraph, with nodes and render commands" ON)
 option(NCINE_WITH_ALLOCATORS "Enable the custom memory allocators" OFF)
 option(NCINE_WITH_IMGUI "Enable the integration with Dear ImGui" ON)
@@ -99,7 +102,11 @@ set(NCINE_STARTUP_TEST "apptest_camera" CACHE STRING "Set the starting test proj
 if(NOT NCINE_WITH_SCENEGRAPH)
 	set(NCINE_STARTUP_TEST "apptest_gui")
 	if(NOT NCINE_WITH_IMGUI AND NOT NCINE_DYNAMIC_LIBRARY)
-		set(NCINE_STARTUP_TEST "glapptest_fbo_cube")
+		if(NCINE_WITH_OPENGL)
+			set(NCINE_STARTUP_TEST "glapptest_fbo_cube")
+		elseif(NCINE_WITH_VULKAN)
+			set(NCINE_STARTUP_TEST "grlapptest")
+		endif()
 	endif()
 endif()
 
