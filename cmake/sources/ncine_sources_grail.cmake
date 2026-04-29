@@ -14,7 +14,9 @@ if(NCINE_WITH_VULKAN)
 		${NCINE_ROOT}/src/include/grail/Swapchain.h
 		${NCINE_ROOT}/src/include/grail/BindGroupLayout.h
 		${NCINE_ROOT}/src/include/grail/BindGroup.h
+		${NCINE_ROOT}/src/include/grail/pipeline.h
 		${NCINE_ROOT}/src/include/grail/GraphicsPipeline.h
+		${NCINE_ROOT}/src/include/grail/ComputePipeline.h
 		${NCINE_ROOT}/src/include/grail/Buffer.h
 		${NCINE_ROOT}/src/include/grail/Texture.h
 		${NCINE_ROOT}/src/include/grail/TextureView.h
@@ -38,6 +40,7 @@ if(NCINE_WITH_VULKAN)
 		${NCINE_ROOT}/src/graphics/grail/Device_bindgroup_layout_front.cpp
 		${NCINE_ROOT}/src/graphics/grail/Device_bindgroup_front.cpp
 		${NCINE_ROOT}/src/graphics/grail/Device_graphics_pipeline_front.cpp
+		${NCINE_ROOT}/src/graphics/grail/Device_compute_pipeline_front.cpp
 		${NCINE_ROOT}/src/graphics/grail/Device_buffer_front.cpp
 		${NCINE_ROOT}/src/graphics/grail/Device_texture_front.cpp
 		${NCINE_ROOT}/src/graphics/grail/Device_texture_view_front.cpp
@@ -54,7 +57,9 @@ if(NCINE_WITH_VULKAN)
 		${NCINE_ROOT}/src/graphics/grail/vulkan/Device_frame_context.cpp
 		${NCINE_ROOT}/src/graphics/grail/vulkan/Device_bindgroup_layout.cpp
 		${NCINE_ROOT}/src/graphics/grail/vulkan/Device_bindgroup.cpp
+		${NCINE_ROOT}/src/graphics/grail/vulkan/Device_pipeline.cpp
 		${NCINE_ROOT}/src/graphics/grail/vulkan/Device_graphics_pipeline.cpp
+		${NCINE_ROOT}/src/graphics/grail/vulkan/Device_compute_pipeline.cpp
 		${NCINE_ROOT}/src/graphics/grail/vulkan/Device_buffer.cpp
 		${NCINE_ROOT}/src/graphics/grail/vulkan/Device_texture.cpp
 		${NCINE_ROOT}/src/graphics/grail/vulkan/Device_texture_view.cpp

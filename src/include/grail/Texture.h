@@ -73,6 +73,8 @@ struct Desc
 
 	Usage usage = Usage::SAMPLED;
 	SampleCount sampleCount = SampleCount::SAMPLE_1;
+
+	const char *debugName = nullptr;
 };
 
 }

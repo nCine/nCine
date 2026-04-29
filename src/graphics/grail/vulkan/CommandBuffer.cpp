@@ -68,22 +68,101 @@ VkPipelineStageFlags grlTextureStateToVkStage(Texture::State state)
 	}
 }
 
+VkAccessFlags grlBufferStateToVkAccess(Buffer::State state)
+{
+	switch (state)
+	{
+		case Buffer::State::TRANSFER_SRC: return VK_ACCESS_TRANSFER_READ_BIT;
+		case Buffer::State::TRANSFER_DST: return VK_ACCESS_TRANSFER_WRITE_BIT;
+
+		case Buffer::State::VERTEX_BUFFER: return VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT;
+		case Buffer::State::INDEX_BUFFER: return VK_ACCESS_INDEX_READ_BIT;
+
+		case Buffer::State::UNIFORM_BUFFER: return VK_ACCESS_UNIFORM_READ_BIT;
+
+		case Buffer::State::STORAGE_READ: return VK_ACCESS_SHADER_READ_BIT;
+		case Buffer::State::STORAGE_WRITE: return VK_ACCESS_SHADER_WRITE_BIT;
+
+		case Buffer::State::INDIRECT_BUFFER: return VK_ACCESS_INDIRECT_COMMAND_READ_BIT;
+
+		default: return 0;
+	}
+}
+
+VkPipelineStageFlags grlBufferStateToVkStage(Buffer::State state)
+{
+	switch (state)
+	{
+		case Buffer::State::UNDEFINED:
+			return VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+
+		case Buffer::State::TRANSFER_SRC:
+		case Buffer::State::TRANSFER_DST:
+			return VK_PIPELINE_STAGE_TRANSFER_BIT;
+
+		case Buffer::State::VERTEX_BUFFER:
+			return VK_PIPELINE_STAGE_VERTEX_INPUT_BIT;
+		case Buffer::State::INDEX_BUFFER:
+			return VK_PIPELINE_STAGE_VERTEX_INPUT_BIT;
+
+		case Buffer::State::UNIFORM_BUFFER:
+			return VK_PIPELINE_STAGE_VERTEX_SHADER_BIT |
+				VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+
+		case Buffer::State::STORAGE_READ:
+		case Buffer::State::STORAGE_WRITE:
+			return VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT |
+				VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT |
+				VK_PIPELINE_STAGE_VERTEX_SHADER_BIT;
+
+		case Buffer::State::INDIRECT_BUFFER:
+			return VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT;
+
+		default:
+			return VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+	}
+}
+
 }
 
 ///////////////////////////////////////////////////////////
 // CommandBuffer::BackendData
 ///////////////////////////////////////////////////////////
 
-void CommandBuffer::BackendData::bindDescriptorSet()
+bool CommandBuffer::BackendData::tryBindDescriptorSet()
 {
+	if (bindGroup.isValid() == false)
+		return false;
+
 	Device::BackendData &devBck = *deviceBackend;
-
-	ASSERT(bindGroup.isValid() == true);
-	ASSERT(graphicsPipeline.isValid() == true);
 	VkDescriptorSet descriptorSet = devBck.bindGroupData_[bindGroup.index()].descriptorSet;
-	VkPipelineLayout pipelineLayout = devBck.graphicsPipelineData_[graphicsPipeline.index()].pipelineLayout;
 
-	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet, numDynamicOffsets, dynamicOffsets);
+	switch (activeBindPoint)
+	{
+		case BindPoint::NONE:
+			return false;
+		case BindPoint::GRAPHICS:
+		{
+			if (graphicsPipeline.isValid() == false)
+				return false;
+
+			VkPipelineLayout pipelineLayout = devBck.graphicsPipelineData_[graphicsPipeline.index()].pipelineLayout;
+			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet, numDynamicOffsets, dynamicOffsets);
+			break;
+		}
+
+		case BindPoint::COMPUTE:
+		{
+			if (computePipeline.isValid() == false)
+				return false;
+
+			VkPipelineLayout pipelineLayout = devBck.computePipelineData_[computePipeline.index()].pipelineLayout;
+			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, 1, &descriptorSet, numDynamicOffsets, dynamicOffsets);
+			break;
+		}
+	}
+
+	return true;
 }
 
 ///////////////////////////////////////////////////////////
@@ -106,21 +185,34 @@ void CommandBuffer::begin()
 	vlkFatalAssert(result);
 }
 
-void CommandBuffer::beginRenderPass(const RenderPass::RenderPassDesc &passDesc, const RenderPass::RenderTargetDesc &targetDesc)
+void CommandBuffer::beginRenderPass(const RenderPass::RenderPassDesc &passDesc, const RenderPass::RenderTargetDesc &targetDesc, const char *debugName)
 {
 	BackendData &bck = *backendData_;
 	Device::BackendData &devBck = *bck.deviceBackend;
 
-	const uint64_t renderPassHash = hashDesc(passDesc);
+	bool hasSwapchainAttachments = false;
+	bool isSwapchainAttachment[RenderPass::MaxColorAttachments] = { false, false, false, false };
+	for (uint32_t i = 0; i < passDesc.layout.colorCount; i++)
+	{
+		const Device::BackendData::TextureViewData &data = devBck.textureViewData_[targetDesc.color[i].index()];
+		isSwapchainAttachment[i] = data.isSwapchain;
+		if (data.isSwapchain)
+			hasSwapchainAttachments = true;
+	}
+
+	const uint64_t renderPassHash = hashDesc(passDesc, isSwapchainAttachment);
 	VkRenderPass renderPass = VK_NULL_HANDLE;
 	VkRenderPass *renderPassPtr = devBck.hashToVkRenderPasses_.find(renderPassHash);
 	if (renderPassPtr != nullptr)
 		renderPass = *renderPassPtr;
 	else
 	{
-		renderPass = devBck.createRenderPass(passDesc);
+		renderPass = devBck.createRenderPass(passDesc, isSwapchainAttachment);
 		devBck.hashToVkRenderPasses_.insert(renderPassHash, renderPass);
 	}
+
+	if (devBck.caps_.debugUtils)
+		setObjectName(devBck.device_, renderPass, debugName);
 
 	// Note: render pass hash is combined with framebuffer hash, as a VkFramebuffer references a VkRenderPass
 	const uint64_t framebufferHash = hashDesc(targetDesc, renderPassHash);
@@ -132,6 +224,8 @@ void CommandBuffer::beginRenderPass(const RenderPass::RenderPassDesc &passDesc, 
 	{
 		framebuffer = devBck.createFramebuffer(targetDesc, renderPass);
 		devBck.hashToVkFramebuffers_.insert(framebufferHash, framebuffer);
+		if (hasSwapchainAttachments)
+			devBck.swapchainVkFramebuffersHashes_.pushBack(framebufferHash);
 	}
 
 	VkRenderPassBeginInfo renderPassInfo{};
@@ -163,20 +257,43 @@ void CommandBuffer::beginRenderPass(const RenderPass::RenderPassDesc &passDesc, 
 	vkCmdBeginRenderPass(bck.commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 }
 
+void CommandBuffer::beginRenderPass(const RenderPass::RenderPassDesc &passDesc, const RenderPass::RenderTargetDesc &targetDesc)
+{
+	return beginRenderPass(passDesc, targetDesc, nullptr);
+}
+
 void CommandBuffer::bindGraphicsPipeline(GraphicsPipeline::Handle handle)
 {
 	BackendData &bck = *backendData_;
 	Device::BackendData &devBck = *bck.deviceBackend;
 
-	// This should be the first and only call to bind a graphics pipeline
-	ASSERT(bck.graphicsPipeline.isValid() == false);
-
 	VkPipeline pipeline = devBck.graphicsPipelineData_[handle.index()].pipeline;
 	vkCmdBindPipeline(bck.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 
+	// Try binding descriptors if a bind group is present and this is the first pipeline to be bound
+	const bool bindDescriptors = (bck.activeBindPoint == BackendData::BindPoint::NONE && bck.bindGroup.isValid());
+
 	bck.graphicsPipeline = handle;
-	if (bck.bindGroup.isValid())
-		bck.bindDescriptorSet();
+	bck.activeBindPoint = BackendData::BindPoint::GRAPHICS;
+	if (bindDescriptors)
+		bck.tryBindDescriptorSet();
+}
+
+void CommandBuffer::bindComputePipeline(ComputePipeline::Handle handle)
+{
+	BackendData &bck = *backendData_;
+	Device::BackendData &devBck = *bck.deviceBackend;
+
+	VkPipeline pipeline = devBck.computePipelineData_[handle.index()].pipeline;
+	vkCmdBindPipeline(bck.commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline);
+
+	// Try binding descriptors if a bind group is present and this is the first pipeline to be bound
+	const bool bindDescriptors = (bck.activeBindPoint == BackendData::BindPoint::NONE && bck.bindGroup.isValid());
+
+	bck.computePipeline = handle;
+	bck.activeBindPoint = BackendData::BindPoint::COMPUTE;
+	if (bindDescriptors)
+		bck.tryBindDescriptorSet();
 }
 
 void CommandBuffer::bindVertexBuffer(Buffer::Handle handle)
@@ -204,29 +321,21 @@ void CommandBuffer::bindBindGroup(BindGroup::Handle handle)
 {
 	BackendData &bck = *backendData_;
 
-	// This should be the first and only call to bind a bind group
-	ASSERT(bck.bindGroup.isValid() == false);
-
 	bck.numDynamicOffsets = 0;
 	bck.bindGroup = handle;
-	if (bck.graphicsPipeline.isValid())
-		bck.bindDescriptorSet();
+	bck.tryBindDescriptorSet();
 }
 
 void CommandBuffer::bindBindGroup(BindGroup::Handle handle, const uint32_t *offsets, uint32_t offsetCount)
 {
 	BackendData &bck = *backendData_;
 
-	// This should be the first and only call to bind a bind group
-	ASSERT(bck.bindGroup.isValid() == false);
-
 	bck.numDynamicOffsets = offsetCount;
 	for (uint32_t i = 0; i < offsetCount; i++)
 		bck.dynamicOffsets[i] = offsets[i];
 
 	bck.bindGroup = handle;
-	if (bck.graphicsPipeline.isValid())
-		bck.bindDescriptorSet();
+	bck.tryBindDescriptorSet();
 }
 
 void CommandBuffer::setViewport(Offset2D offset, Extent2D extent, float minDepth, float maxDepth)
@@ -265,6 +374,12 @@ void CommandBuffer::drawIndexed(uint32_t indexCount, uint32_t instanceCount, uin
 {
 	BackendData &bck = *backendData_;
 	vkCmdDrawIndexed(bck.commandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+}
+
+void CommandBuffer::dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ)
+{
+	BackendData &bck = *backendData_;
+	vkCmdDispatch(bck.commandBuffer, groupCountX, groupCountY, groupCountZ);
 }
 
 void CommandBuffer::copyBuffer(Buffer::Handle srcHandle, Buffer::Handle dstHandle, uint64_t srcOffset, uint64_t dstOffset, uint64_t size)
@@ -360,10 +475,72 @@ void CommandBuffer::transitionTexture(Texture::Handle handle, Texture::State new
 	data.textureState = newState;
 }
 
+void CommandBuffer::transitionBuffer(Buffer::Handle handle, Buffer::State newState)
+{
+	BackendData &bck = *backendData_;
+	Device::BackendData &devBck = *bck.deviceBackend;
+	Device::FrontendData &devFrn = *bck.deviceFrontend;
+
+	Device::BackendData::BufferData &data = devBck.bufferData_[handle.index()];
+	const Buffer::Desc &desc = devFrn.bufferDescs_[handle.index()];
+
+	VkBufferMemoryBarrier barrier{};
+	barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+
+	barrier.srcAccessMask = grlBufferStateToVkAccess(data.bufferState);
+	barrier.dstAccessMask = grlBufferStateToVkAccess(newState);
+
+	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+	barrier.buffer = data.buffer;
+	barrier.offset = 0;
+	barrier.size = desc.size;
+
+	VkPipelineStageFlags sourceStage = grlBufferStateToVkStage(data.bufferState);
+	VkPipelineStageFlags destinationStage = grlBufferStateToVkStage(newState);
+
+	vkCmdPipelineBarrier(bck.commandBuffer, sourceStage, destinationStage, 0, 0, nullptr, 1, &barrier, 0, nullptr);
+	data.bufferState = newState;
+}
+
 void CommandBuffer::endRenderPass()
 {
 	BackendData &bck = *backendData_;
 	vkCmdEndRenderPass(bck.commandBuffer);
+}
+
+void CommandBuffer::beginLabel(const char *labelName)
+{
+	BackendData &bck = *backendData_;
+	if (bck.deviceBackend->caps_.debugUtils)
+	{
+		VkDebugUtilsLabelEXT labelInfo{};
+		labelInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
+		labelInfo.pLabelName = labelName;
+
+		vkCmdBeginDebugUtilsLabelEXT(bck.commandBuffer, &labelInfo);
+	}
+}
+
+void CommandBuffer::insertLabel(const char *labelName)
+{
+	BackendData &bck = *backendData_;
+	if (bck.deviceBackend->caps_.debugUtils)
+	{
+		VkDebugUtilsLabelEXT labelInfo{};
+		labelInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
+		labelInfo.pLabelName = labelName;
+
+		vkCmdInsertDebugUtilsLabelEXT(bck.commandBuffer, &labelInfo);
+	}
+}
+
+void CommandBuffer::endLabel()
+{
+	BackendData &bck = *backendData_;
+	if (bck.deviceBackend->caps_.debugUtils)
+		vkCmdEndDebugUtilsLabelEXT(bck.commandBuffer);
 }
 
 void CommandBuffer::end()

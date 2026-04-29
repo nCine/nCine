@@ -25,6 +25,34 @@ VKAPI_ATTR VkBool32 VKAPI_CALL vlkDebugCallback(
     const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
     void *pUserData);
 
+/** @defgroup group1 Debug Object Names
+ *  Functions to set the debug name for various object types
+ *  @{
+ */
+
+void setObjectName(VkDevice device, VkInstance instanceHandle, const char *name);
+void setObjectName(VkDevice device, VkPhysicalDevice physicalDeviceHandle, const char *name);
+void setObjectName(VkDevice device, VkDevice deviceHandle, const char *name);
+void setObjectName(VkDevice device, VkQueue queueHandle, const char *name);
+void setObjectName(VkDevice device, VkSemaphore semaphoreHandle, const char *name);
+void setObjectName(VkDevice device, VkCommandBuffer commandBufferHandle, const char *name);
+void setObjectName(VkDevice device, VkFence fenceHandle, const char *name);
+void setObjectName(VkDevice device, VkBuffer bufferHandle, const char *name);
+void setObjectName(VkDevice device, VkImage imageHandle, const char *name);
+void setObjectName(VkDevice device, VkImageView imageViewHandle, const char *name);
+void setObjectName(VkDevice device, VkShaderModule shaderModuleHandle, const char *name);
+void setObjectName(VkDevice device, VkRenderPass renderPassHandle, const char *name);
+void setObjectName(VkDevice device, VkPipeline pipelineHandle, const char *name);
+void setObjectName(VkDevice device, VkDescriptorSetLayout descriptorSetLayoutHandle, const char *name);
+void setObjectName(VkDevice device, VkSampler samplerHandle, const char *name);
+void setObjectName(VkDevice device, VkDescriptorPool descriptorPoolHandle, const char *name);
+void setObjectName(VkDevice device, VkDescriptorSet descriptorSetHandle, const char *name);
+void setObjectName(VkDevice device, VkCommandPool commandPoolHandle, const char *name);
+void setObjectName(VkDevice device, VkSurfaceKHR surfaceHandle, const char *name);
+void setObjectName(VkDevice device, VkSwapchainKHR swapchainHandle, const char *name);
+
+/** @} */
+
 /// Returns the Vulkan image format from the corresponding GrAIL one
 VkFormat grlFormatToVk(Format format);
 /// Returns the Vulkan vertex format from the corresponding GrAIL one

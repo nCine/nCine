@@ -11,7 +11,15 @@ namespace grail {
 CommandBuffer Device::createCommandBuffer()
 {
 	CommandBuffer commandBuffer;
-	createCommandBufferImpl(commandBuffer);
+	createCommandBufferImpl(commandBuffer, nullptr);
+
+	return commandBuffer;
+}
+
+CommandBuffer Device::createCommandBuffer(const char *debugName)
+{
+	CommandBuffer commandBuffer;
+	createCommandBufferImpl(commandBuffer, debugName);
 
 	return commandBuffer;
 }

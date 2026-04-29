@@ -60,9 +60,11 @@ VkDevice createLogicalDevice(const PhysicalDeviceQueryData &physicalDeviceQueryD
 
 	VkPhysicalDeviceFeatures deviceFeatures{};
 
-	nctl::Array<const char *> enabledExtensionsNames(1);
+	nctl::Array<const char *> enabledExtensionsNames(2);
 	ASSERT(physicalDeviceQueryData.availableExtensions.contains(VK_KHR_SWAPCHAIN_EXTENSION_NAME));
 	enabledExtensionsNames.pushBack(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+	if (physicalDeviceQueryData.availableExtensions.contains(VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME))
+		enabledExtensionsNames.pushBack(VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME);
 
 	VkDeviceCreateInfo createInfo{};
 	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -82,6 +84,16 @@ VkDevice createLogicalDevice(const PhysicalDeviceQueryData &physicalDeviceQueryD
 		features11.shaderDrawParameters = VK_TRUE;
 		features11.pNext = pNextChain;
 		pNextChain = &features11;
+	}
+
+	// Add timeline semaphore
+	VkPhysicalDeviceTimelineSemaphoreFeatures timelineFeatures{};
+	if (physicalDeviceQueryData.availableExtensions.contains(VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME))
+	{
+		timelineFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES;
+		timelineFeatures.timelineSemaphore = VK_TRUE;
+		timelineFeatures.pNext = pNextChain;
+		pNextChain = &timelineFeatures;
 	}
 
 	createInfo.pNext = pNextChain;
@@ -182,6 +194,9 @@ void scorePhysicalDevice(Device::Type preferredType, PhysicalDeviceQueryData &qu
 
 	if (queryData.properties.apiVersion < VK_API_VERSION_1_1)
 		queryData.score = 0;
+
+	if (queryData.availableExtensions.contains(VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME))
+		queryData.score += 50;
 }
 
 void enumeratePhysicalDevices(VkInstance instance, VkSurfaceKHR surface, Device::Type preferredType, nctl::Array<PhysicalDeviceQueryData> &queryData)
@@ -266,11 +281,23 @@ bool Device::BackendData::createDevice(const Device::CreateDesc &createDesc, Dev
 	graphicsQueue_.queueIndex = queryData[queryDataIndex].graphicsQueueIndex;
 
 	caps_.vulkan11 = (physicalDeviceProperties_.apiVersion >= VK_API_VERSION_1_1);
+	caps_.timelineSemaphores = queryData[queryDataIndex].availableExtensions.contains(VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME);
 
 	device_ = createLogicalDevice(queryData[queryDataIndex], allocator_);
 	volkLoadDevice(device_);
 
 	vkGetDeviceQueue(device_, graphicsQueue_.queueIndex, 0, &graphicsQueue_.queue);
+
+	if (caps_.debugUtils)
+	{
+		setObjectName(device_, instance_, "Instance");
+		setObjectName(device_, physicalDevice_, physicalDeviceProperties_.deviceName);
+		setObjectName(device_, device_, "Device");
+		setObjectName(device_, graphicsQueue_.queue, "Main queue");
+	}
+
+	if (caps_.timelineSemaphores)
+		graphicsQueue_.timelineSemaphore = createTimelineSemaphore();
 
 	VmaVulkanFunctions vmaFunctions{};
 	vmaFunctions.vkGetInstanceProcAddr = vkGetInstanceProcAddr;
@@ -290,6 +317,12 @@ void Device::BackendData::destroyDevice()
 {
 	if (device_ != VK_NULL_HANDLE)
 	{
+		if (graphicsQueue_.timelineSemaphore != VK_NULL_HANDLE)
+		{
+			destroySemaphore(graphicsQueue_.timelineSemaphore);
+			graphicsQueue_.timelineSemaphore = VK_NULL_HANDLE;
+		}
+
 		if (vmaAllocator_ != VK_NULL_HANDLE)
 		{
 			vmaDestroyAllocator(vmaAllocator_);
@@ -313,9 +346,15 @@ void Device::BackendData::createBackendData(Device &device)
 	bufferDesc.usage = Buffer::Usage::UNIFORM;
 	dynamicUploadBuffer_ = device.createBuffer(bufferDesc);
 	dynamicUploadBufferMapBase_ = static_cast<uint8_t *>(device.mapBuffer(dynamicUploadBuffer_));
+	if (caps_.debugUtils)
+		setObjectName(device_, bufferData_[dynamicUploadBuffer_.index()].buffer, "Dynamic uniform buffer");
 
 	for (uint32_t i = 0; i < NumFramesInFlight; i++)
-		createFrameContext(frameContexts_[i]);
+		createFrameContext(frameContexts_[i], i);
+
+#ifdef WITH_TRACY
+	createTracyContext();
+#endif
 }
 
 void Device::BackendData::destroyBackendData(Device &device)
@@ -333,7 +372,12 @@ void Device::BackendData::destroyBackendData(Device &device)
 	for (uint32_t i = 0; i < NumFramesInFlight; i++)
 		destroyFrameContext(frameContexts_[i]);
 
-	for (Desc64HashMap<VkFramebuffer>::ConstIterator it = hashToVkFramebuffers_.begin(); it != hashToVkFramebuffers_.end(); ++it)
+	// The swapchain is responsible for destroying its own framebuffers
+	Desc64HashMap<VkFramebuffer> hashToVkFramebuffersNoSwapchain = hashToVkFramebuffers_;
+	for (uint32_t i = 0; i < swapchainVkFramebuffersHashes_.size(); i++)
+		hashToVkFramebuffersNoSwapchain.remove(swapchainVkFramebuffersHashes_[i]);
+
+	for (Desc64HashMap<VkFramebuffer>::ConstIterator it = hashToVkFramebuffersNoSwapchain.begin(); it != hashToVkFramebuffersNoSwapchain.end(); ++it)
 		destroyFramebuffer(it.value());
 	for (Desc64HashMap<VkRenderPass>::ConstIterator it = hashToVkRenderPasses_.begin(); it != hashToVkRenderPasses_.end(); ++it)
 		destroyRenderPass(it.value());
@@ -343,6 +387,33 @@ void Device::BackendData::destroyBackendData(Device &device)
 		destroyPipelineLayout(it.value());
 	for (Desc64HashMap<VkSampler>::ConstIterator it = hashToVkSampler_.begin(); it != hashToVkSampler_.end(); ++it)
 		destroySampler(it.value());
+}
+
+void Device::BackendData::createTracyContext()
+{
+	ASSERT(tracyContext == nullptr);
+
+	FrameContext &currentFC = frameContexts_[currentFrameIndex];
+	ASSERT(currentFC.freeCommandBuffers.isEmpty() == false);
+
+	const CommandBuffer::BackendData &cmdBck = obtainCommandBufferData(currentFC);
+	VkCommandBuffer cmd = cmdBck.commandBuffer;
+
+	VkCommandBufferBeginInfo beginInfo{};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+	vkBeginCommandBuffer(cmd, &beginInfo);
+	tracyContext = TracyVkContext(physicalDevice_, device_, graphicsQueue_.queue, cmd);
+	vkEndCommandBuffer(cmd);
+
+	VkSubmitInfo submit{};
+	submit.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submit.commandBufferCount = 1;
+	submit.pCommandBuffers = &cmd;
+
+	vkQueueSubmit(graphicsQueue_.queue, 1, &submit, VK_NULL_HANDLE);
+	vkQueueWaitIdle(graphicsQueue_.queue);
 }
 
 } // namespace grail

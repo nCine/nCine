@@ -27,6 +27,24 @@ enum class Usage : uint8_t
 	TRANSFER_DST = 1 << 5
 };
 
+enum class State : uint8_t
+{
+	UNDEFINED,
+
+	TRANSFER_SRC,
+	TRANSFER_DST,
+
+	VERTEX_BUFFER,
+	INDEX_BUFFER,
+
+	UNIFORM_BUFFER,
+
+	STORAGE_READ,
+	STORAGE_WRITE,
+
+	INDIRECT_BUFFER
+};
+
 inline Usage operator|(Usage a, Usage b)
 {
 	return static_cast<Usage>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
@@ -42,6 +60,8 @@ struct Desc
 	uint64_t size = 0;
 	MemoryType memoryType = MemoryType::DEFAULT;
 	Usage usage = Usage::STORAGE;
+
+	const char *debugName = nullptr;
 };
 
 /// A structure with the information returned by `Device::allocateDynamicBuffer()`

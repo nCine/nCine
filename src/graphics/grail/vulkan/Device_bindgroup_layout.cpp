@@ -1,6 +1,7 @@
 #define NCINE_INCLUDE_VULKAN
 #include "common_headers.h"
 
+#include <nctl/StaticString.h>
 #include "grail/Device.h"
 #include "grail/vulkan/Device_backend.h"
 #include "grail/vulkan/vlk_utils.h"
@@ -109,16 +110,29 @@ void Device::BackendData::addDescriptorPool()
 	createDesc.combinedImageSamplerCount = 1024;
 	createDesc.uniformBufferCount = 1024;
 	createDesc.uniformBufferDynamicCount = 1024;
+	createDesc.storageBufferCount = 1024;
+	createDesc.storageBufferDynamicCount = 1024;
 
-	VkDescriptorPoolSize poolSizes[3];
+	VkDescriptorPoolSize poolSizes[5];
 	poolSizes[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	poolSizes[0].descriptorCount = createDesc.combinedImageSamplerCount;
 	poolSizes[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 	poolSizes[1].descriptorCount = createDesc.uniformBufferCount;
 	poolSizes[2].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 	poolSizes[2].descriptorCount = createDesc.uniformBufferDynamicCount;
+	poolSizes[3].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+	poolSizes[3].descriptorCount = createDesc.storageBufferCount;
+	poolSizes[4].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+	poolSizes[4].descriptorCount = createDesc.storageBufferDynamicCount;
 
 	VkDescriptorPool descriptorPool = createDescriptorPool(poolSizes, nctl::arraySize(poolSizes), createDesc.maxSets);
+
+	if (caps_.debugUtils)
+	{
+		nctl::StaticString<32> debugNameString;
+		debugNameString.format("Descriptor pool %u", descriptorPoolData_.size());
+		setObjectName(device_, descriptorPool, debugNameString.data());
+	}
 
 	descriptorPoolData_.emplaceBack();
 	DescriptorPoolData &descriptorPoolData = descriptorPoolData_.back();
@@ -126,11 +140,14 @@ void Device::BackendData::addDescriptorPool()
 	descriptorPoolData.combinedImageSamplerCount = createDesc.combinedImageSamplerCount;
 	descriptorPoolData.uniformBufferCount = createDesc.uniformBufferCount;
 	descriptorPoolData.uniformBufferDynamicCount = createDesc.uniformBufferDynamicCount;
+	descriptorPoolData.storageBufferCount = createDesc.storageBufferCount;
+	descriptorPoolData.storageBufferDynamicCount = createDesc.storageBufferDynamicCount;
 	descriptorPoolData.maxSets = createDesc.maxSets;
 }
 
 VkDescriptorSet Device::BackendData::allocateFromDescriptorPools(const BindGroup::Desc &desc, VkDescriptorPool &descriptorPool)
 {
+	static uint32_t poolIndex = 0;
 	BindGroupLayout::Handle layoutHandle = desc.layout;
 
 	VkDescriptorSetLayout descriptorSetLayout = bindGroupLayoutData_[layoutHandle.index()].descriptorSetLayout;
@@ -141,6 +158,15 @@ VkDescriptorSet Device::BackendData::allocateFromDescriptorPools(const BindGroup
 	{
 		addDescriptorPool();
 		poolData = descriptorPoolData_.back();
+
+		if (caps_.debugUtils)
+		{
+			nctl::StaticString<32> debugNameString;
+			debugNameString.format("Descriptor pool #u", poolIndex);
+			setObjectName(device_, poolData.descriptorPool, debugNameString.data());
+		}
+		poolIndex++;
+
 		descriptorSet = allocateDescriptorSet(poolData.descriptorPool, descriptorSetLayout);
 		FATAL_ASSERT(descriptorSet != VK_NULL_HANDLE);
 	}
@@ -181,6 +207,9 @@ bool Device::createBindGroupLayoutImpl(uint32_t index, const BindGroupLayout::Cr
 
 	const VkResult result = vkCreateDescriptorSetLayout(bck.device_, &createInfo, nullptr, &data.descriptorSetLayout);
 	vlkFatalAssert(result);
+
+	if (bck.caps_.debugUtils)
+		setObjectName(bck.device_, data.descriptorSetLayout, desc.debugName);
 
 	return (result == VK_SUCCESS);
 }

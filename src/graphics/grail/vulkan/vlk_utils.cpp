@@ -19,6 +19,19 @@ const char *messageTypeToString(VkDebugUtilsMessageTypeFlagsEXT messageType)
 	}
 }
 
+void setObjectName(VkDevice device, VkObjectType objectType, uint64_t objectHandle, const char *name)
+{
+	if (device == VK_NULL_HANDLE || objectHandle == 0)
+		return;
+
+	VkDebugUtilsObjectNameInfoEXT nameInfo{};
+	nameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+	nameInfo.objectType = objectType;
+	nameInfo.objectHandle = objectHandle;
+	nameInfo.pObjectName = name;
+	vkSetDebugUtilsObjectNameEXT(device, &nameInfo);
+}
+
 }
 
 ///////////////////////////////////////////////////////////
@@ -130,6 +143,106 @@ VKAPI_ATTR VkBool32 VKAPI_CALL vlkDebugCallback(
 	}
 
 	return VK_FALSE;
+}
+
+void setObjectName(VkDevice device, VkInstance instanceHandle, const char *name)
+{
+	setObjectName(device, VK_OBJECT_TYPE_INSTANCE, uint64_t(instanceHandle), name);
+}
+
+void setObjectName(VkDevice device, VkPhysicalDevice physicalDeviceHandle, const char *name)
+{
+	setObjectName(device, VK_OBJECT_TYPE_PHYSICAL_DEVICE, uint64_t(physicalDeviceHandle), name);
+}
+
+void setObjectName(VkDevice device, VkDevice deviceHandle, const char *name)
+{
+	setObjectName(device, VK_OBJECT_TYPE_DEVICE, uint64_t(deviceHandle), name);
+}
+
+void setObjectName(VkDevice device, VkQueue queueHandle, const char *name)
+{
+	setObjectName(device, VK_OBJECT_TYPE_QUEUE, uint64_t(queueHandle), name);
+}
+
+void setObjectName(VkDevice device, VkSemaphore semaphoreHandle, const char *name)
+{
+	setObjectName(device, VK_OBJECT_TYPE_SEMAPHORE, uint64_t(semaphoreHandle), name);
+}
+
+void setObjectName(VkDevice device, VkCommandBuffer commandBufferHandle, const char *name)
+{
+	setObjectName(device, VK_OBJECT_TYPE_COMMAND_BUFFER, uint64_t(commandBufferHandle), name);
+}
+
+void setObjectName(VkDevice device, VkFence fenceHandle, const char *name)
+{
+	setObjectName(device, VK_OBJECT_TYPE_FENCE, uint64_t(fenceHandle), name);
+}
+
+void setObjectName(VkDevice device, VkBuffer bufferHandle, const char *name)
+{
+	setObjectName(device, VK_OBJECT_TYPE_BUFFER, uint64_t(bufferHandle), name);
+}
+
+void setObjectName(VkDevice device, VkImage imageHandle, const char *name)
+{
+	setObjectName(device, VK_OBJECT_TYPE_IMAGE, uint64_t(imageHandle), name);
+}
+
+void setObjectName(VkDevice device, VkImageView imageViewHandle, const char *name)
+{
+	setObjectName(device, VK_OBJECT_TYPE_IMAGE_VIEW, uint64_t(imageViewHandle), name);
+}
+
+void setObjectName(VkDevice device, VkShaderModule shaderModuleHandle, const char *name)
+{
+	setObjectName(device, VK_OBJECT_TYPE_SHADER_MODULE, uint64_t(shaderModuleHandle), name);
+}
+
+void setObjectName(VkDevice device, VkRenderPass renderPassHandle, const char *name)
+{
+	setObjectName(device, VK_OBJECT_TYPE_RENDER_PASS, uint64_t(renderPassHandle), name);
+}
+
+void setObjectName(VkDevice device, VkPipeline pipelineHandle, const char *name)
+{
+	setObjectName(device, VK_OBJECT_TYPE_PIPELINE, uint64_t(pipelineHandle), name);
+}
+
+void setObjectName(VkDevice device, VkDescriptorSetLayout descriptorSetLayoutHandle, const char *name)
+{
+	setObjectName(device, VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT, uint64_t(descriptorSetLayoutHandle), name);
+}
+
+void setObjectName(VkDevice device, VkSampler samplerHandle, const char *name)
+{
+	setObjectName(device, VK_OBJECT_TYPE_SAMPLER, uint64_t(samplerHandle), name);
+}
+
+void setObjectName(VkDevice device, VkDescriptorPool descriptorPoolHandle, const char *name)
+{
+	setObjectName(device, VK_OBJECT_TYPE_DESCRIPTOR_POOL, uint64_t(descriptorPoolHandle), name);
+}
+
+void setObjectName(VkDevice device, VkDescriptorSet descriptorSetHandle, const char *name)
+{
+	setObjectName(device, VK_OBJECT_TYPE_DESCRIPTOR_SET, uint64_t(descriptorSetHandle), name);
+}
+
+void setObjectName(VkDevice device, VkCommandPool commandPoolHandle, const char *name)
+{
+	setObjectName(device, VK_OBJECT_TYPE_COMMAND_POOL, uint64_t(commandPoolHandle), name);
+}
+
+void setObjectName(VkDevice device, VkSurfaceKHR surfaceHandle, const char *name)
+{
+	setObjectName(device, VK_OBJECT_TYPE_SURFACE_KHR, uint64_t(surfaceHandle), name);
+}
+
+void setObjectName(VkDevice device, VkSwapchainKHR swapchainHandle, const char *name)
+{
+	setObjectName(device, VK_OBJECT_TYPE_SWAPCHAIN_KHR, uint64_t(swapchainHandle), name);
 }
 
 VkFormat grlFormatToVk(Format format)
