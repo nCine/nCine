@@ -3,7 +3,12 @@ name: 'CodeQL'
 env:
   LIBRARIES_BRANCH: libraries-OS-COMPILER
 
-on: [push, workflow_dispatch]
+on:
+  push:
+    branches:
+      - master
+      - main
+  workflow_dispatch:
 
 jobs:
   Analyze:
@@ -14,10 +19,10 @@ jobs:
 
     steps:
     - name: 'Checkout Code'
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: 'Initialize CodeQL'
-      uses: github/codeql-action/init@v1
+      uses: github/codeql-action/init@v4
       with:
         languages: 'cpp'
 
@@ -59,4 +64,4 @@ jobs:
         make -j $(getconf _NPROCESSORS_ONLN) -C ../nCine-build-$BuildType
 
     - name: 'Perform CodeQL Analysis'
-      uses: github/codeql-action/analyze@v1
+      uses: github/codeql-action/analyze@v4

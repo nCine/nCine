@@ -8,7 +8,12 @@ env:
     - nCine artifact from branch 'BRANCH_NAME' with commit id ${{ github.sha }}
   DEPLOY_BRANCH: nCine-BRANCH_NAME-OS-COMPILER
 
-on: [push, workflow_dispatch]
+on:
+  push:
+    branches:
+      - master
+      - main
+  workflow_dispatch:
 
 jobs:
   Build:
@@ -29,7 +34,7 @@ jobs:
 
     steps:
     - name: 'Checkout Code'
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: 'Install Build Dependencies'
       run: |
@@ -150,7 +155,7 @@ jobs:
 
     - name: 'Upload GitHub Actions Artifact'
       if: matrix.BuildType == 'DevDist' || matrix.BuildType == 'LuaDist'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: nCine-job-artifacts-${{ matrix.BuildType }}-${{ matrix.compiler }}
         path: nCine-job-artifacts/*
@@ -214,14 +219,14 @@ jobs:
 
     steps:
     - name: 'Checkout Code'
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: 'Unshallow Git Repository for Versioning'
       run: |
         git fetch --unshallow || true
 
     - name: 'Download GitHub Actions Artifact'
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: nCine-job-artifacts-${{ matrix.BuildType }}-${{ matrix.compiler }}
         path: nCine-job-artifacts
