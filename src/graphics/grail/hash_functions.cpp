@@ -2,6 +2,7 @@
 #include "grail/private/hash_functions.h"
 #include "grail/BindGroupLayout.h"
 #include "grail/GraphicsPipeline.h"
+#include "grail/ComputePipeline.h"
 #include "grail/RenderPass.h"
 #include "grail/TextureView.h"
 
@@ -101,6 +102,40 @@ uint64_t hashDesc(const GraphicsPipeline::VertexInputLayoutCreateDesc &desc, uin
 	return hashValue;
 }
 
+uint64_t hashDesc(const GraphicsPipeline::ColorBlendAttachmentDesc &desc, uint64_t seed)
+{
+	uint64_t hashValue = seed;
+
+	const uint8_t blendEnable = desc.blendEnable ? 1 : 0;
+	hashValue = nctl::fasthash64(&blendEnable, sizeof(blendEnable), hashValue);
+
+	hashValue = nctl::fasthash64(&desc.srcColorFactor, sizeof(desc.srcColorFactor), hashValue);
+	hashValue = nctl::fasthash64(&desc.dstColorFactor, sizeof(desc.dstColorFactor), hashValue);
+	hashValue = nctl::fasthash64(&desc.colorOp, sizeof(desc.colorOp), hashValue);
+
+	hashValue = nctl::fasthash64(&desc.srcAlphaFactor, sizeof(desc.srcAlphaFactor), hashValue);
+	hashValue = nctl::fasthash64(&desc.dstAlphaFactor, sizeof(desc.dstAlphaFactor), hashValue);
+	hashValue = nctl::fasthash64(&desc.alphaOp, sizeof(desc.alphaOp), hashValue);
+
+	hashValue = nctl::fasthash64(&desc.colorWriteMask, sizeof(desc.colorWriteMask), hashValue);
+
+	return hashValue;
+}
+
+uint64_t hashDesc(const GraphicsPipeline::ColorBlendStateCreateDesc &desc, uint64_t seed)
+{
+	uint64_t hashValue = seed;
+
+	hashValue = nctl::fasthash64(&desc.attachmentCount, sizeof(desc.attachmentCount), hashValue);
+
+	for (uint32_t i = 0; i < desc.attachmentCount; i++)
+		hashValue = hashDesc(desc.attachments[i], hashValue);
+
+	hashValue = nctl::fasthash64(desc.blendConstants, sizeof(desc.blendConstants), hashValue);
+
+	return hashValue;
+}
+
 uint64_t hashDesc(const GraphicsPipeline::CreateDesc &desc,
                   const GrlHandleHashMap<BindGroupLayout::Tag> &fromHandleToHash,
                   uint64_t seed)
@@ -134,13 +169,37 @@ uint64_t hashDesc(const GraphicsPipeline::CreateDesc &desc,
 	hashValue = nctl::fasthash64(&depthWriteEnable, sizeof(depthWriteEnable), hashValue);
 	hashValue = nctl::fasthash64(&desc.depthCompareOp, sizeof(desc.depthCompareOp), hashValue);
 
-	const uint8_t blendEnable = desc.blendEnable ? 1 : 0;
-	hashValue = nctl::fasthash64(&blendEnable, sizeof(blendEnable), hashValue);
+	hashValue = hashDesc(desc.blendState, hashValue);
 
 	return hashValue;
 }
 
 uint64_t hashDesc(const GraphicsPipeline::CreateDesc &desc,
+                  const GrlHandleHashMap<BindGroupLayout::Tag> &fromHandleToHash)
+{
+	return hashDesc(desc, fromHandleToHash, InitialSeed);
+}
+
+// ---------------------------------------------------------
+
+uint64_t hashDesc(const ComputePipeline::CreateDesc &desc,
+                  const GrlHandleHashMap<BindGroupLayout::Tag> &fromHandleToHash,
+                  uint64_t seed)
+{
+	uint64_t hashValue = seed;
+	if (desc.computeShader.isValid())
+	{
+		hashValue = nctl::fasthash64(&desc.computeShader.codeSize, sizeof(desc.computeShader.codeSize), hashValue);
+		hashValue = nctl::fasthash64(&desc.computeShader.codeData, desc.computeShader.codeSize, hashValue);
+		hashValue = nctl::fasthash64(&desc.computeShader.entryName, strlen(desc.computeShader.entryName), hashValue);
+	}
+
+	hashValue = hashDesc(desc.pipelineLayout, fromHandleToHash, hashValue);
+
+	return hashValue;
+}
+
+uint64_t hashDesc(const ComputePipeline::CreateDesc &desc,
                   const GrlHandleHashMap<BindGroupLayout::Tag> &fromHandleToHash)
 {
 	return hashDesc(desc, fromHandleToHash, InitialSeed);
@@ -169,7 +228,7 @@ uint64_t hashDesc(const RenderPass::RenderTargetLayoutDesc &desc)
 
 // ---------------------------------------------------------
 
-uint64_t hashDesc(const RenderPass::RenderPassDesc &desc, uint64_t seed)
+uint64_t hashDesc(const RenderPass::RenderPassDesc &desc, bool *isSwapchainAttachment, uint64_t seed)
 {
 	uint64_t hashValue = hashDesc(desc.layout, seed);
 
@@ -180,12 +239,18 @@ uint64_t hashDesc(const RenderPass::RenderPassDesc &desc, uint64_t seed)
 	hashValue = nctl::fasthash64(&desc.depthLoadOp, sizeof(desc.depthLoadOp), hashValue);
 	hashValue = nctl::fasthash64(&desc.depthStoreOp, sizeof(desc.depthStoreOp), hashValue);
 
+	uint8_t swapchainFlags[RenderPass::MaxColorAttachments];
+	for (uint32_t i = 0; i < colorCount; i++)
+		swapchainFlags[i] = isSwapchainAttachment[i] ? 1 : 0;
+
+	hashValue = nctl::fasthash64(swapchainFlags, colorCount * sizeof(uint8_t), hashValue);
+
 	return hashValue;
 }
 
-uint64_t hashDesc(const RenderPass::RenderPassDesc &desc)
+uint64_t hashDesc(const RenderPass::RenderPassDesc &desc, bool *isSwapchainAttachment)
 {
-	return hashDesc(desc, InitialSeed);
+	return hashDesc(desc, isSwapchainAttachment, InitialSeed);
 }
 
 // ---------------------------------------------------------

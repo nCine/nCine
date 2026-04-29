@@ -25,6 +25,12 @@ struct Device::FrontendData
 	GrlHandleHashMap<GraphicsPipeline::Tag> graphicsPipelineFromHandleToHash_{ PoolLimits::GraphicsPipelines };
 	Desc64HashMap<GraphicsPipeline::Handle> graphicsPipelineFromHashToHandle_{ PoolLimits::GraphicsPipelines };
 
+	HandlePool<ComputePipeline::Handle> computePipelineHandles_{ PoolLimits::ComputePipelines };
+	ComputePipeline::Desc computePipelineDescs_[PoolLimits::ComputePipelines];
+
+	GrlHandleHashMap<ComputePipeline::Tag> computePipelineFromHandleToHash_{ PoolLimits::ComputePipelines };
+	Desc64HashMap<ComputePipeline::Handle> computePipelineFromHashToHandle_{ PoolLimits::ComputePipelines };
+
 	HandlePool<Buffer::Handle> bufferHandles_{ PoolLimits::Buffers };
 	Buffer::Desc bufferDescs_[PoolLimits::Buffers];
 
@@ -41,6 +47,7 @@ struct Device::FrontendData
 	bool isAlive(BindGroupLayout::Handle handle) const;
 	bool isAlive(BindGroup::Handle handle) const;
 	bool isAlive(GraphicsPipeline::Handle handle) const;
+	bool isAlive(ComputePipeline::Handle handle) const;
 	bool isAlive(Buffer::Handle handle) const;
 	bool isAlive(Texture::Handle handle) const;
 	bool isAlive(TextureView::Handle handle) const;

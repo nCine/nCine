@@ -156,6 +156,12 @@ bool Device::createTextureViewImpl(uint32_t index, const TextureView::Desc &desc
 		bck.hashToVkSampler_.insert(samplerHash, data.sampler);
 	}
 
+	if (bck.caps_.debugUtils && desc.debugName)
+	{
+		setObjectName(bck.device_, data.imageView, desc.debugName);
+		setObjectName(bck.device_, data.sampler, desc.debugName);
+	}
+
 	return (result == VK_SUCCESS);
 }
 

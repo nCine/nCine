@@ -1,6 +1,8 @@
 #define NCINE_INCLUDE_VULKAN
 #include "common_headers.h"
 
+#include <nctl/StaticString.h>
+
 #include "grail/Device.h"
 #include "grail/vulkan/vlk_utils.h"
 #include "grail/vulkan/Device_backend.h"
@@ -62,7 +64,7 @@ VkCommandBuffer Device::BackendData::allocateCommandBuffers(VkCommandPool comman
 // Device::BackendData
 ///////////////////////////////////////////////////////////
 
-bool Device::BackendData::createFrameContext(FrameContext &frameContext)
+bool Device::BackendData::createFrameContext(FrameContext &frameContext, uint32_t index)
 {
 	ASSERT(frameContext.frameFence == VK_NULL_HANDLE);
 	frameContext.frameFence = createFence(true); // Note: It should start as signalled
@@ -80,6 +82,17 @@ bool Device::BackendData::createFrameContext(FrameContext &frameContext)
 
 	ASSERT(dynamicUploadBuffer_.isValid() == true);
 	ASSERT(dynamicUploadBufferMapBase_ != nullptr);
+
+	if (caps_.debugUtils)
+	{
+		nctl::StaticString<32> debugNameString;
+		debugNameString.format("Frame fence #%u", index);
+		setObjectName(device_, frameContext.frameFence, debugNameString.data());
+		debugNameString.format("Acquire semaphore #%u", index);
+		setObjectName(device_, frameContext.acquireSemaphore, debugNameString.data());
+		debugNameString.format("Frame command pool #%u", index);
+		setObjectName(device_, frameContext.graphicsCmdPool, debugNameString.data());
+	}
 
 	return true;
 }
@@ -103,8 +116,16 @@ void Device::BackendData::beginFrameContext()
 {
 	FrameContext &currentFC = frameContexts_[currentFrameIndex];
 
-	waitFence(currentFC.frameFence);
-	resetFence(currentFC.frameFence);
+	if (caps_.timelineSemaphores)
+	{
+		if (currentFC.lastSubmissionId > 0)
+			waitTimelineSemaphore(graphicsQueue_.timelineSemaphore, currentFC.lastSubmissionId);
+	}
+	else
+	{
+		waitFence(currentFC.frameFence);
+		resetFence(currentFC.frameFence);
+	}
 
 	// Recycling the command buffer handles
 	for (uint32_t i = 0; i < currentFC.usedCommandBuffers.size(); i++)

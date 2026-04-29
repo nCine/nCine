@@ -1,15 +1,19 @@
 #ifndef CLASS_GRAIL_GRAPHICSPIPELINE
 #define CLASS_GRAIL_GRAPHICSPIPELINE
 
-#include <cstdint>
-#include <nctl/Array.h>
 #include <nctl/String.h>
+#include "grail/pipeline.h"
 #include "grail/RenderPass.h"
 
 namespace ncine {
 namespace grail {
 
 namespace GraphicsPipeline {
+
+using pipeline::MaxBindGroups;
+using pipeline::PipelineLayoutCreateDesc;
+using pipeline::ShaderDesc;
+using pipeline::PipelineLayoutDesc;
 
 enum class VertexFormat : uint8_t
 {
@@ -61,15 +65,9 @@ struct VertexInputLayoutCreateDesc
 	uint32_t attributeCount = 0;
 };
 
-constexpr uint8_t MaxBindGroups = 4;
-struct PipelineLayoutCreateDesc
-{
-	uint32_t bindGroupLayoutCount = 0;
-	BindGroupLayout::Handle bindGroupLayouts[MaxBindGroups];
-};
-
 enum class PrimitiveTopology
 {
+	POINT_LIST,
 	TRIANGLE_LIST,
 	TRIANGLE_STRIP,
 	TRIANGLE_FAN
@@ -94,13 +92,72 @@ enum class CompareOp
 	ALWAYS
 };
 
-struct ShaderDesc
+enum class BlendFactor
 {
-	const uint8_t *codeData = nullptr;
-	size_t codeSize = 0;
-	const char *entryName = "main";
+	ZERO,
+	ONE,
 
-	inline bool isValid() const { return (codeData && codeSize > 0 && entryName); }
+	SRC_COLOR,
+	ONE_MINUS_SRC_COLOR,
+
+	DST_COLOR,
+	ONE_MINUS_DST_COLOR,
+
+	SRC_ALPHA,
+	ONE_MINUS_SRC_ALPHA,
+
+	DST_ALPHA,
+	ONE_MINUS_DST_ALPHA,
+
+	CONSTANT_COLOR,
+	ONE_MINUS_CONSTANT_COLOR,
+
+	CONSTANT_ALPHA,
+	ONE_MINUS_CONSTANT_ALPHA,
+
+	SRC_ALPHA_SATURATE
+};
+
+enum class BlendOp
+{
+	ADD,
+	SUBTRACT,
+	REVERSE_SUBTRACT,
+	MIN,
+	MAX
+};
+
+enum class ColorComponent : uint8_t
+{
+	NONE = 0,
+	R = 1 << 0,
+	G = 1 << 1,
+	B = 1 << 2,
+	A = 1 << 3,
+	ALL = R | G | B | A
+};
+
+struct ColorBlendAttachmentDesc
+{
+	bool blendEnable = false;
+
+	BlendFactor srcColorFactor = BlendFactor::ONE;
+	BlendFactor dstColorFactor = BlendFactor::ZERO;
+	BlendOp colorOp = BlendOp::ADD;
+
+	BlendFactor srcAlphaFactor = BlendFactor::ONE;
+	BlendFactor dstAlphaFactor = BlendFactor::ZERO;
+	BlendOp alphaOp = BlendOp::ADD;
+
+	ColorComponent colorWriteMask = ColorComponent::ALL;
+};
+
+struct ColorBlendStateCreateDesc
+{
+	const ColorBlendAttachmentDesc *attachments = nullptr;
+	uint32_t attachmentCount = 0;
+
+	float blendConstants[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 };
 
 struct CreateDesc
@@ -119,7 +176,9 @@ struct CreateDesc
 	bool depthWriteEnable = false;
 	CompareOp depthCompareOp = CompareOp::LESS;
 
-	bool blendEnable = false;
+	ColorBlendStateCreateDesc blendState;
+
+	const char *debugName = nullptr;
 };
 
 struct VertexInputLayoutDesc
@@ -128,9 +187,11 @@ struct VertexInputLayoutDesc
 	nctl::Array<VertexAttribute> attributes;
 };
 
-struct PipelineLayoutDesc
+struct ColorBlendStateDesc
 {
-	nctl::Array<BindGroupLayout::Handle> bindGroupLayouts;
+	nctl::Array<ColorBlendAttachmentDesc> attachments;
+
+	float blendConstants[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 };
 
 struct Desc
@@ -150,7 +211,7 @@ struct Desc
 	bool depthWriteEnable;
 	CompareOp depthCompareOp;
 
-	bool blendEnable;
+	ColorBlendStateDesc blendState;
 };
 
 }

@@ -103,6 +103,9 @@ bool Device::createTextureImpl(uint32_t index, const Texture::Desc &desc)
 	vlkFatalAssert(result);
 	data.textureState = Texture::State::UNDEFINED;
 
+	if (bck.caps_.debugUtils && desc.debugName)
+		setObjectName(bck.device_, data.image, desc.debugName);
+
 	return (result == VK_SUCCESS);
 }
 

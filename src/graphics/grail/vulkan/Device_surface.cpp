@@ -3,6 +3,7 @@
 
 #include <nctl/String.h>
 #include "grail/Device.h"
+#include "grail/vulkan/vlk_utils.h"
 #include "grail/vulkan/Device_backend.h"
 
 #include "Application.h"
@@ -27,6 +28,9 @@ bool Device::BackendData::createSurface()
 
 	const bool result = theApplication().gfxDevice().createVulkanSurface(instance_, allocator_, &surface_);
 	FATAL_ASSERT_MSG(result == true, "Cannot create the Vulkan presentation surface");
+
+	if (caps_.debugUtils)
+		setObjectName(device_, surface_, "SurfaceKHR");
 
 	return true;
 }

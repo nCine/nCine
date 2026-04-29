@@ -77,6 +77,9 @@ bool Device::createBufferImpl(uint32_t index, const Buffer::Desc &desc)
 	const VkResult result = vmaCreateBuffer(bck.vmaAllocator_, &createInfo, &allocInfo, &data.buffer, &data.allocation, &data.allocationInfo);
 	vlkFatalAssert(result);
 
+	if (bck.caps_.debugUtils && desc.debugName)
+		setObjectName(bck.device_, data.buffer, desc.debugName);
+
 	return (result == VK_SUCCESS);
 }
 

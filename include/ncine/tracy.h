@@ -1,3 +1,5 @@
+#include <ncine/config.h>
+
 #if defined(WITH_TRACY) || NCINE_WITH_TRACY
 
 	#include "tracy/Tracy.hpp"
@@ -26,7 +28,7 @@
 	#define ZoneName(x, y)
 	#define ZoneNameV(x, y, z)
 	#define ZoneNameF(x, ...)
-	#define ZoneNameVF(x, y ,...)
+	#define ZoneNameVF(x, y, ...)
 	#define ZoneColor(x)
 	#define ZoneColorV(x, y)
 	#define ZoneValue(x)

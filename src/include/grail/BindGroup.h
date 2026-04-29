@@ -28,6 +28,8 @@ struct Desc
 
 	const Entry *entries;
 	uint32_t entryCount;
+
+	const char *debugName = nullptr;
 };
 
 }

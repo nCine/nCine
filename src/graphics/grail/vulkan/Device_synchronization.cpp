@@ -58,6 +58,65 @@ VkSemaphore Device::BackendData::createSemaphore()
 	return semaphore;
 }
 
+VkSemaphore Device::BackendData::createTimelineSemaphore(uint64_t initialValue)
+{
+	VkSemaphore semaphore = VK_NULL_HANDLE;
+
+	VkSemaphoreTypeCreateInfoKHR timelineCreateInfo;
+	timelineCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO_KHR;
+	timelineCreateInfo.pNext = NULL;
+	timelineCreateInfo.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE_KHR;
+	timelineCreateInfo.initialValue = initialValue;
+
+	VkSemaphoreCreateInfo createInfo{};
+	createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+	createInfo.pNext = &timelineCreateInfo;
+
+	const VkResult result = vkCreateSemaphore(device_, &createInfo, allocator_, &semaphore);
+	vlkFatalAssert(result);
+
+	return semaphore;
+}
+
+VkSemaphore Device::BackendData::createTimelineSemaphore()
+{
+	return createTimelineSemaphore(0);
+}
+
+void Device::BackendData::signalTimelineSemaphore(VkSemaphore semaphore, uint64_t value)
+{
+	ASSERT(semaphore != VK_NULL_HANDLE);
+
+	VkSemaphoreSignalInfo signalInfo{};
+	signalInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SIGNAL_INFO_KHR;
+	signalInfo.semaphore = semaphore;
+	signalInfo.value = value;
+
+	vkSignalSemaphoreKHR(device_, &signalInfo);
+}
+
+void Device::BackendData::waitTimelineSemaphore(VkSemaphore semaphore, uint64_t value)
+{
+	ASSERT(semaphore != VK_NULL_HANDLE);
+
+	VkSemaphoreWaitInfo waitInfo{};
+	waitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
+	waitInfo.semaphoreCount = 1;
+	waitInfo.pSemaphores = &semaphore;
+	waitInfo.pValues = &value;
+
+	vkWaitSemaphoresKHR(device_, &waitInfo, UINT64_MAX);
+}
+
+uint64_t Device::BackendData::getTimelineSemaphoreValue(VkSemaphore semaphore)
+{
+	ASSERT(semaphore != VK_NULL_HANDLE);
+
+	uint64_t value = 0;
+	vkGetSemaphoreCounterValueKHR(device_, semaphore, &value);
+	return value;
+}
+
 void Device::BackendData::destroySemaphore(VkSemaphore semaphore)
 {
 	ASSERT(semaphore != VK_NULL_HANDLE);

@@ -1,4 +1,6 @@
-#if (defined(WITH_TRACY) || NCINE_WITH_TRACY) && \
+#include <ncine/config.h>
+
+#if (defined(WITH_TRACY) || NCINE_WITH_TRACY) && NCINE_WITH_OPENGL && \
     !defined(__ANDROID__) && !defined(__APPLE__) && !defined(__EMSCRIPTEN__)
 
 	#include "tracy/TracyOpenGL.hpp"

@@ -44,7 +44,15 @@ void copyDesc(const GraphicsPipeline::CreateDesc &createDesc, GraphicsPipeline::
 	desc.depthWriteEnable = createDesc.depthWriteEnable;
 	desc.depthCompareOp = createDesc.depthCompareOp;
 
-	desc.blendEnable = createDesc.blendEnable;
+	if (createDesc.blendState.attachmentCount > 0)
+	{
+		const GraphicsPipeline::ColorBlendStateCreateDesc &src = createDesc.blendState;
+		GraphicsPipeline::ColorBlendStateDesc &dst = desc.blendState;
+
+		dst.attachments.setSize(src.attachmentCount);
+		memcpy(dst.attachments.data(), src.attachments, src.attachmentCount * sizeof(GraphicsPipeline::ColorBlendAttachmentDesc));
+		memcpy(dst.blendConstants, src.blendConstants, 4 * sizeof(float));
+	}
 }
 
 }

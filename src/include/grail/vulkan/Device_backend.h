@@ -9,6 +9,9 @@
 #include "grail/Device.h"
 #include "grail/Swapchain.h"
 
+#include "tracy.h"
+#include "tracy_vulkan.h"
+
 namespace ncine {
 namespace grail {
 
@@ -48,19 +51,29 @@ struct Swapchain::BackendData
 	// The swapchain needs the device to create the TextureViews
 	Device *theDevice_ = nullptr;
 
-	void populateSwapchainCreateInfo(VkSwapchainCreateInfoKHR &createInfo);
+	void populateSwapchainCreateInfo(VkSwapchainCreateInfoKHR &createInfo, VkSwapchainKHR oldSwapchain);
 	void updateDesc(Desc &desc);
 	bool canBeCreated(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface, const Desc &desc);
 	bool createImagesAndViews(const Desc &desc);
 	bool create(const Desc &createDesc, Desc &desc);
+	bool recreate(const Desc &createDesc, Desc &desc);
 	void destroy();
 	void destroyImagesAndViews();
 };
 
 struct CommandBuffer::BackendData
 {
+	enum class BindPoint
+	{
+		NONE,
+		GRAPHICS,
+		COMPUTE
+	};
+	BindPoint activeBindPoint = BindPoint::NONE;
+
 	VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
 	GraphicsPipeline::Handle graphicsPipeline;
+	ComputePipeline::Handle computePipeline;
 	BindGroup::Handle bindGroup;
 	Device::BackendData *deviceBackend = nullptr;
 	Device::FrontendData *deviceFrontend = nullptr;
@@ -68,7 +81,7 @@ struct CommandBuffer::BackendData
 	uint32_t numDynamicOffsets = 0;
 	uint32_t dynamicOffsets[ExtraLimits::MaxDynamicOffsetsBindGroup];
 
-	void bindDescriptorSet();
+	bool tryBindDescriptorSet();
 };
 
 struct Device::BackendData
@@ -84,12 +97,15 @@ struct Device::BackendData
 	{
 		bool vulkan11 = false;
 		bool debugUtils = false;
+		bool timelineSemaphores = false;
 	};
 
 	struct QueueData
 	{
 		uint32_t queueIndex = uint32_t(-1);
 		VkQueue queue = VK_NULL_HANDLE;
+		VkSemaphore timelineSemaphore = VK_NULL_HANDLE;
+		uint64_t nextValue = 0; //< value to signal on next submit
 	};
 
 	struct FrameContext
@@ -98,6 +114,7 @@ struct Device::BackendData
 
 		bool swapchainHasAcquired = false;
 		VkFence frameFence = VK_NULL_HANDLE;
+		uint64_t lastSubmissionId = 0;
 
 		VkSemaphore acquireSemaphore = VK_NULL_HANDLE;
 
@@ -118,6 +135,8 @@ struct Device::BackendData
 		uint32_t combinedImageSamplerCount = 0;
 		uint32_t uniformBufferCount = 0;
 		uint32_t uniformBufferDynamicCount = 0;
+		uint32_t storageBufferCount = 0;
+		uint32_t storageBufferDynamicCount = 0;
 	};
 
 	struct DescriptorPoolData
@@ -127,6 +146,8 @@ struct Device::BackendData
 		uint32_t combinedImageSamplerCount = 0;
 		uint32_t uniformBufferCount = 0;
 		uint32_t uniformBufferDynamicCount = 0;
+		uint32_t storageBufferCount = 0;
+		uint32_t storageBufferDynamicCount = 0;
 	};
 
 	struct BindGroupLayoutData
@@ -146,11 +167,18 @@ struct Device::BackendData
 		VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
 	};
 
+	struct ComputePipelineData
+	{
+		VkPipeline pipeline = VK_NULL_HANDLE;
+		VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
+	};
+
 	struct BufferData
 	{
 		VkBuffer buffer = VK_NULL_HANDLE;
 		VmaAllocation allocation = VK_NULL_HANDLE;
 		VmaAllocationInfo allocationInfo;
+		Buffer::State bufferState = Buffer::State::UNDEFINED;
 	};
 
 	struct TextureData
@@ -166,6 +194,7 @@ struct Device::BackendData
 		VkImageView imageView = VK_NULL_HANDLE;
 		VkImage image = VK_NULL_HANDLE;
 		VkSampler sampler = VK_NULL_HANDLE;
+		bool isSwapchain = false;
 	};
 
 	struct Capabilities caps_;
@@ -194,6 +223,7 @@ struct Device::BackendData
 	BindGroupLayoutData bindGroupLayoutData_[PoolLimits::BindGroupLayouts];
 	BindGroupData bindGroupData_[PoolLimits::BindGroups];
 	GraphicsPipelineData graphicsPipelineData_[PoolLimits::GraphicsPipelines];
+	ComputePipelineData computePipelineData_[PoolLimits::ComputePipelines];
 	BufferData bufferData_[PoolLimits::Buffers];
 	TextureData textureData_[PoolLimits::Textures];
 	TextureViewData textureViewData_[PoolLimits::TextureViews];
@@ -207,6 +237,12 @@ struct Device::BackendData
 	Desc64HashMap<VkFramebuffer> hashToVkFramebuffers_{ BackendCacheLimits::FrameBuffers };
 	Desc64HashMap<VkPipelineLayout> hashToVkPipelineLayout_{ BackendCacheLimits::PipelineLayouts };
 	Desc64HashMap<VkSampler> hashToVkSampler_{ BackendCacheLimits::Samplers };
+
+	/// An array of VkFramebuffer hashes related to the current swapchain
+	nctl::StaticArray<uint64_t, BackendCacheLimits::FrameBuffers> swapchainVkFramebuffersHashes_;
+
+	/// A pointer to the Tracy context used for Vulkan profiling
+	TracyVkCtx tracyContext = nullptr;
 
 	/** @name Instance */
 	///@{
@@ -232,6 +268,7 @@ struct Device::BackendData
 	void destroyDevice();
 	void createBackendData(Device &device);
 	void destroyBackendData(Device &device);
+	void createTracyContext();
 
 	///@}
 
@@ -244,6 +281,11 @@ struct Device::BackendData
 	void resetFence(VkFence fence);
 
 	VkSemaphore createSemaphore();
+	VkSemaphore createTimelineSemaphore(uint64_t initialValue);
+	VkSemaphore createTimelineSemaphore();
+	void signalTimelineSemaphore(VkSemaphore semaphore, uint64_t value);
+	void waitTimelineSemaphore(VkSemaphore semaphore, uint64_t value);
+	uint64_t getTimelineSemaphoreValue(VkSemaphore semaphore);
 	void destroySemaphore(VkSemaphore semaphore);
 
 	///@}
@@ -251,7 +293,7 @@ struct Device::BackendData
 	/** @name FrameContext */
 	///@{
 
-	bool createFrameContext(FrameContext &frameContext);
+	bool createFrameContext(FrameContext &frameContext, uint32_t index);
 	void destroyFrameContext(FrameContext &frameContext);
 	void beginFrameContext();
 	void endFrameContext();
@@ -287,15 +329,20 @@ struct Device::BackendData
 	VkShaderModule createShaderModule(const uint8_t *codeData, size_t codeSize);
 	void destroyShaderModule(VkShaderModule shaderModule);
 
+	VkPipelineLayout createPipelineLayout(const GraphicsPipeline::PipelineLayoutCreateDesc &desc);
+	void destroyPipelineLayout(VkPipelineLayout pipelineLayout);
+
+	///@}
+
+	/** @name GraphicsPipeline */
+	///@{
+
 	VkRenderPass createRenderPass(const RenderPass::RenderTargetLayoutDesc &desc);
-	VkRenderPass createRenderPass(const RenderPass::RenderPassDesc &desc);
+	VkRenderPass createRenderPass(const RenderPass::RenderPassDesc &desc, bool *isSwapchainAttachment);
 	void destroyRenderPass(VkRenderPass renderPass);
 
 	VkFramebuffer createFramebuffer(const RenderPass::RenderTargetDesc &desc, VkRenderPass renderPass);
 	void destroyFramebuffer(VkFramebuffer framebuffer);
-
-	VkPipelineLayout createPipelineLayout(const GraphicsPipeline::PipelineLayoutCreateDesc &desc);
-	void destroyPipelineLayout(VkPipelineLayout pipelineLayout);
 
 	///@}
 
