@@ -9,6 +9,7 @@
 #include "grail/BindGroupLayout.h"
 #include "grail/BindGroup.h"
 #include "grail/GraphicsPipeline.h"
+#include "grail/ComputePipeline.h"
 #include "grail/Buffer.h"
 #include "grail/Texture.h"
 #include "grail/TextureView.h"
@@ -148,6 +149,19 @@ class Device
 
 	///@}
 
+	/** @name ComputePipeline */
+	///@{
+
+	/// Creates a new compute pipeline
+	NODISCARD ComputePipeline::Handle createComputePipeline(const ComputePipeline::CreateDesc &desc);
+	/// Destroys a compute pipeline
+	void destroyComputePipeline(ComputePipeline::Handle handle);
+
+	/// Retrieves the description structure of a compute pipeline
+	const ComputePipeline::Desc &computePipelineDesc(ComputePipeline::Handle handle);
+
+	///@}
+
 	/** @name Buffer */
 	///@{
 
@@ -198,10 +212,29 @@ class Device
 	/** @name CommandBuffer*/
 	///@{
 
+	struct SubmitDesc
+	{
+		bool waitAcquire = false;
+		bool signalPresent = false;
+		/// A value of zero means no wait
+		uint64_t waitValue = 0;
+	};
+
 	/// Creates a new command buffer (with a lifetime of a frame)
 	NODISCARD CommandBuffer createCommandBuffer();
+	/// Creates a new command buffer with the specified debug name (with a lifetime of a frame)
+	NODISCARD CommandBuffer createCommandBuffer(const char *debugName);
+	/// Submits a command buffer for execution with the specified presentation and timeline wait
+	uint64_t submitCommandBuffer(CommandBuffer &commandBuffer, const SubmitDesc &desc);
+	/// Submits a command buffer for execution with the specified timeline wait
+	uint64_t submitCommandBuffer(CommandBuffer &commandBuffer, uint64_t waitValue);
 	/// Submits a command buffer for execution
-	void submitCommandBuffer(CommandBuffer &commandBuffer);
+	uint64_t submitCommandBuffer(CommandBuffer &commandBuffer);
+
+	/// Checks if the specified submission has completed
+	bool isSubmissionComplete(uint64_t id);
+	/// Waits for the specified submission to be completed
+	void waitSubmission(uint64_t id);
 
 	///@}
 
@@ -257,6 +290,12 @@ class Device
 	void destroyGraphicsPipelineImpl(uint32_t index);
 	///@}
 
+	///** @name ComputePipeline implementation */
+	///@{
+	bool createComputePipelineImpl(uint32_t index, const ComputePipeline::CreateDesc &desc);
+	void destroyComputePipelineImpl(uint32_t index);
+	///@}
+
 	///** @name Buffer implementation */
 	///@{
 	bool createBufferImpl(uint32_t index, const Buffer::Desc &desc);
@@ -277,7 +316,7 @@ class Device
 
 	///** @name CommandBuffer implementation */
 	///@{
-	bool createCommandBufferImpl(CommandBuffer &commandBuffer);
+	bool createCommandBufferImpl(CommandBuffer &commandBuffer, const char *debugName);
 	///@}
 };
 

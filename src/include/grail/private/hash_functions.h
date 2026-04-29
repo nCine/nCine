@@ -11,8 +11,15 @@ namespace BindGroupLayout {
 	struct CreateDesc;
 }
 
-namespace GraphicsPipeline {
+namespace pipeline {
 	struct PipelineLayoutCreateDesc;
+}
+
+namespace GraphicsPipeline {
+	struct CreateDesc;
+}
+
+namespace ComputePipeline {
 	struct CreateDesc;
 }
 
@@ -29,23 +36,29 @@ namespace TextureView {
 uint64_t hashDesc(const BindGroupLayout::CreateDesc &desc, uint64_t seed);
 uint64_t hashDesc(const BindGroupLayout::CreateDesc &desc);
 
-uint64_t hashDesc(const GraphicsPipeline::PipelineLayoutCreateDesc &desc,
+uint64_t hashDesc(const pipeline::PipelineLayoutCreateDesc &desc,
                   const GrlHandleHashMap<BindGroupLayout::Tag> &fromHandleToHash,
                   uint64_t seed);
-uint64_t hashDesc(const GraphicsPipeline::PipelineLayoutCreateDesc &desc,
+uint64_t hashDesc(const pipeline::PipelineLayoutCreateDesc &desc,
                   const GrlHandleHashMap<BindGroupLayout::Tag> &fromHandleToHash);
 
 uint64_t hashDesc(const GraphicsPipeline::CreateDesc &desc,
                   const GrlHandleHashMap<BindGroupLayout::Tag> &fromHandleToHash,
                   uint64_t seed);
 uint64_t hashDesc(const GraphicsPipeline::CreateDesc &desc,
+                  const GrlHandleHashMap<BindGroupLayout::Tag> &fromHandleToHash);
+
+uint64_t hashDesc(const ComputePipeline::CreateDesc &desc,
+                  const GrlHandleHashMap<BindGroupLayout::Tag> &fromHandleToHash,
+                  uint64_t seed);
+uint64_t hashDesc(const ComputePipeline::CreateDesc &desc,
                   const GrlHandleHashMap<BindGroupLayout::Tag> &fromHandleToHash);
 
 uint64_t hashDesc(const RenderPass::RenderTargetLayoutDesc &desc, uint64_t seed);
 uint64_t hashDesc(const RenderPass::RenderTargetLayoutDesc &desc);
 
-uint64_t hashDesc(const RenderPass::RenderPassDesc &desc, uint64_t seed);
-uint64_t hashDesc(const RenderPass::RenderPassDesc &desc);
+uint64_t hashDesc(const RenderPass::RenderPassDesc &desc, bool *isSwapchainAttachment, uint64_t seed);
+uint64_t hashDesc(const RenderPass::RenderPassDesc &desc, bool *isSwapchainAttachment);
 
 uint64_t hashDesc(const RenderPass::RenderTargetDesc &desc, uint64_t seed);
 uint64_t hashDesc(const RenderPass::RenderTargetDesc &desc);

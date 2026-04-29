@@ -17,6 +17,8 @@ VkPrimitiveTopology grlPrimitiveTopologyToVk(GraphicsPipeline::PrimitiveTopology
 {
 	switch (primitiveTopology)
 	{
+		case GraphicsPipeline::PrimitiveTopology::POINT_LIST: return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+
 		case GraphicsPipeline::PrimitiveTopology::TRIANGLE_LIST: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 		case GraphicsPipeline::PrimitiveTopology::TRIANGLE_STRIP: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
 		case GraphicsPipeline::PrimitiveTopology::TRIANGLE_FAN: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN;
@@ -77,53 +79,93 @@ VkAttachmentStoreOp grlStoreOpToVk(RenderPass::StoreOp storeOp)
 	}
 }
 
+VkBlendFactor grlBlendFactorToVk(GraphicsPipeline::BlendFactor factor)
+{
+	switch (factor)
+	{
+		case GraphicsPipeline::BlendFactor::ZERO: return VK_BLEND_FACTOR_ZERO;
+		case GraphicsPipeline::BlendFactor::ONE: return VK_BLEND_FACTOR_ONE;
+
+		case GraphicsPipeline::BlendFactor::SRC_COLOR: return VK_BLEND_FACTOR_SRC_COLOR;
+		case GraphicsPipeline::BlendFactor::ONE_MINUS_SRC_COLOR: return VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
+
+		case GraphicsPipeline::BlendFactor::DST_COLOR: return VK_BLEND_FACTOR_DST_COLOR;
+		case GraphicsPipeline::BlendFactor::ONE_MINUS_DST_COLOR: return VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
+
+		case GraphicsPipeline::BlendFactor::SRC_ALPHA: return VK_BLEND_FACTOR_SRC_ALPHA;
+		case GraphicsPipeline::BlendFactor::ONE_MINUS_SRC_ALPHA: return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+
+		case GraphicsPipeline::BlendFactor::DST_ALPHA: return VK_BLEND_FACTOR_DST_ALPHA;
+		case GraphicsPipeline::BlendFactor::ONE_MINUS_DST_ALPHA: return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
+
+		case GraphicsPipeline::BlendFactor::CONSTANT_COLOR: return VK_BLEND_FACTOR_CONSTANT_COLOR;
+		case GraphicsPipeline::BlendFactor::ONE_MINUS_CONSTANT_COLOR: return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
+
+		case GraphicsPipeline::BlendFactor::CONSTANT_ALPHA: return VK_BLEND_FACTOR_CONSTANT_ALPHA;
+		case GraphicsPipeline::BlendFactor::ONE_MINUS_CONSTANT_ALPHA: return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA;
+
+		case GraphicsPipeline::BlendFactor::SRC_ALPHA_SATURATE: return VK_BLEND_FACTOR_SRC_ALPHA_SATURATE;
+
+		default: return VK_BLEND_FACTOR_ONE;
+	}
+}
+
+VkBlendOp grlBlendOpToVk(GraphicsPipeline::BlendOp op)
+{
+	switch (op)
+	{
+		case GraphicsPipeline::BlendOp::ADD: return VK_BLEND_OP_ADD;
+		case GraphicsPipeline::BlendOp::SUBTRACT: return VK_BLEND_OP_SUBTRACT;
+		case GraphicsPipeline::BlendOp::REVERSE_SUBTRACT: return VK_BLEND_OP_REVERSE_SUBTRACT;
+		case GraphicsPipeline::BlendOp::MIN: return VK_BLEND_OP_MIN;
+		case GraphicsPipeline::BlendOp::MAX: return VK_BLEND_OP_MAX;
+
+		default: return VK_BLEND_OP_ADD;
+	}
+}
+
+VkColorComponentFlags grlColorComponentToVk(GraphicsPipeline::ColorComponent mask)
+{
+	VkColorComponentFlags flags = 0;
+
+	if (uint8_t(mask) & uint8_t(GraphicsPipeline::ColorComponent::R))
+		flags |= VK_COLOR_COMPONENT_R_BIT;
+	if (uint8_t(mask) & uint8_t(GraphicsPipeline::ColorComponent::G))
+		flags |= VK_COLOR_COMPONENT_G_BIT;
+	if (uint8_t(mask) & uint8_t(GraphicsPipeline::ColorComponent::B))
+		flags |= VK_COLOR_COMPONENT_B_BIT;
+	if (uint8_t(mask) & uint8_t(GraphicsPipeline::ColorComponent::A))
+		flags |= VK_COLOR_COMPONENT_A_BIT;
+
+	return flags;
+}
+
 }
 
 ///////////////////////////////////////////////////////////
 // Device::BackendData
 ///////////////////////////////////////////////////////////
 
-VkShaderModule Device::BackendData::createShaderModule(const uint8_t *codeData, size_t codeSize)
-{
-	if (codeSize == 0 || codeData == nullptr)
-		return VK_NULL_HANDLE;
-
-	VkShaderModuleCreateInfo createInfo{};
-	createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-	createInfo.codeSize = codeSize;
-	createInfo.pCode = reinterpret_cast<const uint32_t *>(codeData);
-
-	VkShaderModule shaderModule = VK_NULL_HANDLE;
-	const VkResult result = vkCreateShaderModule(device_, &createInfo, allocator_, &shaderModule);
-	vlkFatalAssert(result);
-
-	return shaderModule;
-}
-
-void Device::BackendData::destroyShaderModule(VkShaderModule shaderModule)
-{
-	ASSERT(shaderModule != VK_NULL_HANDLE);
-	vkDestroyShaderModule(device_, shaderModule, allocator_);
-}
-
 VkRenderPass Device::BackendData::createRenderPass(const RenderPass::RenderTargetLayoutDesc &desc)
 {
 	RenderPass::RenderPassDesc renderPassDesc{};
 	renderPassDesc.layout = desc;
 
+	bool isSwapchainAttachment[RenderPass::MaxColorAttachments];
 	for (uint32_t i = 0; i < desc.colorCount; i++)
 	{
 		renderPassDesc.colorLoadOps[i] = RenderPass::LoadOp::DONT_CARE;
 		renderPassDesc.colorStoreOps[i] = RenderPass::StoreOp::DONT_CARE;
+		isSwapchainAttachment[i] = false;
 	}
 
 	renderPassDesc.depthLoadOp = RenderPass::LoadOp::DONT_CARE;
 	renderPassDesc.depthStoreOp = RenderPass::StoreOp::DONT_CARE;
 
-	return createRenderPass(renderPassDesc);
+	return createRenderPass(renderPassDesc, isSwapchainAttachment);
 }
 
-VkRenderPass Device::BackendData::createRenderPass(const RenderPass::RenderPassDesc &desc)
+VkRenderPass Device::BackendData::createRenderPass(const RenderPass::RenderPassDesc &desc, bool *isSwapchainAttachment)
 {
 	VkAttachmentDescription attachments[RenderPass::MaxColorAttachments + 1]{};
 	VkAttachmentReference colorAttachmentRefs[RenderPass::MaxColorAttachments]{};
@@ -143,7 +185,7 @@ VkRenderPass Device::BackendData::createRenderPass(const RenderPass::RenderPassD
 		attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		attachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		attachment.finalLayout = isSwapchainAttachment[i] ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 		colorAttachmentRefs[i].attachment = attachmentIndex;
 		colorAttachmentRefs[i].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -269,39 +311,6 @@ void Device::BackendData::destroyFramebuffer(VkFramebuffer framebuffer)
 	vkDestroyFramebuffer(device_, framebuffer, allocator_);
 }
 
-VkPipelineLayout Device::BackendData::createPipelineLayout(const GraphicsPipeline::PipelineLayoutCreateDesc &desc)
-{
-	ASSERT(desc.bindGroupLayoutCount > 0);
-
-	VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
-
-	VkDescriptorSetLayout descriptorSetLayouts[GraphicsPipeline::MaxBindGroups];
-	for (unsigned int i = 0; i < desc.bindGroupLayoutCount; i++)
-	{
-		BindGroupLayout::Handle bindGroupLayoutHandle = desc.bindGroupLayouts[i];
-		Device::BackendData::BindGroupLayoutData &data = bindGroupLayoutData_[bindGroupLayoutHandle.index()];
-		descriptorSetLayouts[i] = data.descriptorSetLayout;
-	}
-
-	VkPipelineLayoutCreateInfo createInfo{};
-	createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	createInfo.setLayoutCount = desc.bindGroupLayoutCount;
-	createInfo.pSetLayouts = descriptorSetLayouts;
-	createInfo.pushConstantRangeCount = 0;
-	createInfo.pPushConstantRanges = nullptr;
-
-	const VkResult result = vkCreatePipelineLayout(device_, &createInfo, allocator_, &pipelineLayout);
-	vlkFatalAssert(result);
-
-	return pipelineLayout;
-}
-
-void Device::BackendData::destroyPipelineLayout(VkPipelineLayout pipelineLayout)
-{
-	ASSERT(pipelineLayout != VK_NULL_HANDLE);
-	vkDestroyPipelineLayout(device_, pipelineLayout, allocator_);
-}
-
 ///////////////////////////////////////////////////////////
 // Device
 ///////////////////////////////////////////////////////////
@@ -350,6 +359,9 @@ bool Device::createGraphicsPipelineImpl(uint32_t index, const GraphicsPipeline::
 		vertShaderStageInfo.module = vertexShaderModule;
 		vertShaderStageInfo.pName = desc.vertexShader.entryName;
 		shaderStages.pushBack(vertShaderStageInfo);
+
+		if (bck.caps_.debugUtils)
+			setObjectName(bck.device_, vertexShaderModule, desc.vertexShader.debugName);
 	}
 
 	VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
@@ -363,6 +375,9 @@ bool Device::createGraphicsPipelineImpl(uint32_t index, const GraphicsPipeline::
 		fragShaderStageInfo.module = fragmentShaderModule;
 		fragShaderStageInfo.pName = desc.fragmentShader.entryName;
 		shaderStages.pushBack(fragShaderStageInfo);
+
+		if (bck.caps_.debugUtils)
+			setObjectName(bck.device_, fragmentShaderModule, desc.fragmentShader.debugName);
 	}
 
 	nctl::Array<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
@@ -463,26 +478,52 @@ bool Device::createGraphicsPipelineImpl(uint32_t index, const GraphicsPipeline::
 	depthStencil.front = {};
 	depthStencil.back = {};
 
-	VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-	colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-	colorBlendAttachment.blendEnable = VK_FALSE;
-	colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
-	colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-	colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
-	colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-	colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-	colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+	nctl::Array<VkPipelineColorBlendAttachmentState> colorBlendAttachments;
+	if (desc.blendState.attachmentCount > 0)
+	{
+		colorBlendAttachments.setCapacity(desc.blendState.attachmentCount);
+		for (uint32_t i = 0; i < desc.blendState.attachmentCount; i++)
+		{
+			const GraphicsPipeline::ColorBlendAttachmentDesc &src = desc.blendState.attachments[i];
 
-	VkPipelineColorBlendStateCreateInfo colorBlending{};
-	colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-	colorBlending.logicOpEnable = VK_FALSE;
-	colorBlending.logicOp = VK_LOGIC_OP_COPY;
-	colorBlending.attachmentCount = 1;
-	colorBlending.pAttachments = &colorBlendAttachment;
-	colorBlending.blendConstants[0] = 0.0f;
-	colorBlending.blendConstants[1] = 0.0f;
-	colorBlending.blendConstants[2] = 0.0f;
-	colorBlending.blendConstants[3] = 0.0f;
+			VkPipelineColorBlendAttachmentState dest{};
+			dest.blendEnable = src.blendEnable ? VK_TRUE : VK_FALSE;
+
+			dest.srcColorBlendFactor = grlBlendFactorToVk(src.srcColorFactor);
+			dest.dstColorBlendFactor = grlBlendFactorToVk(src.dstColorFactor);
+			dest.colorBlendOp = grlBlendOpToVk(src.colorOp);
+
+			dest.srcAlphaBlendFactor = grlBlendFactorToVk(src.srcAlphaFactor);
+			dest.dstAlphaBlendFactor = grlBlendFactorToVk(src.dstAlphaFactor);
+			dest.alphaBlendOp = grlBlendOpToVk(src.alphaOp);
+
+			dest.colorWriteMask = grlColorComponentToVk(src.colorWriteMask);
+
+			colorBlendAttachments.pushBack(dest);
+		}
+	}
+	else
+	{
+		VkPipelineColorBlendAttachmentState dummy{};
+		dummy.blendEnable = VK_FALSE;
+		dummy.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+		dummy.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+		dummy.colorBlendOp = VK_BLEND_OP_ADD;
+		dummy.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+		dummy.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+		dummy.alphaBlendOp = VK_BLEND_OP_ADD;
+		dummy.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+
+		colorBlendAttachments.pushBack(dummy);
+	}
+
+	VkPipelineColorBlendStateCreateInfo blendState{};
+	blendState.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+	blendState.logicOpEnable = VK_FALSE;
+	blendState.logicOp = VK_LOGIC_OP_COPY;
+	blendState.attachmentCount = colorBlendAttachments.size();
+	blendState.pAttachments = colorBlendAttachments.data();
+	memcpy(blendState.blendConstants, desc.blendState.blendConstants, sizeof(float) * 4);
 
 	VkGraphicsPipelineCreateInfo createInfo{};
 	createInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -495,7 +536,7 @@ bool Device::createGraphicsPipelineImpl(uint32_t index, const GraphicsPipeline::
 	createInfo.pRasterizationState = &rasterizer;
 	createInfo.pMultisampleState = &multisampling;
 	createInfo.pDepthStencilState = &depthStencil;
-	createInfo.pColorBlendState = &colorBlending;
+	createInfo.pColorBlendState = &blendState;
 	createInfo.pDynamicState = &dynamicState;
 
 	createInfo.layout = pipelineLayout;
@@ -509,6 +550,9 @@ bool Device::createGraphicsPipelineImpl(uint32_t index, const GraphicsPipeline::
 	vlkFatalAssert(result);
 	data.pipeline = pipeline;
 	data.pipelineLayout = pipelineLayout;
+
+	if (bck.caps_.debugUtils && desc.debugName)
+		setObjectName(bck.device_, data.pipeline, desc.debugName);
 
 	if (vertShaderStageInfo.module != VK_NULL_HANDLE)
 		bck.destroyShaderModule(vertShaderStageInfo.module);

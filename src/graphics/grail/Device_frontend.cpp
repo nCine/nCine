@@ -34,6 +34,15 @@ bool Device::FrontendData::isAlive(GraphicsPipeline::Handle handle) const
 	return isAlive;
 }
 
+bool Device::FrontendData::isAlive(ComputePipeline::Handle handle) const
+{
+	const bool isAlive = computePipelineHandles_.isAlive(handle);
+	if (isAlive == false)
+		LOGE_X("ComputePipeline handle is not alive: %u index, %u gen", handle.index(), handle.generation());
+	ASSERT(isAlive == true);
+	return isAlive;
+}
+
 bool Device::FrontendData::isAlive(Buffer::Handle handle) const
 {
 	const bool isAlive = bufferHandles_.isAlive(handle);

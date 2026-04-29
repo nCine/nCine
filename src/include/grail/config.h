@@ -10,6 +10,7 @@ namespace PoolLimits {
 	constexpr uint32_t BindGroupLayouts = 64;
 	constexpr uint32_t BindGroups = 512;
 	constexpr uint32_t GraphicsPipelines = 512;
+	constexpr uint32_t ComputePipelines = 128;
 	constexpr uint32_t Buffers = 1024;
 	constexpr uint32_t Textures = 1024;
 	constexpr uint32_t TextureViews = 1024;

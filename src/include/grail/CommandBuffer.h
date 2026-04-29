@@ -4,6 +4,7 @@
 #include "grail/handle_types.h"
 #include "grail/types.h"
 #include "grail/Texture.h"
+#include "grail/Buffer.h"
 
 namespace ncine {
 namespace grail {
@@ -17,8 +18,10 @@ class CommandBuffer
 {
   public:
 	void begin();
+	void beginRenderPass(const RenderPass::RenderPassDesc &passDesc, const RenderPass::RenderTargetDesc &targetDesc, const char *debugName);
 	void beginRenderPass(const RenderPass::RenderPassDesc &passDesc, const RenderPass::RenderTargetDesc &targetDesc);
 	void bindGraphicsPipeline(GraphicsPipeline::Handle handle);
+	void bindComputePipeline(ComputePipeline::Handle handle);
 	void bindVertexBuffer(Buffer::Handle handle);
 	void bindIndexBuffer(Buffer::Handle handle);
 	void bindBindGroup(BindGroup::Handle handle);
@@ -27,12 +30,17 @@ class CommandBuffer
 	void setScissor(Offset2D offset, Extent2D extent);
 	void draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance);
 	void drawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance);
+	void dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ);
 	void copyBuffer(Buffer::Handle srcHandle, Buffer::Handle dstHandle, uint64_t srcOffset, uint64_t dstOffset, uint64_t size);
 	void copyBuffer(Buffer::Handle srcHandle, Buffer::Handle dstHandle);
 	void copyBufferToTexture(Buffer::Handle srcHandle, Texture::Handle dstHandle, uint64_t srcOffset, Offset3D imgOffset, Extent3D imgExtent);
 	void copyBufferToTexture(Buffer::Handle srcHandle, Texture::Handle dstHandle);
 	void transitionTexture(Texture::Handle handle, Texture::State newState);
+	void transitionBuffer(Buffer::Handle handle, Buffer::State newState);
 	void endRenderPass();
+	void beginLabel(const char *labelName);
+	void insertLabel(const char *labelName);
+	void endLabel();
 	void end();
 
   private:

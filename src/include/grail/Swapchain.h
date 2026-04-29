@@ -54,6 +54,13 @@ class Swapchain
 	/// Presents the frame to the swapchain
 	bool present();
 
+	/// Recreates an outdated swapchain with the current description
+	bool recreate();
+	/// Recreates an outdated swapchain with the specified description
+	bool recreate(const Desc &desc);
+	/// Recreates an outdated swapchain with the current description but with the specified size
+	bool resize(uint32_t width, uint32_t height);
+
   private:
 	Desc desc_;
 

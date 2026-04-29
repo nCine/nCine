@@ -61,6 +61,8 @@ struct Desc
 
 	Type type = Type::TEXTURE_2D;
 	Sampler sampler;
+
+	const char *debugName = nullptr;
 };
 
 }

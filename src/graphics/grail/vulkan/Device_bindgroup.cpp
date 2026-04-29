@@ -23,6 +23,8 @@ bool Device::createBindGroupImpl(uint32_t index, const BindGroup::Desc &desc)
 	ASSERT(desc.entryCount == layoutDesc.entries.size());
 
 	data.descriptorSet = bck.allocateFromDescriptorPools(desc, data.descriptorPool);
+	if (bck.caps_.debugUtils)
+		setObjectName(bck.device_, data.descriptorSet, desc.debugName);
 
 	VkWriteDescriptorSet descriptorWrites[ExtraLimits::MaxWriteDescriptorBatchSize]{};
 	VkDescriptorBufferInfo bufferInfos[ExtraLimits::MaxWriteDescriptorBatchSize]{};
@@ -73,7 +75,22 @@ bool Device::createBindGroupImpl(uint32_t index, const BindGroup::Desc &desc)
 			descriptorWrite.dstBinding = entry.binding;
 			descriptorWrite.dstArrayElement = entry.arrayIndex;
 
-			descriptorWrite.descriptorType = layoutEntry.dynamicOffset ? VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC : VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			VkDescriptorType descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			if (layoutEntry.type == BindGroupLayout::BindingType::UNIFORM_BUFFER)
+			{
+				descriptorType = layoutEntry.dynamicOffset
+				        ? VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC
+				        : VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			}
+			else if (layoutEntry.type == BindGroupLayout::BindingType::STORAGE_BUFFER ||
+			         layoutEntry.type == BindGroupLayout::BindingType::READONLY_STORAGE_BUFFER)
+			{
+				descriptorType = layoutEntry.dynamicOffset
+				        ? VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC
+				        : VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+			}
+
+			descriptorWrite.descriptorType = descriptorType;
 			descriptorWrite.descriptorCount = 1;
 
 			descriptorWrite.pBufferInfo = &bufferInfo;

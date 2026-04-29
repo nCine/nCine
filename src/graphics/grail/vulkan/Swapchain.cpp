@@ -2,6 +2,7 @@
 #include "common_headers.h"
 
 #include <nctl/algorithms.h> // for `nctl::clamp()`
+#include <nctl/StaticString.h>
 #include "grail/private/Device_frontend.h"
 #include "grail/vulkan/Device_backend.h"
 #include "grail/vulkan/vlk_utils.h"
@@ -29,7 +30,7 @@ Swapchain::AcquireResult vlkResultToAcquireResult(VkResult result)
 // Swapchain::BackendData
 ///////////////////////////////////////////////////////////
 
-void Swapchain::BackendData::populateSwapchainCreateInfo(VkSwapchainCreateInfoKHR &createInfo)
+void Swapchain::BackendData::populateSwapchainCreateInfo(VkSwapchainCreateInfoKHR &createInfo, VkSwapchainKHR oldSwapchain)
 {
 	createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 	createInfo.surface = settings_.surface;
@@ -46,7 +47,7 @@ void Swapchain::BackendData::populateSwapchainCreateInfo(VkSwapchainCreateInfoKH
 	createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 	createInfo.presentMode = settings_.presentMode;
 	createInfo.clipped = VK_TRUE;
-	createInfo.oldSwapchain = VK_NULL_HANDLE;
+	createInfo.oldSwapchain = oldSwapchain;
 }
 
 void Swapchain::BackendData::updateDesc(Desc &desc)
@@ -165,6 +166,7 @@ bool Swapchain::BackendData::createImagesAndViews(const Desc &desc)
 	if (swapchain_ == VK_NULL_HANDLE)
 		return false;
 
+	nctl::StaticString<32> debugNameString;
 	Device::BackendData &devBck = *theDevice_->backendData_;
 	Device::FrontendData &devFrn = *theDevice_->frontendData_;
 
@@ -191,6 +193,7 @@ bool Swapchain::BackendData::createImagesAndViews(const Desc &desc)
 	textureViewDesc.baseLayer = 0;
 	textureViewDesc.layerCount = 1;
 	textureViewDesc.type = TextureView::Type::TEXTURE_2D;
+	textureViewDesc.debugName = debugNameString.data();
 
 	for (uint32_t i = 0; i < imageCount; i++)
 	{
@@ -201,12 +204,21 @@ bool Swapchain::BackendData::createImagesAndViews(const Desc &desc)
 		textureData.textureState = Texture::State::UNDEFINED;
 		frontend_->textures_.pushBack(textureHandle);
 
-		textureViewDesc.texture = textureHandle;
-		TextureView::Handle textureViewHandle = theDevice_->createTextureView(textureViewDesc);
+		if (devBck.caps_.debugUtils)
+		{
+			debugNameString.format("Swapchain image #%u", i);
+			setObjectName(devBck.device_, images[i], debugNameString.data());
+		}
 
+		textureViewDesc.texture = textureHandle;
+		debugNameString.format("Swapchain imageview #%u", i);
+		TextureView::Handle textureViewHandle = theDevice_->createTextureView(textureViewDesc);
+		devBck.textureViewData_[textureViewHandle.index()].isSwapchain = true;
 		frontend_->textureViews_.pushBack(textureViewHandle);
 
 		presentSemaphores[i] = devBck.createSemaphore();
+		debugNameString.format("Present semaphore #%u", i);
+		setObjectName(devBck.device_, presentSemaphores[i], debugNameString.data());
 	}
 
 	return true;
@@ -232,10 +244,48 @@ bool Swapchain::BackendData::create(const Desc &createDesc, Desc &desc)
 	}
 
 	VkSwapchainCreateInfoKHR createInfo{};
-	populateSwapchainCreateInfo(createInfo);
+	populateSwapchainCreateInfo(createInfo, VK_NULL_HANDLE);
 
 	const VkResult result = vkCreateSwapchainKHR(devBck.device_, &createInfo, devBck.allocator_, &swapchain_);
 	vlkFatalAssert(result);
+
+	if (devBck.caps_.debugUtils)
+		setObjectName(devBck.device_, swapchain_, "SwapchainKHR");
+
+	updateDesc(desc);
+
+	const bool created = createImagesAndViews(desc);
+	return created;
+}
+
+bool Swapchain::BackendData::recreate(const Desc &createDesc, Desc &desc)
+{
+	ASSERT(swapchain_ != VK_NULL_HANDLE);
+	if (swapchain_ == VK_NULL_HANDLE)
+		return false;
+
+	Device::BackendData &devBck = *theDevice_->backendData_;
+
+	const bool success = canBeCreated(devBck.physicalDevice_, devBck.surface_, createDesc);
+	if (success == false)
+		return false;
+
+	theDevice_->waitIdle();
+
+	destroyImagesAndViews();
+
+	VkSwapchainKHR oldSwapchain = swapchain_;
+	VkSwapchainCreateInfoKHR createInfo{};
+	populateSwapchainCreateInfo(createInfo, oldSwapchain);
+
+	const VkResult result = vkCreateSwapchainKHR(devBck.device_, &createInfo, devBck.allocator_, &swapchain_);
+	vlkFatalAssert(result);
+
+	if (devBck.caps_.debugUtils)
+		setObjectName(devBck.device_, swapchain_, "SwapchainKHR");
+
+	if (oldSwapchain != VK_NULL_HANDLE)
+		vkDestroySwapchainKHR(devBck.device_, oldSwapchain, devBck.allocator_);
 
 	updateDesc(desc);
 
@@ -259,6 +309,21 @@ void Swapchain::BackendData::destroyImagesAndViews()
 {
 	ASSERT(swapchain_ != VK_NULL_HANDLE);
 	Device::BackendData &devBck = *theDevice_->backendData_;
+
+	for (uint32_t i = 0; i < devBck.swapchainVkFramebuffersHashes_.size(); i++)
+	{
+		const uint64_t framebufferHash = devBck.swapchainVkFramebuffersHashes_[i];
+		VkFramebuffer *framebufferPtr = devBck.hashToVkFramebuffers_.find(framebufferHash);
+		ASSERT(framebufferPtr != nullptr);
+
+		if (framebufferPtr != nullptr)
+		{
+			VkFramebuffer framebuffer = *framebufferPtr;
+			devBck.destroyFramebuffer(framebuffer);
+			devBck.hashToVkFramebuffers_.remove(framebufferHash);
+		}
+	}
+	devBck.swapchainVkFramebuffersHashes_.clear();
 
 	const uint32_t numTextures = frontend_->textures_.size();
 	ASSERT(numTextures > 0);
@@ -318,6 +383,32 @@ bool Swapchain::present()
 	devBck.endFrameContext();
 
 	return (result == VK_SUCCESS);
+}
+
+bool Swapchain::recreate()
+{
+	BackendData &bck = *backendData_;
+	const bool recreated = bck.recreate(desc_, desc_);
+	return recreated;
+}
+
+bool Swapchain::recreate(const Desc &desc)
+{
+	BackendData &bck = *backendData_;
+	const bool recreated = bck.recreate(desc, desc_);
+	return recreated;
+}
+
+bool Swapchain::resize(uint32_t width, uint32_t height)
+{
+	Desc desc = desc_;
+	desc.width = width;
+	desc.height = height;
+
+	BackendData &bck = *backendData_;
+	const bool recreated = bck.recreate(desc, desc_);
+
+	return recreated;
 }
 
 } // namespace grail
