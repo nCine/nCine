@@ -35,20 +35,20 @@ class DLL_PUBLIC IGfxDevice
 	{
 		WindowMode()
 		    : width(0), height(0), refreshRate(0.0f), windowPositionX(AppConfiguration::WindowPositionIgnore),
-		      windowPositionY(AppConfiguration::WindowPositionIgnore), isFullScreen(false), isResizable(false), hasWindowScaling(true) {}
+		      windowPositionY(AppConfiguration::WindowPositionIgnore), isFullscreen(false), isResizable(false), hasWindowScaling(true) {}
 		WindowMode(unsigned int w, unsigned int h, float refresh, int posX, int posY, bool fullscreen, bool resizable, bool windowScaling)
 		    : width(w), height(h), refreshRate(refresh), windowPositionX(posX), windowPositionY(posY),
-		      isFullScreen(fullscreen), isResizable(resizable), hasWindowScaling(windowScaling) {}
+		      isFullscreen(fullscreen), isResizable(resizable), hasWindowScaling(windowScaling) {}
 		explicit WindowMode(const AppConfiguration &appCfg)
 		    : width(appCfg.resolution.x), height(appCfg.resolution.y), refreshRate(appCfg.refreshRate), windowPositionX(appCfg.windowPosition.x),
-		      windowPositionY(appCfg.windowPosition.y), isFullScreen(appCfg.fullScreen), isResizable(appCfg.resizable), hasWindowScaling(appCfg.windowScaling) {}
+		      windowPositionY(appCfg.windowPosition.y), isFullscreen(appCfg.fullscreen), isResizable(appCfg.resizable), hasWindowScaling(appCfg.windowScaling) {}
 
 		unsigned int width;
 		unsigned int height;
 		float refreshRate;
 		int windowPositionX;
 		int windowPositionY;
-		bool isFullScreen;
+		bool isFullscreen;
 		bool isResizable;
 		bool hasWindowScaling;
 	};
@@ -113,10 +113,10 @@ class DLL_PUBLIC IGfxDevice
 	/*! An interval of `-1` will enable adaptive v-sync if available */
 	virtual void setSwapInterval(int interval) = 0;
 
-	/// Returns true if the device renders in full screen
-	inline bool isFullScreen() const { return isFullScreen_; }
-	/// Sets the full screen flag of the window
-	virtual void setFullScreen(bool fullScreen) = 0;
+	/// Returns true if the device renders in fullscreen
+	inline bool isFullscreen() const { return isFullscreen_; }
+	/// Sets the fullscreen flag of the window
+	virtual void setFullscreen(bool fullscreen) = 0;
 
 	/// Returns true if the window is resizable
 	inline bool isResizable() const { return isResizable_; }
@@ -145,10 +145,10 @@ class DLL_PUBLIC IGfxDevice
 	/// Returns the window or video mode resolution aspect ratio
 	inline float aspect() const { return width_ / static_cast<float>(height_); }
 	/// Sets the window size with two integers
-	/*! \note If the application is in full screen this method will have no effect. */
+	/*! \note If the application is in fullscreen this method will have no effect. */
 	virtual void setWindowSize(int width, int height) = 0;
 	/// Sets the window size with a `Vector2i` object
-	/*! \note If the application is in full screen this method will have no effect. */
+	/*! \note If the application is in fullscreen this method will have no effect. */
 	inline void setWindowSize(Vector2i size) { setWindowSize(size.x, size.y); }
 
 	/// Returns the window width in pixels
@@ -192,8 +192,8 @@ class DLL_PUBLIC IGfxDevice
 	virtual const VideoMode &currentVideoMode(unsigned int monitorIndex) const = 0;
 	/// Returns the current video mode for the monitor that hosts the window
 	inline const VideoMode &currentVideoMode() const { return currentVideoMode(windowMonitorIndex()); }
-	/// Sets the video mode that will be used in full screen by the monitor that hosts the window
-	/*! \note Call this method <b>before</b> enabling full screen. */
+	/// Sets the video mode that will be used in fullscreen by the monitor that hosts the window
+	/*! \note Call this method <b>before</b> enabling fullscreen. */
 	inline virtual bool setVideoMode(unsigned int modeIndex) { return false; }
 
 	/// Returns the scaling factor for application window
@@ -211,8 +211,8 @@ class DLL_PUBLIC IGfxDevice
 	int drawableWidth_;
 	/// Window height in pixels (for HiDPI screens)
 	int drawableHeight_;
-	/// Whether rendering occurs in full screen
-	bool isFullScreen_;
+	/// Whether rendering occurs in fullscreen
+	bool isFullscreen_;
 	/// Whether the window is resizable
 	bool isResizable_;
 	/// OpenGL context creation attributes

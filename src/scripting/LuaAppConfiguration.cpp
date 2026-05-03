@@ -21,7 +21,7 @@ namespace AppConfiguration {
 	static const char *resolution = "resolution";
 	static const char *refreshRate = "refresh_rate";
 	static const char *windowPosition = "window_position";
-	static const char *fullScreen = "full_screen";
+	static const char *fullscreen = "fullscreen";
 	static const char *resizable = "resizable";
 	static const char *windowScaling = "window_scaling";
 	static const char *frameLimit = "frame_limit";
@@ -85,7 +85,7 @@ void LuaAppConfiguration::push(lua_State *L, const AppConfiguration &appCfg)
 	LuaVector2iUtils::pushField(L, LuaNames::AppConfiguration::resolution, appCfg.resolution);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::refreshRate, appCfg.refreshRate);
 	LuaVector2iUtils::pushField(L, LuaNames::AppConfiguration::windowPosition, appCfg.windowPosition);
-	LuaUtils::pushField(L, LuaNames::AppConfiguration::fullScreen, appCfg.fullScreen);
+	LuaUtils::pushField(L, LuaNames::AppConfiguration::fullscreen, appCfg.fullscreen);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::resizable, appCfg.resizable);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::windowScaling, appCfg.windowScaling);
 	LuaUtils::pushField(L, LuaNames::AppConfiguration::frameLimit, appCfg.frameLimit);
@@ -161,8 +161,8 @@ void LuaAppConfiguration::retrieveAndSet(lua_State *L, AppConfiguration &appCfg)
 	appCfg.refreshRate = refreshRate;
 	const Vector2i windowPosition = LuaVector2iUtils::retrieveTableField(L, -1, LuaNames::AppConfiguration::windowPosition);
 	appCfg.windowPosition = windowPosition;
-	const bool fullScreen = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::fullScreen);
-	appCfg.fullScreen = fullScreen;
+	const bool fullscreen = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::fullscreen);
+	appCfg.fullscreen = fullscreen;
 	const bool resizable = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::resizable);
 	appCfg.resizable = resizable;
 	const bool windowScaling = LuaUtils::retrieveField<bool>(L, -1, LuaNames::AppConfiguration::windowScaling);

@@ -14,8 +14,8 @@ class LuaIGfxDevice
   private:
 	static int setSwapInterval(lua_State *L);
 
-	static int isFullScreen(lua_State *L);
-	static int setFullScreen(lua_State *L);
+	static int isFullscreen(lua_State *L);
+	static int setFullscreen(lua_State *L);
 
 	static int isResizable(lua_State *L);
 

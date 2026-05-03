@@ -20,7 +20,7 @@ class GlfwGfxDevice : public IGfxDevice
 
 	void setSwapInterval(int interval) override;
 
-	void setFullScreen(bool fullScreen) override;
+	void setFullscreen(bool fullscreen) override;
 	void setResizable(bool resizable) override;
 
 	int windowPositionX() const override;
@@ -50,12 +50,12 @@ class GlfwGfxDevice : public IGfxDevice
 	/*! \note Used to retrieve the index in the monitors array */
 	static GLFWmonitor *monitorPointers_[MaxMonitors];
 
-	/// Monitor index to use in full screen
+	/// Monitor index to use in fullscreen
 	static int fsMonitorIndex_;
-	/// Video mode index to use in full screen
+	/// Video mode index to use in fullscreen
 	static int fsModeIndex_;
 #ifdef _WIN32
-	/// Swap interval to restore after going full screen
+	/// Swap interval to restore after going fullscreen
 	static int swapInterval_;
 #endif
 

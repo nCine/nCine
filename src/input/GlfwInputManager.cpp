@@ -486,7 +486,7 @@ void GlfwInputManager::windowSizeCallback(GLFWwindow *window, int width, int hei
 
 	gfxDevice.width_ = width;
 	gfxDevice.height_ = height;
-	gfxDevice.isFullScreen_ = (glfwGetWindowMonitor(window) != nullptr);
+	gfxDevice.isFullscreen_ = (glfwGetWindowMonitor(window) != nullptr);
 }
 
 void GlfwInputManager::framebufferSizeCallback(GLFWwindow *window, int width, int height)

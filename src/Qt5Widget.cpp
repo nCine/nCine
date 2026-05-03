@@ -1,11 +1,8 @@
 #include "Qt5Widget.h"
+#include "Qt5GfxDevice.h"
 #include "Qt5InputManager.h"
 #include "PCApplication.h"
 #include "IAppEventHandler.h"
-
-#ifdef WITH_GLEW
-	#include "Qt5GfxDevice.h"
-#endif
 
 #include <QApplication>
 #include <QCoreApplication>
@@ -34,7 +31,7 @@ Qt5Widget::Qt5Widget(QWidget *parent, nctl::UniquePtr<IAppEventHandler> (*create
 	application_.setAutoSuspension(false);
 
 	// The graphics device is initialized and can react to resize events
-	if (application_.gfxDevice().isFullScreen())
+	if (application_.gfxDevice().isFullscreen())
 		window()->showFullScreen();
 	else if (application_.appConfiguration().resizable == false)
 	{

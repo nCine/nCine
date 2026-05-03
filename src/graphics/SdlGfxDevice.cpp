@@ -62,17 +62,17 @@ void SdlGfxDevice::setSwapInterval(int interval)
 	SDL_GL_SetSwapInterval(interval);
 }
 
-void SdlGfxDevice::setFullScreen(bool fullScreen)
+void SdlGfxDevice::setFullscreen(bool fullscreen)
 {
-	if (isFullScreen_ == fullScreen)
+	if (isFullscreen_ == fullscreen)
 		return;
 
-	isFullScreen_ = fullScreen;
+	isFullscreen_ = fullscreen;
 #ifdef __EMSCRIPTEN__
-	// Emscripten needs `SDL_WINDOW_FULLSCREEN_DESKTOP` to request full screen
-	const int flags = isFullScreen_ ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0;
+	// Emscripten needs `SDL_WINDOW_FULLSCREEN_DESKTOP` to request fullscreen
+	const int flags = isFullscreen_ ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0;
 #else
-	const int flags = isFullScreen_ ? SDL_WINDOW_FULLSCREEN : 0;
+	const int flags = isFullscreen_ ? SDL_WINDOW_FULLSCREEN : 0;
 #endif
 	SDL_SetWindowFullscreen(windowHandle_, flags);
 
@@ -239,21 +239,21 @@ void SdlGfxDevice::initDevice(const WindowMode &windowMode)
 #endif
 
 #ifndef __EMSCRIPTEN__
-	// If the window size is zero or negative, then the application will go full screen
+	// If the window size is zero or negative, then the application will go fullscreen
 	if (width_ <= 0 || height_ <= 0)
-		isFullScreen_ = true;
+		isFullscreen_ = true;
 
 	const bool ignoreAnyWindowPosition = (windowMode.windowPositionX == AppConfiguration::WindowPositionIgnore ||
 	                                      windowMode.windowPositionY == AppConfiguration::WindowPositionIgnore);
 	const Vector2i windowCenter(windowMode.windowPositionX + windowMode.width / 2, windowMode.windowPositionY + windowMode.height / 2);
 	const unsigned int monitorIndex = (ignoreAnyWindowPosition == false) ? containingMonitorIndex(windowCenter) : 0;
-	const bool desktopFullScreen = (width_ <= 0 || height_ <= 0) && windowMode.refreshRate <= 0.0f; // If full screen is requested, current video mode will not be changed
+	const bool desktopFullscreen = (width_ <= 0 || height_ <= 0) && windowMode.refreshRate <= 0.0f; // If fullscreen is requested, current video mode will not be changed
 
 	const SDL_DisplayMode *closestModePtr = nullptr;
 	SDL_DisplayMode closestMode;
-	if (isFullScreen_)
+	if (isFullscreen_)
 	{
-		if (desktopFullScreen)
+		if (desktopFullscreen)
 			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		else
 		{
@@ -271,7 +271,7 @@ void SdlGfxDevice::initDevice(const WindowMode &windowMode)
 		}
 	}
 #else
-	if (isFullScreen_)
+	if (isFullscreen_)
 		flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 #endif
 
@@ -291,8 +291,8 @@ void SdlGfxDevice::initDevice(const WindowMode &windowMode)
 		SDL_SetWindowFullscreen(windowHandle_, SDL_WINDOW_FULLSCREEN);
 	}
 
-	// Set the current video mode as the default one (for a call to `setFullScreen(true)` without a `setVideoMode()`)
-	if (isFullScreen_ == false)
+	// Set the current video mode as the default one (for a call to `setFullscreen(true)` without a `setVideoMode()`)
+	if (isFullscreen_ == false)
 	{
 		SDL_DisplayMode currentMode;
 		SDL_GetCurrentDisplayMode(monitorIndex, &currentMode);
@@ -309,10 +309,10 @@ void SdlGfxDevice::initDevice(const WindowMode &windowMode)
 
 #ifndef __EMSCRIPTEN__
 	// resolution should be set to current screen size
-	if (desktopFullScreen)
+	if (desktopFullscreen)
 	{
 		SDL_GetWindowSize(windowHandle_, &width_, &height_);
-		isFullScreen_ = true;
+		isFullscreen_ = true;
 	}
 #endif
 

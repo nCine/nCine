@@ -716,7 +716,7 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 		else
 			widgetName_.formatAppend("%d", appCfg.windowPosition.y);
 		ImGui::TextUnformatted(widgetName_.data());
-		ImGui::Text("Full Screen: %s", appCfg.fullScreen ? "true" : "false");
+		ImGui::Text("Fullscreen: %s", appCfg.fullscreen ? "true" : "false");
 		ImGui::Text("Resizable: %s", appCfg.resizable ? "true" : "false");
 		ImGui::Text("Window Scaling: %s", appCfg.windowScaling ? "true" : "false");
 		ImGui::Text("Frame Limit: %u", appCfg.frameLimit);
@@ -807,7 +807,7 @@ void ImGuiDebugOverlay::guiWindowSettings()
 			if (i == gfxDevice.primaryMonitorIndex())
 				widgetName_.append(" [Primary]");
 			if (i == gfxDevice.windowMonitorIndex())
-				widgetName_.formatAppend(" [%s]", gfxDevice.isFullScreen() ? "Full Screen" : "Window");
+				widgetName_.formatAppend(" [%s]", gfxDevice.isFullscreen() ? "Fullscreen" : "Window");
 
 			if (ImGui::TreeNode(widgetName_.data()))
 			{
@@ -836,11 +836,11 @@ void ImGuiDebugOverlay::guiWindowSettings()
 #if !defined(__ANDROID__) || (defined(__ANDROID__) && __ANDROID_API__ >= 30)
 		static Vector2i resolution = theApplication().resolutionInt();
 		static Vector2i winPosition = gfxDevice.windowPosition();
-		static bool fullScreen = gfxDevice.isFullScreen();
+		static bool fullscreen = gfxDevice.isFullscreen();
 
 		static int selectedVideoMode = -1;
 		const IGfxDevice::VideoMode currentVideoMode = gfxDevice.currentVideoMode();
-		if (fullScreen == false)
+		if (fullscreen == false)
 		{
 			ImGui::InputInt2("Resolution", resolution.data());
 			ImGui::InputInt2("Position", winPosition.data());
@@ -876,26 +876,26 @@ void ImGuiDebugOverlay::guiWindowSettings()
 		}
 
 	#ifdef __ANDROID__
-		ImGui::TextUnformatted("Full Screen: true");
+		ImGui::TextUnformatted("Fullscreen: true");
 	#else
-		ImGui::Checkbox("Full Screen", &fullScreen);
+		ImGui::Checkbox("Fullscreen", &fullscreen);
 	#endif
 		ImGui::SameLine();
 		if (ImGui::Button("Apply"))
 		{
-			if (fullScreen == false)
+			if (fullscreen == false)
 			{
-				// Disable full screen, then change window size and position
-				gfxDevice.setFullScreen(fullScreen);
+				// Disable fullscreen, then change window size and position
+				gfxDevice.setFullscreen(fullscreen);
 				gfxDevice.setWindowSize(resolution);
 				gfxDevice.setWindowPosition(winPosition);
 			}
 			else
 			{
-				// Set the video mode, then enable full screen
+				// Set the video mode, then enable fullscreen
 				winPosition = gfxDevice.windowPosition();
 				gfxDevice.setVideoMode(selectedVideoMode);
-				gfxDevice.setFullScreen(fullScreen);
+				gfxDevice.setFullscreen(fullscreen);
 			}
 		}
 		ImGui::SameLine();
@@ -903,9 +903,9 @@ void ImGuiDebugOverlay::guiWindowSettings()
 		{
 	#ifndef __ANDROID__
 			resolution = theApplication().appConfiguration().resolution;
-			fullScreen = theApplication().appConfiguration().fullScreen;
+			fullscreen = theApplication().appConfiguration().fullscreen;
 	#endif
-			gfxDevice.setFullScreen(fullScreen);
+			gfxDevice.setFullscreen(fullscreen);
 			gfxDevice.setWindowSize(resolution[0], resolution[1]);
 			gfxDevice.setWindowPosition(winPosition[0], winPosition[1]);
 		}
@@ -914,7 +914,7 @@ void ImGuiDebugOverlay::guiWindowSettings()
 		{
 			resolution = theApplication().resolutionInt();
 			winPosition = gfxDevice.windowPosition();
-			fullScreen = gfxDevice.isFullScreen();
+			fullscreen = gfxDevice.isFullscreen();
 			selectedVideoMode = -1;
 		}
 

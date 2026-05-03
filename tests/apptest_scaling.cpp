@@ -81,8 +81,8 @@ bool centerWindow(unsigned int monitorIndex)
 	const nc::Vector2i halfScreenResolution(videoMode.width / 2, videoMode.height / 2);
 	const float factorRatio = windowScaling ? gfxDevice.windowScalingFactor() / referenceScalingFactor : 1.0f;
 	const nc::Vector2i scaledWindowSize(referenceWindowSize.x * factorRatio, referenceWindowSize.y * factorRatio);
-	const bool isFullscreen = gfxDevice.isFullScreen();
-	gfxDevice.setFullScreen(false);
+	const bool isFullscreen = gfxDevice.isFullscreen();
+	gfxDevice.setFullscreen(false);
 	gfxDevice.setWindowPosition(monitor.position + halfScreenResolution - scaledWindowSize / 2);
 	if (isFullscreen && windowScaling)
 		gfxDevice.setWindowSize(scaledWindowSize);
@@ -90,7 +90,7 @@ bool centerWindow(unsigned int monitorIndex)
 	return true;
 }
 
-bool goFullScreen(unsigned int monitorIndex, unsigned int modeIndex)
+bool goFullscreen(unsigned int monitorIndex, unsigned int modeIndex)
 {
 	nc::IGfxDevice &gfxDevice = nc::theApplication().gfxDevice();
 
@@ -102,17 +102,17 @@ bool goFullScreen(unsigned int monitorIndex, unsigned int modeIndex)
 		return false;
 
 	const nc::IGfxDevice::VideoMode &currentMode = gfxDevice.currentVideoMode(monitorIndex);
-	if (gfxDevice.isFullScreen() && gfxDevice.windowMonitorIndex() == monitorIndex && currentMode == monitor.videoModes[modeIndex])
+	if (gfxDevice.isFullscreen() && gfxDevice.windowMonitorIndex() == monitorIndex && currentMode == monitor.videoModes[modeIndex])
 		return false;
 
-	// Go full screen to another monitor
+	// Go fullscreen to another monitor
 	if (gfxDevice.windowMonitorIndex() != monitorIndex)
 	{
-		gfxDevice.setFullScreen(false);
+		gfxDevice.setFullscreen(false);
 		gfxDevice.setWindowPosition(monitor.position);
 	}
 	gfxDevice.setVideoMode(modeIndex);
-	gfxDevice.setFullScreen(true);
+	gfxDevice.setFullscreen(true);
 
 	return true;
 }
@@ -150,8 +150,8 @@ void MyEventHandler::onInit()
 	nc::IGfxDevice &gfxDevice = nc::theApplication().gfxDevice();
 	referenceScalingFactor = gfxDevice.windowScalingFactor();
 	referenceWindowSize = gfxDevice.resolution();
-	// If starting in full screen, set the reference window size to a scaled half full screen resolution
-	if (gfxDevice.isFullScreen())
+	// If starting in fullscreen, set the reference window size to a scaled half fullscreen resolution
+	if (gfxDevice.isFullscreen())
 	{
 		referenceWindowSize.x *= referenceScalingFactor / 2.0f;
 		referenceWindowSize.y *= referenceScalingFactor / 2.0f;
@@ -191,7 +191,7 @@ void MyEventHandler::onFrameStart()
 					auxString.append(" [Primary]");
 				if (monitorIndex == gfxDevice.windowMonitorIndex())
 				{
-					auxString.formatAppend(" [%s]", gfxDevice.isFullScreen() ? "Full Screen" : "Window");
+					auxString.formatAppend(" [%s]", gfxDevice.isFullscreen() ? "Fullscreen" : "Window");
 					flags |= ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Selected;
 				}
 
@@ -223,15 +223,15 @@ void MyEventHandler::onFrameStart()
 
 					ImGui::Combo("Video Mode", &selectedVideoMode[monitorIndex], comboString.data());
 
-					const bool alreadyFullScreenHere = gfxDevice.isFullScreen() && gfxDevice.windowMonitorIndex() == monitorIndex &&
+					const bool alreadyFullscreenHere = gfxDevice.isFullscreen() && gfxDevice.windowMonitorIndex() == monitorIndex &&
 					                                   monitor.videoModes[selectedVideoMode[monitorIndex]] == gfxDevice.currentVideoMode(monitorIndex);
-					ImGui::BeginDisabled(alreadyFullScreenHere);
-					if (ImGui::Button("Go full screen"))
-						goFullScreen(monitorIndex, selectedVideoMode[monitorIndex]);
+					ImGui::BeginDisabled(alreadyFullscreenHere);
+					if (ImGui::Button("Go fullscreen"))
+						goFullscreen(monitorIndex, selectedVideoMode[monitorIndex]);
 					ImGui::EndDisabled();
 
 #ifndef __ANDROID__
-					const bool alreadyWindowedHere = gfxDevice.isFullScreen() == false && gfxDevice.windowMonitorIndex() == monitorIndex;
+					const bool alreadyWindowedHere = gfxDevice.isFullscreen() == false && gfxDevice.windowMonitorIndex() == monitorIndex;
 					ImGui::SameLine();
 					ImGui::BeginDisabled(alreadyWindowedHere);
 					if (ImGui::Button("Go windowed"))
@@ -258,7 +258,7 @@ void MyEventHandler::onFrameStart()
 			ImGui::Text("Window position: <%d, %d>", gfxDevice.windowPositionX(), gfxDevice.windowPositionY());
 
 			ImGui::SameLine();
-			ImGui::BeginDisabled(gfxDevice.isFullScreen());
+			ImGui::BeginDisabled(gfxDevice.isFullscreen());
 			if (ImGui::Button("Center"))
 			{
 				const unsigned int monitorIndex = gfxDevice.windowMonitorIndex();
@@ -314,15 +314,15 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 	if (event.sym >= nc::KeySym::N1 && event.sym <= nc::KeySym::N4)
 		centerWindow(static_cast<unsigned int>(event.sym) - static_cast<unsigned int>(nc::KeySym::N1));
 	else if (event.sym >= nc::KeySym::N5 && event.sym <= nc::KeySym::N8)
-		goFullScreen(static_cast<unsigned int>(event.sym) - static_cast<unsigned int>(nc::KeySym::N5), 0);
+		goFullscreen(static_cast<unsigned int>(event.sym) - static_cast<unsigned int>(nc::KeySym::N5), 0);
 	else if (event.sym == nc::KeySym::F)
 	{
-		const bool isFullScreen = nc::theApplication().gfxDevice().isFullScreen();
+		const bool isFullscreen = nc::theApplication().gfxDevice().isFullscreen();
 		const unsigned int monitorIndex = nc::theApplication().gfxDevice().windowMonitorIndex();
-		if (isFullScreen)
+		if (isFullscreen)
 			centerWindow(monitorIndex);
 		else
-			goFullScreen(monitorIndex, 0);
+			goFullscreen(monitorIndex, 0);
 	}
 	else if (event.mod & nc::KeyMod::CTRL && event.sym == nc::KeySym::H)
 		showImGui = !showImGui;

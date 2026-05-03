@@ -49,21 +49,21 @@ void Qt5GfxDevice::setSwapInterval(int interval)
 	widget_.format().setSwapInterval(interval);
 }
 
-void Qt5GfxDevice::setFullScreen(bool fullScreen)
+void Qt5GfxDevice::setFullscreen(bool fullscreen)
 {
-	if (isFullScreen_ == fullScreen)
+	if (isFullscreen_ == fullscreen)
 		return;
 
 	QWidget *window = widget_.window();
-	if (fullScreen != window->isFullScreen())
+	if (fullscreen != window->isFullScreen())
 	{
-		if (fullScreen)
+		if (fullscreen)
 			window->showFullScreen();
 		else
 			window->showNormal();
 	}
 
-	isFullScreen_ = fullScreen;
+	isFullscreen_ = fullscreen;
 	// width and height are updated by the resize event that calls `resizeWindow()`
 }
 
@@ -220,17 +220,17 @@ void Qt5GfxDevice::initDevice(const WindowMode &windowMode)
 	if (glContextInfo_.debugContext)
 		format.setOptions(QSurfaceFormat::DebugContext);
 
-	if (width_ <= 0 || height_ <= 0 || isFullScreen_)
+	if (width_ <= 0 || height_ <= 0 || isFullscreen_)
 	{
-		// Can't set the full screen window state in a method called by the constructor
-		isFullScreen_ = true;
+		// Can't set the fullscreen window state in a method called by the constructor
+		isFullscreen_ = true;
 	}
 
 	QWidget *window = widget_.window();
 	const bool windowPositionIsValid = (containingMonitorIndex(windowMode) != -1);
 	const bool ignoreBothWindowPosition = (windowMode.windowPositionX == AppConfiguration::WindowPositionIgnore &&
 	                                       windowMode.windowPositionY == AppConfiguration::WindowPositionIgnore);
-	if (isFullScreen_ == false && windowPositionIsValid && ignoreBothWindowPosition == false)
+	if (isFullscreen_ == false && windowPositionIsValid && ignoreBothWindowPosition == false)
 	{
 		QPoint windowPos = window->pos();
 		if (windowMode.windowPositionX != AppConfiguration::WindowPositionIgnore)

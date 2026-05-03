@@ -34,8 +34,8 @@ namespace IGfxDevice {
 
 	static const char *setSwapInterval = "set_swap_interval";
 
-	static const char *isFullScreen = "is_fullscreen";
-	static const char *setFullScreen = "set_fullscreen";
+	static const char *isFullscreen = "is_fullscreen";
+	static const char *setFullscreen = "set_fullscreen";
 
 	static const char *isResizable = "is_resizable";
 
@@ -79,8 +79,8 @@ void LuaIGfxDevice::expose(lua_State *L)
 
 	LuaUtils::addFunction(L, LuaNames::IGfxDevice::setSwapInterval, setSwapInterval);
 
-	LuaUtils::addFunction(L, LuaNames::IGfxDevice::isFullScreen, isFullScreen);
-	LuaUtils::addFunction(L, LuaNames::IGfxDevice::setFullScreen, setFullScreen);
+	LuaUtils::addFunction(L, LuaNames::IGfxDevice::isFullscreen, isFullscreen);
+	LuaUtils::addFunction(L, LuaNames::IGfxDevice::setFullscreen, setFullscreen);
 
 	LuaUtils::addFunction(L, LuaNames::IGfxDevice::isResizable, isResizable);
 
@@ -166,20 +166,20 @@ int LuaIGfxDevice::setSwapInterval(lua_State *L)
 	return 0;
 }
 
-int LuaIGfxDevice::isFullScreen(lua_State *L)
+int LuaIGfxDevice::isFullscreen(lua_State *L)
 {
 	const IGfxDevice &gfxDevice = theApplication().gfxDevice();
-	LuaUtils::push(L, gfxDevice.isFullScreen());
+	LuaUtils::push(L, gfxDevice.isFullscreen());
 
 	return 1;
 }
 
-int LuaIGfxDevice::setFullScreen(lua_State *L)
+int LuaIGfxDevice::setFullscreen(lua_State *L)
 {
 	const bool fullscreen = LuaUtils::retrieve<bool>(L, -1);
 
 	IGfxDevice &gfxDevice = theApplication().gfxDevice();
-	gfxDevice.setFullScreen(fullscreen);
+	gfxDevice.setFullscreen(fullscreen);
 
 	return 0;
 }
