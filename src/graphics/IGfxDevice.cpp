@@ -32,7 +32,7 @@ EM_BOOL IGfxDevice::resize_callback(int eventType, const EmscriptenUiEvent *even
 		EmscriptenFullscreenChangeEvent fsce;
 		emscripten_get_fullscreen_status(&fsce);
 		// Setting the window size equal to screen size on GLFW will only
-		// request a full screen without changing the canvas size
+		// request a fullscreen without changing the canvas size
 		if (width == fsce.screenWidth && height == fsce.screenHeight)
 			gfxDevice->setWindowSize(width + 1, height + 1);
 	#endif
@@ -46,7 +46,7 @@ EM_BOOL IGfxDevice::resize_callback(int eventType, const EmscriptenUiEvent *even
 EM_BOOL IGfxDevice::fullscreenchange_callback(int eventType, const EmscriptenFullscreenChangeEvent *event, void *userData)
 {
 	IGfxDevice *gfxDevice = reinterpret_cast<IGfxDevice *>(userData);
-	gfxDevice->setFullScreen(event->isFullscreen);
+	gfxDevice->setFullscreen(event->isFullscreen);
 	return true;
 }
 
@@ -74,7 +74,7 @@ const float IGfxDevice::DefaultDpi = 96.0f;
 IGfxDevice::IGfxDevice(const WindowMode &windowMode, const GLContextInfo &glContextInfo, const DisplayMode &displayMode)
     : width_(windowMode.width), height_(windowMode.height),
       drawableWidth_(windowMode.width), drawableHeight_(windowMode.height),
-      isFullScreen_(windowMode.isFullScreen), isResizable_(windowMode.isResizable),
+      isFullscreen_(windowMode.isFullscreen), isResizable_(windowMode.isResizable),
       glContextInfo_(glContextInfo), displayMode_(displayMode), numMonitors_(0),
       backendScalesWindowSize_(false), previousScalingFactor_(1.0f)
 {
@@ -92,7 +92,7 @@ IGfxDevice::IGfxDevice(const WindowMode &windowMode, const GLContextInfo &glCont
 	height_ = static_cast<int>(cssHeight * pixelRatio);
 	drawableWidth_ = width_;
 	drawableHeight_ = height_;
-	isFullScreen_ = fsce.isFullscreen;
+	isFullscreen_ = fsce.isFullscreen;
 	isResizable_ = true;
 
 	emscripten_set_resize_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, true, IGfxDevice::resize_callback);
@@ -241,7 +241,7 @@ bool IGfxDevice::scaleWindowSize(bool windowScaling)
 	const bool scalingFactorChanged = (currentScalingFactor != previousScalingFactor_);
 
 #ifndef __APPLE__
-	if (backendScalesWindowSize_ == false && isFullScreen_ == false && scalingFactorChanged && windowScaling)
+	if (backendScalesWindowSize_ == false && isFullscreen_ == false && scalingFactorChanged && windowScaling)
 	{
 		const float ratio = currentScalingFactor / previousScalingFactor_;
 		setWindowSize(width_ * ratio, height_ * ratio);

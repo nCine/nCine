@@ -22,7 +22,7 @@ namespace {
 	const char *EnvVariableResolution = "RESOLUTION";
 	const char *EnvVariableRefreshRate = "REFRESH_RATE";
 	const char *EnvVariableWindowPosition = "WINDOW_POSITION";
-	const char *EnvVariableFullScreen = "FULLSCREEN";
+	const char *EnvVariableFullscreen = "FULLSCREEN";
 	const char *EnvVariableResizable = "RESIZABLE";
 	const char *EnvVariableWindowScaling = "WINDOW_SCALING";
 	const char *EnvVariableFrameLimit = "FRAME_LIMIT";
@@ -166,7 +166,7 @@ AppConfiguration::OldValues::OldValues(const AppConfiguration &appCfg)
       resolution(appCfg.resolution),
       refreshRate(appCfg.refreshRate),
       windowPosition(appCfg.windowPosition),
-      fullScreen(appCfg.fullScreen),
+      fullscreen(appCfg.fullscreen),
       resizable(appCfg.resizable),
       windowScaling(appCfg.windowScaling),
       frameLimit(appCfg.frameLimit),
@@ -221,7 +221,7 @@ AppConfiguration::AppConfiguration()
       resolution(1280, 720),
       refreshRate(0.0f),
       windowPosition(WindowPositionIgnore, WindowPositionIgnore),
-      fullScreen(false),
+      fullscreen(false),
       resizable(false),
       windowScaling(true),
       frameLimit(0),
@@ -371,7 +371,7 @@ void AppConfiguration::logFields() const
 		auxString.formatAppend("%d", windowPosition.y);
 	LOGD_X("%s", auxString.data());
 
-	LOGD_X("Full Screen: %s", fullScreen ? "true" : "false");
+	LOGD_X("Fullscreen: %s", fullscreen ? "true" : "false");
 	LOGD_X("Resizable: %s", resizable ? "true" : "false");
 	LOGD_X("Window Scaling: %s", windowScaling ? "true" : "false");
 	LOGD_X("Frame Limit: %u", frameLimit);
@@ -464,9 +464,9 @@ void AppConfiguration::readEnvVariables()
 
 	// NCINE_APPCFG_FULLSCREEN
 	varName = EnvVariablePrefix;
-	varName.append(EnvVariableFullScreen);
-	old.fullScreen = fullScreen;
-	fullScreen = readBoolEnvVar(varName.data(), fullScreen);
+	varName.append(EnvVariableFullscreen);
+	old.fullscreen = fullscreen;
+	fullscreen = readBoolEnvVar(varName.data(), fullscreen);
 
 	// NCINE_APPCFG_RESIZABLE
 	varName = EnvVariablePrefix;
@@ -695,10 +695,10 @@ void AppConfiguration::logEnvVariables() const
 		       EnvVariablePrefix, EnvVariableWindowPosition, windowPosition.x, windowPosition.y, old.windowPosition.x, old.windowPosition.y);
 	}
 
-	if (fullScreen != old.fullScreen)
+	if (fullscreen != old.fullscreen)
 	{
 		LOGI_X("%s%s=%d overrides compiled value %d",
-		       EnvVariablePrefix, EnvVariableFullScreen, fullScreen, old.fullScreen);
+		       EnvVariablePrefix, EnvVariableFullscreen, fullscreen, old.fullscreen);
 	}
 
 	if (resizable != old.resizable)

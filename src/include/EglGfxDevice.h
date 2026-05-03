@@ -24,7 +24,7 @@ class EglGfxDevice : public IGfxDevice
 
 	void setSwapInterval(int interval) override {}
 
-	void setFullScreen(bool fullScreen) override {}
+	void setFullscreen(bool fullscreen) override {}
 	void setResizable(bool resizable) override {}
 
 	void setWindowPosition(int x, int y) override {}

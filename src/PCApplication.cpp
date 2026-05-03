@@ -206,7 +206,7 @@ void PCApplication::processEvents()
 	#endif
 					gfxDevice_->width_ = newWidth;
 					gfxDevice_->height_ = newHeight;
-					gfxDevice_->isFullScreen_ = SDL_GetWindowFlags(windowHandle) & SDL_WINDOW_FULLSCREEN;
+					gfxDevice_->isFullscreen_ = SDL_GetWindowFlags(windowHandle) & SDL_WINDOW_FULLSCREEN;
 					resizeScreenViewport(newWidth, newHeight);
 				}
 				else if (event.window.event == SDL_WINDOWEVENT_RESIZED)

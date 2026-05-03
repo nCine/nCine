@@ -67,28 +67,28 @@ void GlfwGfxDevice::setSwapInterval(int interval)
 {
 	glfwSwapInterval(interval);
 #ifdef _WIN32
-	// The swap interval is reset after going full screen on Windows (https://github.com/glfw/glfw/issues/1072)
+	// The swap interval is reset after going fullscreen on Windows (https://github.com/glfw/glfw/issues/1072)
 	swapInterval_ = interval;
 #endif
 }
 
-void GlfwGfxDevice::setFullScreen(bool fullScreen)
+void GlfwGfxDevice::setFullscreen(bool fullscreen)
 {
-	if (isFullScreen_ == fullScreen)
+	if (isFullscreen_ == fullscreen)
 		return;
 
 	if (fsMonitorIndex_ < 0 || fsMonitorIndex_ > numMonitors_)
 		fsMonitorIndex_ = windowMonitorIndex();
 
-	// The windows goes in full screen on the monitor it was on on the last call to `setVideoMode()`
-	GLFWmonitor *monitor = fullScreen ? monitorPointers_[fsMonitorIndex_] : nullptr;
+	// The windows goes in fullscreen on the monitor it was on on the last call to `setVideoMode()`
+	GLFWmonitor *monitor = fullscreen ? monitorPointers_[fsMonitorIndex_] : nullptr;
 
 	const GLFWvidmode *currentMode = glfwGetVideoMode(monitorPointers_[fsMonitorIndex_]);
 	int width = (monitor != nullptr) ? currentMode->width : width_;
 	int height = (monitor != nullptr) ? currentMode->height : height_;
 	int refreshRate = (monitor != nullptr) ? currentMode->refreshRate : GLFW_DONT_CARE;
 
-	if (fsModeIndex_ >= 0 && fsModeIndex_ < monitors_[fsMonitorIndex_].numVideoModes && fullScreen)
+	if (fsModeIndex_ >= 0 && fsModeIndex_ < monitors_[fsMonitorIndex_].numVideoModes && fullscreen)
 	{
 		const IGfxDevice::VideoMode &mode = monitors_[fsMonitorIndex_].videoModes[fsModeIndex_];
 		width = mode.width;
@@ -99,22 +99,22 @@ void GlfwGfxDevice::setFullScreen(bool fullScreen)
 #ifndef __EMSCRIPTEN__
 	glfwSetWindowMonitor(windowHandle_, monitor, 0, 0, width, height, refreshRate);
 	#ifdef _WIN32
-	// The swap interval is reset after going full screen on Windows (https://github.com/glfw/glfw/issues/1072)
-	if (isFullScreen_)
+	// The swap interval is reset after going fullscreen on Windows (https://github.com/glfw/glfw/issues/1072)
+	if (isFullscreen_)
 		glfwSwapInterval(swapInterval_);
 	#endif
 #else
 	EmscriptenFullscreenChangeEvent fsce;
 	emscripten_get_fullscreen_status(&fsce);
-	if (fullScreen)
+	if (fullscreen)
 	{
-		// On Emscripten, requesting full screen on GLFW is done by changing the window size to the screen size
+		// On Emscripten, requesting fullscreen on GLFW is done by changing the window size to the screen size
 		glfwSetWindowSize(windowHandle_, fsce.screenWidth, fsce.screenHeight);
 	}
 	else
 		emscripten_exit_fullscreen();
 #endif
-	isFullScreen_ = fullScreen;
+	isFullscreen_ = fullscreen;
 	glfwGetWindowSize(windowHandle_, &width_, &height_);
 	glfwGetFramebufferSize(windowHandle_, &drawableWidth_, &drawableHeight_);
 }
@@ -262,7 +262,7 @@ bool GlfwGfxDevice::setVideoMode(unsigned int modeIndex)
 
 	if (modeIndex < numVideoModes)
 	{
-		if (isFullScreen_)
+		if (isFullscreen_)
 		{
 			GLFWmonitor *monitor = monitorPointers_[monitorIndex];
 			const IGfxDevice::VideoMode &mode = monitors_[monitorIndex].videoModes[modeIndex];
@@ -309,11 +309,11 @@ void GlfwGfxDevice::initDevice(const WindowMode &windowMode)
 	{
 		width_ = vidMode->width;
 		height_ = vidMode->height;
-		isFullScreen_ = true;
+		isFullscreen_ = true;
 	}
 
 	GLFWmonitor *monitor = nullptr;
-	if (isFullScreen_)
+	if (isFullscreen_)
 	{
 		monitor = fsMonitor;
 		const int refreshRate = (windowMode.refreshRate > 0.0f) ? static_cast<int>(windowMode.refreshRate) : vidMode->refreshRate;
@@ -357,7 +357,7 @@ void GlfwGfxDevice::initDevice(const WindowMode &windowMode)
 #if GLFW_VERSION_COMBINED < 3400
 	const bool ignoreBothWindowPosition = (windowMode.windowPositionX == AppConfiguration::WindowPositionIgnore &&
 	                                       windowMode.windowPositionY == AppConfiguration::WindowPositionIgnore);
-	if (isFullScreen_ == false && windowPositionIsValid && ignoreBothWindowPosition == false)
+	if (isFullscreen_ == false && windowPositionIsValid && ignoreBothWindowPosition == false)
 	{
 		Vector2i windowPos;
 		glfwGetWindowPos(windowHandle_, &windowPos.x, &windowPos.y);

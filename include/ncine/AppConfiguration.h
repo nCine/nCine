@@ -27,18 +27,18 @@ class DLL_PUBLIC AppConfiguration
 	/// The interval in seconds for frame timer accumulation average and log
 	float frameTimerLogInterval;
 
-	/// The window size or the resolution of the closest video mode if going full screen
-	/*! \note If either `x` or `y` are zero or negative, the application will go in full screen at the current screen resolution. */
+	/// The window size or the resolution of the closest video mode if going fullscreen
+	/*! \note If either `x` or `y` are zero or negative, the application will go in fullscreen at the current screen resolution. */
 	Vector2i resolution;
-	/// The refresh rate of the screen mode used to go in full screen
-	/*! \note If it is zero or negative, when requesting a full screen mode the current refresh rate will not be changed. */
+	/// The refresh rate of the screen mode used to go in fullscreen
+	/*! \note If it is zero or negative, when requesting a fullscreen mode the current refresh rate will not be changed. */
 	float refreshRate;
 	/// The window position coordinates in the virtual screen made of all the connected monitors
-	/*! \note It can also be used to go full screen on a monitor that is not the primary one of the system. */
+	/*! \note It can also be used to go fullscreen on a monitor that is not the primary one of the system. */
 	/*! \note The `WindowPositionIgnore` value can be used in either or both dimensions when a specific position is not needed. */
 	Vector2i windowPosition;
-	/// The flag is `true` if the application is going to be in full screen mode
-	bool fullScreen;
+	/// The flag is `true` if the application is going to be in fullscreen mode
+	bool fullscreen;
 	/// The flag is `true` if the window is going to be resizable
 	bool resizable;
 	/// The flag is `true` if the window size is automatically scaled according to the display factor
@@ -139,7 +139,7 @@ class DLL_PUBLIC AppConfiguration
 		Vector2i resolution;
 		float refreshRate;
 		Vector2i windowPosition;
-		bool fullScreen;
+		bool fullscreen;
 		bool resizable;
 		bool windowScaling;
 		unsigned int frameLimit;

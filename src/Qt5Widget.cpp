@@ -34,8 +34,8 @@ Qt5Widget::Qt5Widget(QWidget *parent, nctl::UniquePtr<IAppEventHandler> (*create
 	application_.setAutoSuspension(false);
 
 	// The graphics device is initialized and can react to resize events
-	if (application_.gfxDevice().isFullScreen())
-		window()->showFullScreen();
+	if (application_.gfxDevice().isFullscreen())
+		window()->showFullscreen();
 	else if (application_.appConfiguration().resizable == false)
 	{
 		const Vector2i &windowSize = application_.appConfiguration().resolution;

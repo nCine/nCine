@@ -533,8 +533,8 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 	else if (event.sym == nc::KeySym::F)
 	{
 		nc::IGfxDevice &gfxDevice = nc::theApplication().gfxDevice();
-		gfxDevice.setFullScreen(!gfxDevice.isFullScreen());
-		if (gfxDevice.isFullScreen() == false)
+		gfxDevice.setFullscreen(!gfxDevice.isFullscreen());
+		if (gfxDevice.isFullscreen() == false)
 			gfxDevice.setWindowSize(nc::theApplication().appConfiguration().resolution);
 	}
 	else if (event.sym == nc::KeySym::P)
