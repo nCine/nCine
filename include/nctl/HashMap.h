@@ -138,7 +138,7 @@ class HashMap
 	void rehash(unsigned int count);
 
   private:
-	static const unsigned int AlignmentBytes = sizeof(int);
+	static const size_t AlignmentBytes = sizeof(int);
 
 	/// The returning structure after probing for a key
 	struct ProbeResult
@@ -580,7 +580,7 @@ void HashMap<K, T, HashFunc>::rehash(unsigned int count)
 template <class K, class T, class HashFunc>
 void HashMap<K, T, HashFunc>::initPointers()
 {
-	unsigned int alignAdjustment = PointerMath::alignAdjustment(buffer_, AlignmentBytes);
+	size_t alignAdjustment = PointerMath::alignAdjustment(buffer_, AlignmentBytes);
 	uint8_t *pointer = reinterpret_cast<uint8_t*>(PointerMath::align(buffer_, AlignmentBytes));
 	delta1_ = pointer;
 	pointer += sizeof(uint8_t) * capacity_;

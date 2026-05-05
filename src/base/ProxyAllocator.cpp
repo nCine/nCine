@@ -22,7 +22,7 @@ ProxyAllocator::~ProxyAllocator()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void *ProxyAllocator::allocateImpl(IAllocator *allocator, size_t bytes, uint8_t alignment)
+void *ProxyAllocator::allocateImpl(IAllocator *allocator, size_t bytes, size_t alignment)
 {
 	FATAL_ASSERT(allocator);
 	ProxyAllocator *allocatorImpl = static_cast<ProxyAllocator *>(allocator);
@@ -39,7 +39,7 @@ void *ProxyAllocator::allocateImpl(IAllocator *allocator, size_t bytes, uint8_t 
 	return ptr;
 }
 
-void *ProxyAllocator::reallocateImpl(IAllocator *allocator, void *ptr, size_t bytes, uint8_t alignment, size_t &oldSize)
+void *ProxyAllocator::reallocateImpl(IAllocator *allocator, void *ptr, size_t bytes, size_t alignment, size_t &oldSize)
 {
 	FATAL_ASSERT(allocator);
 	ProxyAllocator *allocatorImpl = static_cast<ProxyAllocator *>(allocator);

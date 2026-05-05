@@ -57,7 +57,7 @@ void FreeListAllocator::defrag()
 		while (hasCoalesced)
 		{
 			Block *nextBlock = freeBlock->next;
-			const size_t distance = PointerMath::subtract(nextBlock, freeBlock);
+			const size_t distance = PointerMath::distance(nextBlock, freeBlock);
 			hasCoalesced = (freeBlock->size == distance);
 			if (hasCoalesced)
 			{
@@ -73,7 +73,7 @@ void FreeListAllocator::defrag()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void *FreeListAllocator::allocateImpl(IAllocator *allocator, size_t bytes, uint8_t alignment)
+void *FreeListAllocator::allocateImpl(IAllocator *allocator, size_t bytes, size_t alignment)
 {
 	static_assert(sizeof(Header) >= sizeof(Block), "The header should be bigger than the block");
 
@@ -92,7 +92,7 @@ void *FreeListAllocator::allocateImpl(IAllocator *allocator, size_t bytes, uint8
 	while (searchBlock != nullptr)
 	{
 		// Calculate the adjustment needed to keep objects correctly aligned
-		const uint8_t adjustment = PointerMath::alignWithHeader(searchBlock, alignment, sizeof(Header));
+		const size_t adjustment = PointerMath::alignWithHeader(searchBlock, alignment, sizeof(Header));
 		const size_t totalSize = bytes + adjustment;
 
 		if (searchBlock->size >= totalSize)
@@ -113,7 +113,7 @@ void *FreeListAllocator::allocateImpl(IAllocator *allocator, size_t bytes, uint8
 		searchBlock = searchBlock->next;
 	}
 
-	const uint8_t adjustment = PointerMath::alignWithHeader(freeBlock, alignment, sizeof(Header));
+	const size_t adjustment = PointerMath::alignWithHeader(freeBlock, alignment, sizeof(Header));
 	size_t totalSize = bytes + adjustment;
 
 	// Cannot find a free block large enough
@@ -156,7 +156,7 @@ void *FreeListAllocator::allocateImpl(IAllocator *allocator, size_t bytes, uint8
 	return alignedAddress;
 }
 
-void *FreeListAllocator::reallocateImpl(IAllocator *allocator, void *ptr, size_t bytes, uint8_t alignment, size_t &oldSize)
+void *FreeListAllocator::reallocateImpl(IAllocator *allocator, void *ptr, size_t bytes, size_t alignment, size_t &oldSize)
 {
 	FATAL_ASSERT(ptr != nullptr);
 	FATAL_ASSERT(bytes > 0);
@@ -182,7 +182,7 @@ void *FreeListAllocator::reallocateImpl(IAllocator *allocator, void *ptr, size_t
 		freeBlock = freeBlock->next;
 	}
 
-	oldSize = PointerMath::subtract(blockEnd, ptr);
+	oldSize = PointerMath::distance(blockEnd, ptr);
 	const long int difference = bytes - oldSize;
 
 	Block *nextBlock = nullptr;

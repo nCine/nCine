@@ -47,7 +47,7 @@ void StackAllocator::init(size_t size, void *base)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void *StackAllocator::allocateImpl(IAllocator *allocator, size_t bytes, uint8_t alignment)
+void *StackAllocator::allocateImpl(IAllocator *allocator, size_t bytes, size_t alignment)
 {
 	FATAL_ASSERT(bytes > 0);
 	FATAL_ASSERT_MSG((alignment & (alignment - 1)) == 0, "The alignment must be a power of two");
@@ -56,7 +56,7 @@ void *StackAllocator::allocateImpl(IAllocator *allocator, size_t bytes, uint8_t 
 	FATAL_ASSERT(allocator);
 	StackAllocator *allocatorImpl = static_cast<StackAllocator *>(allocator);
 
-	const uint8_t adjustment = PointerMath::alignWithHeader(allocatorImpl->current_, alignment, sizeof(Header));
+	const size_t adjustment = PointerMath::alignWithHeader(allocatorImpl->current_, alignment, sizeof(Header));
 
 	if (allocatorImpl->usedMemory_ + adjustment + bytes > allocatorImpl->size_)
 		return nullptr;
@@ -79,7 +79,7 @@ void *StackAllocator::allocateImpl(IAllocator *allocator, size_t bytes, uint8_t 
 	return alignedAddress;
 }
 
-void *StackAllocator::reallocateImpl(IAllocator *allocator, void *ptr, size_t bytes, uint8_t alignment, size_t &oldSize)
+void *StackAllocator::reallocateImpl(IAllocator *allocator, void *ptr, size_t bytes, size_t alignment, size_t &oldSize)
 {
 	FATAL_ASSERT(ptr != nullptr);
 	FATAL_ASSERT(bytes > 0);
@@ -96,7 +96,7 @@ void *StackAllocator::reallocateImpl(IAllocator *allocator, void *ptr, size_t by
 	FATAL_ASSERT(ptr == allocatorImpl->previous_);
 #endif
 
-	oldSize = PointerMath::subtract(allocatorImpl->current_, ptr);
+	oldSize = PointerMath::distance(allocatorImpl->current_, ptr);
 	const long int diffBytes = bytes - oldSize;
 
 	void *newCurrent = PointerMath::add(ptr, bytes);
@@ -122,7 +122,7 @@ void StackAllocator::deallocateImpl(IAllocator *allocator, void *ptr)
 
 	// Access the header in the bytes before `ptr`
 	Header *header = reinterpret_cast<Header *>(PointerMath::subtract(ptr, sizeof(Header)));
-	allocatorImpl->usedMemory_ -= PointerMath::subtract(allocatorImpl->current_, ptr) + header->adjustment;
+	allocatorImpl->usedMemory_ -= PointerMath::distance(allocatorImpl->current_, ptr) + header->adjustment;
 	allocatorImpl->current_ = PointerMath::subtract(ptr, header->adjustment);
 
 #if STACK_DEBUG

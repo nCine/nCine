@@ -8,11 +8,11 @@ namespace {
 
 const size_t Address = 0x100;
 const size_t Value = 0x10;
-const uint8_t Alignment = 16;
-const uint8_t Disalign = 5;
+const size_t Alignment = 16;
+const size_t Disalign = 5;
 
-const uint8_t HeaderSize = 8;
-const uint8_t SmallHeaderSize = 4;
+const size_t HeaderSize = 8;
+const size_t SmallHeaderSize = 4;
 
 }
 

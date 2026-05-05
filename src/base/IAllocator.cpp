@@ -171,7 +171,7 @@ void IAllocator::printPointerCounters()
 
 #endif
 
-void *IAllocator::reallocate(void *ptr, size_t bytes, uint8_t alignment)
+void *IAllocator::reallocate(void *ptr, size_t bytes, size_t alignment)
 {
 	if (bytes == 0)
 	{
@@ -202,7 +202,7 @@ void *IAllocator::reallocate(void *ptr, size_t bytes, uint8_t alignment)
 
 #if defined(RECORD_ALLOCATIONS) || defined(WITH_TRACY)
 
-void *IAllocator::wrapAllocate(IAllocator *allocator, size_t bytes, uint8_t alignment)
+void *IAllocator::wrapAllocate(IAllocator *allocator, size_t bytes, size_t alignment)
 {
 	void *ptr = (*allocator->realAllocateFunc_)(allocator, bytes, alignment);
 	#ifdef WITH_TRACY
@@ -227,7 +227,7 @@ void *IAllocator::wrapAllocate(IAllocator *allocator, size_t bytes, uint8_t alig
 	return ptr;
 }
 
-void *IAllocator::wrapReallocate(IAllocator *allocator, void *ptr, size_t bytes, uint8_t alignment, size_t &oldSize)
+void *IAllocator::wrapReallocate(IAllocator *allocator, void *ptr, size_t bytes, size_t alignment, size_t &oldSize)
 {
 	void *newPtr = (*allocator->realReallocateFunc_)(allocator, ptr, bytes, alignment, oldSize);
 	#ifdef WITH_TRACY
