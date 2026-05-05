@@ -4,52 +4,103 @@
 #include <cstdint>
 #include <cstddef>
 #include <ncine/common_defines.h>
+#include <ncine/common_macros.h>
 
 namespace nctl {
 
 /// A group of functions to perform pointer math operations
 namespace PointerMath
 {
-	inline void *add(void *ptr, size_t amount) { return reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(ptr) + amount); }
-	inline void *subtract(void *ptr, size_t amount) { return reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(ptr) - amount); }
-
-	inline uintptr_t add(void *first, void *second) { return reinterpret_cast<uintptr_t>(first) + reinterpret_cast<uintptr_t>(second); }
-	inline uintptr_t subtract(void *first, void *second) { return reinterpret_cast<uintptr_t>(first) - reinterpret_cast<uintptr_t>(second); }
-
-	inline void *align(void *ptr, uint8_t alignment)
+	inline uintptr_t add(uintptr_t ptr, size_t amount)
 	{
-		return reinterpret_cast<void *>((reinterpret_cast<uintptr_t>(ptr) +
-		                                 static_cast<uintptr_t>(alignment - 1)) &
-		                                 static_cast<uintptr_t>(~(alignment - 1)));
+		return ptr + amount;
 	}
 
-	inline uint8_t alignAdjustment(const void *ptr, uint8_t alignment)
+	inline uintptr_t subtract(uintptr_t ptr, size_t amount)
 	{
-		const uint8_t amount = alignment - (reinterpret_cast<uintptr_t>(ptr) & (alignment - 1));
-
-		if (amount == alignment)
-			return 0;
-
-		return amount;
+		return ptr - amount;
 	}
 
-	inline uint8_t alignWithHeader(const void *ptr, uint8_t alignment, uint8_t headerSize)
+	inline ptrdiff_t distance(uintptr_t a, uintptr_t b)
 	{
-		uint8_t amount = alignAdjustment(ptr, alignment);
-		uint8_t spaceNeeded = headerSize;
+		return static_cast<ptrdiff_t>(a - b);
+	}
 
-		if (amount < spaceNeeded)
+	inline uintptr_t align(uintptr_t ptr, size_t alignment)
+	{
+		ASSERT((alignment & (alignment - 1)) == 0);
+		return (ptr + (alignment - 1)) & ~(alignment - 1);
+	}
+
+	inline size_t alignAdjustment(uintptr_t ptr, size_t alignment)
+	{
+		ASSERT((alignment & (alignment - 1)) == 0);
+
+		const size_t mask = alignment - 1;
+		const size_t misalignment = ptr & mask;
+
+		return misalignment ? (alignment - misalignment) : 0;
+	}
+
+	inline size_t alignWithHeader(uintptr_t ptr, size_t alignment, size_t headerSize)
+	{
+		size_t adjustment = alignAdjustment(ptr, alignment);
+
+		if (adjustment < headerSize)
 		{
-			spaceNeeded -= amount;
+			size_t needed = headerSize - adjustment;
 
-			// Increase the amount to fit the header
-			amount += alignment * (spaceNeeded / alignment);
-
-			if (spaceNeeded % alignment > 0)
-				amount += alignment;
+			adjustment += alignment * (needed / alignment);
+			if (needed % alignment)
+				adjustment += alignment;
 		}
 
-		return amount;
+		return adjustment;
+	}
+
+	inline void *add(void *ptr, size_t amount)
+	{
+		return reinterpret_cast<void *>(add(reinterpret_cast<uintptr_t>(ptr), amount));
+	}
+
+	inline const void *add(const void *ptr, size_t amount)
+	{
+		return reinterpret_cast<const void *>(add(reinterpret_cast<uintptr_t>(ptr), amount));
+	}
+
+	inline void *subtract(void *ptr, size_t amount)
+	{
+		return reinterpret_cast<void *>(subtract(reinterpret_cast<uintptr_t>(ptr), amount));
+	}
+
+	inline const void *subtract(const void *ptr, size_t amount)
+	{
+		return reinterpret_cast<const void *>(subtract(reinterpret_cast<uintptr_t>(ptr), amount));
+	}
+
+	inline ptrdiff_t distance(const void *a, const void *b)
+	{
+		return distance(reinterpret_cast<uintptr_t>(a), reinterpret_cast<uintptr_t>(b));
+	}
+
+	inline void *align(void *ptr, size_t alignment)
+	{
+		return reinterpret_cast<void *>(align(reinterpret_cast<uintptr_t>(ptr), alignment));
+	}
+
+	inline const void *align(const void *ptr, size_t alignment)
+	{
+		return reinterpret_cast<const void *>(align(reinterpret_cast<uintptr_t>(ptr), alignment));
+	}
+
+	inline size_t alignAdjustment(const void *ptr, size_t alignment)
+	{
+		return alignAdjustment(reinterpret_cast<uintptr_t>(ptr), alignment);
+	}
+
+	inline size_t alignWithHeader(const void *ptr, size_t alignment, size_t headerSize)
+	{
+		return alignWithHeader(reinterpret_cast<uintptr_t>(ptr), alignment, headerSize);
 	}
 }
 

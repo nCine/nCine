@@ -18,7 +18,7 @@ class DLL_PUBLIC IAllocator
 {
   public:
 	/// 16 bytes default alignment on 64bit and 8 bytes on 32bit
-	static const uint8_t DefaultAlignment = 2 * sizeof(void *);
+	static const size_t DefaultAlignment = 2 * sizeof(void *);
 
 	/// Maximum length for the allocator name string
 	static const unsigned int MaxNameLength = 64;
@@ -30,7 +30,7 @@ class DLL_PUBLIC IAllocator
 		void *ptr = nullptr;
 		size_t bytes = 0;
 		/// Deallocations are entries with an alignment value of zero
-		uint8_t alignment = DefaultAlignment;
+		size_t alignment = DefaultAlignment;
 		size_t usedMemory;
 		size_t numAllocations;
 	};
@@ -50,8 +50,8 @@ class DLL_PUBLIC IAllocator
 	void printPointerCounters();
 #endif
 
-	using AllocateFunction = void *(*)(IAllocator *allocator, size_t, uint8_t);
-	using ReallocateFunction = void *(*)(IAllocator *allocator, void *, size_t, uint8_t, size_t &);
+	using AllocateFunction = void *(*)(IAllocator *allocator, size_t, size_t);
+	using ReallocateFunction = void *(*)(IAllocator *allocator, void *, size_t, size_t, size_t &);
 	using DeallocateFunction = void (*)(IAllocator *allocator, void *);
 
 	IAllocator(const char *name, AllocateFunction allocFunc, ReallocateFunction reallocFunc, DeallocateFunction deallocFunc)
@@ -59,10 +59,10 @@ class DLL_PUBLIC IAllocator
 	IAllocator(const char *name, AllocateFunction allocFunc, ReallocateFunction reallocFunc, DeallocateFunction deallocFunc, size_t size, void *base);
 
 	/// Tries to allocate the specified amount of memory with the specified alignment requirement
-	inline void *allocate(size_t bytes, uint8_t alignment) { return (*allocateFunc_)(this, bytes, alignment); }
+	inline void *allocate(size_t bytes, size_t alignment) { return (*allocateFunc_)(this, bytes, alignment); }
 	inline void *allocate(size_t bytes) { return (*allocateFunc_)(this, bytes, DefaultAlignment); }
 	/// Tries to reallocate the allocation at the specified pointer with a different size
-	void *reallocate(void *ptr, size_t bytes, uint8_t alignment);
+	void *reallocate(void *ptr, size_t bytes, size_t alignment);
 	inline void *reallocate(void *ptr, size_t bytes) { return reallocate(ptr, bytes, DefaultAlignment); }
 	/// Deallocates the allocation at the specified pointer
 	inline void deallocate(void *ptr) { (*deallocateFunc_)(this, ptr); }
@@ -110,8 +110,8 @@ class DLL_PUBLIC IAllocator
 	ReallocateFunction realReallocateFunc_;
 	DeallocateFunction realDeallocateFunc_;
 
-	static void *wrapAllocate(IAllocator *allocator, size_t bytes, uint8_t alignment);
-	static void *wrapReallocate(IAllocator *allocator, void *ptr, size_t bytes, uint8_t alignment, size_t &oldSize);
+	static void *wrapAllocate(IAllocator *allocator, size_t bytes, size_t alignment);
+	static void *wrapReallocate(IAllocator *allocator, void *ptr, size_t bytes, size_t alignment, size_t &oldSize);
 	static void wrapDeallocate(IAllocator *allocator, void *ptr);
 #endif
 
@@ -147,7 +147,7 @@ namespace detail {
 		template <class T>
 		inline static T *newArray(IAllocator &alloc, size_t numElements)
 		{
-			uint8_t headerSize = sizeof(size_t) / sizeof(T);
+			size_t headerSize = sizeof(size_t) / sizeof(T);
 
 			if (sizeof(size_t) % sizeof(T) > 0)
 				headerSize += 1;
@@ -171,7 +171,7 @@ namespace detail {
 				(ptr + i - 1)->~T();
 
 			// Calculate how much extra memory was allocated to store the length before the array
-			uint8_t headerSize = sizeof(size_t) / sizeof(T);
+			size_t headerSize = sizeof(size_t) / sizeof(T);
 			if (sizeof(size_t) % sizeof(T) > 0)
 				headerSize += 1;
 			alloc.deallocate(ptr - headerSize);
@@ -198,7 +198,7 @@ namespace detail {
 		template <class T>
 		inline static T *newArray(IAllocator &alloc, size_t numElements)
 		{
-			uint8_t headerSize = sizeof(size_t) / sizeof(T);
+			size_t headerSize = sizeof(size_t) / sizeof(T);
 
 			if (sizeof(size_t) % sizeof(T) > 0)
 				headerSize += 1;
@@ -214,7 +214,7 @@ namespace detail {
 		inline static void deleteArray(IAllocator &alloc, T *ptr)
 		{
 			// Calculate how much extra memory was allocated to store the length before the array
-			uint8_t headerSize = sizeof(size_t) / sizeof(T);
+			size_t headerSize = sizeof(size_t) / sizeof(T);
 			if (sizeof(size_t) % sizeof(T) > 0)
 				headerSize += 1;
 			alloc.deallocate(ptr - headerSize);

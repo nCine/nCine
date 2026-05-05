@@ -48,7 +48,7 @@ void LinearAllocator::clear()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void *LinearAllocator::allocateImpl(IAllocator *allocator, size_t bytes, uint8_t alignment)
+void *LinearAllocator::allocateImpl(IAllocator *allocator, size_t bytes, size_t alignment)
 {
 	FATAL_ASSERT(bytes > 0);
 	FATAL_ASSERT_MSG((alignment & (alignment - 1)) == 0, "The alignment should be a power of two");
@@ -57,7 +57,7 @@ void *LinearAllocator::allocateImpl(IAllocator *allocator, size_t bytes, uint8_t
 	FATAL_ASSERT(allocator);
 	LinearAllocator *allocatorImpl = static_cast<LinearAllocator *>(allocator);
 
-	const uint8_t adjustment = PointerMath::alignAdjustment(allocatorImpl->current_, alignment);
+	const size_t adjustment = PointerMath::alignAdjustment(allocatorImpl->current_, alignment);
 
 	if (PointerMath::add(allocatorImpl->current_, bytes + adjustment) >
 	    PointerMath::add(allocatorImpl->base_, allocatorImpl->size_))
@@ -74,7 +74,7 @@ void *LinearAllocator::allocateImpl(IAllocator *allocator, size_t bytes, uint8_t
 	}
 }
 
-void *LinearAllocator::reallocateImpl(IAllocator *allocator, void *ptr, size_t bytes, uint8_t alignment, size_t &oldSize)
+void *LinearAllocator::reallocateImpl(IAllocator *allocator, void *ptr, size_t bytes, size_t alignment, size_t &oldSize)
 {
 	ASSERT_MSG(false, "LinearAllocator cannot reallocate");
 

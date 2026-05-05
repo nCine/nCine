@@ -14,7 +14,7 @@ PoolAllocator::PoolAllocator(const char *name)
 {
 }
 
-PoolAllocator::PoolAllocator(const char *name, size_t elementSize, uint8_t elementAlignment, size_t size, void *base)
+PoolAllocator::PoolAllocator(const char *name, size_t elementSize, size_t elementAlignment, size_t size, void *base)
     : IAllocator(name, allocateImpl, reallocateImpl, deallocateImpl, size, base),
       elementSize_(elementSize), elementAlignment_(elementAlignment), freeList_(nullptr)
 {
@@ -30,7 +30,7 @@ PoolAllocator::~PoolAllocator()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void PoolAllocator::init(size_t elementSize, uint8_t elementAlignment, size_t size, void *base)
+void PoolAllocator::init(size_t elementSize, size_t elementAlignment, size_t size, void *base)
 {
 	FATAL_ASSERT(usedMemory_ == 0 && numAllocations_ == 0);
 	size_ = size;
@@ -50,7 +50,7 @@ void PoolAllocator::internalInit()
 	// The element should be bigger than a pointer in the free list
 	ASSERT(elementSize_ >= sizeof(void *));
 
-	const uint8_t adjustment = PointerMath::alignAdjustment(base_, elementAlignment_);
+	const size_t adjustment = PointerMath::alignAdjustment(base_, elementAlignment_);
 
 	freeList_ = reinterpret_cast<void **>(PointerMath::add(base_, adjustment));
 	const size_t numElements = (size_ - adjustment) / elementSize_;
@@ -66,7 +66,7 @@ void PoolAllocator::internalInit()
 	*ptr = nullptr;
 }
 
-void *PoolAllocator::allocateImpl(IAllocator *allocator, size_t bytes, uint8_t alignment)
+void *PoolAllocator::allocateImpl(IAllocator *allocator, size_t bytes, size_t alignment)
 {
 	FATAL_ASSERT(bytes > 0);
 	FATAL_ASSERT_MSG((alignment & (alignment - 1)) == 0, "The alignment should be a power of two");
@@ -89,7 +89,7 @@ void *PoolAllocator::allocateImpl(IAllocator *allocator, size_t bytes, uint8_t a
 	return ptr;
 }
 
-void *PoolAllocator::reallocateImpl(IAllocator *allocator, void *ptr, size_t bytes, uint8_t alignment, size_t &oldSize)
+void *PoolAllocator::reallocateImpl(IAllocator *allocator, void *ptr, size_t bytes, size_t alignment, size_t &oldSize)
 {
 	ASSERT_MSG(false, "PoolAllocator cannot reallocate");
 

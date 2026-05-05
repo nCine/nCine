@@ -21,7 +21,7 @@ MallocAllocator::~MallocAllocator()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void *MallocAllocator::allocateImpl(IAllocator *allocator, size_t bytes, uint8_t alignment)
+void *MallocAllocator::allocateImpl(IAllocator *allocator, size_t bytes, size_t alignment)
 {
 	FATAL_ASSERT(bytes > 0);
 	FATAL_ASSERT_MSG((alignment & (alignment - 1)) == 0, "The alignment should be a power of two");
@@ -38,7 +38,7 @@ void *MallocAllocator::allocateImpl(IAllocator *allocator, size_t bytes, uint8_t
 	return ptr;
 }
 
-void *MallocAllocator::reallocateImpl(IAllocator *allocator, void *ptr, size_t bytes, uint8_t alignment, size_t &oldSize)
+void *MallocAllocator::reallocateImpl(IAllocator *allocator, void *ptr, size_t bytes, size_t alignment, size_t &oldSize)
 {
 	FATAL_ASSERT(ptr != nullptr);
 	FATAL_ASSERT(bytes > 0);

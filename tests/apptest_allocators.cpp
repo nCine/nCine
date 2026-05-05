@@ -28,7 +28,7 @@ struct Allocation
 	nc::TimeStamp timestamp;
 	void *ptr = nullptr;
 	size_t size = 0;
-	uint8_t alignment = nctl::IAllocator::DefaultAlignment;
+	size_t alignment = nctl::IAllocator::DefaultAlignment;
 };
 
 struct Allocator
