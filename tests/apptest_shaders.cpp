@@ -535,7 +535,7 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		nc::IGfxDevice &gfxDevice = nc::theApplication().gfxDevice();
 		gfxDevice.setFullscreen(!gfxDevice.isFullscreen());
 		if (gfxDevice.isFullscreen() == false)
-			gfxDevice.setWindowSize(nc::theApplication().appConfiguration().resolution);
+			gfxDevice.setWindowSize(nc::theApplication().appConfiguration().window.resolution);
 	}
 	else if (event.sym == nc::KeySym::P)
 		pause_ = !pause_;

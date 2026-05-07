@@ -488,7 +488,7 @@ void Viewport::draw(unsigned int nextIndex)
 	}
 
 	if (type_ == Type::WITH_TEXTURE && depthStencilFormat_ != DepthStencilFormat::NONE &&
-	    theApplication().appConfiguration().withGlDebugContext == false)
+	    theApplication().appConfiguration().graphics.opengl.debugContext == false)
 	{
 		const GLenum invalidAttachment = depthStencilFormatToGLAttachment(depthStencilFormat_);
 		fbo_->invalidate(1, &invalidAttachment);

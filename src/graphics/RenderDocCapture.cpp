@@ -195,7 +195,7 @@ void RenderDocCapture::init()
 		LOGI_X("RenderDoc API: %d.%d.%d", major, minor, patch);
 
 		const AppConfiguration &appCfg = theApplication().appConfiguration();
-		if (appCfg.withGlDebugContext)
+		if (appCfg.graphics.opengl.debugContext)
 		{
 			rdocApi->SetCaptureOptionU32(RENDERDOC_CaptureOption::eRENDERDOC_Option_APIValidation, 1);
 			rdocApi->SetCaptureOptionU32(RENDERDOC_CaptureOption::eRENDERDOC_Option_CaptureCallstacks, 1);

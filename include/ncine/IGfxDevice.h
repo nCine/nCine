@@ -34,14 +34,15 @@ class DLL_PUBLIC IGfxDevice
 	struct WindowMode
 	{
 		WindowMode()
-		    : width(0), height(0), refreshRate(0.0f), windowPositionX(AppConfiguration::WindowPositionIgnore),
-		      windowPositionY(AppConfiguration::WindowPositionIgnore), isFullscreen(false), isResizable(false), hasWindowScaling(true) {}
+		    : width(0), height(0), refreshRate(0.0f),
+		      windowPositionX(AppConfiguration::Window::IgnorePosition), windowPositionY(AppConfiguration::Window::IgnorePosition),
+		      isFullscreen(false), isResizable(false), hasWindowScaling(true) {}
 		WindowMode(unsigned int w, unsigned int h, float refresh, int posX, int posY, bool fullscreen, bool resizable, bool windowScaling)
 		    : width(w), height(h), refreshRate(refresh), windowPositionX(posX), windowPositionY(posY),
 		      isFullscreen(fullscreen), isResizable(resizable), hasWindowScaling(windowScaling) {}
 		explicit WindowMode(const AppConfiguration &appCfg)
-		    : width(appCfg.resolution.x), height(appCfg.resolution.y), refreshRate(appCfg.refreshRate), windowPositionX(appCfg.windowPosition.x),
-		      windowPositionY(appCfg.windowPosition.y), isFullscreen(appCfg.fullscreen), isResizable(appCfg.resizable), hasWindowScaling(appCfg.windowScaling) {}
+		    : width(appCfg.window.resolution.x), height(appCfg.window.resolution.y), refreshRate(appCfg.window.refreshRate), windowPositionX(appCfg.window.position.x),
+		      windowPositionY(appCfg.window.position.y), isFullscreen(appCfg.window.fullscreen), isResizable(appCfg.window.resizable), hasWindowScaling(appCfg.window.scaling) {}
 
 		unsigned int width;
 		unsigned int height;
@@ -95,9 +96,11 @@ class DLL_PUBLIC IGfxDevice
 	struct GLContextInfo
 	{
 		explicit GLContextInfo(const AppConfiguration &appCfg)
-		    : majorVersion(appCfg.glMajorVersion()), minorVersion(appCfg.glMinorVersion()),
-		      coreProfile(appCfg.glCoreProfile()), forwardCompatible(appCfg.glForwardCompatible()),
-		      debugContext(appCfg.withGlDebugContext) {}
+		    : majorVersion(appCfg.graphics.openglCaps.majorVersion),
+		      minorVersion(appCfg.graphics.openglCaps.minorVersion),
+		      coreProfile(appCfg.graphics.openglCaps.coreProfile),
+		      forwardCompatible(appCfg.graphics.openglCaps.forwardCompatible),
+		      debugContext(appCfg.graphics.opengl.debugContext) {}
 
 		unsigned int majorVersion;
 		unsigned int minorVersion;
@@ -239,13 +242,13 @@ class DLL_PUBLIC IGfxDevice
 	void initGLViewport();
 
 	/// Returns the monitor index that contains the center of the specified rectangle, or -1 if its center is outside the virtual screen
-	/*! \note The special WindowPositionIgnore value can be used for the `x` and `y` variables */
+	/*! \note The special `AppConfiguration::Window::IgnorePosition` value can be used for the `x` and `y` variables */
 	int containingMonitorIndex(int x, int y, int width, int height) const;
 	/// Returns the monitor index that contains the center of the specified rectangle as a `Recti` object, or -1 if its center is outside the virtual screen
-	/*! \note The special WindowPositionIgnore value can be used for the `x` and `y` variables */
+	/*! \note The special `AppConfiguration::Window::IgnorePosition` value can be used for the `x` and `y` variables */
 	inline int containingMonitorIndex(const Recti &rect) const { return containingMonitorIndex(rect.x, rect.y, rect.w, rect.h); }
 	/// Returns the monitor index that contains the center of the specified rectangle as a `WindowMode` object, or -1 if its center is outside the virtual screen
-	/*! \note The special WindowPositionIgnore value can be used for the `x` and `y` variables */
+	/*! \note The special `AppConfiguration::Window::IgnorePosition` value can be used for the `x` and `y` variables */
 	inline int containingMonitorIndex(const WindowMode &windowMode) const
 	{
 		return containingMonitorIndex(windowMode.windowPositionX, windowMode.windowPositionY, windowMode.width, windowMode.height);

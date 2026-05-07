@@ -60,8 +60,8 @@ nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 {
 	setDataPath(config);
-	config.windowTitle = InitialWindowTitle;
-	//config.resolution.set(800, 600); // window size for the original BunnyMark
+	config.window.title = InitialWindowTitle;
+	//config.window.resolution.set(800, 600); // window size for the original BunnyMark
 }
 
 void MyEventHandler::onInit()
@@ -74,7 +74,7 @@ void MyEventHandler::onInit()
 
 	setNumBunnies(InitialSize);
 
-	withVSync_ = nc::theApplication().appConfiguration().withVSync;
+	withVSync_ = nc::theApplication().appConfiguration().graphics.vsync;
 	pause_ = false;
 
 	nc::IFrameTimer &frameTimer = nc::theApplication().frameTimer();
@@ -241,7 +241,7 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		nc::IGfxDevice &gfxDevice = nc::theApplication().gfxDevice();
 		gfxDevice.setFullscreen(!gfxDevice.isFullscreen());
 		if (gfxDevice.isFullscreen() == false)
-			gfxDevice.setWindowSize(nc::theApplication().appConfiguration().resolution);
+			gfxDevice.setWindowSize(nc::theApplication().appConfiguration().window.resolution);
 	}
 #if NCINE_WITH_IMGUI
 	else if (event.mod & nc::KeyMod::CTRL && event.sym == nc::KeySym::H)

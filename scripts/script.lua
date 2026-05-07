@@ -3,11 +3,12 @@ require ("ncine_header")
 nc = ncine
 
 function nc.on_pre_init(cfg)
-	cfg.resolution = {x = 1280, y = 720}
-	cfg.window_title = "nCine Lua test"
+	--cfg.logging.console_level = nc.log_level.OFF
 
-	--cfg.console_log_level = nc.log_level.OFF
-	--cfg.resizable = true
+	cfg.window.resolution = {x = 1280, y = 720}
+	--cfg.window.resizable = true
+	cfg.window.title = "nCine Lua test"
+
 	return cfg
 end
 

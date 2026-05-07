@@ -74,7 +74,7 @@ bool centerWindow(unsigned int monitorIndex)
 	if (monitorIndex > gfxDevice.numMonitors() - 1)
 		return false;
 
-	const bool windowScaling = nc::theApplication().appConfiguration().windowScaling;
+	const bool windowScaling = nc::theApplication().appConfiguration().window.scaling;
 	const nc::IGfxDevice::VideoMode &videoMode = gfxDevice.currentVideoMode(monitorIndex);
 	const nc::IGfxDevice::Monitor &monitor = gfxDevice.monitor(monitorIndex);
 
@@ -243,7 +243,7 @@ void MyEventHandler::onFrameStart()
 				}
 			}
 
-			const bool windowScaling = nc::theApplication().appConfiguration().windowScaling;
+			const bool windowScaling = nc::theApplication().appConfiguration().window.scaling;
 #ifndef __ANDROID__
 			ImGui::Text("Window resolution: %d x %d (scaled: %s)", gfxDevice.width(), gfxDevice.height(), windowScaling ? "yes" : "no");
 			bool resizable = gfxDevice.isResizable();
@@ -305,7 +305,7 @@ void MyEventHandler::onFrameStart()
 void MyEventHandler::onChangeScalingFactor(float factor)
 {
 	scalingFactor = factor;
-	if (nc::theApplication().appConfiguration().windowScaling)
+	if (nc::theApplication().appConfiguration().window.scaling)
 		imguiWindowSizeFrames = 3;
 }
 

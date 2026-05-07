@@ -690,8 +690,8 @@ void MyEventHandler::onResizeWindow(int width, int height)
 
 		if (rect.w != 0 && rect.h != 0)
 		{
-			const float widthRatio = width / static_cast<float>(nc::theApplication().appConfiguration().resolution.x);
-			const float heightRatio = height / static_cast<float>(nc::theApplication().appConfiguration().resolution.y);
+			const float widthRatio = width / static_cast<float>(nc::theApplication().appConfiguration().window.resolution.x);
+			const float heightRatio = height / static_cast<float>(nc::theApplication().appConfiguration().window.resolution.y);
 			rect.set(oldRect.x * widthRatio, oldRect.y * heightRatio, oldRect.w * widthRatio, oldRect.h * heightRatio);
 		}
 
@@ -751,7 +751,7 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		nc::IGfxDevice &gfxDevice = nc::theApplication().gfxDevice();
 		gfxDevice.setFullscreen(!gfxDevice.isFullscreen());
 		if (gfxDevice.isFullscreen() == false)
-			gfxDevice.setWindowSize(nc::theApplication().appConfiguration().resolution);
+			gfxDevice.setWindowSize(nc::theApplication().appConfiguration().window.resolution);
 	}
 	else if (event.sym == nc::KeySym::P)
 		pause_ = !pause_;

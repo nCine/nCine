@@ -111,10 +111,10 @@ nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 
 void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 {
-	config.withScenegraph = false;
-	config.withAudio = false;
-	config.withJobSystem = false;
-	config.vaoPoolSize = 2;
+	config.graphics.opengl.vaoPoolSize = 2;
+	config.audio.enabled = false;
+	config.jobSystem.enabled = false;
+	config.features.scenegraph = false;
 
 	setDataPath(config);
 }
@@ -306,7 +306,7 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		nc::IGfxDevice &gfxDevice = nc::theApplication().gfxDevice();
 		gfxDevice.setFullscreen(!gfxDevice.isFullscreen());
 		if (gfxDevice.isFullscreen() == false)
-			gfxDevice.setWindowSize(nc::theApplication().appConfiguration().resolution);
+			gfxDevice.setWindowSize(nc::theApplication().appConfiguration().window.resolution);
 	}
 #if NCINE_WITH_IMGUI
 	else if (event.mod & nc::KeyMod::CTRL && event.sym == nc::KeySym::H)

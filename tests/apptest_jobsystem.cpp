@@ -356,8 +356,8 @@ nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 
 void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 {
-	config.withJobSystem = true;
-	config.numThreads = 0;
+	config.jobSystem.enabled = true;
+	config.jobSystem.numThreads = 0;
 }
 
 void MyEventHandler::onInit()

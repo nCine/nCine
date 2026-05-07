@@ -132,7 +132,7 @@ void ImGuiDebugOverlay::update()
 	if (settings_.showInfoText)
 	{
 		const AppConfiguration &appCfg = theApplication().appConfiguration();
-		if (appCfg.withScenegraph)
+		if (appCfg.features.scenegraph)
 		{
 			guiTopLeft();
 			guiBottomRight();
@@ -154,7 +154,7 @@ void ImGuiDebugOverlay::updateFrameTimings()
 
 		plotValues_[ValuesType::FRAME_TIME][index_] = theApplication().frameTime();
 		plotValues_[ValuesType::FRAME_START][index_] = timings[Application::Timings::FRAME_START];
-		if (appCfg.withScenegraph)
+		if (appCfg.features.scenegraph)
 			plotValues_[ValuesType::POST_UPDATE][index_] = timings[Application::Timings::POST_UPDATE];
 		plotValues_[ValuesType::IMGUI][index_] = timings[Application::Timings::IMGUI];
 #ifdef WITH_NUKLEAR
@@ -162,7 +162,7 @@ void ImGuiDebugOverlay::updateFrameTimings()
 #endif
 		plotValues_[ValuesType::FRAME_END][index_] = timings[Application::Timings::FRAME_END];
 
-		if (appCfg.withScenegraph)
+		if (appCfg.features.scenegraph)
 		{
 			plotValues_[ValuesType::UPDATE_VISIT_DRAW][index_] = timings[Application::Timings::UPDATE] +
 			                                                     timings[Application::Timings::VISIT] +
@@ -176,11 +176,11 @@ void ImGuiDebugOverlay::updateFrameTimings()
 		{
 			if (plotValues_[ValuesType::FRAME_TIME][i] > maxFrameTime_)
 				maxFrameTime_ = plotValues_[ValuesType::FRAME_TIME][i];
-			if (appCfg.withScenegraph && plotValues_[ValuesType::UPDATE_VISIT_DRAW][i] > maxUpdateVisitDraw_)
+			if (appCfg.features.scenegraph && plotValues_[ValuesType::UPDATE_VISIT_DRAW][i] > maxUpdateVisitDraw_)
 				maxUpdateVisitDraw_ = plotValues_[ValuesType::UPDATE_VISIT_DRAW][i];
 		}
 
-		if (appCfg.withScenegraph)
+		if (appCfg.features.scenegraph)
 			updateOverlayTimings();
 
 		index_ = (index_ + 1) % numValues_;
@@ -298,7 +298,7 @@ void ImGuiDebugOverlay::guiWindow()
 	guiLog();
 	guiGraphicsCapabilities();
 	guiApplicationConfiguration();
-	if (appCfg.withScenegraph)
+	if (appCfg.features.scenegraph)
 		guiRenderingSettings();
 	guiWindowSettings();
 	guiAudioCapabilities();
@@ -308,7 +308,7 @@ void ImGuiDebugOverlay::guiWindow()
 	guiJobSystem();
 	guiRenderDoc();
 	guiAllocators();
-	if (appCfg.withScenegraph)
+	if (appCfg.features.scenegraph)
 		guiNodeInspector();
 
 	ImGui::End();
@@ -327,7 +327,7 @@ void ImGuiDebugOverlay::guiConfigureGui()
 		{
 			ImGui::Checkbox("Show overlays", &settings_.showInfoText);
 			ImGui::Checkbox("Lock overlay positions", &lockOverlayPositions_);
-			if (appCfg.withScenegraph)
+			if (appCfg.features.scenegraph)
 			{
 				ImGui::Checkbox("Show Top-Left", &showTopLeftOverlay_);
 				ImGui::SameLine();
@@ -335,7 +335,7 @@ void ImGuiDebugOverlay::guiConfigureGui()
 			ImGui::Checkbox("Show Top-Right", &showTopRightOverlay_);
 			ImGui::Checkbox("Show Bottom-Left", &showBottomLeftOverlay_);
 #ifdef WITH_LUA
-			if (appCfg.withScenegraph)
+			if (appCfg.features.scenegraph)
 			{
 				ImGui::SameLine();
 				ImGui::Checkbox("Show Bottom-Right", &showBottomRightOverlay_);
@@ -348,7 +348,7 @@ void ImGuiDebugOverlay::guiConfigureGui()
 		{
 			ImGui::Checkbox("Show profiling graphs", &settings_.showProfilerGraphs);
 			ImGui::Checkbox("Plot additional frame values", &plotAdditionalFrameValues_);
-			if (appCfg.withScenegraph)
+			if (appCfg.features.scenegraph)
 				ImGui::Checkbox("Plot overlay values", &plotOverlayValues_);
 			ImGui::SliderFloat("Graphs update time", &updateTime_, 0.0f, 1.0f, "%.3f s");
 			numValues = (numValues == 0) ? static_cast<int>(numValues_) : numValues;
@@ -590,7 +590,7 @@ void ImGuiDebugOverlay::guiFrameTimer()
 		ImGui::EndDisabled();
 		ImGui::SameLine();
 		if (ImGui::Checkbox("##EnableAvgUpdate", &averageEnabled))
-			averageInterval = averageEnabled ? theApplication().appConfiguration().profileTextUpdateTime() : 0.0f;
+			averageInterval = averageEnabled ? theApplication().appConfiguration().profileTextUpdateTime : 0.0f;
 		frameTimer.setAverageInterval(averageInterval);
 
 		int logLevel = static_cast<int>(frameTimer.logLevel());
@@ -605,7 +605,7 @@ void ImGuiDebugOverlay::guiFrameTimer()
 		ImGui::EndDisabled();
 		ImGui::SameLine();
 		if (ImGui::Checkbox("##EnableLogging", &loggingEnabled))
-			loggingInterval = loggingEnabled ? theApplication().appConfiguration().frameTimerLogInterval : 0.0f;
+			loggingInterval = loggingEnabled ? theApplication().appConfiguration().logging.frameTimerInterval : 0.0f;
 		frameTimer.setLoggingInterval(loggingInterval);
 
 		ImGui::Text("Total Number of Frames: %lu", frameTimer.totalNumberFrames());
@@ -689,78 +689,126 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 	if (ImGui::CollapsingHeader("Application Configuration"))
 	{
 		const AppConfiguration &appCfg = theApplication().appConfiguration();
+		// ----- Logging -----
+		if (ImGui::TreeNodeEx("Logging", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			ImGui::Text("File: \"%s\"", appCfg.logging.file.data());
+			ImGui::Text("Console Level: %d", static_cast<int>(appCfg.logging.consoleLevel));
+			ImGui::Text("File Level: %d", static_cast<int>(appCfg.logging.fileLevel));
+			ImGui::Text("Frame Timer Interval: %.2f s", appCfg.logging.frameTimerInterval);
+			ImGui::Text("Console Colors: %s", appCfg.logging.consoleColors ? "true" : "false");
+
+			ImGui::TreePop();
+		}
+
+		// ----- Window -----
+		if (ImGui::TreeNodeEx("Window", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			ImGui::Text("Resolution: %d x %d", appCfg.window.resolution.x, appCfg.window.resolution.y);
+			ImGui::Text("Refresh Rate: %.2f Hz", appCfg.window.refreshRate);
+			widgetName_.assign("Position: ");
+			if (appCfg.window.position.x == AppConfiguration::Window::IgnorePosition)
+				widgetName_.append("Ignore x ");
+			else
+				widgetName_.formatAppend("%d x ", appCfg.window.position.x);
+			if (appCfg.window.position.y == AppConfiguration::Window::IgnorePosition)
+				widgetName_.append("Ignore");
+			else
+				widgetName_.formatAppend("%d", appCfg.window.position.y);
+			ImGui::TextUnformatted(widgetName_.data());
+			ImGui::Text("Fullscreen: %s", appCfg.window.fullscreen ? "true" : "false");
+			ImGui::Text("Resizable: %s", appCfg.window.resizable ? "true" : "false");
+			ImGui::Text("Scaling: %s", appCfg.window.scaling ? "true" : "false");
+
+			ImGui::Text("Title: \"%s\"", appCfg.window.title.data());
+			ImGui::Text("Icon: \"%s\"", appCfg.window.iconFilename.data());
+
+			ImGui::TreePop();
+		}
+
+		// ----- Graphics -----
+		if (ImGui::TreeNodeEx("Graphics", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			ImGui::Text("V-Sync: %s", appCfg.graphics.vsync ? "true" : "false");
+			ImGui::Text("Frame Limit: %u", appCfg.graphics.frameLimit);
+
+			// ----- Graphics.OpenGLCapabilities -----
+			if (ImGui::TreeNodeEx("Graphics.OpenGLCapabilities", ImGuiTreeNodeFlags_DefaultOpen))
+			{
 #if !defined(WITH_OPENGLES) && !defined(__EMSCRIPTEN__)
-		ImGui::Text("OpenGL Core: %s", appCfg.glCoreProfile() ? "true" : "false");
-		ImGui::Text("OpenGL Forward: %s", appCfg.glForwardCompatible() ? "true" : "false");
+				ImGui::Text("Core Profile: %s", appCfg.graphics.openglCaps.coreProfile ? "true" : "false");
+				ImGui::Text("Forward Compatible: %s", appCfg.graphics.openglCaps.forwardCompatible ? "true" : "false");
 #endif
-		ImGui::Text("%s Major.Minor: %d.%d", openglApiName, appCfg.glMajorVersion(), appCfg.glMinorVersion());
+				ImGui::Text("%s: %d.%d", openglApiName, appCfg.graphics.openglCaps.majorVersion, appCfg.graphics.openglCaps.minorVersion);
 
-		ImGui::Separator();
-		ImGui::Text("Data Path: \"%s\"", appCfg.dataPath().data());
-		ImGui::Text("Log File: \"%s\"", appCfg.logFile.data());
-		ImGui::Text("Console Log Level: %d", static_cast<int>(appCfg.consoleLogLevel));
-		ImGui::Text("File Log Level: %d", static_cast<int>(appCfg.fileLogLevel));
-		ImGui::Text("Frametimer Log Interval: %f s", appCfg.frameTimerLogInterval);
-		ImGui::Text("Profile Text Update Time: %f s", appCfg.profileTextUpdateTime());
+				ImGui::TreePop();
+			}
 
-		ImGui::Separator();
-		ImGui::Text("Resolution: %d x %d", appCfg.resolution.x, appCfg.resolution.y);
-		ImGui::Text("Refresh Rate: %f Hz", appCfg.refreshRate);
-		widgetName_.assign("Window Position: ");
-		if (appCfg.windowPosition.x == AppConfiguration::WindowPositionIgnore)
-			widgetName_.append("Ignore x ");
-		else
-			widgetName_.formatAppend("%d x ", appCfg.windowPosition.x);
-		if (appCfg.windowPosition.y == AppConfiguration::WindowPositionIgnore)
-			widgetName_.append("Ignore");
-		else
-			widgetName_.formatAppend("%d", appCfg.windowPosition.y);
-		ImGui::TextUnformatted(widgetName_.data());
-		ImGui::Text("Fullscreen: %s", appCfg.fullscreen ? "true" : "false");
-		ImGui::Text("Resizable: %s", appCfg.resizable ? "true" : "false");
-		ImGui::Text("Window Scaling: %s", appCfg.windowScaling ? "true" : "false");
-		ImGui::Text("Frame Limit: %u", appCfg.frameLimit);
-
-		ImGui::Separator();
-		ImGui::Text("Window Title: \"%s\"", appCfg.windowTitle.data());
-		ImGui::Text("Window Icon: \"%s\"", appCfg.windowIconFilename.data());
-
-		ImGui::Separator();
-		ImGui::Text("Buffer Mapping: %s", appCfg.useBufferMapping ? "true" : "false");
-		ImGui::Text("Defer Shader Queries: %s", appCfg.deferShaderQueries ? "true" : "false");
+			// ----- Graphics.OpenGL -----
+			if (ImGui::TreeNodeEx("Graphics.OpenGL", ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				ImGui::Text("Debug Context: %s", appCfg.graphics.opengl.debugContext ? "true" : "false");
+				ImGui::Text("Buffer Mapping: %s", appCfg.graphics.opengl.useBufferMapping ? "true" : "false");
+				ImGui::Separator();
+				ImGui::Text("VBO Size: %lu bytes", appCfg.graphics.opengl.vboSize);
+				ImGui::Text("IBO Size: %lu bytes", appCfg.graphics.opengl.iboSize);
+				ImGui::Text("VAO Pool Size: %u", appCfg.graphics.opengl.vaoPoolSize);
+				ImGui::Text("RenderCommand Pool Size: %u", appCfg.graphics.opengl.renderCommandPoolSize);
+				ImGui::Separator();
+				ImGui::Text("Defer Shader Queries: %s", appCfg.graphics.opengl.deferShaderQueries ? "true" : "false");
 #if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
-		ImGui::Text("Fixed Batch Size: %u", appCfg.fixedBatchSize);
+				ImGui::Text("Fixed Batch Size: %u", appCfg.graphics.opengl.fixedBatchSize);
 #endif
-		ImGui::Text("Binary Shader Cache: %s", appCfg.useBinaryShaderCache ? "true" : "false");
-		ImGui::Text("Shader Cache Directory Name: \"%s\"", appCfg.shaderCacheDirname.data());
-		ImGui::Text("Compile Batched Shaders Twice: %s", appCfg.compileBatchedShadersTwice ? "true" : "false");
+				ImGui::Text("Binary Shader Cache: %s", appCfg.graphics.opengl.useBinaryShaderCache ? "true" : "false");
+				ImGui::Text("Shader Cache Directory Name: \"%s\"", appCfg.graphics.opengl.shaderCacheDirname.data());
+				ImGui::Text("Compile Batched Shaders Twice: %s", appCfg.graphics.opengl.compileBatchedShadersTwice ? "true" : "false");
 
-		ImGui::Separator();
-		ImGui::Text("VBO Size: %lu bytes", appCfg.vboSize);
-		ImGui::Text("IBO Size: %lu bytes", appCfg.iboSize);
-		ImGui::Text("VAO Pool Size: %u", appCfg.vaoPoolSize);
-		ImGui::Text("RenderCommand Pool Size: %u", appCfg.renderCommandPoolSize);
+				ImGui::TreePop();
+			}
 
-		ImGui::Separator();
-		ImGui::Text("Output Audio Frequency: %u Hz", appCfg.outputAudioFrequency);
-		ImGui::Text("Mono Audio Sources: %u", appCfg.monoAudioSources);
-		ImGui::Text("Stereo Audio Sources: %u", appCfg.stereoAudioSources);
+			ImGui::TreePop();
+		}
 
-		ImGui::Separator();
-		ImGui::Text("Debug Overlay: %s", appCfg.withDebugOverlay ? "true" : "false");
-		ImGui::Text("Audio: %s", appCfg.withAudio ? "true" : "false");
-		ImGui::Text("Job System: %s", appCfg.withJobSystem ? "true" : "false");
-		ImGui::Text("Number of Threads: %u", appCfg.numThreads);
-		ImGui::Text("Scenegraph: %s", appCfg.withScenegraph ? "true" : "false");
-		ImGui::Text("VSync: %s", appCfg.withVSync ? "true" : "false");
-		ImGui::Text("%s Debug Context: %s", openglApiName, appCfg.withGlDebugContext ? "true" : "false");
-		ImGui::Text("Console Colors: %s", appCfg.withConsoleColors ? "true" : "false");
+		if (ImGui::TreeNodeEx("Audio", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			ImGui::Text("Enabled: %s", appCfg.audio.enabled ? "true" : "false");
+			ImGui::Text("Frequency: %u Hz", appCfg.audio.frequency);
+			ImGui::Text("Mono Sources: %u", appCfg.audio.monoSources);
+			ImGui::Text("Stereo Sources: %u", appCfg.audio.stereoSources);
 
+			ImGui::TreePop();
+		}
+
+		if (ImGui::TreeNodeEx("Job System", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			ImGui::Text("Enabled: %s", appCfg.jobSystem.enabled ? "true" : "false");
+			ImGui::Text("Number of Threads: %u", appCfg.jobSystem.numThreads);
+
+			ImGui::TreePop();
+		}
+
+		if (ImGui::TreeNodeEx("Features", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			ImGui::Text("Scenegraph: %s", appCfg.features.scenegraph ? "enabled" : "disabled");
+			ImGui::Text("Debug Overlay: %s", appCfg.features.debugOverlay ? "enabled" : "disabled");
+
+			ImGui::TreePop();
+		}
+
+		ImGui::Text("Profile Text Update Time: %.2f s", appCfg.profileTextUpdateTime);
+		ImGui::Text("Data Path: \"%s\"", appCfg.dataPath().data());
+
+		ImGui::NewLine();
 		if (appCfg.argc() > 0)
 		{
-			ImGui::Separator();
-			for (int i = 0; i < appCfg.argc(); i++)
-				LOGI_X("argv[%u]: \"%s\"", i, appCfg.argv(i));
+			widgetName_.format("argc: %u###ArgC", appCfg.argc());
+			if (ImGui::TreeNodeEx(widgetName_.data(), ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				for (int i = 0; i < appCfg.argc(); i++)
+					ImGui::Text("argv[%u]: \"%s\"", i, appCfg.argv(i));
+
+				ImGui::TreePop();
+			}
 		}
 	}
 }
@@ -780,7 +828,7 @@ void ImGuiDebugOverlay::guiRenderingSettings()
 		int minBatchSize = settings.minBatchSize;
 		int maxBatchSize = settings.maxBatchSize;
 #if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
-		const unsigned int fixedBatchSize = theApplication().appConfiguration().fixedBatchSize;
+		const unsigned int fixedBatchSize = theApplication().appConfiguration().graphics.opengl.fixedBatchSize;
 		const int maxBatchSizeRange = fixedBatchSize;
 #else
 		const int maxBatchSizeRange = 512;
@@ -902,8 +950,8 @@ void ImGuiDebugOverlay::guiWindowSettings()
 		if (ImGui::Button("Reset"))
 		{
 	#ifndef __ANDROID__
-			resolution = theApplication().appConfiguration().resolution;
-			fullscreen = theApplication().appConfiguration().fullscreen;
+			resolution = theApplication().appConfiguration().window.resolution;
+			fullscreen = theApplication().appConfiguration().window.fullscreen;
 	#endif
 			gfxDevice.setFullscreen(fullscreen);
 			gfxDevice.setWindowSize(resolution[0], resolution[1]);
@@ -2184,7 +2232,7 @@ void ImGuiDebugOverlay::guiTopRight()
 
 #ifdef WITH_SCENEGRAPH
 		const AppConfiguration &appCfg = theApplication().appConfiguration();
-		if (appCfg.withScenegraph)
+		if (appCfg.features.scenegraph)
 		{
 			const RenderStatistics::Commands &spriteCommands = RenderStatistics::commands(RenderCommand::CommandTypes::SPRITE);
 			const RenderStatistics::Commands &meshspriteCommands = RenderStatistics::commands(RenderCommand::CommandTypes::MESH_SPRITE);
@@ -2343,7 +2391,7 @@ void ImGuiDebugOverlay::guiPlots()
 	ImGui::PlotLines("Frame time", plotValues_[ValuesType::FRAME_TIME].get(), numValues_, 0, nullptr, 0.0f, maxFrameTime_, ImVec2(appWidth * 0.33f, 0.0f));
 
 	const AppConfiguration &appCfg = theApplication().appConfiguration();
-	if (appCfg.withScenegraph)
+	if (appCfg.features.scenegraph)
 	{
 		ImGui::Separator();
 		ImGui::PushStyleColor(ImGuiCol_PlotLines, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
@@ -2364,7 +2412,7 @@ void ImGuiDebugOverlay::guiPlots()
 	{
 		ImGui::Separator();
 		ImGui::PlotLines("onFrameStart", plotValues_[ValuesType::FRAME_START].get(), numValues_, 0, nullptr, 0.0f, maxUpdateVisitDraw_, ImVec2(appWidth * 0.33f, 0.0f));
-		if (appCfg.withScenegraph)
+		if (appCfg.features.scenegraph)
 			ImGui::PlotLines("onPostUpdate", plotValues_[ValuesType::POST_UPDATE].get(), numValues_, 0, nullptr, 0.0f, maxUpdateVisitDraw_, ImVec2(appWidth * 0.33f, 0.0f));
 		ImGui::PlotLines("onFrameEnd", plotValues_[ValuesType::FRAME_END].get(), numValues_, 0, nullptr, 0.0f, maxUpdateVisitDraw_, ImVec2(appWidth * 0.33f, 0.0f));
 		ImGui::PlotLines("ImGui", plotValues_[ValuesType::IMGUI].get(), numValues_, 0, nullptr, 0.0f, maxUpdateVisitDraw_, ImVec2(appWidth * 0.33f, 0.0f));

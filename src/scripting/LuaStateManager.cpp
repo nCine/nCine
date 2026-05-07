@@ -647,7 +647,7 @@ void LuaStateManager::exposeApi()
 	LuaApplication::expose(L_);
 	LuaIGfxDevice::expose(L_);
 	#ifdef WITH_SCENEGRAPH
-	if (appCfg.withScenegraph)
+	if (appCfg.features.scenegraph)
 	{
 		LuaViewport::expose(this);
 		LuaCamera::expose(this);
@@ -667,7 +667,7 @@ void LuaStateManager::exposeApi()
 	#endif
 
 	#ifdef WITH_AUDIO
-	if (appCfg.withAudio)
+	if (appCfg.audio.enabled)
 	{
 		LuaIAudioDevice::expose(L_);
 		LuaAudioBuffer::expose(this);
@@ -699,7 +699,7 @@ void LuaStateManager::exposeConstants()
 	LuaFileSystem::exposeConstants(L_);
 	LuaAppConfiguration::exposeConstants(L_);
 	#ifdef WITH_SCENEGRAPH
-	if (appCfg.withScenegraph)
+	if (appCfg.features.scenegraph)
 	{
 		LuaViewport::exposeConstants(L_);
 		LuaShader::exposeConstants(L_);
@@ -714,7 +714,7 @@ void LuaStateManager::exposeConstants()
 	}
 	#endif
 	#ifdef WITH_OPENAL_EXT
-	if (appCfg.withAudio)
+	if (appCfg.audio.enabled)
 	{
 		LuaAudioFilter::exposeConstants(L_);
 		LuaAudioEffect::exposeConstants(L_);
