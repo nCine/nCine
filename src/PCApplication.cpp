@@ -70,7 +70,7 @@ void PCApplication::init(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandl
 	wasSuspended_ = shouldSuspend();
 
 	// Registering the logger as early as possible
-	theServiceLocator().registerLogger(nctl::makeUnique<FileLogger>(appCfg_.consoleLogLevel));
+	theServiceLocator().registerLogger(nctl::makeUnique<FileLogger>(appCfg_.logging.consoleLevel));
 
 	appEventHandler_ = createAppEventHandler();
 	// Only `onPreInit()` can modify the application configuration
@@ -87,10 +87,11 @@ void PCApplication::init(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandl
 
 	// Setting log levels and filename based on application configuration
 	FileLogger &fileLogger = static_cast<FileLogger &>(theServiceLocator().logger());
-	fileLogger.setConsoleLevel(appCfg_.consoleLogLevel);
-	fileLogger.setFileLevel(appCfg_.fileLogLevel);
-	fileLogger.openLogFile(appCfg_.logFile.data());
+	fileLogger.setConsoleLevel(appCfg_.logging.consoleLevel);
+	fileLogger.setFileLevel(appCfg_.logging.fileLevel);
+	fileLogger.openLogFile(appCfg_.logging.file.data());
 	LOGI("IAppEventHandler::onPreInit() invoked"); // Logging delayed to set up the logger first
+	modifiableAppCfg.applyOverrides();
 	appCfg_.logFields();
 	appCfg_.logEnvVariables();
 
@@ -100,7 +101,7 @@ void PCApplication::init(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandl
 
 	// Graphics device should always be created before the input manager!
 	IGfxDevice::GLContextInfo glContextInfo(appCfg_);
-	const DisplayMode::VSync vSyncMode = appCfg_.withVSync ? DisplayMode::VSync::ENABLED : DisplayMode::VSync::DISABLED;
+	const DisplayMode::VSync vSyncMode = appCfg_.graphics.vsync ? DisplayMode::VSync::ENABLED : DisplayMode::VSync::DISABLED;
 	DisplayMode displayMode(8, 8, 8, 8, 24, 8, DisplayMode::DoubleBuffering::ENABLED, vSyncMode);
 
 	const IGfxDevice::WindowMode windowMode(appCfg_);
@@ -115,8 +116,8 @@ void PCApplication::init(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandl
 	gfxDevice_ = nctl::makeUnique<Qt5GfxDevice>(windowMode, glContextInfo, displayMode, *qt5Widget_);
 	inputManager_ = nctl::makeUnique<Qt5InputManager>(*qt5Widget_);
 #endif
-	gfxDevice_->setWindowTitle(appCfg_.windowTitle.data());
-	nctl::String windowIconFilePath = fs::joinPath(fs::dataPath(), appCfg_.windowIconFilename);
+	gfxDevice_->setWindowTitle(appCfg_.window.title.data());
+	nctl::String windowIconFilePath = fs::joinPath(fs::dataPath(), appCfg_.window.iconFilename);
 	if (fs::isReadableFile(windowIconFilePath.data()))
 		gfxDevice_->setWindowIcon(windowIconFilePath.data());
 

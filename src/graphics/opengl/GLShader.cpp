@@ -65,8 +65,9 @@ GLShader::GLShader(GLenum type)
 #if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
 		// ANGLE does not seem capable of handling large arrays that are not entirely filled.
 		// A small array size will also make shader compilation a lot faster.
-		if (theApplication().appConfiguration().fixedBatchSize > 0)
-			patchLines.formatAppend("#define BATCH_SIZE (%u)\n", theApplication().appConfiguration().fixedBatchSize);
+		const unsigned int fixedBatchSize = theApplication().appConfiguration().graphics.opengl.fixedBatchSize;
+		if (fixedBatchSize > 0)
+			patchLines.formatAppend("#define BATCH_SIZE (%u)\n", fixedBatchSize);
 #endif
 		// Exclude patch lines when counting line numbers in info logs
 		patchLines.append("#line 0\n");

@@ -78,7 +78,9 @@ ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
 	io.BackendFlags |= ImGuiBackendFlags_RendererHasTextures; // We can honor ImGuiPlatformIO::Textures[] requests during render.
 
 	const AppConfiguration &appCfg = theApplication().appConfiguration();
-	const GLShaderProgram::QueryPhase queryPhase = appCfg.deferShaderQueries ? GLShaderProgram::QueryPhase::DEFERRED : GLShaderProgram::QueryPhase::IMMEDIATE;
+	const GLShaderProgram::QueryPhase queryPhase = appCfg.graphics.opengl.deferShaderQueries
+	        ? GLShaderProgram::QueryPhase::DEFERRED
+	        : GLShaderProgram::QueryPhase::IMMEDIATE;
 
 	imguiShaderProgram_ = nctl::makeUnique<GLShaderProgram>(queryPhase);
 

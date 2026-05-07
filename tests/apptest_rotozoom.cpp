@@ -163,7 +163,7 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		nc::IGfxDevice &gfxDevice = nc::theApplication().gfxDevice();
 		gfxDevice.setFullscreen(!gfxDevice.isFullscreen());
 		if (gfxDevice.isFullscreen() == false)
-			gfxDevice.setWindowSize(nc::theApplication().appConfiguration().resolution);
+			gfxDevice.setWindowSize(nc::theApplication().appConfiguration().window.resolution);
 	}
 	if (event.sym == nc::KeySym::ESCAPE)
 		nc::theApplication().quit();

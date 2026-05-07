@@ -68,7 +68,9 @@ NuklearDrawing::NuklearDrawing(bool withSceneGraph)
       lastFrameWidth_(0), lastFrameHeight_(0), lastLayerValue_(0)
 {
 	const AppConfiguration &appCfg = theApplication().appConfiguration();
-	const GLShaderProgram::QueryPhase queryPhase = appCfg.deferShaderQueries ? GLShaderProgram::QueryPhase::DEFERRED : GLShaderProgram::QueryPhase::IMMEDIATE;
+	const GLShaderProgram::QueryPhase queryPhase = appCfg.graphics.opengl.deferShaderQueries
+	        ? GLShaderProgram::QueryPhase::DEFERRED
+	        : GLShaderProgram::QueryPhase::IMMEDIATE;
 
 	// Nuklear shaders are the same as ImGui
 	nuklearShaderProgram_ = nctl::makeUnique<GLShaderProgram>(queryPhase);

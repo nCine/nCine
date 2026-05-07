@@ -485,8 +485,8 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 {
 	setDataPath(config);
 
-	config.withAudio = false;
-	config.withJobSystem = false;
+	config.audio.enabled = false;
+	config.jobSystem.enabled = false;
 }
 
 void MyEventHandler::onInit()

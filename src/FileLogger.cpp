@@ -60,7 +60,7 @@ FileLogger::FileLogger(LogLevel consoleLevel, LogLevel fileLevel, const char *fi
 {
 	// The setter will create the console on Windows, if needed
 	setConsoleLevel(consoleLevel);
-	canUseColors_ &= theApplication().appConfiguration().withConsoleColors;
+	canUseColors_ &= theApplication().appConfiguration().logging.consoleColors;
 
 	openLogFile(filename);
 	setvbuf(stdout, nullptr, _IONBF, 0);

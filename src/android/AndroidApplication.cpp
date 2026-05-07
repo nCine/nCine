@@ -242,7 +242,7 @@ void AndroidApplication::preInit()
 	profileStartTime_ = TimeStamp::now();
 
 	// Registering the logger as early as possible
-	theServiceLocator().registerLogger(nctl::makeUnique<FileLogger>(appCfg_.consoleLogLevel));
+	theServiceLocator().registerLogger(nctl::makeUnique<FileLogger>(appCfg_.logging.consoleLevel));
 
 	AndroidJniHelper::attachJVM(state_);
 	AssetFile::initAssetManager(state_);
@@ -253,26 +253,27 @@ void AndroidApplication::preInit()
 	appEventHandler_->onPreInit(modifiableAppCfg);
 
 	// If the log file path is not contained in the files directory, then add it
-	if (appCfg_.logFile.length() <= fs::savePath().length() ||
-	    (appCfg_.logFile.length() > fs::savePath().length() &&
-	     strncmp(fs::dirName(appCfg_.logFile.data()).data(), fs::savePath().data(), fs::savePath().length()) != 0))
+	if (appCfg_.logging.file.length() <= fs::savePath().length() ||
+	    (appCfg_.logging.file.length() > fs::savePath().length() &&
+	     strncmp(fs::dirName(appCfg_.logging.file.data()).data(), fs::savePath().data(), fs::savePath().length()) != 0))
 	{
-		modifiableAppCfg.logFile = fs::joinPath(fs::savePath(), appCfg_.logFile);
+		modifiableAppCfg.logging.file = fs::joinPath(fs::savePath(), appCfg_.logging.file);
 	}
 	modifiableAppCfg.readEnvVariables();
 
 #ifdef WITH_CRASHPAD
-	// Initialize Crashpad after validating the `logFile` path
+	// Initialize Crashpad after validating the logging file path
 	if (Crashpad::isInitialized() == false)
 		Crashpad::initialize();
 #endif
 
 	// Setting log levels and filename based on application configuration
 	FileLogger &fileLogger = static_cast<FileLogger &>(theServiceLocator().logger());
-	fileLogger.setConsoleLevel(appCfg_.consoleLogLevel);
-	fileLogger.setFileLevel(appCfg_.fileLogLevel);
-	fileLogger.openLogFile(appCfg_.logFile.data());
+	fileLogger.setConsoleLevel(appCfg_.logging.consoleLevel);
+	fileLogger.setFileLevel(appCfg_.logging.fileLevel);
+	fileLogger.openLogFile(appCfg_.logging.file.data());
 	LOGI("IAppEventHandler::onPreInit() invoked"); // Logging delayed to set up the logger first
+	modifiableAppCfg.applyOverrides();
 	appCfg_.logFields();
 	appCfg_.logEnvVariables();
 }

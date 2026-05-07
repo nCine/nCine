@@ -3,11 +3,12 @@ require ("ncine_header")
 nc = ncine
 
 function nc.on_pre_init(cfg)
-	cfg.resolution = {x = 1280, y = 720}
-	cfg.window_title = "nCine Lua test"
+	--cfg.logging.console_level = nc.log_level.OFF
 
-	--cfg.console_log_level = nc.log_level.OFF
-	--cfg.resizable = true
+	cfg.window.resolution = {x = 1280, y = 720}
+	--cfg.window.resizable = true
+	cfg.window.title = "nCine Lua test"
+
 	return cfg
 end
 
@@ -317,7 +318,7 @@ function nc.on_key_released(event)
 	elseif event.sym == nc.keysym.F then
 		nc.gfx_device.set_fullscreen(not nc.gfx_device.is_fullscreen())
 		if nc.gfx_device.is_fullscreen() == false then
-			nc.gfx_device.set_window_size(nc.application.get_app_configuration().resolution)
+			nc.gfx_device.set_window_size(nc.application.get_app_configuration().window.resolution)
 		end
 	elseif event.sym == nc.keysym.F5 or event.sym == nc.keysym.N5 then
 		-- Don't call `reload_script()` if the function is not available, like when using the Lua interpreter directly

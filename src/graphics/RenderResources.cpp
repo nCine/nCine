@@ -102,7 +102,9 @@ void RenderResources::compileShader(ShaderProgramCompileInfo &shaderToCompile)
 	const uint64_t shaderHashSum = binaryShaderCache_->isEnabled() ? shaderToCompile.vertexInfo.hash + shaderToCompile.fragmentInfo.hash : 0;
 
 	const AppConfiguration &appCfg = theApplication().appConfiguration();
-	const GLShaderProgram::QueryPhase cfgQueryPhase = appCfg.deferShaderQueries ? GLShaderProgram::QueryPhase::DEFERRED : GLShaderProgram::QueryPhase::IMMEDIATE;
+	const GLShaderProgram::QueryPhase cfgQueryPhase = appCfg.graphics.opengl.deferShaderQueries
+	        ? GLShaderProgram::QueryPhase::DEFERRED
+	        : GLShaderProgram::QueryPhase::IMMEDIATE;
 
 	BinaryShaderCache::ShaderInfo shaderInfo;
 	const bool isCached = binaryShaderCache_->retrieveShaderInfo(shaderHashSum, shaderInfo);
@@ -127,9 +129,9 @@ void RenderResources::compileShader(ShaderProgramCompileInfo &shaderToCompile)
 	const bool compileTwice = (maxUniformBlockSize < 64 * 1024 &&
 	                           shaderToCompile.introspection == GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS &&
 #if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
-	                           theApplication().appConfiguration().fixedBatchSize == 0 &&
+	                           theApplication().appConfiguration().graphics.opengl.fixedBatchSize == 0 &&
 #endif
-	                           theApplication().appConfiguration().compileBatchedShadersTwice);
+	                           theApplication().appConfiguration().graphics.opengl.compileBatchedShadersTwice);
 
 	// The first compilation of a batched shader that needs a double compilation should be queried immediately
 	const GLShaderProgram::QueryPhase queryPhase = compileTwice ? GLShaderProgram::QueryPhase::IMMEDIATE : cfgQueryPhase;
@@ -219,10 +221,10 @@ void RenderResources::compileShader(ShaderProgramCompileInfo &shaderToCompile)
 
 #if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
 	if (shaderToCompile.introspection == GLShaderProgram::Introspection::NO_UNIFORMS_IN_BLOCKS &&
-	    theApplication().appConfiguration().fixedBatchSize != 0)
+	    theApplication().appConfiguration().graphics.opengl.fixedBatchSize != 0)
 	{
 		// If the batch size is fixed then it is also the maximum value
-		maxBatchSize = theApplication().appConfiguration().fixedBatchSize;
+		maxBatchSize = theApplication().appConfiguration().graphics.opengl.fixedBatchSize;
 	}
 #endif
 
@@ -472,16 +474,16 @@ void RenderResources::create()
 
 	// `create()` can be called after `createMinimal()`
 
-	const AppConfiguration &appCfg = theApplication().appConfiguration();
+	const AppConfiguration::Graphics::OpenGL &openglCfg = theApplication().appConfiguration().graphics.opengl;
 	if (binaryShaderCache_ == nullptr)
-		binaryShaderCache_ = nctl::makeUnique<BinaryShaderCache>(appCfg.useBinaryShaderCache, appCfg.shaderCacheDirname.data());
+		binaryShaderCache_ = nctl::makeUnique<BinaryShaderCache>(openglCfg.useBinaryShaderCache, openglCfg.shaderCacheDirname.data());
 	if (buffersManager_ == nullptr)
-		buffersManager_ = nctl::makeUnique<RenderBuffersManager>(appCfg.useBufferMapping, appCfg.vboSize, appCfg.iboSize);
+		buffersManager_ = nctl::makeUnique<RenderBuffersManager>(openglCfg.useBufferMapping, openglCfg.vboSize, openglCfg.iboSize);
 	if (vaoPool_ == nullptr)
-		vaoPool_ = nctl::makeUnique<RenderVaoPool>(appCfg.vaoPoolSize);
+		vaoPool_ = nctl::makeUnique<RenderVaoPool>(openglCfg.vaoPoolSize);
 	if (hash64_ == nullptr)
 		hash64_ = nctl::makeUnique<Hash64>();
-	renderCommandPool_ = nctl::makeUnique<RenderCommandPool>(appCfg.renderCommandPoolSize);
+	renderCommandPool_ = nctl::makeUnique<RenderCommandPool>(openglCfg.renderCommandPoolSize);
 	renderBatcher_ = nctl::makeUnique<RenderBatcher>();
 	defaultCamera_ = nctl::makeUnique<Camera>();
 	currentCamera_ = defaultCamera_.get();
@@ -590,10 +592,10 @@ void RenderResources::createMinimal()
 	ASSERT(vaoPool_ == nullptr);
 	ASSERT(hash64_ == nullptr);
 
-	const AppConfiguration &appCfg = theApplication().appConfiguration();
-	binaryShaderCache_ = nctl::makeUnique<BinaryShaderCache>(appCfg.useBinaryShaderCache, appCfg.shaderCacheDirname.data());
-	buffersManager_ = nctl::makeUnique<RenderBuffersManager>(appCfg.useBufferMapping, appCfg.vboSize, appCfg.iboSize);
-	vaoPool_ = nctl::makeUnique<RenderVaoPool>(appCfg.vaoPoolSize);
+	const AppConfiguration::Graphics::OpenGL &openglCfg = theApplication().appConfiguration().graphics.opengl;
+	binaryShaderCache_ = nctl::makeUnique<BinaryShaderCache>(openglCfg.useBinaryShaderCache, openglCfg.shaderCacheDirname.data());
+	buffersManager_ = nctl::makeUnique<RenderBuffersManager>(openglCfg.useBufferMapping, openglCfg.vboSize, openglCfg.iboSize);
+	vaoPool_ = nctl::makeUnique<RenderVaoPool>(openglCfg.vaoPoolSize);
 	hash64_ = nctl::makeUnique<Hash64>();
 
 	LOGI("Minimal rendering resources created");

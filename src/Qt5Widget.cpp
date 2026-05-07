@@ -33,9 +33,9 @@ Qt5Widget::Qt5Widget(QWidget *parent, nctl::UniquePtr<IAppEventHandler> (*create
 	// The graphics device is initialized and can react to resize events
 	if (application_.gfxDevice().isFullscreen())
 		window()->showFullScreen();
-	else if (application_.appConfiguration().resizable == false)
+	else if (application_.appConfiguration().window.resizable == false)
 	{
-		const Vector2i &windowSize = application_.appConfiguration().resolution;
+		const Vector2i &windowSize = application_.appConfiguration().window.resolution;
 		setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 		setMinimumSize(windowSize.x, windowSize.y);
 		setMaximumSize(windowSize.x, windowSize.y);
@@ -181,13 +181,13 @@ void Qt5Widget::paintGL()
 
 QSize Qt5Widget::minimumSizeHint() const
 {
-	if (application_.appConfiguration().resizable == true)
+	if (application_.appConfiguration().window.resizable == true)
 		return QSize(-1, -1);
 
 	if (isInitialized_)
 		return QSize(application_.widthInt(), application_.heightInt());
 	else
-		return QSize(application_.appCfg_.resolution.x, application_.appCfg_.resolution.y);
+		return QSize(application_.appCfg_.window.resolution.x, application_.appCfg_.window.resolution.y);
 }
 
 QSize Qt5Widget::sizeHint() const
@@ -195,7 +195,7 @@ QSize Qt5Widget::sizeHint() const
 	if (isInitialized_)
 		return QSize(application_.widthInt(), application_.heightInt());
 	else
-		return QSize(application_.appCfg_.resolution.x, application_.appCfg_.resolution.y);
+		return QSize(application_.appCfg_.window.resolution.x, application_.appCfg_.window.resolution.y);
 }
 
 ///////////////////////////////////////////////////////////

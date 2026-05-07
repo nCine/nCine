@@ -1,9 +1,8 @@
 nc = ncine
 
 function ncine.on_pre_init(cfg)
-	cfg.x_res = 1280
-	cfg.y_res = 720
-	cfg.window_title = "nCine Lua test"
+	cfg.window.resolution = {x = 1280, y = 720}
+	cfg.window.title = "nCine Lua test"
 	return cfg
 end
 
