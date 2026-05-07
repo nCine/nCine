@@ -110,7 +110,7 @@ void Qt5GfxDevice::setWindowSize(int width, int height)
 	if (width <= 0 || height <= 0 || (width == width_ && height == height_))
 		return;
 
-	if (theApplication().appConfiguration().resizable == false)
+	if (theApplication().appConfiguration().window.resizable == false)
 	{
 		widget_.setMinimumSize(width, height);
 		widget_.setMaximumSize(width, height);
@@ -228,14 +228,14 @@ void Qt5GfxDevice::initDevice(const WindowMode &windowMode)
 
 	QWidget *window = widget_.window();
 	const bool windowPositionIsValid = (containingMonitorIndex(windowMode) != -1);
-	const bool ignoreBothWindowPosition = (windowMode.windowPositionX == AppConfiguration::WindowPositionIgnore &&
-	                                       windowMode.windowPositionY == AppConfiguration::WindowPositionIgnore);
+	const bool ignoreBothWindowPosition = (windowMode.windowPositionX == AppConfiguration::Window::IgnorePosition &&
+	                                       windowMode.windowPositionY == AppConfiguration::Window::IgnorePosition);
 	if (isFullscreen_ == false && windowPositionIsValid && ignoreBothWindowPosition == false)
 	{
 		QPoint windowPos = window->pos();
-		if (windowMode.windowPositionX != AppConfiguration::WindowPositionIgnore)
+		if (windowMode.windowPositionX != AppConfiguration::Window::IgnorePosition)
 			windowPos.setX(windowMode.windowPositionX);
-		if (windowMode.windowPositionY != AppConfiguration::WindowPositionIgnore)
+		if (windowMode.windowPositionY != AppConfiguration::Window::IgnorePosition)
 			windowPos.setY(windowMode.windowPositionY);
 		window->move(windowPos);
 	}

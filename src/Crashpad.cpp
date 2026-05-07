@@ -176,21 +176,21 @@ bool Crashpad::initialize()
 
 	// Attach the log file if it exists
 	std::vector<base::FilePath> attachments;
-	if (appCfg.fileLogLevel != ILogger::LogLevel::OFF)
+	if (appCfg.logging.fileLevel != ILogger::LogLevel::OFF)
 	{
 		// Try to specify an absolute path for the log file attachment
 		nctl::String logFilepath(512);
 #if !defined(__ANDROID__)
-		logFilepath = fs::joinPath(fs::currentDir(), appCfg.logFile);
+		logFilepath = fs::joinPath(fs::currentDir(), appCfg.logging.file);
 		if (fs::isReadableFile(logFilepath.data()) == false)
 		{
-			logFilepath = fs::joinPath(fs::executableDir(), appCfg.logFile);
+			logFilepath = fs::joinPath(fs::executableDir(), appCfg.logging.file);
 			if (fs::isReadableFile(logFilepath.data()) == false)
-				logFilepath = appCfg.logFile;
+				logFilepath = appCfg.logging.file;
 		}
 #else
-		// On Android the `logFile` is already absolute, and uses the persistent files directory
-		logFilepath = appCfg.logFile;
+		// On Android the logging file is already absolute, and uses the persistent files directory
+		logFilepath = appCfg.logging.file;
 #endif
 
 #if defined(_WIN32)

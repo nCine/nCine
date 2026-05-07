@@ -43,13 +43,13 @@ ALAudioDevice::ALAudioDevice(const AppConfiguration &appCfg)
 
 	const ALCint attrList[7] = {
 #ifdef __EMSCRIPTEN__
-		ALC_FREQUENCY, (appCfg.outputAudioFrequency > 0) ? static_cast<ALCint>(appCfg.outputAudioFrequency) : 44100,
-		ALC_MONO_SOURCES, (appCfg.monoAudioSources > 0) ? static_cast<ALCint>(appCfg.monoAudioSources) : 15,
-		ALC_STEREO_SOURCES, (appCfg.stereoAudioSources > 0) ? static_cast<ALCint>(appCfg.stereoAudioSources) : 1,
+		ALC_FREQUENCY, (appCfg.audio.frequency > 0) ? static_cast<ALCint>(appCfg.audio.frequency) : 44100,
+		ALC_MONO_SOURCES, (appCfg.audio.monoSources > 0) ? static_cast<ALCint>(appCfg.audio.monoSources) : 15,
+		ALC_STEREO_SOURCES, (appCfg.audio.stereoSources > 0) ? static_cast<ALCint>(appCfg.audio.stereoSources) : 1,
 #else
-		ALC_FREQUENCY, static_cast<ALCint>(appCfg.outputAudioFrequency),
-		ALC_MONO_SOURCES, static_cast<ALCint>(appCfg.monoAudioSources),
-		ALC_STEREO_SOURCES, static_cast<ALCint>(appCfg.stereoAudioSources),
+		ALC_FREQUENCY, static_cast<ALCint>(appCfg.audio.frequency),
+		ALC_MONO_SOURCES, static_cast<ALCint>(appCfg.audio.monoSources),
+		ALC_STEREO_SOURCES, static_cast<ALCint>(appCfg.audio.stereoSources),
 #endif
 
 		0
@@ -78,7 +78,7 @@ ALAudioDevice::ALAudioDevice(const AppConfiguration &appCfg)
 	logALExtensions();
 
 	const unsigned int MaxAvailableSources = unsigned(attributes_.numMonoSources + attributes_.numStereoSources);
-	unsigned int sourcePoolSize = appCfg.monoAudioSources + appCfg.stereoAudioSources;
+	unsigned int sourcePoolSize = appCfg.audio.monoSources + appCfg.audio.stereoSources;
 	if (sourcePoolSize == 0 || sourcePoolSize > MaxAvailableSources)
 		sourcePoolSize = MaxAvailableSources;
 	sources_.setSize(sourcePoolSize);

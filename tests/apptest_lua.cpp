@@ -187,14 +187,14 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 		{
 			printf("%s from nCine %s (%s)\n", nc::fs::baseName(config.argv(0)).data(),
 			       nc::VersionStrings::Version, nc::VersionStrings::GitBranch);
-			config.consoleLogLevel = nc::ILogger::LogLevel::OFF;
+			config.logging.consoleLevel = nc::ILogger::LogLevel::OFF;
 			nc::theApplication().quit();
 			return;
 		}
 		else if (strncmp(config.argv(1), "-h", 2) == 0 || strncmp(config.argv(1), "--help", 6) == 0)
 		{
 			printf("Usage: %s [FILE]\nExecute the specified Lua script, or the default one (\"%s\") if unspecified.\n", config.argv(0), DefaultScriptName);
-			config.consoleLogLevel = nc::ILogger::LogLevel::OFF;
+			config.logging.consoleLevel = nc::ILogger::LogLevel::OFF;
 			nc::theApplication().quit();
 			return;
 		}

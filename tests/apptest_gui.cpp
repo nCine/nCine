@@ -466,8 +466,8 @@ int main(int argc, char **argv)
 	ncine::Qt5Widget *ncWidget = new nc::Qt5Widget(createAppEventHandler, argc, argv);
 	const nc::AppConfiguration appCfg = nc::theApplication().appConfiguration();
 	QWidget window;
-	window.setWindowTitle(appCfg.windowTitle.data());
-	window.setWindowIcon(QIcon((nc::fs::dataPath() + appCfg.windowIconFilename).data()));
+	window.setWindowTitle(appCfg.window.title.data());
+	window.setWindowIcon(QIcon((nc::fs::dataPath() + appCfg.window.iconFilename).data()));
 
 	QHBoxLayout *hLayout = new QHBoxLayout;
 	hLayout->addLayout(vLayout);
@@ -480,13 +480,13 @@ int main(int argc, char **argv)
 	const int screenWidth = nc::theApplication().gfxDevice().currentVideoMode().width;
 	const int screenHeight = nc::theApplication().gfxDevice().currentVideoMode().height;
 
-	const bool configResolutionIsValid = (appCfg.resolution.x != 0 && appCfg.resolution.y != 0);
+	const bool configResolutionIsValid = (appCfg.window.resolution.x != 0 && appCfg.window.resolution.y != 0);
 	const int width = configResolutionIsValid ? nc::theApplication().gfxDevice().width() : screenWidth;
 	const int height = configResolutionIsValid ? nc::theApplication().gfxDevice().height() : screenHeight;
 
 	nc::theApplication().gfxDevice().setWindowSize(width - qt5GuiWidth, height);
 	window.setGeometry((screenWidth - width) / 2, (screenHeight - height) / 2, width, height);
-	if (appCfg.resizable == false)
+	if (appCfg.window.resizable == false)
 	{
 		window.setMinimumSize(width, height);
 		window.setMaximumSize(width, height);
