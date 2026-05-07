@@ -190,7 +190,7 @@ QSize Qt5Widget::minimumSizeHint() const
 	if (isInitialized_)
 		return QSize(application_.widthInt(), application_.heightInt());
 	else
-		return QSize(application_.appCfg_.resolution.x, application_.appCfg_.resolution.y);
+		return QSize(application_.appCfg_.window.resolution.x, application_.appCfg_.window.resolution.y);
 }
 
 QSize Qt5Widget::sizeHint() const
@@ -198,7 +198,7 @@ QSize Qt5Widget::sizeHint() const
 	if (isInitialized_)
 		return QSize(application_.widthInt(), application_.heightInt());
 	else
-		return QSize(application_.appCfg_.resolution.x, application_.appCfg_.resolution.y);
+		return QSize(application_.appCfg_.window.resolution.x, application_.appCfg_.window.resolution.y);
 }
 
 ///////////////////////////////////////////////////////////

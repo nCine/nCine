@@ -243,8 +243,8 @@ void SdlGfxDevice::initDevice(const WindowMode &windowMode)
 	if (width_ <= 0 || height_ <= 0)
 		isFullscreen_ = true;
 
-	const bool ignoreAnyWindowPosition = (windowMode.windowPositionX == AppConfiguration::WindowPositionIgnore ||
-	                                      windowMode.windowPositionY == AppConfiguration::WindowPositionIgnore);
+	const bool ignoreAnyWindowPosition = (windowMode.windowPositionX == AppConfiguration::Window::IgnorePosition ||
+	                                      windowMode.windowPositionY == AppConfiguration::Window::IgnorePosition);
 	const Vector2i windowCenter(windowMode.windowPositionX + windowMode.width / 2, windowMode.windowPositionY + windowMode.height / 2);
 	const unsigned int monitorIndex = (ignoreAnyWindowPosition == false) ? containingMonitorIndex(windowCenter) : 0;
 	const bool desktopFullscreen = (width_ <= 0 || height_ <= 0) && windowMode.refreshRate <= 0.0f; // If fullscreen is requested, current video mode will not be changed
@@ -276,9 +276,9 @@ void SdlGfxDevice::initDevice(const WindowMode &windowMode)
 #endif
 
 	const bool windowPositionIsValid = (containingMonitorIndex(windowMode) != -1);
-	const int windowPosX = (windowMode.windowPositionX != AppConfiguration::WindowPositionIgnore && windowPositionIsValid)
+	const int windowPosX = (windowMode.windowPositionX != AppConfiguration::Window::IgnorePosition && windowPositionIsValid)
 	                           ? windowMode.windowPositionX : SDL_WINDOWPOS_CENTERED;
-	const int windowPosY = (windowMode.windowPositionY != AppConfiguration::WindowPositionIgnore && windowPositionIsValid)
+	const int windowPosY = (windowMode.windowPositionY != AppConfiguration::Window::IgnorePosition && windowPositionIsValid)
 	                           ? windowMode.windowPositionY : SDL_WINDOWPOS_CENTERED;
 	windowHandle_ = SDL_CreateWindow("", windowPosX, windowPosY, width_, height_, flags);
 	FATAL_ASSERT_MSG_X(windowHandle_, "SDL_CreateWindow failed: %s", SDL_GetError());

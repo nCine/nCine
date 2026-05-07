@@ -343,9 +343,9 @@ void GlfwGfxDevice::initDevice(const WindowMode &windowMode)
 #endif
 
 #if GLFW_VERSION_COMBINED >= 3400
-	const int windowPosX = (windowMode.windowPositionX != AppConfiguration::WindowPositionIgnore && windowPositionIsValid)
+	const int windowPosX = (windowMode.windowPositionX != AppConfiguration::Window::IgnorePosition && windowPositionIsValid)
 	                           ? windowMode.windowPositionX : GLFW_ANY_POSITION;
-	const int windowPosY = (windowMode.windowPositionY != AppConfiguration::WindowPositionIgnore && windowPositionIsValid)
+	const int windowPosY = (windowMode.windowPositionY != AppConfiguration::Window::IgnorePosition && windowPositionIsValid)
 	                           ? windowMode.windowPositionY : GLFW_ANY_POSITION;
 	glfwWindowHint(GLFW_POSITION_X, windowPosX);
 	glfwWindowHint(GLFW_POSITION_Y, windowPosY);
@@ -355,15 +355,15 @@ void GlfwGfxDevice::initDevice(const WindowMode &windowMode)
 	FATAL_ASSERT_MSG(windowHandle_, "glfwCreateWindow() failed");
 
 #if GLFW_VERSION_COMBINED < 3400
-	const bool ignoreBothWindowPosition = (windowMode.windowPositionX == AppConfiguration::WindowPositionIgnore &&
-	                                       windowMode.windowPositionY == AppConfiguration::WindowPositionIgnore);
-	if (isFullscreen_ == false && windowPositionIsValid && ignoreBothWindowPosition == false)
+	const bool ignoreBothWindowPosition = (windowMode.windowPositionX == AppConfiguration::Window::IgnorePosition &&
+	                                       windowMode.windowPositionY == AppConfiguration::Window::IgnorePosition);
+	if (isFullScreen_ == false && windowPositionIsValid && ignoreBothWindowPosition == false)
 	{
 		Vector2i windowPos;
 		glfwGetWindowPos(windowHandle_, &windowPos.x, &windowPos.y);
-		if (windowMode.windowPositionX != AppConfiguration::WindowPositionIgnore)
+		if (windowMode.windowPositionX != AppConfiguration::Window::IgnorePosition)
 			windowPos.x = windowMode.windowPositionX;
-		if (windowMode.windowPositionY != AppConfiguration::WindowPositionIgnore)
+		if (windowMode.windowPositionY != AppConfiguration::Window::IgnorePosition)
 			windowPos.y = windowMode.windowPositionY;
 		glfwSetWindowPos(windowHandle_, windowPos.x, windowPos.y);
 	}

@@ -40,7 +40,7 @@ void RenderBatcher::createBatches(const nctl::Array<RenderCommand *> &srcQueue, 
 	unsigned int &minBatchSize = theApplication().renderingSettings().minBatchSize;
 
 #if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
-	const unsigned int fixedBatchSize = theApplication().appConfiguration().fixedBatchSize;
+	const unsigned int fixedBatchSize = theApplication().appConfiguration().graphics.opengl.fixedBatchSize;
 	if (fixedBatchSize > 0)
 		maxBatchSize = fixedBatchSize;
 #endif

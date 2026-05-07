@@ -250,16 +250,16 @@ void Application::initCommon()
 	theServiceLocator().registerIndexer(nctl::makeUnique<ArrayIndexer>());
 #endif
 #ifdef WITH_AUDIO
-	if (appCfg_.withAudio)
+	if (appCfg_.audio.enabled)
 		theServiceLocator().registerAudioDevice(nctl::makeUnique<ALAudioDevice>(appCfg_));
 #endif
 #ifdef WITH_JOBSYSTEM
-	if (appCfg_.withJobSystem)
+	if (appCfg_.jobSystem.enabled)
 	{
-		if (appCfg_.numThreads == 1)
+		if (appCfg_.jobSystem.numThreads == 1)
 			theServiceLocator().registerJobSystem(nctl::makeUnique<SerialJobSystem>());
 		else
-			theServiceLocator().registerJobSystem(nctl::makeUnique<JobSystem>(appCfg_.numThreads));
+			theServiceLocator().registerJobSystem(nctl::makeUnique<JobSystem>(appCfg_.jobSystem.numThreads));
 	}
 #endif
 	theServiceLocator().registerGfxCapabilities(nctl::makeUnique<GfxCapabilities>());
@@ -274,20 +274,20 @@ void Application::initCommon()
 	FrameMark;
 	TracyGpuCollect;
 
-	frameTimer_ = nctl::makeUnique<FrameTimer>(appCfg_.profileTextUpdateTime(), appCfg_.frameTimerLogInterval);
+	frameTimer_ = nctl::makeUnique<FrameTimer>(appCfg_.profileTextUpdateTime, appCfg_.logging.frameTimerInterval);
 
 	// Create a minimal set of render resources before compiling the first shader
 	RenderResources::createMinimal(); // they are required for rendering even without a scenegraph
 
 #ifdef WITH_IMGUI
-	imguiDrawing_ = nctl::makeUnique<ImGuiDrawing>(appCfg_.withScenegraph);
+	imguiDrawing_ = nctl::makeUnique<ImGuiDrawing>(appCfg_.features.scenegraph);
 #endif
 #ifdef WITH_NUKLEAR
-	nuklearDrawing_ = nctl::makeUnique<NuklearDrawing>(appCfg_.withScenegraph);
+	nuklearDrawing_ = nctl::makeUnique<NuklearDrawing>(appCfg_.features.scenegraph);
 #endif
 
 #ifdef WITH_SCENEGRAPH
-	if (appCfg_.withScenegraph)
+	if (appCfg_.features.scenegraph)
 	{
 		gfxDevice_->setupGL();
 		RenderResources::create();
@@ -299,8 +299,8 @@ void Application::initCommon()
 
 #ifdef WITH_IMGUI
 	// Debug overlay is available even when scenegraph is not
-	if (appCfg_.withDebugOverlay)
-		debugOverlay_ = nctl::makeUnique<ImGuiDebugOverlay>(appCfg_.profileTextUpdateTime());
+	if (appCfg_.features.debugOverlay)
+		debugOverlay_ = nctl::makeUnique<ImGuiDebugOverlay>(appCfg_.profileTextUpdateTime);
 #endif
 
 	// Initialization of the static random generator seeds
@@ -376,7 +376,7 @@ void Application::step()
 		debugOverlay_->update();
 
 #ifdef WITH_SCENEGRAPH
-	if (appCfg_.withScenegraph)
+	if (appCfg_.features.scenegraph)
 	{
 		ZoneScopedN("SceneGraph");
 		{
@@ -478,9 +478,9 @@ void Application::step()
 	FrameMark;
 	TracyGpuCollect;
 
-	if (appCfg_.frameLimit > 0)
+	if (appCfg_.graphics.frameLimit > 0)
 	{
-		const float frameTimeDuration = 1.0f / static_cast<float>(appCfg_.frameLimit);
+		const float frameTimeDuration = 1.0f / static_cast<float>(appCfg_.graphics.frameLimit);
 		while (frameTimer_->currentFrameTime() < frameTimeDuration)
 			Timer::sleep(0);
 	}
@@ -584,7 +584,7 @@ bool Application::resizeScreenViewport(int width, int height)
 /*! \note It will also call the `onChangeScalingFactor()` callback if the factor has really changed */
 bool Application::updateScalingFactor()
 {
-	const bool scalingChanged = gfxDevice_->scaleWindowSize(appCfg_.windowScaling);
+	const bool scalingChanged = gfxDevice_->scaleWindowSize(appCfg_.window.scaling);
 	if (scalingChanged)
 		appEventHandler_->onChangeScalingFactor(gfxDevice_->windowScalingFactor());
 	return scalingChanged;

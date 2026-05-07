@@ -11,51 +11,75 @@
 namespace ncine {
 
 namespace {
+	// Root
+	#define ENV_PREFIX "NCINE_APPCFG_"
 
-	const char *EnvVariablePrefix = "NCINE_APPCFG_";
+	// Domains
+	#define ENV_LOGGING "LOGGING_"
+	#define ENV_WINDOW "WINDOW_"
+	#define ENV_GRAPHICS "GRAPHICS_"
+	#define ENV_OPENGL "OPENGL_"
+	#define ENV_AUDIO "AUDIO_"
+	#define ENV_JOBSYSTEM "JOBSYSTEM_"
+	#define ENV_FEATURES "FEATURES_"
 
-	const char *EnvVariableLogFile = "LOG_FILE";
-	const char *EnvVariableConsoleLogLevel = "CONSOLE_LOG_LEVEL";
-	const char *EnvVariableFileLogLevel = "FILE_LOG_LEVEL";
-	const char *EnvVariableFrameTimerLogInterval = "FRAME_TIMER_LOG_INTERVAL";
+	// Leaf keys
+	#define ENV_ENABLED "ENABLED"
+	// ----- Logging -----
+	#define ENV_FILE "FILE"
+	#define ENV_CONSOLE_LEVEL "CONSOLE_LEVEL"
+	#define ENV_FILE_LEVEL "FILE_LEVEL"
+	#define ENV_FRAME_TIMER_INTERVAL "FRAME_TIMER_INTERVAL"
+	#define ENV_CONSOLE_COLORS "CONSOLE_COLORS"
 
-	const char *EnvVariableResolution = "RESOLUTION";
-	const char *EnvVariableRefreshRate = "REFRESH_RATE";
-	const char *EnvVariableWindowPosition = "WINDOW_POSITION";
-	const char *EnvVariableFullscreen = "FULLSCREEN";
-	const char *EnvVariableResizable = "RESIZABLE";
-	const char *EnvVariableWindowScaling = "WINDOW_SCALING";
-	const char *EnvVariableFrameLimit = "FRAME_LIMIT";
+	// ----- Window -----
+	#define ENV_RESOLUTION "RESOLUTION"
+	#define ENV_REFRESH_RATE "REFRESH_RATE"
+	#define ENV_POSITION "POSITION"
+	#define ENV_FULLSCREEN "FULLSCREEN"
+	#define ENV_RESIZABLE "RESIZABLE"
+	#define ENV_SCALING "SCALING"
 
-	const char *EnvVariableWindowTitle = "WINDOW_TITLE";
-	const char *EnvVariableWindowIconFilename = "WINDOW_ICON_FILENAME";
+	#define ENV_TITLE "TITLE"
+	#define ENV_ICON_FILENAME "ICON_FILENAME"
 
-	const char *EnvVariableBufferMapping = "BUFFER_MAPPING";
-	const char *EnvVariableDeferShaderQueries = "DEFER_SHADER_QUERIES";
-	const char *EnvVariableFixedBatchSize = "FIXED_BATCH_SIZE";
-	const char *EnvVariableBinaryShaderCache = "BINARY_SHADER_CACHE";
-	const char *EnvVariableShaderCacheDirname = "SHADER_CACHE_DIRNAME";
-	const char *EnvVariableCompileBatchedShadersTwice = "COMPILE_BATCHED_SHADERS_TWICE";
+	// ----- Graphics -----
+	#define ENV_VSYNC "VSYNC"
+	#define ENV_FRAME_LIMIT "FRAME_LIMIT"
 
-	const char *EnvVariableVboSize = "VBO_SIZE";
-	const char *EnvVariableIboSize = "IBO_SIZE";
-	const char *EnvVariableVaoPoolSize = "VAO_POOL_SIZE";
-	const char *EnvVariableRenderCommandPoolSize = "RENDER_COMMAND_POOL_SIZE";
+	// ----- Graphics.OpenGL -----
+	#define ENV_DEBUG_CONTEXT "DEBUG_CONTEXT"
+	#define ENV_BUFFER_MAPPING "BUFFER_MAPPING"
 
-	const char *EnvVariableOutputAudioFrequency = "OUTPUT_AUDIO_FREQUENCY";
-	const char *EnvVariableMonoAudioSources = "MONO_AUDIO_SOURCES";
-	const char *EnvVariableStereoAudioSources = "STEREO_AUDIO_SOURCES";
+	#define ENV_VBO_SIZE "VBO_SIZE"
+	#define ENV_IBO_SIZE "IBO_SIZE"
+	#define ENV_VAO_POOL_SIZE "VAO_POOL_SIZE"
+	#define ENV_RENDER_COMMAND_POOL_SIZE "RENDER_COMMAND_POOL_SIZE"
 
-	const char *EnvVariableDebugOverlay = "DEBUG_OVERLAY";
-	const char *EnvVariableAudio = "AUDIO";
-	const char *EnvVariableJobSystem = "JOBSYSTEM";
-	const char *EnvVariableNumThreads = "NUM_THREADS";
-	const char *EnvVariableScenegraph = "SCENEGRAPH";
-	const char *EnvVariableVSync = "VSYNC";
-	const char *EnvVariableGlDebugContext = "GL_DEBUG_CONTEXT";
-	const char *EnvVariableConsoleColors = "CONSOLE_COLORS";
+	#define ENV_DEFER_SHADER_QUERIES "DEFER_SHADER_QUERIES"
+	#define ENV_FIXED_BATCH_SIZE "FIXED_BATCH_SIZE"
+	#define ENV_BINARY_SHADER_CACHE "BINARY_SHADER_CACHE"
+	#define ENV_SHADER_CACHE_DIRNAME "SHADER_CACHE_DIRNAME"
+	#define ENV_COMPILE_BATCHED_SHADERS_TWICE "COMPILE_BATCHED_SHADERS_TWICE"
 
-	const char *EnvVariableDataPath = "DATA_PATH";
+	// ----- Audio -----
+	#define ENV_FREQUENCY "FREQUENCY"
+	#define ENV_MONO_SOURCES "MONO_SOURCES"
+	#define ENV_STEREO_SOURCES "STEREO_SOURCES"
+
+	// ----- Job System -----
+	#define ENV_NUM_THREADS "NUM_THREADS"
+
+	// ----- Features -----
+	#define ENV_SCENEGRAPH "SCENEGRAPH"
+	#define ENV_DEBUG_OVERLAY "DEBUG_OVERLAY"
+
+	// -----
+	#define ENV_DATA_PATH "DATA_PATH"
+
+	// Helper
+	#define ENV2(a, b) ENV_PREFIX a b
+	#define ENV3(a, b, c) ENV_PREFIX a b c
 
 	bool readBoolEnvVar(const char *envVarName, bool currentValue)
 	{
@@ -157,162 +181,26 @@ namespace {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-AppConfiguration::OldValues::OldValues(const AppConfiguration &appCfg)
-    : logFile(appCfg.logFile.capacity()),
-      consoleLogLevel(appCfg.consoleLogLevel),
-      fileLogLevel(appCfg.fileLogLevel),
-      frameTimerLogInterval(appCfg.frameTimerLogInterval),
-
-      resolution(appCfg.resolution),
-      refreshRate(appCfg.refreshRate),
-      windowPosition(appCfg.windowPosition),
-      fullscreen(appCfg.fullscreen),
-      resizable(appCfg.resizable),
-      windowScaling(appCfg.windowScaling),
-      frameLimit(appCfg.frameLimit),
-
-      windowTitle(appCfg.windowTitle.capacity()),
-      windowIconFilename(appCfg.windowIconFilename.capacity()),
-
-      useBufferMapping(appCfg.useBufferMapping),
-      deferShaderQueries(appCfg.deferShaderQueries),
-      fixedBatchSize(appCfg.fixedBatchSize),
-      useBinaryShaderCache(appCfg.useBinaryShaderCache),
-      shaderCacheDirname(appCfg.shaderCacheDirname.capacity()),
-      compileBatchedShadersTwice(appCfg.compileBatchedShadersTwice),
-
-      vboSize(appCfg.vboSize),
-      iboSize(appCfg.iboSize),
-      vaoPoolSize(appCfg.vaoPoolSize),
-      renderCommandPoolSize(appCfg.renderCommandPoolSize),
-
-      outputAudioFrequency(appCfg.outputAudioFrequency),
-      monoAudioSources(appCfg.monoAudioSources),
-      stereoAudioSources(appCfg.stereoAudioSources),
-
-      withDebugOverlay(appCfg.withDebugOverlay),
-      withAudio(appCfg.withAudio),
-      withJobSystem(appCfg.withJobSystem),
-      numThreads(appCfg.numThreads),
-      withScenegraph(appCfg.withScenegraph),
-      withVSync(appCfg.withVSync),
-      withGlDebugContext(appCfg.withGlDebugContext),
-      withConsoleColors(appCfg.withConsoleColors),
-
-      dataPath(appCfg.dataPath().capacity())
+AppConfiguration::Graphics::OpenGLCapabilities::OpenGLCapabilities()
+    : coreProfile(true),
+      forwardCompatible(true),
+#if defined(WITH_OPENGLES) || defined(__EMSCRIPTEN__)
+      majorVersion(3),
+      minorVersion(0)
+#else
+      majorVersion(3),
+      minorVersion(3)
+#endif
 {
 }
 
 AppConfiguration::AppConfiguration()
-    : logFile(128),
-#ifdef NCINE_DEBUG
-      consoleLogLevel(ILogger::LogLevel::INFO),
-#else
-	#ifdef _WIN32
-      // Disable console logging on Windows to avoid allocating a console
-      consoleLogLevel(ILogger::LogLevel::OFF),
-	#else
-      consoleLogLevel(ILogger::LogLevel::ERROR),
-	#endif
-#endif
-      fileLogLevel(ILogger::LogLevel::OFF),
-      frameTimerLogInterval(5.0f),
-
-      resolution(1280, 720),
-      refreshRate(0.0f),
-      windowPosition(WindowPositionIgnore, WindowPositionIgnore),
-      fullscreen(false),
-      resizable(false),
-      windowScaling(true),
-      frameLimit(0),
-
-      windowTitle(128),
-      windowIconFilename(128),
-
-      useBufferMapping(false),
-      deferShaderQueries(true),
-#if defined(__EMSCRIPTEN__)
-      fixedBatchSize(10),
-#elif defined(WITH_ANGLE)
-      fixedBatchSize(64),
-#else
-      fixedBatchSize(0),
-#endif
-#if defined(WITH_ANGLE) || defined(__ANDROID__)
-      useBinaryShaderCache(true),
-#else
-      useBinaryShaderCache(false),
-#endif
-      shaderCacheDirname(64),
-      compileBatchedShadersTwice(true),
-
-#if defined(WITH_IMGUI) || defined(WITH_NUKLEAR)
-      vboSize(512 * 1024),
-      iboSize(128 * 1024),
-#else
-      vboSize(64 * 1024),
-      iboSize(8 * 1024),
-#endif
-      vaoPoolSize(16),
-      renderCommandPoolSize(32),
-
-      outputAudioFrequency(0),
-      monoAudioSources(31),
-      stereoAudioSources(1),
-
-      withDebugOverlay(false),
-      withAudio(true),
-      withJobSystem(true),
-      numThreads(0),
-      withScenegraph(true),
-      withVSync(true),
-      withGlDebugContext(false),
-      withConsoleColors(true),
-
-      // Compile-time variables
-      glCoreProfile_(true),
-      glForwardCompatible_(true),
-#if defined(WITH_OPENGLES) || defined(__EMSCRIPTEN__)
-      glMajorVersion_(3),
-      glMinorVersion_(0),
-#else
-      glMajorVersion_(3),
-      glMinorVersion_(3),
-#endif
-      profileTextUpdateTime_(0.2f),
-
+    : profileTextUpdateTime(0.2f),
       argc_(0),
-      argv_(nullptr),
-
-      old(*this)
+      argv_(nullptr)
 {
-	logFile = "ncine_log.txt";
-	windowTitle = "nCine";
-	windowIconFilename = "icons/icon48.png";
-	shaderCacheDirname = "nCineShaderCache";
-
-#if defined(WITH_CRASHPAD)
-	fileLogLevel = ILogger::LogLevel::DEBUG;
-#endif
-
-#if defined(__ANDROID__)
-	dataPath() = AssetFile::Prefix;
-#elif defined(__EMSCRIPTEN__)
-	dataPath() = "/";
-	// Always disable mapping on Emscripten as it is not supported by WebGL 2
-	useBufferMapping = false;
-	// Accessing binary representations of compiled shader programs is not supported by WebGL 2
-	useBinaryShaderCache = false;
-#endif
-
-#if defined(__linux__) && defined(WITH_SDL)
-	// DPI queries do not seem to work reliably on X11 with SDL2
-	windowScaling = false;
-#endif
-
-#if !defined(WITH_SCENEGRAPH)
-	withScenegraph = false;
-#endif
+	applyDefaults();
+	old_.assign(*this);
 }
 
 ///////////////////////////////////////////////////////////
@@ -341,538 +229,670 @@ const char *AppConfiguration::argv(int index) const
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+void AppConfiguration::OldValues::assign(const AppConfiguration &appCfg)
+{
+	logging = appCfg.logging;
+	window = appCfg.window;
+	graphics.vsync = appCfg.graphics.vsync;
+	graphics.frameLimit = appCfg.graphics.frameLimit;
+	graphics.opengl = appCfg.graphics.opengl;
+	audio = appCfg.audio;
+	jobSystem = appCfg.jobSystem;
+	features = appCfg.features;
+	dataPath = appCfg.dataPath();
+}
+
+void AppConfiguration::applyDefaults()
+{
+	// ----- Logging -----
+	logging.file = "ncine_log.txt";
+
+#ifdef NCINE_DEBUG
+	logging.consoleLevel = ILogger::LogLevel::INFO;
+#else
+	#ifdef _WIN32
+	// Disable console logging on Windows to avoid allocating a console
+	logging.consoleLevel = ILogger::LogLevel::OFF;
+	#else
+	logging.consoleLevel = ILogger::LogLevel::ERROR;
+	#endif
+#endif
+
+#if defined(WITH_CRASHPAD)
+	logging.fileLevel = ILogger::LogLevel::DEBUG;
+#endif
+
+	// ----- Window -----
+#if defined(__linux__) && defined(WITH_SDL)
+	// DPI queries do not seem to work reliably on X11 with SDL2
+	window.scaling = false;
+#endif
+	window.title = "nCine";
+	window.iconFilename = "icons/icon48.png";
+
+	// ----- Graphics.OpenGL -----
+#if defined(WITH_IMGUI) || defined(WITH_NUKLEAR)
+	graphics.opengl.vboSize = 512 * 1024;
+	graphics.opengl.iboSize = 128 * 1024;
+#endif
+
+#if defined(__EMSCRIPTEN__)
+	graphics.opengl.fixedBatchSize = 10;
+#elif defined(WITH_ANGLE)
+	graphics.opengl.fixedBatchSize = 64;
+#endif
+
+#if defined(WITH_ANGLE) || defined(__ANDROID__)
+	graphics.opengl.useBinaryShaderCache = true;
+#endif
+	graphics.opengl.shaderCacheDirname = "nCineShaderCache";
+
+	// ------ Features -----
+#if !defined(WITH_SCENEGRAPH)
+	features.scenegraph = false;
+#endif
+
+	// ------
+#if defined(__ANDROID__)
+	dataPath() = AssetFile::Prefix;
+#elif defined(__EMSCRIPTEN__)
+	dataPath() = "/";
+#endif
+
+	// This method should be called a second time after the `onPreInit()` callback
+	applyOverrides();
+}
+
+void AppConfiguration::applyOverrides()
+{
+	// ----- Graphics.OpenGL -----
+#if defined(__EMSCRIPTEN__)
+	// Always disable mapping on Emscripten as it is not supported by WebGL 2
+	graphics.opengl.useBufferMapping = false;
+
+	// Accessing binary representations of compiled shader programs is not supported by WebGL 2
+	graphics.opengl.useBinaryShaderCache = false;
+#endif
+}
+
 void AppConfiguration::logFields() const
 {
-#if !defined(WITH_OPENGLES) && !defined(__EMSCRIPTEN__)
-	LOGD_X("OpenGL Core: %s", glCoreProfile_ ? "true" : "false");
-	LOGD_X("OpenGL Forward: %s", glForwardCompatible_ ? "true" : "false");
-#endif
-	LOGD_X("GL Major.Minor: %d.%d", glMajorVersion_, glMinorVersion_);
+	// ----- Logging -----
+	LOGD("Logging Configuration");
+	LOGD_X("- File: \"%s\"", logging.file.data());
+	LOGD_X("- Console Level: %d", static_cast<int>(logging.consoleLevel));
+	LOGD_X("- File Level: %d", static_cast<int>(logging.fileLevel));
+	LOGD_X("- Frametimer Interval: %.2f s", logging.frameTimerInterval);
+	LOGD_X("- Console Colors: %s", logging.consoleColors ? "true" : "false");
 
-	LOGD_X("Data Path: \"%s\"", dataPath().data());
-	LOGD_X("Log File: \"%s\"", logFile.data());
-	LOGD_X("Console Log Level: %d", static_cast<int>(consoleLogLevel));
-	LOGD_X("File Log Level: %d", static_cast<int>(fileLogLevel));
-	LOGD_X("Frametimer Log Interval: %f s", frameTimerLogInterval);
-	LOGD_X("Profile Text Update Time: %f s", profileTextUpdateTime());
+	// ----- Window -----
+	LOGD("Window Configuration");
+	LOGD_X("- Resolution: %d x %d", window.resolution.x, window.resolution.y);
+	LOGD_X("- Refresh Rate: %.2f Hz", window.refreshRate);
 
-	LOGD_X("Resolution: %d x %d", resolution.x, resolution.y);
-	LOGD_X("Refresh Rate: %f Hz", refreshRate);
-
-	nctl::StaticString<256> auxString;
-	auxString.assign("Window Position: ");
-	if (windowPosition.x == WindowPositionIgnore)
+	nctl::StaticString<128> auxString;
+	auxString.assign("- Position: ");
+	if (window.position.x == Window::IgnorePosition)
 		auxString.append("Ignore x ");
 	else
-		auxString.formatAppend("%d x ", windowPosition.x);
-	if (windowPosition.y == WindowPositionIgnore)
+		auxString.formatAppend("%d x ", window.position.x);
+	if (window.position.y == Window::IgnorePosition)
 		auxString.append("Ignore");
 	else
-		auxString.formatAppend("%d", windowPosition.y);
+		auxString.formatAppend("%d", window.position.y);
 	LOGD_X("%s", auxString.data());
 
-	LOGD_X("Fullscreen: %s", fullscreen ? "true" : "false");
-	LOGD_X("Resizable: %s", resizable ? "true" : "false");
-	LOGD_X("Window Scaling: %s", windowScaling ? "true" : "false");
-	LOGD_X("Frame Limit: %u", frameLimit);
+	LOGD_X("- Fullscreen: %s", window.fullscreen ? "true" : "false");
+	LOGD_X("- Resizable: %s", window.resizable ? "true" : "false");
+	LOGD_X("- Scaling: %s", window.scaling ? "true" : "false");
 
-	LOGD_X("Window title: \"%s\"", windowTitle.data());
-	LOGD_X("Window icon: \"%s\"", windowIconFilename.data());
+	LOGD_X("- Title: \"%s\"", window.title.data());
+	LOGD_X("- Icon File: \"%s\"", window.iconFilename.data());
 
-	LOGD_X("Buffer Mapping: %s", useBufferMapping ? "true" : "false");
-	LOGD_X("Defer Shader Queries: %s", deferShaderQueries ? "true" : "false");
-#if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
-	LOGD_X("Fixed Batch Size: %u", fixedBatchSize);
+	// ----- Graphics -----
+	LOGD("Graphics Configuration");
+	LOGD_X("- V-Sync: %s", graphics.vsync ? "true" : "false");
+	LOGD_X("- Frame Limit: %u", graphics.frameLimit);
+	// ----- Graphics.OpenGLCapabilities -----
+	LOGD("- OpenGL Capabilities");
+#if !defined(WITH_OPENGLES) && !defined(__EMSCRIPTEN__)
+	LOGD_X("  - Core Profile: %s", graphics.openglCaps.coreProfile ? "true" : "false");
+	LOGD_X("  - Forward Compatible: %s", graphics.openglCaps.forwardCompatible ? "true" : "false");
 #endif
-	LOGD_X("Binary Shader Cache: %s", useBinaryShaderCache ? "true" : "false");
-	LOGD_X("Shader Cache Directory Name: \"%s\"", shaderCacheDirname.data());
-	LOGD_X("Compile Batched Shaders Twice: %s", compileBatchedShadersTwice ? "true" : "false");
+	LOGD_X("  - Version: %d.%d", graphics.openglCaps.majorVersion, graphics.openglCaps.minorVersion);
+	// ----- Graphics.OpenGL -----
+	LOGD("- OpenGL Configuration");
+	LOGD_X("  - OpenGL Debug Context: %s", graphics.opengl.debugContext ? "true" : "false");
+	LOGD_X("  - Buffer Mapping: %s", graphics.opengl.useBufferMapping ? "true" : "false");
 
-	LOGD_X("VBO Size: %lu bytes", vboSize);
-	LOGD_X("IBO Size: %lu bytes", iboSize);
-	LOGD_X("VAO Pool Size: %u", vaoPoolSize);
-	LOGD_X("RenderCommand Pool Size: %u", renderCommandPoolSize);
+	LOGD_X("  - VBO Size: %lu bytes", graphics.opengl.vboSize);
+	LOGD_X("  - IBO Size: %lu bytes", graphics.opengl.iboSize);
+	LOGD_X("  - VAO Pool Size: %u", graphics.opengl.vaoPoolSize);
+	LOGD_X("  - RenderCommand Pool Size: %u", graphics.opengl.renderCommandPoolSize);
 
-	LOGD_X("Output Audio Frequency: %u Hz", outputAudioFrequency);
-	LOGD_X("Mono Audio Sources: %u", monoAudioSources);
-	LOGD_X("Stereo Audio Sources: %u", stereoAudioSources);
+	LOGD_X("  - Defer Shader Queries: %s", graphics.opengl.deferShaderQueries ? "true" : "false");
+#if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
+	LOGD_X("  - Fixed Batch Size: %u", graphics.opengl.fixedBatchSize);
+#endif
+	LOGD_X("  - Binary Shader Cache: %s", graphics.opengl.useBinaryShaderCache ? "true" : "false");
+	LOGD_X("  - Shader Cache Directory Name: \"%s\"", graphics.opengl.shaderCacheDirname.data());
+	LOGD_X("  - Compile Batched Shaders Twice: %s", graphics.opengl.compileBatchedShadersTwice ? "true" : "false");
 
-	LOGD_X("Debug Overlay: %s", withDebugOverlay ? "true" : "false");
-	LOGD_X("Audio: %s", withAudio ? "true" : "false");
-	LOGD_X("Job System: %s", withJobSystem ? "true" : "false");
-	LOGD_X("Number of Threads: %u", numThreads);
-	LOGD_X("Scenegraph: %s", withScenegraph ? "true" : "false");
-	LOGD_X("VSync: %s", withVSync ? "true" : "false");
-	LOGD_X("GL Debug Context: %s", withGlDebugContext ? "true" : "false");
-	LOGD_X("Console Colors: %s", withConsoleColors ? "true" : "false");
+	// ----- Audio -----
+	LOGD("Audio Configuration");
+	LOGD_X("- Enabled: %s", audio.enabled ? "true" : "false");
+	LOGD_X("- Frequency: %u Hz", audio.frequency);
+	LOGD_X("- Mono Sources: %u", audio.monoSources);
+	LOGD_X("- Stereo Sources: %u", audio.stereoSources);
+
+	// ----- Job System -----
+	LOGD("Job System Configuration");
+	LOGD_X("- Enabled: %s", jobSystem.enabled ? "true" : "false");
+	LOGD_X("- Number of Threads: %u", jobSystem.numThreads);
+
+	// ----- Features -----
+	LOGD("Features Configuration");
+	LOGD_X("- Scenegraph: %s", features.scenegraph ? "true" : "false");
+	LOGD_X("- Debug Overlay: %s", features.debugOverlay ? "true" : "false");
+
+	// -----
+	LOGD("Additional Configuration");
+	LOGD_X("- Profile Text Update Time: %.2f s", profileTextUpdateTime);
+	LOGD_X("- Data Path: \"%s\"", dataPath().data());
 
 	for (int i = 0; i < argc_; i++)
-		LOGD_X("argv[%u]: \"%s\"", i, argv_[i]);
+		LOGD_X("- argv[%u]: \"%s\"", i, argv_[i]);
 }
 
 void AppConfiguration::readEnvVariables()
 {
-	nctl::StaticString<64> varName;
+	// ----- Logging -----
+	// NCINE_APPCFG_LOGGING_FILE
+	old_.logging.file = logging.file;
+	constexpr const char EnvLoggingFile[] = ENV2(ENV_LOGGING, ENV_FILE);
+	readStringEnvVar(EnvLoggingFile, logging.file);
 
-	// NCINE_APPCFG_LOG_FILE
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableLogFile);
-	old.logFile = logFile;
-	readStringEnvVar(varName.data(), logFile);
+	// NCINE_APPCFG_LOGGING_CONSOLE_LEVEL
+	old_.logging.consoleLevel = logging.consoleLevel;
+	constexpr const char EnvLoggingConsoleLevel[] = ENV2(ENV_LOGGING, ENV_CONSOLE_LEVEL);
+	logging.consoleLevel = readLogLevelEnvVar(EnvLoggingConsoleLevel, logging.consoleLevel);
 
-	// NCINE_APPCFG_CONSOLE_LOG_LEVEL
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableConsoleLogLevel);
-	old.consoleLogLevel = consoleLogLevel;
-	consoleLogLevel = readLogLevelEnvVar(varName.data(), consoleLogLevel);
+	// NCINE_APPCFG_LOGGING_FILE_LEVEL
+	old_.logging.fileLevel = logging.fileLevel;
+	constexpr const char EnvLoggingFileLevel[] = ENV2(ENV_LOGGING, ENV_FILE_LEVEL);
+	logging.fileLevel = readLogLevelEnvVar(EnvLoggingFileLevel, logging.fileLevel);
 
-	// NCINE_APPCFG_FILE_LOG_LEVEL
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableFileLogLevel);
-	old.fileLogLevel = fileLogLevel;
-	fileLogLevel = readLogLevelEnvVar(varName.data(), fileLogLevel);
+	// NCINE_APPCFG_LOGGING_FRAME_TIMER_INTERVAL
+	old_.logging.frameTimerInterval = logging.frameTimerInterval;
+	constexpr const char EnvLoggingFrameTimerInterval[] = ENV2(ENV_LOGGING, ENV_FRAME_TIMER_INTERVAL);
+	logging.frameTimerInterval = readFloatEnvVar(EnvLoggingFrameTimerInterval, logging.frameTimerInterval);
+	if (logging.frameTimerInterval < 0.0f)
+		logging.frameTimerInterval = old_.logging.frameTimerInterval;
 
-	// NCINE_APPCFG_FRAME_TIMER_LOG_INTERVAL
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableFrameTimerLogInterval);
-	old.frameTimerLogInterval = frameTimerLogInterval;
-	frameTimerLogInterval = readFloatEnvVar(varName.data(), frameTimerLogInterval);
-	if (frameTimerLogInterval < 0.0f)
-		frameTimerLogInterval = old.frameTimerLogInterval;
+	// NCINE_APPCFG_LOGGING_CONSOLE_COLORS
+	old_.logging.consoleColors = logging.consoleColors;
+	constexpr const char EnvLoggingConsoleColors[] = ENV2(ENV_LOGGING, ENV_CONSOLE_COLORS);
+	logging.consoleColors = readBoolEnvVar(EnvLoggingConsoleColors, logging.consoleColors);
 
 	// ----------------------------------------------------------------
+	// ----- Window -----
 
-	// NCINE_APPCFG_RESOLUTION
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableResolution);
-	old.resolution = resolution;
-	resolution = readVector2iEnvVar(varName.data(), resolution);
+	// NCINE_APPCFG_WINDOW_RESOLUTION
+	old_.window.resolution = window.resolution;
+	constexpr const char EnvWindowResolution[] = ENV2(ENV_WINDOW, ENV_RESOLUTION);
+	window.resolution = readVector2iEnvVar(EnvWindowResolution, window.resolution);
 
-	// NCINE_APPCFG_REFRESH_RATE
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableRefreshRate);
-	old.refreshRate = refreshRate;
-	refreshRate = readFloatEnvVar(varName.data(), refreshRate);
-	if (refreshRate < 0.0f)
-		refreshRate = old.refreshRate;
+	// NCINE_APPCFG_WINDOW_REFRESH_RATE
+	old_.window.refreshRate = window.refreshRate;
+	constexpr const char EnvWindowRefreshRate[] = ENV2(ENV_WINDOW, ENV_REFRESH_RATE);
+	window.refreshRate = readFloatEnvVar(EnvWindowRefreshRate, window.refreshRate);
+	if (window.refreshRate < 0.0f)
+		window.refreshRate = old_.window.refreshRate;
 
 	// NCINE_APPCFG_WINDOW_POSITION
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableWindowPosition);
-	old.windowPosition = windowPosition;
-	windowPosition = readVector2iEnvVar(varName.data(), windowPosition);
+	old_.window.position = window.position;
+	constexpr const char EnvWindowPosition[] = ENV2(ENV_WINDOW, ENV_POSITION);
+	window.position = readVector2iEnvVar(EnvWindowPosition, window.position);
 
-	// NCINE_APPCFG_FULLSCREEN
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableFullscreen);
-	old.fullscreen = fullscreen;
-	fullscreen = readBoolEnvVar(varName.data(), fullscreen);
+	// NCINE_APPCFG_WINDOW_FULLSCREEN
+	old_.window.fullscreen = window.fullscreen;
+	constexpr const char EnvWindowFullscreen[] = ENV2(ENV_WINDOW, ENV_FULLSCREEN);
+	window.fullscreen = readBoolEnvVar(EnvWindowFullscreen, window.fullscreen);
 
-	// NCINE_APPCFG_RESIZABLE
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableResizable);
-	old.resizable = resizable;
-	resizable = readBoolEnvVar(varName.data(), resizable);
+	// NCINE_APPCFG_WINDOW_RESIZABLE
+	old_.window.resizable = window.resizable;
+	constexpr const char EnvWindowResizable[] = ENV2(ENV_WINDOW, ENV_RESIZABLE);
+	window.resizable = readBoolEnvVar(EnvWindowResizable, window.resizable);
 
 	// NCINE_APPCFG_WINDOW_SCALING
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableWindowScaling);
-	old.windowScaling = windowScaling;
-	windowScaling = readBoolEnvVar(varName.data(), windowScaling);
-
-	// NCINE_APPCFG_FRAME_LIMIT
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableFrameLimit);
-	old.frameLimit = frameLimit;
-	frameLimit = readUintEnvVar(varName.data(), frameLimit);
+	old_.window.scaling = window.scaling;
+	constexpr const char EnvWindowScaling[] = ENV2(ENV_WINDOW, ENV_SCALING);
+	window.scaling = readBoolEnvVar(EnvWindowScaling, window.scaling);
 
 	// ----------------------------------------------------------------
 
 	// NCINE_APPCFG_WINDOW_TITLE
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableWindowTitle);
-	old.windowTitle = windowTitle;
-	readStringEnvVar(varName.data(), windowTitle);
+	old_.window.title = window.title;
+	constexpr const char EnvWindowTitle[] = ENV2(ENV_WINDOW, ENV_TITLE);
+	readStringEnvVar(EnvWindowTitle, window.title);
 
 	// NCINE_APPCFG_WINDOW_ICON_FILENAME
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableWindowIconFilename);
-	old.windowIconFilename = windowIconFilename;
-	readStringEnvVar(varName.data(), windowIconFilename);
+	old_.window.iconFilename = window.iconFilename;
+	constexpr const char EnvWindowIcon[] = ENV2(ENV_WINDOW, ENV_ICON_FILENAME);
+	readStringEnvVar(EnvWindowIcon, window.iconFilename);
+
+	// ----------------------------------------------------------------
+	// ----- Graphics -----
+
+	// NCINE_APPCFG_GRAPHICS_VSYNC
+	old_.graphics.vsync = graphics.vsync;
+	constexpr const char EnvGraphicsVsync[] = ENV2(ENV_GRAPHICS, ENV_VSYNC);
+	graphics.vsync = readBoolEnvVar(EnvGraphicsVsync, graphics.vsync);
+
+	// NCINE_APPCFG_GRAPHICS_FRAME_LIMIT
+	old_.graphics.frameLimit = graphics.frameLimit;
+	constexpr const char EnvGraphicsFrameLimit[] = ENV2(ENV_GRAPHICS, ENV_FRAME_LIMIT);
+	graphics.frameLimit = readUintEnvVar(EnvGraphicsFrameLimit, graphics.frameLimit);
+
+	// ----------------------------------------------------------------
+	// ----- Graphics.OpenGL -----
+
+	// NCINE_APPCFG_GRAPHICS_OPENGL_DEBUG_CONTEXT
+	old_.graphics.opengl.debugContext = graphics.opengl.debugContext;
+	constexpr const char EnvGLDebugContext[] = ENV3(ENV_GRAPHICS, ENV_OPENGL, ENV_DEBUG_CONTEXT);
+	graphics.opengl.debugContext = readBoolEnvVar(EnvGLDebugContext, graphics.opengl.debugContext);
+
+	// NCINE_APPCFG_GRAPHICS_OPENGL_BUFFER_MAPPING
+	old_.graphics.opengl.useBufferMapping = graphics.opengl.useBufferMapping;
+	constexpr const char EnvGLBufferMapping[] = ENV3(ENV_GRAPHICS, ENV_OPENGL, ENV_BUFFER_MAPPING);
+	graphics.opengl.useBufferMapping = readBoolEnvVar(EnvGLBufferMapping, graphics.opengl.useBufferMapping);
 
 	// ----------------------------------------------------------------
 
-	// NCINE_APPCFG_BUFFER_MAPPING
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableBufferMapping);
-	old.useBufferMapping = useBufferMapping;
-	useBufferMapping = readBoolEnvVar(varName.data(), useBufferMapping);
+	// NCINE_APPCFG_GRAPHICS_OPENGL_VBO_SIZE
+	old_.graphics.opengl.vboSize = graphics.opengl.vboSize;
+	constexpr const char EnvGLVboSize[] = ENV3(ENV_GRAPHICS, ENV_OPENGL, ENV_VBO_SIZE);
+	graphics.opengl.vboSize = readUlongEnvVar(EnvGLVboSize, graphics.opengl.vboSize);
+	if (graphics.opengl.vboSize == 0)
+		graphics.opengl.vboSize = old_.graphics.opengl.vboSize;
 
-	// NCINE_APPCFG_DEFER_SHADER_QUERIES
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableDeferShaderQueries);
-	old.deferShaderQueries = deferShaderQueries;
-	deferShaderQueries = readBoolEnvVar(varName.data(), deferShaderQueries);
+	// NCINE_APPCFG_GRAPHICS_OPENGL_IBO_SIZE
+	old_.graphics.opengl.iboSize = graphics.opengl.iboSize;
+	constexpr const char EnvGLIboSize[] = ENV3(ENV_GRAPHICS, ENV_OPENGL, ENV_IBO_SIZE);
+	graphics.opengl.iboSize = readUlongEnvVar(EnvGLIboSize, graphics.opengl.iboSize);
+	if (graphics.opengl.iboSize == 0)
+		graphics.opengl.iboSize = old_.graphics.opengl.iboSize;
 
-	// NCINE_APPCFG_FIXED_BATCH_SIZE
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableFixedBatchSize);
-	old.fixedBatchSize = fixedBatchSize;
-	fixedBatchSize = readUintEnvVar(varName.data(), fixedBatchSize);
+	// NCINE_APPCFG_GRAPHICS_OPENGL_VAO_POOL_SIZE
+	old_.graphics.opengl.vaoPoolSize = graphics.opengl.vaoPoolSize;
+	constexpr const char EnvGLVaoPoolSize[] = ENV3(ENV_GRAPHICS, ENV_OPENGL, ENV_VAO_POOL_SIZE);
+	graphics.opengl.vaoPoolSize = readUintEnvVar(EnvGLVaoPoolSize, graphics.opengl.vaoPoolSize);
 
-	// NCINE_APPCFG_BINARY_SHADER_CACHE
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableBinaryShaderCache);
-	old.useBinaryShaderCache = useBinaryShaderCache;
-	useBinaryShaderCache = readBoolEnvVar(varName.data(), useBinaryShaderCache);
-
-	// NCINE_APPCFG_SHADER_CACHE_DIRNAME
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableShaderCacheDirname);
-	old.shaderCacheDirname = shaderCacheDirname;
-	readStringEnvVar(varName.data(), shaderCacheDirname);
-
-	// NCINE_APPCFG_COMPILE_BATCHED_SHADERS_TWICE
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableCompileBatchedShadersTwice);
-	old.compileBatchedShadersTwice = compileBatchedShadersTwice;
-	compileBatchedShadersTwice = readBoolEnvVar(varName.data(), compileBatchedShadersTwice);
+	// NCINE_APPCFG_GRAPHICS_OPENGL_RENDER_COMMAND_POOL_SIZE
+	old_.graphics.opengl.renderCommandPoolSize = graphics.opengl.renderCommandPoolSize;
+	constexpr const char EnvGLRenderCmdPool[] = ENV3(ENV_GRAPHICS, ENV_OPENGL, ENV_RENDER_COMMAND_POOL_SIZE);
+	graphics.opengl.renderCommandPoolSize = readUintEnvVar(EnvGLRenderCmdPool, graphics.opengl.renderCommandPoolSize);
 
 	// ----------------------------------------------------------------
 
-	// NCINE_APPCFG_VBO_SIZE
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableVboSize);
-	old.vboSize = vboSize;
-	vboSize = readUlongEnvVar(varName.data(), vboSize);
-	if (vboSize == 0)
-		vboSize = old.vboSize;
+	// NCINE_APPCFG_GRAPHICS_OPENGL_DEFER_SHADER_QUERIES
+	old_.graphics.opengl.deferShaderQueries = graphics.opengl.deferShaderQueries;
+	constexpr const char EnvGLDeferQueries[] = ENV3(ENV_GRAPHICS, ENV_OPENGL, ENV_DEFER_SHADER_QUERIES);
+	graphics.opengl.deferShaderQueries = readBoolEnvVar(EnvGLDeferQueries, graphics.opengl.deferShaderQueries);
 
-	// NCINE_APPCFG_IBO_SIZE
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableIboSize);
-	old.iboSize = iboSize;
-	iboSize = readUlongEnvVar(varName.data(), iboSize);
-	if (iboSize == 0)
-		iboSize = old.iboSize;
+	// NCINE_APPCFG_GRAPHICS_OPENGL_FIXED_BATCH_SIZE
+	old_.graphics.opengl.fixedBatchSize = graphics.opengl.fixedBatchSize;
+	constexpr const char EnvGLFixedBatch[] = ENV3(ENV_GRAPHICS, ENV_OPENGL, ENV_FIXED_BATCH_SIZE);
+	graphics.opengl.fixedBatchSize = readUintEnvVar(EnvGLFixedBatch, graphics.opengl.fixedBatchSize);
 
-	// NCINE_APPCFG_VAO_POOL_SIZE
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableVaoPoolSize);
-	old.vaoPoolSize = vaoPoolSize;
-	vaoPoolSize = readUintEnvVar(varName.data(), vaoPoolSize);
-	if (iboSize == 0)
-		iboSize = old.iboSize;
+	// NCINE_APPCFG_GRAPHICS_OPENGL_BINARY_SHADER_CACHE
+	old_.graphics.opengl.useBinaryShaderCache = graphics.opengl.useBinaryShaderCache;
+	constexpr const char EnvGLBinaryCache[] = ENV3(ENV_GRAPHICS, ENV_OPENGL, ENV_BINARY_SHADER_CACHE);
+	graphics.opengl.useBinaryShaderCache = readBoolEnvVar(EnvGLBinaryCache, graphics.opengl.useBinaryShaderCache);
 
-	// NCINE_APPCFG_RENDER_COMMAND_POOL_SIZE
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableRenderCommandPoolSize);
-	old.renderCommandPoolSize = renderCommandPoolSize;
-	renderCommandPoolSize = readUintEnvVar(varName.data(), renderCommandPoolSize);
+	// NCINE_APPCFG_GRAPHICS_OPENGL_SHADER_CACHE_DIRNAME
+	old_.graphics.opengl.shaderCacheDirname = graphics.opengl.shaderCacheDirname;
+	constexpr const char EnvGLCacheDir[] = ENV3(ENV_GRAPHICS, ENV_OPENGL, ENV_SHADER_CACHE_DIRNAME);
+	readStringEnvVar(EnvGLCacheDir, graphics.opengl.shaderCacheDirname);
+
+	// NCINE_APPCFG_GRAPHICS_OPENGL_COMPILE_BATCHED_SHADERS_TWICE
+	old_.graphics.opengl.compileBatchedShadersTwice = graphics.opengl.compileBatchedShadersTwice;
+	constexpr const char EnvGLCompileTwice[] = ENV3(ENV_GRAPHICS, ENV_OPENGL, ENV_COMPILE_BATCHED_SHADERS_TWICE);
+	graphics.opengl.compileBatchedShadersTwice = readBoolEnvVar(EnvGLCompileTwice, graphics.opengl.compileBatchedShadersTwice);
 
 	// ----------------------------------------------------------------
+	// ----- Audio -----
 
-	// NCINE_APPCFG_OUTPUT_AUDIO_FREQUENCY
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableOutputAudioFrequency);
-	old.outputAudioFrequency = outputAudioFrequency;
-	outputAudioFrequency = readUintEnvVar(varName.data(), outputAudioFrequency);
+	// NCINE_APPCFG_AUDIO_ENABLED
+	old_.audio.enabled = audio.enabled;
+	constexpr const char EnvAudioEnabled[] = ENV2(ENV_AUDIO, ENV_ENABLED);
+	audio.enabled = readBoolEnvVar(EnvAudioEnabled, audio.enabled);
 
-	// NCINE_APPCFG_MONO_AUDIO_SOURCES
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableMonoAudioSources);
-	old.monoAudioSources = monoAudioSources;
-	monoAudioSources = readUintEnvVar(varName.data(), monoAudioSources);
+	// NCINE_APPCFG_AUDIO_FREQUENCY
+	old_.audio.frequency = audio.frequency;
+	constexpr const char EnvAudioFrequency[] = ENV2(ENV_AUDIO, ENV_FREQUENCY);
+	audio.frequency = readUintEnvVar(EnvAudioFrequency, audio.frequency);
 
-	// NCINE_APPCFG_STEREO_AUDIO_SOURCES
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableStereoAudioSources);
-	old.stereoAudioSources = stereoAudioSources;
-	stereoAudioSources = readUintEnvVar(varName.data(), stereoAudioSources);
+	// NCINE_APPCFG_AUDIO_MONO_SOURCES
+	old_.audio.monoSources = audio.monoSources;
+	constexpr const char EnvAudioMono[] = ENV2(ENV_AUDIO, ENV_MONO_SOURCES);
+	audio.monoSources = readUintEnvVar(EnvAudioMono, audio.monoSources);
+
+	// NCINE_APPCFG_AUDIO_STEREO_SOURCES
+	old_.audio.stereoSources = audio.stereoSources;
+	constexpr const char EnvAudioStereo[] = ENV2(ENV_AUDIO, ENV_STEREO_SOURCES);
+	audio.stereoSources = readUintEnvVar(EnvAudioStereo, audio.stereoSources);
 
 	// ----------------------------------------------------------------
+	// ----- Job System -----
 
-	// NCINE_APPCFG_DEBUG_OVERLAY
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableDebugOverlay);
-	old.withDebugOverlay = withDebugOverlay;
-	withDebugOverlay = readBoolEnvVar(varName.data(), withDebugOverlay);
+	// NCINE_APPCFG_JOBSYSTEM_ENABLED
+	old_.jobSystem.enabled = jobSystem.enabled;
+	constexpr const char EnvJobEnabled[] = ENV2(ENV_JOBSYSTEM, ENV_ENABLED);
+	jobSystem.enabled = readBoolEnvVar(EnvJobEnabled, jobSystem.enabled);
 
-	// NCINE_APPCFG_AUDIO
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableAudio);
-	old.withAudio = withAudio;
-	withAudio = readBoolEnvVar(varName.data(), withAudio);
+	// NCINE_APPCFG_JOBSYSTEM_NUM_THREADS
+	old_.jobSystem.numThreads = jobSystem.numThreads;
+	constexpr const char EnvJobThreads[] = ENV2(ENV_JOBSYSTEM, ENV_NUM_THREADS);
+	jobSystem.numThreads = readUintEnvVar(EnvJobThreads, jobSystem.numThreads);
 
-	// NCINE_APPCFG_JOBSYSTEM
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableJobSystem);
-	old.withJobSystem = withJobSystem;
-	withJobSystem = readBoolEnvVar(varName.data(), withJobSystem);
+	// ----------------------------------------------------------------
+	// ----- Features -----
 
-	// NCINE_APPCFG_NUM_THREADS
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableNumThreads);
-	old.numThreads = numThreads;
-	numThreads = readUintEnvVar(varName.data(), numThreads);
+	// NCINE_APPCFG_FEATURES_SCENEGRAPH
+	old_.features.scenegraph = features.scenegraph;
+	constexpr const char EnvFeatureScenegraph[] = ENV2(ENV_FEATURES, ENV_SCENEGRAPH);
+	features.scenegraph = readBoolEnvVar(EnvFeatureScenegraph, features.scenegraph);
 
-	// NCINE_APPCFG_SCENEGRAPH
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableScenegraph);
-	old.withScenegraph = withScenegraph;
-	withScenegraph = readBoolEnvVar(varName.data(), withScenegraph);
-
-	// NCINE_APPCFG_VSYNC
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableVSync);
-	old.withVSync = withVSync;
-	withVSync = readBoolEnvVar(varName.data(), withVSync);
-
-	// NCINE_APPCFG_GL_DEBUG_CONTEXT
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableGlDebugContext);
-	old.withGlDebugContext = withGlDebugContext;
-	withGlDebugContext = readBoolEnvVar(varName.data(), withGlDebugContext);
-
-	// NCINE_APPCFG_CONSOLE_COLORS
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableConsoleColors);
-	old.withConsoleColors = withConsoleColors;
-	withConsoleColors = readBoolEnvVar(varName.data(), withConsoleColors);
+	// NCINE_APPCFG_FEATURES_DEBUG_OVERLAY
+	old_.features.debugOverlay = features.debugOverlay;
+	constexpr const char EnvFeatureDebugOverlay[] = ENV2(ENV_FEATURES, ENV_DEBUG_OVERLAY);
+	features.debugOverlay = readBoolEnvVar(EnvFeatureDebugOverlay, features.debugOverlay);
 
 	// ----------------------------------------------------------------
 
 	// NCINE_APPCFG_DATA_PATH
-	varName = EnvVariablePrefix;
-	varName.append(EnvVariableDataPath);
-	old.dataPath = dataPath();
-	readStringEnvVar(varName.data(), dataPath());
+	old_.dataPath = dataPath();
+	constexpr const char EnvDataPath[] = ENV2(ENV_PREFIX, ENV_DATA_PATH);
+	readStringEnvVar(EnvDataPath, dataPath());
 }
 
 void AppConfiguration::logEnvVariables() const
 {
-	if (logFile != old.logFile)
+	// ----- Logging -----
+	if (logging.file != old_.logging.file)
 	{
-		LOGI_X("%s%s=\"%s\" overrides compiled value \"%s\"",
-		       EnvVariablePrefix, EnvVariableLogFile, logFile.data(), old.logFile.data());
+		constexpr const char Name[] = ENV2(ENV_LOGGING, ENV_FILE);
+		LOGI_X("%s=\"%s\" overrides compiled value \"%s\"",
+		       Name, logging.file.data(), old_.logging.file.data());
 	}
 
-	if (consoleLogLevel != old.consoleLogLevel)
+	if (logging.consoleLevel != old_.logging.consoleLevel)
 	{
-		LOGI_X("%s%s=%d overrides compiled value %d",
-		       EnvVariablePrefix, EnvVariableConsoleLogLevel, consoleLogLevel, old.consoleLogLevel);
+		constexpr const char Name[] = ENV2(ENV_LOGGING, ENV_CONSOLE_LEVEL);
+		LOGI_X("%s=%d overrides compiled value %d",
+		       Name, logging.consoleLevel, old_.logging.consoleLevel);
 	}
 
-	if (fileLogLevel != old.fileLogLevel)
+	if (logging.fileLevel != old_.logging.fileLevel)
 	{
-		LOGI_X("%s%s=%d overrides compiled value %d",
-		       EnvVariablePrefix, EnvVariableFileLogLevel, fileLogLevel, old.fileLogLevel);
+		constexpr const char Name[] = ENV2(ENV_LOGGING, ENV_FILE_LEVEL);
+		LOGI_X("%s=%d overrides compiled value %d",
+		       Name, logging.fileLevel, old_.logging.fileLevel);
 	}
 
-	if (frameTimerLogInterval != old.frameTimerLogInterval)
+	if (logging.frameTimerInterval != old_.logging.frameTimerInterval)
 	{
-		LOGI_X("%s%s=%f overrides compiled value %f",
-		       EnvVariablePrefix, EnvVariableFrameTimerLogInterval, frameTimerLogInterval, old.frameTimerLogInterval);
+		constexpr const char Name[] = ENV2(ENV_LOGGING, ENV_FRAME_TIMER_INTERVAL);
+		LOGI_X("%s=%f overrides compiled value %f",
+		       Name, logging.frameTimerInterval, old_.logging.frameTimerInterval);
+	}
+
+	if (logging.consoleColors != old_.logging.consoleColors)
+	{
+		constexpr const char Name[] = ENV2(ENV_LOGGING, ENV_CONSOLE_COLORS);
+		LOGI_X("%s=%d overrides compiled value %d",
+		       Name, logging.consoleColors, old_.logging.consoleColors);
+	}
+
+	// ----------------------------------------------------------------
+	// ----- Window -----
+
+	if (window.resolution != old_.window.resolution)
+	{
+		constexpr const char Name[] = ENV2(ENV_WINDOW, ENV_RESOLUTION);
+		LOGI_X("%s=%dx%d overrides compiled value %dx%d",
+		       Name,
+		       window.resolution.x, window.resolution.y,
+		       old_.window.resolution.x, old_.window.resolution.y);
+	}
+
+	if (window.refreshRate != old_.window.refreshRate)
+	{
+		constexpr const char Name[] = ENV2(ENV_WINDOW, ENV_REFRESH_RATE);
+		LOGI_X("%s=%f overrides compiled value %f",
+		       Name, window.refreshRate, old_.window.refreshRate);
+	}
+
+	if (window.position != old_.window.position)
+	{
+		constexpr const char Name[] = ENV2(ENV_WINDOW, ENV_POSITION);
+		LOGI_X("%s=%dx%d overrides compiled value %dx%d",
+		       Name,
+		       window.position.x, window.position.y,
+		       old_.window.position.x, old_.window.position.y);
+	}
+
+	if (window.fullscreen != old_.window.fullscreen)
+	{
+		constexpr const char Name[] = ENV2(ENV_WINDOW, ENV_FULLSCREEN);
+		LOGI_X("%s=%d overrides compiled value %d",
+		       Name, window.fullscreen, old_.window.fullscreen);
+	}
+
+	if (window.resizable != old_.window.resizable)
+	{
+		constexpr const char Name[] = ENV2(ENV_WINDOW, ENV_RESIZABLE);
+		LOGI_X("%s=%d overrides compiled value %d",
+		       Name, window.resizable, old_.window.resizable);
+	}
+
+	if (window.scaling != old_.window.scaling)
+	{
+		constexpr const char Name[] = ENV2(ENV_WINDOW, ENV_SCALING);
+		LOGI_X("%s=%d overrides compiled value %d",
+		       Name, window.scaling, old_.window.scaling);
 	}
 
 	// ----------------------------------------------------------------
 
-	if (resolution != old.resolution)
+	if (window.title != old_.window.title)
 	{
-		LOGI_X("%s%s=%dx%d overrides compiled value %dx%d",
-		       EnvVariablePrefix, EnvVariableResolution, resolution.x, resolution.y, old.resolution.x, old.resolution.y);
+		constexpr const char Name[] = ENV2(ENV_WINDOW, ENV_TITLE);
+		LOGI_X("%s=\"%s\" overrides compiled value \"%s\"",
+		       Name, window.title.data(), old_.window.title.data());
 	}
 
-	if (refreshRate != old.refreshRate)
+	if (window.iconFilename != old_.window.iconFilename)
 	{
-		LOGI_X("%s%s=%f overrides compiled value %f",
-		       EnvVariablePrefix, EnvVariableRefreshRate, refreshRate, old.refreshRate);
+		constexpr const char Name[] = ENV2(ENV_WINDOW, ENV_ICON_FILENAME);
+		LOGI_X("%s=\"%s\" overrides compiled value \"%s\"",
+		       Name, window.iconFilename.data(), old_.window.iconFilename.data());
 	}
 
-	if (windowPosition != old.windowPosition)
+	// ----------------------------------------------------------------
+	// ----- Graphics -----
+
+	if (graphics.vsync != old_.graphics.vsync)
 	{
-		LOGI_X("%s%s=%dx%d overrides compiled value %dx%d",
-		       EnvVariablePrefix, EnvVariableWindowPosition, windowPosition.x, windowPosition.y, old.windowPosition.x, old.windowPosition.y);
+		constexpr const char Name[] = ENV2(ENV_GRAPHICS, ENV_VSYNC);
+		LOGI_X("%s=%d overrides compiled value %d",
+		       Name, graphics.vsync, old_.graphics.vsync);
 	}
 
-	if (fullscreen != old.fullscreen)
+	if (graphics.frameLimit != old_.graphics.frameLimit)
 	{
-		LOGI_X("%s%s=%d overrides compiled value %d",
-		       EnvVariablePrefix, EnvVariableFullscreen, fullscreen, old.fullscreen);
+		constexpr const char Name[] = ENV2(ENV_GRAPHICS, ENV_FRAME_LIMIT);
+		LOGI_X("%s=%u overrides compiled value %u",
+		       Name, graphics.frameLimit, old_.graphics.frameLimit);
 	}
 
-	if (resizable != old.resizable)
+	// ----------------------------------------------------------------
+	// ----- Graphics.OpenGL -----
+
+	if (graphics.opengl.debugContext != old_.graphics.opengl.debugContext)
 	{
-		LOGI_X("%s%s=%d overrides compiled value %d",
-		       EnvVariablePrefix, EnvVariableResizable, resizable, old.resizable);
+		constexpr const char Name[] = ENV3(ENV_GRAPHICS, ENV_OPENGL, ENV_DEBUG_CONTEXT);
+		LOGI_X("%s=%d overrides compiled value %d",
+		       Name, graphics.opengl.debugContext, old_.graphics.opengl.debugContext);
 	}
 
-	if (windowScaling != old.windowScaling)
+	if (graphics.opengl.useBufferMapping != old_.graphics.opengl.useBufferMapping)
 	{
-		LOGI_X("%s%s=%d overrides compiled value %d",
-		       EnvVariablePrefix, EnvVariableWindowScaling, windowScaling, old.windowScaling);
-	}
-
-	if (frameLimit != old.frameLimit)
-	{
-		LOGI_X("%s%s=%u overrides compiled value %u",
-		       EnvVariablePrefix, EnvVariableFrameLimit, frameLimit, old.frameLimit);
+		constexpr const char Name[] = ENV3(ENV_GRAPHICS, ENV_OPENGL, ENV_BUFFER_MAPPING);
+		LOGI_X("%s=%d overrides compiled value %d",
+		       Name, graphics.opengl.useBufferMapping, old_.graphics.opengl.useBufferMapping);
 	}
 
 	// ----------------------------------------------------------------
 
-	if (windowTitle != old.windowTitle)
+	if (graphics.opengl.vboSize != old_.graphics.opengl.vboSize)
 	{
-		LOGI_X("%s%s=\"%s\" overrides compiled value \"%s\"",
-		       EnvVariablePrefix, EnvVariableWindowTitle, windowTitle.data(), old.windowTitle.data());
+		constexpr const char Name[] = ENV3(ENV_GRAPHICS, ENV_OPENGL, ENV_VBO_SIZE);
+		LOGI_X("%s=%lu overrides compiled value %lu",
+		       Name, graphics.opengl.vboSize, old_.graphics.opengl.vboSize);
 	}
 
-	if (windowIconFilename != old.windowIconFilename)
+	if (graphics.opengl.iboSize != old_.graphics.opengl.iboSize)
 	{
-		LOGI_X("%s%s=\"%s\" overrides compiled value \"%s\"",
-		       EnvVariablePrefix, EnvVariableWindowIconFilename, windowIconFilename.data(), old.windowIconFilename.data());
+		constexpr const char Name[] = ENV3(ENV_GRAPHICS, ENV_OPENGL, ENV_IBO_SIZE);
+		LOGI_X("%s=%lu overrides compiled value %lu",
+		       Name, graphics.opengl.iboSize, old_.graphics.opengl.iboSize);
 	}
 
-	// ----------------------------------------------------------------
-
-	if (useBufferMapping != old.useBufferMapping)
+	if (graphics.opengl.vaoPoolSize != old_.graphics.opengl.vaoPoolSize)
 	{
-		LOGI_X("%s%s=%d overrides compiled value %d",
-		       EnvVariablePrefix, EnvVariableBufferMapping, useBufferMapping, old.useBufferMapping);
+		constexpr const char Name[] = ENV3(ENV_GRAPHICS, ENV_OPENGL, ENV_VAO_POOL_SIZE);
+		LOGI_X("%s=%u overrides compiled value %u",
+		       Name, graphics.opengl.vaoPoolSize, old_.graphics.opengl.vaoPoolSize);
 	}
 
-	if (deferShaderQueries != old.deferShaderQueries)
+	if (graphics.opengl.renderCommandPoolSize != old_.graphics.opengl.renderCommandPoolSize)
 	{
-		LOGI_X("%s%s=%d overrides compiled value %d",
-		       EnvVariablePrefix, EnvVariableDeferShaderQueries, deferShaderQueries, old.deferShaderQueries);
-	}
-
-	if (fixedBatchSize != old.fixedBatchSize)
-	{
-		LOGI_X("%s%s=%u overrides compiled value %u",
-		       EnvVariablePrefix, EnvVariableFixedBatchSize, fixedBatchSize, old.fixedBatchSize);
-	}
-
-	if (useBinaryShaderCache != old.useBinaryShaderCache)
-	{
-		LOGI_X("%s%s=%d overrides compiled value %d",
-		       EnvVariablePrefix, EnvVariableBinaryShaderCache, useBinaryShaderCache, old.useBinaryShaderCache);
-	}
-
-	if (shaderCacheDirname != old.shaderCacheDirname)
-	{
-		LOGI_X("%s%s=\"%s\" overrides compiled value \"%s\"",
-		       EnvVariablePrefix, EnvVariableShaderCacheDirname, shaderCacheDirname.data(), old.shaderCacheDirname.data());
-	}
-
-	if (compileBatchedShadersTwice != old.compileBatchedShadersTwice)
-	{
-		LOGI_X("%s%s=%d overrides compiled value %d",
-		       EnvVariablePrefix, EnvVariableCompileBatchedShadersTwice, compileBatchedShadersTwice, old.compileBatchedShadersTwice);
+		constexpr const char Name[] = ENV3(ENV_GRAPHICS, ENV_OPENGL, ENV_RENDER_COMMAND_POOL_SIZE);
+		LOGI_X("%s=%u overrides compiled value %u",
+		       Name, graphics.opengl.renderCommandPoolSize, old_.graphics.opengl.renderCommandPoolSize);
 	}
 
 	// ----------------------------------------------------------------
 
-	if (vboSize != old.vboSize)
+	if (graphics.opengl.deferShaderQueries != old_.graphics.opengl.deferShaderQueries)
 	{
-		LOGI_X("%s%s=%lu overrides compiled value %lu",
-		       EnvVariablePrefix, EnvVariableVboSize, vboSize, old.vboSize);
+		constexpr const char Name[] = ENV3(ENV_GRAPHICS, ENV_OPENGL, ENV_DEFER_SHADER_QUERIES);
+		LOGI_X("%s=%d overrides compiled value %d",
+		       Name, graphics.opengl.deferShaderQueries, old_.graphics.opengl.deferShaderQueries);
 	}
 
-	if (iboSize != old.iboSize)
+	if (graphics.opengl.fixedBatchSize != old_.graphics.opengl.fixedBatchSize)
 	{
-		LOGI_X("%s%s=%lu overrides compiled value %lu",
-		       EnvVariablePrefix, EnvVariableIboSize, iboSize, old.iboSize);
+		constexpr const char Name[] = ENV3(ENV_GRAPHICS, ENV_OPENGL, ENV_FIXED_BATCH_SIZE);
+		LOGI_X("%s=%u overrides compiled value %u",
+		       Name, graphics.opengl.fixedBatchSize, old_.graphics.opengl.fixedBatchSize);
 	}
 
-	if (vaoPoolSize != old.vaoPoolSize)
+	if (graphics.opengl.useBinaryShaderCache != old_.graphics.opengl.useBinaryShaderCache)
 	{
-		LOGI_X("%s%s=%u overrides compiled value %u",
-		       EnvVariablePrefix, EnvVariableVaoPoolSize, vaoPoolSize, old.vaoPoolSize);
+		constexpr const char Name[] = ENV3(ENV_GRAPHICS, ENV_OPENGL, ENV_BINARY_SHADER_CACHE);
+		LOGI_X("%s=%d overrides compiled value %d",
+		       Name, graphics.opengl.useBinaryShaderCache, old_.graphics.opengl.useBinaryShaderCache);
 	}
 
-	if (renderCommandPoolSize != old.renderCommandPoolSize)
+	if (graphics.opengl.shaderCacheDirname != old_.graphics.opengl.shaderCacheDirname)
 	{
-		LOGI_X("%s%s=%u overrides compiled value %u",
-		       EnvVariablePrefix, EnvVariableRenderCommandPoolSize, renderCommandPoolSize, old.renderCommandPoolSize);
+		constexpr const char Name[] = ENV3(ENV_GRAPHICS, ENV_OPENGL, ENV_SHADER_CACHE_DIRNAME);
+		LOGI_X("%s=\"%s\" overrides compiled value \"%s\"",
+		       Name, graphics.opengl.shaderCacheDirname.data(), old_.graphics.opengl.shaderCacheDirname.data());
+	}
+
+	if (graphics.opengl.compileBatchedShadersTwice != old_.graphics.opengl.compileBatchedShadersTwice)
+	{
+		constexpr const char Name[] = ENV3(ENV_GRAPHICS, ENV_OPENGL, ENV_COMPILE_BATCHED_SHADERS_TWICE);
+		LOGI_X("%s=%d overrides compiled value %d",
+		       Name, graphics.opengl.compileBatchedShadersTwice, old_.graphics.opengl.compileBatchedShadersTwice);
+	}
+
+	// ----------------------------------------------------------------
+	// ----- Audio -----
+
+	if (audio.enabled != old_.audio.enabled)
+	{
+		constexpr const char Name[] = ENV2(ENV_AUDIO, ENV_ENABLED);
+		LOGI_X("%s=%d overrides compiled value %d",
+		       Name, audio.enabled, old_.audio.enabled);
+	}
+
+	if (audio.frequency != old_.audio.frequency)
+	{
+		constexpr const char Name[] = ENV2(ENV_AUDIO, ENV_FREQUENCY);
+		LOGI_X("%s=%u overrides compiled value %u",
+		       Name, audio.frequency, old_.audio.frequency);
+	}
+
+	if (audio.monoSources != old_.audio.monoSources)
+	{
+		constexpr const char Name[] = ENV2(ENV_AUDIO, ENV_MONO_SOURCES);
+		LOGI_X("%s=%u overrides compiled value %u",
+		       Name, audio.monoSources, old_.audio.monoSources);
+	}
+
+	if (audio.stereoSources != old_.audio.stereoSources)
+	{
+		constexpr const char Name[] = ENV2(ENV_AUDIO, ENV_STEREO_SOURCES);
+		LOGI_X("%s=%u overrides compiled value %u",
+		       Name, audio.stereoSources, old_.audio.stereoSources);
+	}
+
+	// ----------------------------------------------------------------
+	// ----- Job System -----
+
+	if (jobSystem.enabled != old_.jobSystem.enabled)
+	{
+		constexpr const char Name[] = ENV2(ENV_JOBSYSTEM, ENV_ENABLED);
+		LOGI_X("%s=%d overrides compiled value %d",
+		       Name, jobSystem.enabled, old_.jobSystem.enabled);
+	}
+
+	if (jobSystem.numThreads != old_.jobSystem.numThreads)
+	{
+		constexpr const char Name[] = ENV2(ENV_JOBSYSTEM, ENV_NUM_THREADS);
+		LOGI_X("%s=%u overrides compiled value %u",
+		       Name, jobSystem.numThreads, old_.jobSystem.numThreads);
+	}
+
+	// ----------------------------------------------------------------
+	// ----- Features -----
+
+	if (features.scenegraph != old_.features.scenegraph)
+	{
+		constexpr const char Name[] = ENV2(ENV_FEATURES, ENV_SCENEGRAPH);
+		LOGI_X("%s=%d overrides compiled value %d",
+		       Name, features.scenegraph, old_.features.scenegraph);
+	}
+
+	if (features.debugOverlay != old_.features.debugOverlay)
+	{
+		constexpr const char Name[] = ENV2(ENV_FEATURES, ENV_DEBUG_OVERLAY);
+		LOGI_X("%s=%d overrides compiled value %d",
+		       Name, features.debugOverlay, old_.features.debugOverlay);
 	}
 
 	// ----------------------------------------------------------------
 
-	if (outputAudioFrequency != old.outputAudioFrequency)
+	if (fs::baseName(dataPath().data()) != fs::baseName(old_.dataPath.data()))
 	{
-		LOGI_X("%s%s=%u overrides compiled value %u",
-		       EnvVariablePrefix, EnvVariableOutputAudioFrequency, outputAudioFrequency, old.outputAudioFrequency);
-	}
-
-	if (monoAudioSources != old.monoAudioSources)
-	{
-		LOGI_X("%s%s=%u overrides compiled value %u",
-		       EnvVariablePrefix, EnvVariableMonoAudioSources, monoAudioSources, old.monoAudioSources);
-	}
-
-	if (stereoAudioSources != old.stereoAudioSources)
-	{
-		LOGI_X("%s%s=%u overrides compiled value %u",
-		       EnvVariablePrefix, EnvVariableStereoAudioSources, stereoAudioSources, old.stereoAudioSources);
-	}
-
-	// ----------------------------------------------------------------
-
-	if (withDebugOverlay != old.withDebugOverlay)
-	{
-		LOGI_X("%s%s=%d overrides compiled value %d",
-		       EnvVariablePrefix, EnvVariableDebugOverlay, withDebugOverlay, old.withDebugOverlay);
-	}
-
-	if (withAudio != old.withAudio)
-	{
-		LOGI_X("%s%s=%d overrides compiled value %d",
-		       EnvVariablePrefix, EnvVariableAudio, withAudio, old.withAudio);
-	}
-
-	if (withJobSystem != old.withJobSystem)
-	{
-		LOGI_X("%s%s=%d overrides compiled value %d",
-		       EnvVariablePrefix, EnvVariableJobSystem, withJobSystem, old.withJobSystem);
-	}
-
-	if (numThreads != old.numThreads)
-	{
-		LOGI_X("%s%s=%u overrides compiled value %u",
-		       EnvVariablePrefix, EnvVariableNumThreads, numThreads, old.numThreads);
-	}
-
-	if (withScenegraph != old.withScenegraph)
-	{
-		LOGI_X("%s%s=%d overrides compiled value %d",
-		       EnvVariablePrefix, EnvVariableScenegraph, withScenegraph, old.withScenegraph);
-	}
-
-	if (withVSync != old.withVSync)
-	{
-		LOGI_X("%s%s=%d overrides compiled value %d",
-		       EnvVariablePrefix, EnvVariableVSync, withVSync, old.withVSync);
-	}
-
-	if (withGlDebugContext != old.withGlDebugContext)
-	{
-		LOGI_X("%s%s=%d overrides compiled value %d",
-		       EnvVariablePrefix, EnvVariableGlDebugContext, withGlDebugContext, old.withGlDebugContext);
-	}
-
-	if (withConsoleColors != old.withConsoleColors)
-	{
-		LOGI_X("%s%s=%d overrides compiled value %d",
-		       EnvVariablePrefix, EnvVariableConsoleColors, withConsoleColors, old.withConsoleColors);
-	}
-
-	// ----------------------------------------------------------------
-
-	if (fs::baseName(dataPath().data()) != fs::baseName(old.dataPath.data()))
-	{
-		LOGI_X("%s%s=\"%s\" overrides compiled value \"%s\"",
-		       EnvVariablePrefix, EnvVariableDataPath, dataPath().data(), old.dataPath.data());
+		constexpr const char Name[] = ENV_PREFIX ENV_DATA_PATH;
+		LOGI_X("%s=\"%s\" overrides compiled value \"%s\"",
+		       Name, dataPath().data(), old_.dataPath.data());
 	}
 }
 
