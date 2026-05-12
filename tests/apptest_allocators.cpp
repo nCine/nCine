@@ -241,8 +241,8 @@ void MyEventHandler::onFrameStart()
 		const ImColor fillColor = (selectedType != AllocatorType::FREELIST) ? 0xffffffff : 0xffa9a9a9;
 		drawList->AddRectFilled(minRect, maxRect, ImColor(fillColor), 0.0f, ImDrawFlags_RoundCornersAll);
 
-		drawList->AddRect(minRect, maxRect, ImColor(0xffb1b9a8), 0.0f, ImDrawFlags_RoundCornersAll, 2.0f * thickness);
-		drawList->AddRect(minRect, maxRect, ImColor(0xffceb89f), 0.0f, ImDrawFlags_RoundCornersAll, thickness);
+		drawList->AddRect(minRect, maxRect, ImColor(0xffb1b9a8), 0.0f, 2.0f * thickness, ImDrawFlags_RoundCornersAll);
+		drawList->AddRect(minRect, maxRect, ImColor(0xffceb89f), 0.0f, thickness, ImDrawFlags_RoundCornersAll);
 
 		for (unsigned int i = 0; i < allocations.size(); i++)
 		{
@@ -258,13 +258,13 @@ void MyEventHandler::onFrameStart()
 				const ImVec2 baseMinRect(minRect.x + baseNormStart * width, minRect.y);
 				const ImVec2 baseMaxRect(minRect.x + normStart * width, maxRect.y);
 				drawList->AddRectFilled(baseMinRect, baseMaxRect, ImColor(0xffa9a9a9), 0.0f, ImDrawFlags_RoundCornersAll);
-				drawList->AddRect(baseMinRect, baseMaxRect, ImColor(0xff595959), 0.0f, ImDrawFlags_RoundCornersAll, thickness);
+				drawList->AddRect(baseMinRect, baseMaxRect, ImColor(0xff595959), 0.0f, thickness, ImDrawFlags_RoundCornersAll);
 			}
 
 			const ImVec2 allocMinRect(minRect.x + normStart * width, minRect.y);
 			const ImVec2 allocMaxRect(minRect.x + normEnd * width, maxRect.y);
 			drawList->AddRectFilled(allocMinRect, allocMaxRect, ImColor(0xffbaf8f8), 0.0f, ImDrawFlags_RoundCornersAll);
-			drawList->AddRect(allocMinRect, allocMaxRect, ImColor(0xffa90000), 0.0f, ImDrawFlags_RoundCornersAll, thickness);
+			drawList->AddRect(allocMinRect, allocMaxRect, ImColor(0xffa90000), 0.0f, thickness, ImDrawFlags_RoundCornersAll);
 
 			if (mouseInsideRect(allocMinRect, allocMaxRect))
 			{
@@ -300,7 +300,7 @@ void MyEventHandler::onFrameStart()
 				const ImVec2 blockMinRect(minRect.x + blockNormStart * width, minRect.y);
 				const ImVec2 blockMaxRect(minRect.x + blockNormEnd * width, maxRect.y);
 				drawList->AddRectFilled(blockMinRect, blockMaxRect, ImColor(0xffdfdfdf), 0.0f, ImDrawFlags_RoundCornersAll);
-				drawList->AddRect(blockMinRect, blockMaxRect, ImColor(0xff792979), 0.0f, ImDrawFlags_RoundCornersAll, 2.0f);
+				drawList->AddRect(blockMinRect, blockMaxRect, ImColor(0xff792979), 0.0f, 2.0f, ImDrawFlags_RoundCornersAll);
 
 				if (mouseInsideRect(blockMinRect, blockMaxRect))
 				{
@@ -329,7 +329,7 @@ void MyEventHandler::onFrameStart()
 				const ImVec2 blockMinRect(minRect.x + blockNormStart * width, minRect.y);
 				const ImVec2 blockMaxRect(minRect.x + blockNormEnd * width, maxRect.y);
 				drawList->AddRectFilled(blockMinRect, blockMaxRect, ImColor(0xffdfdfdf), 0.0f, ImDrawFlags_RoundCornersAll);
-				drawList->AddRect(blockMinRect, blockMaxRect, ImColor(0xff792979), 0.0f, ImDrawFlags_RoundCornersAll, 2.0f);
+				drawList->AddRect(blockMinRect, blockMaxRect, ImColor(0xff792979), 0.0f, 2.0f, ImDrawFlags_RoundCornersAll);
 
 				if (mouseInsideRect(blockMinRect, blockMaxRect))
 				{
