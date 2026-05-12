@@ -392,7 +392,7 @@ void ImGuiSdlInput::newFrame()
 	Uint64 currentTime = SDL_GetPerformanceCounter();
 	if (currentTime <= time_)
 		currentTime = time_ + 1;
-	io.DeltaTime = time_ > 0 ? static_cast<float>((static_cast<double>(currentTime - time_) / frequency)) : static_cast<float>(1.0f / 60.0f);
+	io.DeltaTime = time_ > 0 ? static_cast<float>(static_cast<double>(currentTime - time_) / static_cast<double>(frequency)) : static_cast<float>(1.0f / 60.0f);
 	time_ = currentTime;
 
 	if (mouseLastLeaveFrame_ && mouseLastLeaveFrame_ >= ImGui::GetFrameCount() && mouseButtonsDown_ == 0)
@@ -624,6 +624,7 @@ float ImGuiSdlInput::getContentScaleForWindow(SDL_Window *window)
 	return getContentScaleForDisplay(SDL_GetWindowDisplayIndex(window));
 }
 
+// SDL_GetDisplayDPI() seems rather unreliable on Linux.
 float ImGuiSdlInput::getContentScaleForDisplay(int displayIndex)
 {
 	const char *sdlDriver = SDL_GetCurrentVideoDriver();
@@ -633,7 +634,11 @@ float ImGuiSdlInput::getContentScaleForDisplay(int displayIndex)
 	#if !defined(__APPLE__) && !defined(__EMSCRIPTEN__) && !defined(__ANDROID__)
 	float dpi = 0.0f;
 	if (SDL_GetDisplayDPI(displayIndex, &dpi, nullptr, nullptr) == 0)
+	{
+		if (dpi < 96.0f)
+			dpi = 96.0f;
 		return dpi / 96.0f;
+	}
 	#endif
 #endif
 	IM_UNUSED(displayIndex);
@@ -756,7 +761,7 @@ void ImGuiSdlInput::getWindowSizeAndFramebufferScale(SDL_Window *window, SDL_Ren
 	if (outSize != nullptr)
 		*outSize = ImVec2(static_cast<float>(w), static_cast<float>(h));
 	if (outFramebufferScale != nullptr)
-		*outFramebufferScale = (w > 0 && h > 0) ? ImVec2(static_cast<float>(displayW) / w, static_cast<float>(displayH) / h) : ImVec2(1.0f, 1.0f);
+		*outFramebufferScale = (w > 0 && h > 0) ? ImVec2(static_cast<float>(displayW) / static_cast<float>(w), static_cast<float>(displayH) / static_cast<float>(h)) : ImVec2(1.0f, 1.0f);
 }
 
 }

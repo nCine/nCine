@@ -500,7 +500,7 @@ void ImGuiGlfwInput::newFrame()
 	// (Accept glfwGetTime() not returning a monotonically increasing value. Seems to happens on disconnecting peripherals and probably on VMs and Emscripten, see #6491, #6189, #6114, #3644)
 	double currentTime = glfwGetTime();
 	if (currentTime <= time_)
-		currentTime = time_ + 0.00001f;
+		currentTime = time_ + 0.00001;
 	io.DeltaTime = time_ > 0.0 ? static_cast<float>(currentTime - time_) : static_cast<float>(1.0f / 60.0f);
 	time_ = currentTime;
 
@@ -790,6 +790,16 @@ void ImGuiGlfwInput::updateGamepads()
 		// clang-format on
 	}
 }
+
+// For GFLW 3.2 + Windows: include a simplified non-monitor aware version of ImGui_ImplWin32_GetDpiScaleForMonitor().
+// This is merely a band-aid to make using GLFW 3.2 a little bit nicer, but prefer to use GLFW 3.3+ or the full correct functions from the Win32 backend.
+#if !GLFW_HAS_PER_MONITOR_DPI && defined(_WIN32) && !defined(NOGDI)
+static float   ImGui_ImplWin32_GetLegacyDpiScale()   { const HDC dc = ::GetDC(nullptr); UINT xdpi = ::GetDeviceCaps(dc, LOGPIXELSX); ::ReleaseDC(nullptr, dc); return static_cast<float>(xdpi) / 96.0f; }
+static void    glfwGetWindowContentScale(GLFWwindow *, float *xScale, float *yScale)   { *xScale = *yScale = ImGui_ImplWin32_GetLegacyDpiScale(); }
+static void    glfwGetMonitorContentScale(GLFWmonitor *, float *xScale, float *yScale) { *xScale = *yScale = ImGui_ImplWin32_GetLegacyDpiScale(); }
+#undef GLFW_HAS_PER_MONITOR_DPI
+#define GLFW_HAS_PER_MONITOR_DPI 1
+#endif
 
 // - On Windows the process needs to be marked DPI-aware!! SDL2 doesn't do it by default. You can call ::SetProcessDPIAware() or call ImGui_ImplWin32_EnableDpiAwareness() from Win32 backend.
 // - Apple platforms use FramebufferScale so we always return 1.0f.
