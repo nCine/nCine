@@ -16,10 +16,10 @@ namespace Application {
 
 	static const char *appConfiguration = "get_app_configuration";
 
+#ifdef WITH_SCENEGRAPH
 	static const char *renderingSettings = "get_rendering_settings";
 	static const char *setRenderingSettings = "set_rendering_settings";
 
-#ifdef WITH_SCENEGRAPH
 	static const char *guiSettings = "get_gui_settings";
 	static const char *setGuiSettings = "set_gui_settings";
 #endif
@@ -46,15 +46,18 @@ namespace Application {
 
 	static const char *quit = "quit";
 
+#ifdef WITH_SCENEGRAPH
 	namespace RenderingSettings {
 		static const char *batchingEnabled = "batching";
 		static const char *batchingWithIndices = "batching_with_indices";
+		static const char *instancingEnabled = "instancing";
 		static const char *cullingEnabled = "culling";
 		static const char *minBatchSize = "min_batch_size";
 		static const char *maxBatchSize = "max_batch_size";
+		static const char *minInstancedBatchSize = "min_instanced_batch_size";
+		static const char *maxInstancedBatchSize = "max_instanced_batch_size";
 	}
 
-#ifdef WITH_SCENEGRAPH
 	namespace GuiSettings {
 		static const char *imguiLayer = "imgui_layer";
 		static const char *nuklearLayer = "nuklear_layer";
@@ -80,9 +83,10 @@ void LuaApplication::expose(lua_State *L)
 
 	LuaUtils::addFunction(L, LuaNames::Application::appConfiguration, appConfiguration);
 
+#ifdef WITH_SCENEGRAPH
 	LuaUtils::addFunction(L, LuaNames::Application::renderingSettings, renderingSettings);
 	LuaUtils::addFunction(L, LuaNames::Application::setRenderingSettings, setRenderingSettings);
-#ifdef WITH_SCENEGRAPH
+
 	LuaUtils::addFunction(L, LuaNames::Application::guiSettings, guiSettings);
 	LuaUtils::addFunction(L, LuaNames::Application::setGuiSettings, setGuiSettings);
 #endif
@@ -124,16 +128,20 @@ int LuaApplication::appConfiguration(lua_State *L)
 	return 1;
 }
 
+#ifdef WITH_SCENEGRAPH
 int LuaApplication::renderingSettings(lua_State *L)
 {
 	const Application::RenderingSettings &settings = theApplication().renderingSettings();
 
-	lua_createtable(L, 0, 5);
+	lua_createtable(L, 0, 8);
 	LuaUtils::pushField(L, LuaNames::Application::RenderingSettings::batchingEnabled, settings.batchingEnabled);
 	LuaUtils::pushField(L, LuaNames::Application::RenderingSettings::batchingWithIndices, settings.batchingWithIndices);
+	LuaUtils::pushField(L, LuaNames::Application::RenderingSettings::instancingEnabled, settings.instancingEnabled);
 	LuaUtils::pushField(L, LuaNames::Application::RenderingSettings::cullingEnabled, settings.cullingEnabled);
 	LuaUtils::pushField(L, LuaNames::Application::RenderingSettings::minBatchSize, settings.minBatchSize);
 	LuaUtils::pushField(L, LuaNames::Application::RenderingSettings::maxBatchSize, settings.maxBatchSize);
+	LuaUtils::pushField(L, LuaNames::Application::RenderingSettings::minInstancedBatchSize, settings.minInstancedBatchSize);
+	LuaUtils::pushField(L, LuaNames::Application::RenderingSettings::maxInstancedBatchSize, settings.maxInstancedBatchSize);
 
 	return 1;
 }
@@ -150,14 +158,16 @@ int LuaApplication::setRenderingSettings(lua_State *L)
 
 	settings.batchingEnabled = LuaUtils::retrieveField<bool>(L, -1, LuaNames::Application::RenderingSettings::batchingEnabled);
 	settings.batchingWithIndices = LuaUtils::retrieveField<bool>(L, -1, LuaNames::Application::RenderingSettings::batchingWithIndices);
+	settings.instancingEnabled = LuaUtils::retrieveField<bool>(L, -1, LuaNames::Application::RenderingSettings::instancingEnabled);
 	settings.cullingEnabled = LuaUtils::retrieveField<bool>(L, -1, LuaNames::Application::RenderingSettings::cullingEnabled);
 	settings.minBatchSize = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::Application::RenderingSettings::minBatchSize);
 	settings.maxBatchSize = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::Application::RenderingSettings::maxBatchSize);
+	settings.minInstancedBatchSize = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::Application::RenderingSettings::minInstancedBatchSize);
+	settings.maxInstancedBatchSize = LuaUtils::retrieveField<uint32_t>(L, -1, LuaNames::Application::RenderingSettings::maxInstancedBatchSize);
 
 	return 0;
 }
 
-#ifdef WITH_SCENEGRAPH
 int LuaApplication::guiSettings(lua_State *L)
 {
 	const Application::GuiSettings &settings = theApplication().guiSettings();

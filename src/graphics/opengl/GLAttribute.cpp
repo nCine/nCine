@@ -46,16 +46,16 @@ GLenum GLAttribute::basicType() const
 		case GL_INT_VEC3:
 		case GL_INT_VEC4:
 			return GL_INT;
-		case GL_BOOL:
-		case GL_BOOL_VEC2:
-		case GL_BOOL_VEC3:
-		case GL_BOOL_VEC4:
-			return GL_BOOL;
 		case GL_UNSIGNED_INT:
 		case GL_UNSIGNED_INT_VEC2:
 		case GL_UNSIGNED_INT_VEC3:
 		case GL_UNSIGNED_INT_VEC4:
 			return GL_UNSIGNED_INT;
+		case GL_BOOL:
+		case GL_BOOL_VEC2:
+		case GL_BOOL_VEC3:
+		case GL_BOOL_VEC4:
+			return GL_BOOL;
 		default:
 			LOGW_X("No available case to handle type: %u", type_);
 			return type_;
@@ -73,23 +73,23 @@ int GLAttribute::numComponents() const
 			return 1;
 		case GL_FLOAT:
 		case GL_INT:
-		case GL_BOOL:
 		case GL_UNSIGNED_INT:
+		case GL_BOOL:
 			return 1;
 		case GL_FLOAT_VEC2:
 		case GL_INT_VEC2:
-		case GL_BOOL_VEC2:
 		case GL_UNSIGNED_INT_VEC2:
+		case GL_BOOL_VEC2:
 			return 2;
 		case GL_FLOAT_VEC3:
 		case GL_INT_VEC3:
-		case GL_BOOL_VEC3:
 		case GL_UNSIGNED_INT_VEC3:
+		case GL_BOOL_VEC3:
 			return 3;
 		case GL_FLOAT_VEC4:
 		case GL_INT_VEC4:
-		case GL_BOOL_VEC4:
 		case GL_UNSIGNED_INT_VEC4:
+		case GL_BOOL_VEC4:
 			return 4;
 		default:
 			LOGW_X("No available case to handle type: %u", type_);

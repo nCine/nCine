@@ -4,11 +4,33 @@
 #include <nctl/Array.h>
 #include <nctl/algorithms.h>
 
-Statistics::Statistics(unsigned int capacity)
-	: capacity_(capacity), size_(0), writeIndex_(0),
-		values_(nctl::makeUnique<float[]>(capacity)),
-		sortedValues_(nctl::makeUnique<float[]>(capacity))
+Statistics::Statistics()
+    : capacity_(0), size_(0), writeIndex_(0)
 {
+}
+
+Statistics::Statistics(unsigned int capacity)
+    : capacity_(capacity), size_(0), writeIndex_(0),
+      values_(nctl::makeUnique<float[]>(capacity)),
+      sortedValues_(nctl::makeUnique<float[]>(capacity))
+{
+	clearValues();
+}
+
+void Statistics::setCapacity(unsigned int capacity)
+{
+	if (capacity > 0)
+	{
+		values_ = nctl::makeUnique<float[]>(capacity);
+		sortedValues_ = nctl::makeUnique<float[]>(capacity);
+	}
+	else
+	{
+		values_.reset(nullptr);
+		sortedValues_.reset(nullptr);
+	}
+
+	capacity_ = capacity;
 	clearValues();
 }
 
@@ -24,9 +46,12 @@ bool Statistics::addValue(float value)
 
 void Statistics::addValueWrap(float value)
 {
+	if (capacity_ == 0)
+		return;
+
 	values_[writeIndex_] = value;
 	writeIndex_ = (writeIndex_ + 1) % capacity_;
-	dirty = true;
+	dirty_ = true;
 
 	if (size_ < capacity_)
 		size_++;
@@ -55,7 +80,7 @@ void Statistics::clearValues()
 	}
 	size_ = 0;
 	writeIndex_ = 0;
-	dirty = true;
+	dirty_ = true;
 }
 
 void Statistics::resetStats()
@@ -67,15 +92,21 @@ void Statistics::resetStats()
 	mode_ = 0.0f;
 	sigma_ = 0.0f;
 	relativeSigma_ = 0.0f;
-	dirty = true;
+	dirty_ = true;
 }
 
 void Statistics::calculateStats()
 {
-	if (dirty == false)
+	if (dirty_ == false)
 		return;
 
 	resetStats();
+	if (size_ == 0)
+	{
+		dirty_ = false;
+		return;
+	}
+
 	minimum_ = FLT_MAX;
 	maximum_ = -FLT_MAX;
 
@@ -136,7 +167,7 @@ void Statistics::calculateStats()
 			maxBin = i;
 	}
 	mode_ = minimum_ + (maxBin + 0.5f) * modeBinWidth;
-	dirty = false;
+	dirty_ = false;
 }
 
 float Statistics::median() const
@@ -147,8 +178,8 @@ float Statistics::median() const
 		return sortedValues_[0];
 
 	return (size_ % 2 == 0)
-				? 0.5f * (sortedValues_[size_ / 2 - 1] + sortedValues_[size_ / 2])
-				: sortedValues_[size_ / 2];
+	        ? 0.5f * (sortedValues_[size_ / 2 - 1] + sortedValues_[size_ / 2])
+	        : sortedValues_[size_ / 2];
 }
 
 float Statistics::percentile(float p) const

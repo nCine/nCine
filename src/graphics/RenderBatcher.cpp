@@ -7,6 +7,13 @@
 #include "Application.h"
 #include <nctl/StaticHashMapIterator.h>
 
+#include "tracy.h"
+
+#ifdef WITH_TRACY
+	#include <nctl/StaticString.h>
+	nctl::StaticString<64> zoneTextString;
+#endif
+
 namespace ncine {
 
 ///////////////////////////////////////////////////////////
@@ -36,8 +43,13 @@ RenderBatcher::RenderBatcher()
 
 void RenderBatcher::createBatches(const nctl::Array<RenderCommand *> &srcQueue, nctl::Array<RenderCommand *> &destQueue)
 {
+	ZoneScoped;
+
 	unsigned int &maxBatchSize = theApplication().renderingSettings().maxBatchSize;
 	unsigned int &minBatchSize = theApplication().renderingSettings().minBatchSize;
+	const bool instancingEnabled = theApplication().renderingSettings().instancingEnabled;
+	unsigned int &maxInstancedBatchSize = theApplication().renderingSettings().maxInstancedBatchSize;
+	unsigned int &minInstancedBatchSize = theApplication().renderingSettings().minInstancedBatchSize;
 
 #if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
 	const unsigned int fixedBatchSize = theApplication().appConfiguration().graphics.opengl.fixedBatchSize;
@@ -54,6 +66,10 @@ void RenderBatcher::createBatches(const nctl::Array<RenderCommand *> &srcQueue, 
 	maxBatchSize = (maxBatchSize == 0) ? 1 : maxBatchSize;
 	minBatchSize = (minBatchSize == 0) ? 1 : minBatchSize;
 	minBatchSize = (minBatchSize > maxBatchSize) ? maxBatchSize : minBatchSize;
+	// Validating instanced batch size values
+	maxInstancedBatchSize = (maxInstancedBatchSize == 0) ? 1 : maxInstancedBatchSize;
+	minInstancedBatchSize = (minInstancedBatchSize == 0) ? 1 : minInstancedBatchSize;
+	minInstancedBatchSize = (minInstancedBatchSize > maxInstancedBatchSize) ? maxInstancedBatchSize : minInstancedBatchSize;
 
 	unsigned int lastSplit = 0;
 	for (unsigned int i = 1; i < srcQueue.size(); i++)
@@ -73,24 +89,37 @@ void RenderBatcher::createBatches(const nctl::Array<RenderCommand *> &srcQueue, 
 		// Split point if last command or split condition
 		if (i == srcQueue.size() - 1 || shouldSplit)
 		{
+			nctl::Array<RenderCommand *>::ConstIterator start = srcQueue.cBegin() + lastSplit;
+			const bool canUseInstancing = ((*start)->type() == RenderCommand::CommandTypes::SPRITE &&
+			                               (*start)->material().shaderProgramType() != Material::ShaderProgramType::CUSTOM);
+			const bool useInstancing = (canUseInstancing && instancingEnabled);
+
+			const unsigned int minBatchSizeValue = useInstancing ? minInstancedBatchSize : minBatchSize;
+			const unsigned int maxBatchSizeValue = useInstancing ? maxInstancedBatchSize : maxBatchSize;
+
 			const GLShaderProgram *batchedShader = RenderResources::batchedShader(prevCommand->material().shaderProgram());
-			if (batchedShader && (endSplit - lastSplit) >= minBatchSize)
+			if (batchedShader && (endSplit - lastSplit) >= minBatchSizeValue)
 			{
 				// Split point for the maximum batch size
 				while (lastSplit < endSplit)
 				{
 					const unsigned int batchSize = endSplit - lastSplit;
 					unsigned int nextSplit = endSplit;
-					if (batchSize > maxBatchSize)
-						nextSplit = lastSplit + maxBatchSize;
-					else if (batchSize < minBatchSize)
+					if (batchSize > maxBatchSizeValue)
+						nextSplit = lastSplit + maxBatchSizeValue;
+					else if (batchSize < minBatchSizeValue)
 						break;
 
-					nctl::Array<RenderCommand *>::ConstIterator start = srcQueue.cBegin() + lastSplit;
 					nctl::Array<RenderCommand *>::ConstIterator end = srcQueue.cBegin() + nextSplit;
 
-					// Handling early splits while collecting (not enough UBO free space)
-					RenderCommand *batchCommand = collectCommands(start, end, start);
+					RenderCommand *batchCommand = nullptr;
+					if (useInstancing)
+						batchCommand = collectCommandsWithInstancing(start, end, start);
+					else
+					{
+						// Handling early splits while collecting (not enough UBO free space)
+						batchCommand = collectCommandsWithUniforms(start, end, start);
+					}
 					destQueue.pushBack(batchCommand);
 					lastSplit = start - srcQueue.cBegin();
 				}
@@ -123,12 +152,17 @@ void RenderBatcher::reset()
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-RenderCommand *RenderBatcher::collectCommands(
+RenderCommand *RenderBatcher::collectCommandsWithUniforms(
     nctl::Array<RenderCommand *>::ConstIterator start,
     nctl::Array<RenderCommand *>::ConstIterator end,
     nctl::Array<RenderCommand *>::ConstIterator &nextStart)
 {
 	ASSERT(end > start);
+	ZoneScoped;
+#ifdef WITH_TRACY
+	zoneTextString.format("Batch size: %u", end - start);
+	ZoneText(zoneTextString.data(), zoneTextString.length());
+#endif
 
 	const RenderCommand *refCommand = *start;
 	RenderCommand *batchCommand = nullptr;
@@ -389,6 +423,159 @@ RenderCommand *RenderBatcher::collectCommands(
 	}
 	else
 		batchCommand->geometry().setDrawParameters(GL_TRIANGLES, 0, 6 * (nextStart - start));
+
+	return batchCommand;
+}
+
+namespace {
+
+	struct SpriteInstanceBase
+	{
+		float transform[4];
+		float translation[4];
+
+		uint32_t color;
+		uint32_t spriteSize;
+	};
+
+	struct SpriteInstance : public SpriteInstanceBase
+	{
+		uint32_t uvEndpointsU;
+		uint32_t uvEndpointsV;
+	};
+
+	struct SpriteNoTextureInstance : public SpriteInstanceBase
+	{
+	};
+
+}
+
+RenderCommand *RenderBatcher::collectCommandsWithInstancing(
+    nctl::Array<RenderCommand *>::ConstIterator start,
+    nctl::Array<RenderCommand *>::ConstIterator end,
+    nctl::Array<RenderCommand *>::ConstIterator &nextStart)
+{
+	ASSERT(end > start);
+	ZoneScoped;
+#ifdef WITH_TRACY
+	zoneTextString.format("Batch size: %u", end - start);
+	ZoneText(zoneTextString.data(), zoneTextString.length());
+#endif
+
+	const RenderCommand *refCommand = *start;
+	RenderCommand *batchCommand = nullptr;
+
+	bool commandAdded = false;
+	const bool withTexture = (refCommand->material().shaderProgramType() != Material::ShaderProgramType::SPRITE_NO_TEXTURE);
+	const Material::ShaderProgramType attribsShaderProgramType = withTexture
+	    ? Material::ShaderProgramType::SPRITE_ATTRIBS
+	    : Material::ShaderProgramType::SPRITE_NO_TEXTURE_ATTRIBS;
+	batchCommand = RenderResources::renderCommandPool().retrieveOrAdd(RenderResources::shaderProgram(attribsShaderProgramType), commandAdded);
+
+	const size_t instanceStructSize = withTexture ? sizeof(SpriteInstance) : sizeof(SpriteNoTextureInstance);
+	const unsigned int numFloats = instanceStructSize / sizeof(GLfloat);
+	const unsigned int numInstances = end - start;
+
+	if (commandAdded)
+	{
+		batchCommand->setType(RenderCommand::CommandTypes::SPRITE);
+		batchCommand->material().reserveUniformsDataMemory();
+
+		GLShaderProgram &shaderProgram = *batchCommand->material().shaderProgram();
+		GLVertexFormat::Attribute *transformAttribute = shaderProgram.attribute("aTransform");
+		GLVertexFormat::Attribute *translationAttribute = shaderProgram.attribute("aTranslation");
+		GLVertexFormat::Attribute *colorAttribute = shaderProgram.attribute("aColor");
+		GLVertexFormat::Attribute *spriteSizeAttribute = shaderProgram.attribute("aSpriteSize");
+		GLVertexFormat::Attribute *uvEndpointsUAttribute = withTexture ? shaderProgram.attribute("aUvEndpointsU") : nullptr;
+		GLVertexFormat::Attribute *uvEndpointsVAttribute = withTexture ? shaderProgram.attribute("aUvEndpointsV") : nullptr;
+
+		transformAttribute->setVboParameters(instanceStructSize, reinterpret_cast<void *>(0 * sizeof(GLfloat)));
+		translationAttribute->setVboParameters(instanceStructSize, reinterpret_cast<void *>(4 * sizeof(GLfloat)));
+		colorAttribute->setVboParameters(instanceStructSize, reinterpret_cast<void *>(8 * sizeof(GLfloat)));
+		spriteSizeAttribute->setVboParameters(instanceStructSize, reinterpret_cast<void *>(9 * sizeof(GLfloat)));
+		if (withTexture)
+		{
+			uvEndpointsUAttribute->setVboParameters(instanceStructSize, reinterpret_cast<void *>(10 * sizeof(GLfloat)));
+			uvEndpointsVAttribute->setVboParameters(instanceStructSize, reinterpret_cast<void *>(11 * sizeof(GLfloat)));
+		}
+
+		transformAttribute->setDivisor(1);
+		translationAttribute->setDivisor(1);
+		colorAttribute->setDivisor(1);
+		spriteSizeAttribute->setDivisor(1);
+		if (withTexture)
+		{
+			uvEndpointsUAttribute->setDivisor(1);
+			uvEndpointsVAttribute->setDivisor(1);
+		}
+	}
+
+	// The base pointer should be a multiple of 4 for the vertex ID calculation to work in the shader
+	GLfloat *base = batchCommand->geometry().acquireVertexPointer(numFloats * numInstances, 4);
+	uint8_t *instanceData = reinterpret_cast<uint8_t *>(base);
+
+	nctl::Array<RenderCommand *>::ConstIterator it = start;
+	unsigned int instanceIndex = 0;
+	while (it != end)
+	{
+		const RenderCommand *command = *it;
+		ASSERT(command->type() == RenderCommand::CommandTypes::SPRITE);
+
+		const Material &material = command->material();
+
+		const GLUniformBlockCache *instanceBlock = material.uniformBlock(Material::InstanceBlockName);
+		const int alignedInstanceStructSize = (instanceStructSize + 15) & ~size_t(15);
+		ASSERT(instanceBlock->usedSize() - instanceBlock->alignAmount() == alignedInstanceStructSize);
+
+		uint8_t *dstPtr = instanceData + instanceIndex * instanceStructSize;
+		SpriteInstanceBase *dst = reinterpret_cast<SpriteInstanceBase *>(dstPtr);
+
+		const float *matrix = command->transformation().data();
+		dst->transform[0] = matrix[0];
+		dst->transform[1] = matrix[4];
+		dst->transform[2] = matrix[1];
+		dst->transform[3] = matrix[5];
+
+		dst->translation[0] = matrix[12];
+		dst->translation[1] = matrix[13];
+		dst->translation[2] = matrix[14];
+
+		const size_t bytesToCopyAfterMatrix = (withTexture ? 4 : 2) * sizeof(uint32_t);
+		memcpy(&dst->color, reinterpret_cast<const uint32_t *>(instanceBlock->dataPointer()) + 8, bytesToCopyAfterMatrix);
+
+		instanceIndex++;
+		++it;
+	}
+	nextStart = it;
+
+	batchCommand->geometry().releaseVertexPointer();
+
+	// Setting sampler uniforms for GL_TEXTURE* units
+	const GLShaderUniforms::UniformHashMapType allUniforms = refCommand->material().allUniforms();
+	for (const GLUniformCache &uniformCache : allUniforms)
+	{
+		if (uniformCache.uniform()->type() == GL_SAMPLER_2D)
+		{
+			GLUniformCache *batchUniformCache = batchCommand->material().uniform(uniformCache.uniform()->name());
+			const int refValue = uniformCache.intValue(0);
+			const int batchValue = batchUniformCache->intValue(0);
+			// Also checking if the command has just been added, as the memory at the
+			// uniforms data pointer is not cleared and might contain the reference value
+			if (batchValue != refValue || commandAdded)
+				batchUniformCache->setIntValue(refValue);
+		}
+	}
+
+	for (unsigned int i = 0; i < GLTexture::MaxTextureUnits; i++)
+		batchCommand->material().setTexture(i, refCommand->material().texture(i));
+	batchCommand->material().setBlendingEnabled(refCommand->material().isBlendingEnabled());
+	batchCommand->material().setBlendingFactors(refCommand->material().srcBlendingFactor(), refCommand->material().destBlendingFactor());
+	batchCommand->setBatchSize(nextStart - start);
+	batchCommand->setLayer(refCommand->layer());
+	batchCommand->setVisitOrder(refCommand->visitOrder());
+
+	batchCommand->geometry().setDrawParameters(GL_TRIANGLE_STRIP, 0, 4);
+	batchCommand->setNumInstances(nextStart - start);
 
 	return batchCommand;
 }

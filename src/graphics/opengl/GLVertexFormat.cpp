@@ -10,7 +10,8 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 
 GLVertexFormat::Attribute::Attribute()
-    : enabled_(false), vbo_(nullptr), index_(0), size_(-1), type_(GL_FLOAT), stride_(0), pointer_(nullptr), baseOffset_(0)
+    : enabled_(false), vbo_(nullptr), index_(0), size_(-1), type_(GL_FLOAT),
+      stride_(0), pointer_(nullptr), baseOffset_(0), divisor_(0)
 {
 }
 
@@ -34,7 +35,8 @@ bool GLVertexFormat::Attribute::operator==(const Attribute &other) const
 	         other.normalized_ == normalized_ &&
 	         other.stride_ == stride_ &&
 	         other.pointer_ == pointer_ &&
-	         other.baseOffset_ == baseOffset_));
+	         other.baseOffset_ == baseOffset_ &&
+	         other.divisor_ == divisor_));
 }
 
 bool GLVertexFormat::Attribute::operator!=(const Attribute &other) const
@@ -53,6 +55,7 @@ void GLVertexFormat::Attribute::init(unsigned int index, GLint size, GLenum type
 	stride_ = 0;
 	pointer_ = nullptr;
 	baseOffset_ = 0;
+	divisor_ = 0;
 }
 
 void GLVertexFormat::Attribute::setVboParameters(GLsizei stride, const GLvoid *pointer)
@@ -81,12 +84,8 @@ void GLVertexFormat::define()
 			attributes_[i].vbo_->bind();
 			glEnableVertexAttribArray(attributes_[i].index_);
 
-#if (defined(WITH_OPENGLES) && !GL_ES_VERSION_3_2) || defined(__EMSCRIPTEN__)
 			const GLubyte *initialPointer = reinterpret_cast<const GLubyte *>(attributes_[i].pointer_);
 			const GLvoid *pointer = reinterpret_cast<const GLvoid *>(initialPointer + attributes_[i].baseOffset_);
-#else
-			const GLvoid *pointer = attributes_[i].pointer_;
-#endif
 
 			switch (attributes_[i].type_)
 			{
@@ -105,6 +104,8 @@ void GLVertexFormat::define()
 					glVertexAttribPointer(attributes_[i].index_, attributes_[i].size_, attributes_[i].type_, attributes_[i].normalized_, attributes_[i].stride_, pointer);
 					break;
 			}
+
+			glVertexAttribDivisor(attributes_[i].index_, attributes_[i].divisor_);
 		}
 	}
 

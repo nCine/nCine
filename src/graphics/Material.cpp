@@ -15,6 +15,8 @@ namespace ncine {
 const char *Material::InstanceBlockName = "InstanceBlock";
 const char *Material::InstancesBlockName = "InstancesBlock";
 const char *Material::ModelMatrixUniformName = "modelMatrix";
+const char *Material::ModelTransformUniformName = "transform";
+const char *Material::ModelTranslationUniformName = "translation";
 
 const char *Material::ProjectionMatrixUniformName = "uProjectionMatrix";
 const char *Material::ViewMatrixUniformName = "uViewMatrix";
@@ -24,6 +26,8 @@ const char *Material::TextureUniformName = "uTexture";
 const char *Material::ColorUniformName = "color";
 const char *Material::SpriteSizeUniformName = "spriteSize";
 const char *Material::TexRectUniformName = "texRect";
+const char *Material::UvEndpointsUUniformName = "uvEndpointsU";
+const char *Material::UvEndpointsVUniformName = "uvEndpointsV";
 const char *Material::PositionAttributeName = "aPosition";
 const char *Material::TexCoordsAttributeName = "aTexCoords";
 const char *Material::MeshIndexAttributeName = "aMeshIndex";

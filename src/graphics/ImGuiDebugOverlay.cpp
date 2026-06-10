@@ -815,6 +815,7 @@ void ImGuiDebugOverlay::guiApplicationConfiguration()
 
 void ImGuiDebugOverlay::guiRenderingSettings()
 {
+#if NCINE_WITH_SCENEGRAPH
 	if (ImGui::CollapsingHeader("Rendering Settings"))
 	{
 		Application::RenderingSettings &settings = theApplication().renderingSettings();
@@ -822,6 +823,8 @@ void ImGuiDebugOverlay::guiRenderingSettings()
 		ImGui::Checkbox("Batching", &settings.batchingEnabled);
 		ImGui::SameLine();
 		ImGui::Checkbox("Batching with indices", &settings.batchingWithIndices);
+		ImGui::SameLine();
+		ImGui::Checkbox("Instancing", &settings.instancingEnabled);
 		ImGui::SameLine();
 		ImGui::Checkbox("Culling", &settings.cullingEnabled);
 
@@ -831,15 +834,26 @@ void ImGuiDebugOverlay::guiRenderingSettings()
 		const unsigned int fixedBatchSize = theApplication().appConfiguration().graphics.opengl.fixedBatchSize;
 		const int maxBatchSizeRange = fixedBatchSize;
 #else
-		const int maxBatchSizeRange = 512;
+		const int maxBatchSizeRange = 2048;
 #endif
+		ImGui::BeginDisabled(settings.batchingEnabled == false);
 		ImGui::DragIntRange2("Batch size", &minBatchSize, &maxBatchSize, 1.0f, 0, maxBatchSizeRange);
 #if defined(__EMSCRIPTEN__) || defined(WITH_ANGLE)
 		ImGui::Text("Fixed batch size: %u", fixedBatchSize);
 #endif
 		settings.minBatchSize = minBatchSize;
 		settings.maxBatchSize = maxBatchSize;
+
+		const int minInstancedBatchSizeRange = 8192;
+		int minInstancedBatchSize = settings.minInstancedBatchSize;
+		int maxInstancedBatchSize = settings.maxInstancedBatchSize;
+		ImGui::BeginDisabled(settings.instancingEnabled == false);
+		ImGui::DragIntRange2("Instances size", &minInstancedBatchSize, &maxInstancedBatchSize, 1.0f, 0, minInstancedBatchSizeRange);
+		ImGui::EndDisabled();
+
+		ImGui::EndDisabled();
 	}
+#endif
 }
 
 void ImGuiDebugOverlay::guiWindowSettings()

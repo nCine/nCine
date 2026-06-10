@@ -35,6 +35,7 @@ class GLVertexFormat
 		inline GLsizei stride() const { return stride_; }
 		inline const GLvoid *pointer() const { return pointer_; }
 		inline unsigned int baseOffset() const { return baseOffset_; }
+		inline GLuint divisor() const { return divisor_; }
 
 		void setVboParameters(GLsizei stride, const GLvoid *pointer);
 		inline void setVbo(const GLBufferObject *vbo) { vbo_ = vbo; }
@@ -43,6 +44,7 @@ class GLVertexFormat
 		inline void setSize(GLint size) { size_ = size; }
 		inline void setType(GLenum type) { type_ = type; }
 		inline void setNormalized(bool normalized) { normalized_ = normalized; }
+		inline void setDivisor(GLuint divisor) { divisor_ = divisor; }
 
 	  private:
 		bool enabled_;
@@ -53,8 +55,9 @@ class GLVertexFormat
 		GLboolean normalized_;
 		GLsizei stride_;
 		const GLvoid *pointer_;
-		/// Used to simulate missing `glDrawElementsBaseVertex()` on OpenGL ES 3.0
+		/// Used to simulate missing `glDrawElementsBaseVertex()` on OpenGL ES 3.0, and for instancing
 		unsigned int baseOffset_;
+		GLuint divisor_;
 
 		friend class GLVertexFormat;
 	};

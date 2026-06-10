@@ -652,8 +652,8 @@ void MyEventHandler::onFrameStart()
 	const nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
 	debugString_->clear();
 	debugString_->format("x: %.2f, y: %.2f, scale: %.2f, angle: %.2f", -camPos_.x, -camPos_.y, camScale_, -camRot_);
-	debugString_->formatAppend("\nbatching: %s, culling: %s, input: %s", stringOnOff(settings.batchingEnabled),
-	                           stringOnOff(settings.cullingEnabled), stringOnOff(inputEnabled_));
+	debugString_->formatAppend("\nbatching: %s, instancing: %s, culling: %s, input: %s", stringOnOff(settings.batchingEnabled),
+	                           stringOnOff(settings.instancingEnabled), stringOnOff(settings.cullingEnabled), stringOnOff(inputEnabled_));
 	debugText_->setString(*debugString_);
 
 	nc::Viewport &currentViewport = (currentComboViewport > 0) ? *viewportData[currentComboViewport - 1].viewport : nc::theApplication().screenViewport();
@@ -738,6 +738,8 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 
 	if (event.sym == nc::KeySym::B)
 		renderingSettings.batchingEnabled = !renderingSettings.batchingEnabled;
+	else if (event.sym == nc::KeySym::N)
+		renderingSettings.instancingEnabled = !renderingSettings.instancingEnabled;
 	else if (event.sym == nc::KeySym::C)
 		renderingSettings.cullingEnabled = !renderingSettings.cullingEnabled;
 	else if (event.sym == nc::KeySym::I)

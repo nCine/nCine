@@ -80,10 +80,10 @@ void GLShaderUniformBlocks::setUniformsDataPointer(GLubyte *dataPointer)
 	}
 }
 
-GLUniformBlockCache *GLShaderUniformBlocks::uniformBlock(const char *name)
+const GLUniformBlockCache *GLShaderUniformBlocks::uniformBlock(const char *name) const
 {
 	ASSERT(name);
-	GLUniformBlockCache *uniformBlockCache = nullptr;
+	const GLUniformBlockCache *uniformBlockCache = nullptr;
 
 	if (shaderProgram_)
 		uniformBlockCache = uniformBlockCaches_.find(name);
@@ -91,6 +91,11 @@ GLUniformBlockCache *GLShaderUniformBlocks::uniformBlock(const char *name)
 		LOGE_X("Cannot find uniform block \"%s\", no shader program associated", name);
 
 	return uniformBlockCache;
+}
+
+GLUniformBlockCache *GLShaderUniformBlocks::uniformBlock(const char *name)
+{
+	return const_cast<GLUniformBlockCache *>(static_cast<const GLShaderUniformBlocks &>(*this).uniformBlock(name));
 }
 
 void GLShaderUniformBlocks::commitUniformBlocks()

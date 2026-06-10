@@ -26,6 +26,7 @@ class GLShaderUniforms
 
 	inline unsigned int numUniforms() const { return uniformCaches_.size(); }
 	inline bool hasUniform(const char *name) const { return (uniformCaches_.find(name) != nullptr); }
+	const GLUniformCache *uniform(const char *name) const;
 	GLUniformCache *uniform(const char *name);
 	inline const UniformHashMapType allUniforms() const { return uniformCaches_; }
 	void commitUniforms();

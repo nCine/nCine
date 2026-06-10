@@ -17,6 +17,8 @@ namespace Shader {
 
 	static const char *SPRITE = "SPRITE";
 	static const char *SPRITE_NOTEXTURE = "SPRITE_NOTEXTURE";
+	static const char *SPRITE_ATTRIBS = "SPRITE_ATTRIBS";
+	static const char *SPRITE_NOTEXTURE_ATTRIBS = "SPRITE_NOTEXTURE_ATTRIBS";
 	static const char *MESHSPRITE = "MESHSPRITE";
 	static const char *MESHSPRITE_NOTEXTURE = "MESHSPRITE_NOTEXTURE";
 	static const char *TEXTNODE = "TEXTNODE";
@@ -75,10 +77,12 @@ void LuaShader::exposeConstants(lua_State *L)
 
 	lua_setfield(L, -2, LuaNames::Shader::Introspection);
 
-	lua_createtable(L, 0, 10);
+	lua_createtable(L, 0, 12);
 
 	LuaUtils::pushField(L, LuaNames::Shader::SPRITE, static_cast<int64_t>(Shader::DefaultVertex::SPRITE));
 	LuaUtils::pushField(L, LuaNames::Shader::SPRITE_NOTEXTURE, static_cast<int64_t>(Shader::DefaultVertex::SPRITE_NOTEXTURE));
+	LuaUtils::pushField(L, LuaNames::Shader::SPRITE_ATTRIBS, static_cast<int64_t>(Shader::DefaultVertex::SPRITE_ATTRIBS));
+	LuaUtils::pushField(L, LuaNames::Shader::SPRITE_NOTEXTURE_ATTRIBS, static_cast<int64_t>(Shader::DefaultVertex::SPRITE_NOTEXTURE_ATTRIBS));
 	LuaUtils::pushField(L, LuaNames::Shader::MESHSPRITE, static_cast<int64_t>(Shader::DefaultVertex::MESHSPRITE));
 	LuaUtils::pushField(L, LuaNames::Shader::MESHSPRITE_NOTEXTURE, static_cast<int64_t>(Shader::DefaultVertex::MESHSPRITE_NOTEXTURE));
 	LuaUtils::pushField(L, LuaNames::Shader::TEXTNODE, static_cast<int64_t>(Shader::DefaultVertex::TEXTNODE));
@@ -315,10 +319,12 @@ int LuaShader::retrieveInfoLog(lua_State *L)
 {
 	static nctl::String infoLog(256);
 	Shader *shader = LuaUntrackedUserData<Shader>::retrieve(L, -1);
-	shader->retrieveInfoLog(infoLog);
 
 	if (shader)
+	{
+		shader->retrieveInfoLog(infoLog);
 		LuaUtils::push(L, infoLog.data());
+	}
 	else
 		LuaUtils::pushNil(L);
 

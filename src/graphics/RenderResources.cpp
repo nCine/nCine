@@ -420,6 +420,8 @@ void RenderResources::fillDefaultShaderInfos()
 	// Skipping the initial new line character of the raw string literal
 	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::SPRITE)] = ShaderProgramCompileInfo::ShaderCompileInfo(ShaderStrings::sprite_vs + 1, ShaderHashes::sprite_vs);
 	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::SPRITE_NOTEXTURE)] = ShaderProgramCompileInfo::ShaderCompileInfo(ShaderStrings::sprite_notexture_vs + 1, ShaderHashes::sprite_notexture_vs);
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::SPRITE_ATTRIBS)] = ShaderProgramCompileInfo::ShaderCompileInfo(ShaderStrings::sprite_attribs_vs + 1, ShaderHashes::sprite_attribs_vs);
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::SPRITE_NOTEXTURE_ATTRIBS)] = ShaderProgramCompileInfo::ShaderCompileInfo(ShaderStrings::sprite_notexture_attribs_vs + 1, ShaderHashes::sprite_notexture_attribs_vs);
 	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::MESHSPRITE)] = ShaderProgramCompileInfo::ShaderCompileInfo(ShaderStrings::meshsprite_vs + 1, ShaderHashes::meshsprite_vs);
 	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::MESHSPRITE_NOTEXTURE)] = ShaderProgramCompileInfo::ShaderCompileInfo(ShaderStrings::meshsprite_notexture_vs + 1, ShaderHashes::meshsprite_notexture_vs);
 	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::TEXTNODE)] = ShaderProgramCompileInfo::ShaderCompileInfo(ShaderStrings::textnode_vs + 1, ShaderHashes::textnode_vs);
@@ -437,6 +439,8 @@ void RenderResources::fillDefaultShaderInfos()
 	#else
 	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::SPRITE)] = ShaderProgramCompileInfo::ShaderCompileInfo("sprite_vs.glsl");
 	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::SPRITE_NOTEXTURE)] = ShaderProgramCompileInfo::ShaderCompileInfo("sprite_notexture_vs.glsl");
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::SPRITE_ATTRIBS)] = ShaderProgramCompileInfo::ShaderCompileInfo("sprite_attribs_vs.glsl");
+	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::SPRITE_NOTEXTURE_ATTRIBS)] = ShaderProgramCompileInfo::ShaderCompileInfo("sprite_notexture_attribs_vs.glsl");
 	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::MESHSPRITE)] = ShaderProgramCompileInfo::ShaderCompileInfo("meshsprite_vs.glsl");
 	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::MESHSPRITE_NOTEXTURE)] = ShaderProgramCompileInfo::ShaderCompileInfo("meshsprite_notexture_vs.glsl");
 	defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::TEXTNODE)] = ShaderProgramCompileInfo::ShaderCompileInfo("textnode_vs.glsl");
@@ -494,6 +498,8 @@ void RenderResources::create()
 	nctl::UniquePtr<GLShaderProgram> &spriteProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::SPRITE)];
 	nctl::UniquePtr<GLShaderProgram> &spriteGrayProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::SPRITE_GRAY)];
 	nctl::UniquePtr<GLShaderProgram> &spriteNoTextureProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::SPRITE_NO_TEXTURE)];
+	nctl::UniquePtr<GLShaderProgram> &spriteAttribsProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::SPRITE_ATTRIBS)];
+	nctl::UniquePtr<GLShaderProgram> &spriteNoTextureAttribsProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::SPRITE_NO_TEXTURE_ATTRIBS)];
 	nctl::UniquePtr<GLShaderProgram> &meshSpriteProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::MESH_SPRITE)];
 	nctl::UniquePtr<GLShaderProgram> &meshSpriteGrayProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::MESH_SPRITE_GRAY)];
 	nctl::UniquePtr<GLShaderProgram> &meshSpriteNoTextureProg = defaultShaderPrograms_[static_cast<int>(Material::ShaderProgramType::MESH_SPRITE_NO_TEXTURE)];
@@ -512,6 +518,8 @@ void RenderResources::create()
 	// Define some references to shorten default vertex shader names
 	ShaderProgramCompileInfo::ShaderCompileInfo &spriteVs = defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::SPRITE)];
 	ShaderProgramCompileInfo::ShaderCompileInfo &spriteNoTextureVs = defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::SPRITE_NOTEXTURE)];
+	ShaderProgramCompileInfo::ShaderCompileInfo &spriteAttribsVs = defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::SPRITE_ATTRIBS)];
+	ShaderProgramCompileInfo::ShaderCompileInfo &spriteNoTextureAttribsVs = defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::SPRITE_NOTEXTURE_ATTRIBS)];
 	ShaderProgramCompileInfo::ShaderCompileInfo &meshSpriteVs = defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::MESHSPRITE)];
 	ShaderProgramCompileInfo::ShaderCompileInfo &meshSpriteNoTextureVs = defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::MESHSPRITE_NOTEXTURE)];
 	ShaderProgramCompileInfo::ShaderCompileInfo &textnodeVs = defaultVertexShaderInfos_[static_cast<int>(DefaultVertexShader::TEXTNODE)];
@@ -531,6 +539,8 @@ void RenderResources::create()
 		{ spriteProg, spriteVs, spriteFs, GLShaderProgram::Introspection::ENABLED, "Sprite" },
 		{ spriteGrayProg, spriteVs, spriteGrayFs, GLShaderProgram::Introspection::ENABLED, "Sprite_Gray" },
 		{ spriteNoTextureProg, spriteNoTextureVs, spriteNoTextureFs, GLShaderProgram::Introspection::ENABLED, "Sprite_NoTexture" },
+		{ spriteAttribsProg, spriteAttribsVs, spriteFs, GLShaderProgram::Introspection::ENABLED, "Sprite_Attribs" },
+		{ spriteNoTextureAttribsProg, spriteNoTextureAttribsVs, spriteNoTextureFs, GLShaderProgram::Introspection::ENABLED, "Sprite_NoTexture_Attribs" },
 		{ meshSpriteProg, meshSpriteVs, spriteFs, GLShaderProgram::Introspection::ENABLED, "MeshSprite" },
 		{ meshSpriteGrayProg, meshSpriteVs, spriteGrayFs, GLShaderProgram::Introspection::ENABLED, "MeshSprite_Gray" },
 		{ meshSpriteNoTextureProg, meshSpriteNoTextureVs, spriteNoTextureFs, GLShaderProgram::Introspection::ENABLED, "MeshSprite_NoTexture" },

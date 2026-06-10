@@ -15,6 +15,8 @@
 	#include <ncine/imgui.h>
 #endif
 
+#include <ncine/tracy.h>
+
 /// Based on https://github.com/openfl/openfl-samples/tree/master/demos/BunnyMark
 /// Original BunnyMark (and sprite) by Iain Lobb
 
@@ -50,6 +52,9 @@ bool showImGui = true;
 bool passMouseEvents = true;
 #endif
 
+const unsigned int MaxStatsSeconds = 3;
+const unsigned int MaxStatsFrames = 1000;
+
 }
 
 nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
@@ -62,10 +67,24 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 	setDataPath(config);
 	config.window.title = InitialWindowTitle;
 	//config.window.resolution.set(800, 600); // window size for the original BunnyMark
+#ifndef __ANDROID__
+	config.graphics.vsync = false;
+#endif
 }
 
 void MyEventHandler::onInit()
 {
+#if NCINE_WITH_IMGUI && defined(__ANDROID__)
+	const float scalingFactor = nc::theApplication().gfxDevice().windowScalingFactor();
+	ImGuiStyle &style = ImGui::GetStyle();
+	style.FontScaleMain = scalingFactor;
+	style.ScaleAllSizes(scalingFactor);
+#endif
+
+	const unsigned int refreshRate = static_cast<unsigned int>(nc::theApplication().gfxDevice().currentVideoMode().refreshRate);
+	const unsigned int numFrames = nctl::min(refreshRate * MaxStatsSeconds, MaxStatsFrames);
+	frameStats_.setCapacity(numFrames);
+
 	nc::theApplication().screenViewport().setClearColor(0.392f, 0.584f, 0.929f, 1.0f);
 
 	texture_ = nctl::makeUnique<nc::Texture>((prefixDataPath("textures", TextureFile)).data());
@@ -84,6 +103,8 @@ void MyEventHandler::onInit()
 
 void MyEventHandler::onFrameStart()
 {
+	TracyPlot("Bunnies", static_cast<int64_t>(sprites_.size()));
+
 	nc::IFrameTimer &frameTimer = nc::theApplication().frameTimer();
 	if (frameTimer.averageEnabled())
 		windowTitle.format("%s - %u bunnies (%.2f FPS, %.2f ms)", InitialWindowTitle, sprites_.size(), frameTimer.averageFps(), frameTimer.averageFrameTime() * 1000.0f);
@@ -93,53 +114,21 @@ void MyEventHandler::onFrameStart()
 
 	if (pause_ == false)
 	{
-		const float minX = texture_->width() * 0.5f;
-		const float minY = texture_->height() * 0.5f;
-		const float maxX = nc::theApplication().width() - texture_->width() * 0.5f;
-		const float maxY = nc::theApplication().height() - texture_->height() * 0.5f;
+		ZoneScopedN("Update bunnies");
+		const nc::Vector2f minBounds(texture_->width() * 0.5f, texture_->height() * 0.5f);
+		const nc::Vector2f maxBounds(nc::theApplication().width() - texture_->width() * 0.5f, nc::theApplication().height() - texture_->height() * 0.5f);
 
 		for (unsigned int i = 0; i < transforms_.size(); i++)
-		{
-			transforms_[i].position += transforms_[i].velocity;
-			transforms_[i].velocity += nc::Vector2f(0.0f, gravity);
-
-			if (transforms_[i].position.x > maxX)
-			{
-				transforms_[i].velocity.x *= -1.0f;
-				transforms_[i].position.x = maxX;
-			}
-			else if (transforms_[i].position.x < minX)
-			{
-				transforms_[i].velocity.x *= -1.0f;
-				transforms_[i].position.x = minX;
-			}
-
-			if (transforms_[i].position.y < minY)
-			{
-				transforms_[i].velocity.y *= -0.8f;
-				transforms_[i].position.y = minY;
-
-				// Flip a coin
-				if (nc::random().fastInteger(0, 2) > 0)
-					transforms_[i].velocity += nc::Vector2f(0.0f, 3.0f + nc::random().fastReal() * 4.0f);
-			}
-			else if (transforms_[i].position.y > maxY)
-			{
-				transforms_[i].velocity.y = 0.0f;
-				transforms_[i].position.y = maxY;
-			}
-
-			sprites_[i]->setPosition(transforms_[i].position);
-		}
+			updateBunny(i, minBounds, maxBounds);
 	}
 
 #if NCINE_WITH_IMGUI
 	if (showImGui)
 	{
-		ImGui::SetNextWindowSize(ImVec2(375.0f, 190.0f), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(400.0f, 440.0f), ImGuiCond_FirstUseEver);
 		ImGui::SetNextWindowPos(ImVec2(40.0f, 40.0f), ImGuiCond_FirstUseEver);
 
-		windowTitle.append("###apptest_bunny");
+		windowTitle.append("###apptest_bunnymark");
 		if (ImGui::Begin(windowTitle.data(), &showImGui))
 		{
 			passMouseEvents = (ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) == false);
@@ -155,8 +144,15 @@ void MyEventHandler::onFrameStart()
 			nc::theApplication().renderingSettings().batchingEnabled = batchingEnabled;
 
 			ImGui::SameLine();
+			bool instancingEnabled = nc::theApplication().renderingSettings().instancingEnabled;
+			ImGui::Checkbox("Instancing", &instancingEnabled);
+			nc::theApplication().renderingSettings().instancingEnabled = instancingEnabled;
+
+	#ifndef __ANDROID__
+			ImGui::SameLine();
 			ImGui::Checkbox("V-Sync", &withVSync_);
 			nc::theApplication().gfxDevice().setSwapInterval(withVSync_ ? 1 : 0);
+	#endif
 
 			bool winTitleEnabled = frameTimer.averageEnabled();
 			ImGui::BeginDisabled(winTitleEnabled == false);
@@ -194,6 +190,69 @@ void MyEventHandler::onFrameStart()
 				appendSize = (appendSize <= transforms_.size()) ? appendSize : transforms_.size();
 				setNumBunnies(transforms_.size() - appendSize);
 			}
+
+			if (ImGui::TreeNodeEx("Statistics", ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				// If the tree node is closed, no statistics are collected
+				const float frameTimeMs = frameTimer.lastFrameTime() * 1000;
+				frameStats_.addValueWrap(frameTimeMs);
+
+				static nc::TimeStamp timestamp = nc::TimeStamp::now();
+				static bool sorted = false;
+				ImGui::PlotHistogram("Frame time", frameStats_.values(sorted), frameStats_.size(), 0, nullptr, 0.0f, frameStats_.maximum() * 1.1f);
+
+				ImGui::Checkbox("Sorted", &sorted);
+				ImGui::SameLine();
+				if (ImGui::Button("Reset"))
+				{
+					frameStats_.clearValues();
+					frameStats_.resetStats();
+				}
+				ImGui::SameLine();
+				static float updateStats = 1.0f;
+				ImGui::PushItemWidth(164.0f);
+				ImGui::SliderFloat("Update##statistics", &updateStats, 0.05f, 2.0f, "%.2f s", ImGuiSliderFlags_AlwaysClamp);
+				ImGui::PopItemWidth();
+				if (timestamp.secondsSince() >= updateStats)
+				{
+					frameStats_.calculateStats();
+					timestamp.toNow();
+				}
+
+				if (ImGui::BeginTable("FrameTimingsTable", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable |
+				                      ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_SizingStretchProp))
+				{
+					ImGui::TableSetupScrollFreeze(0, 1);
+					ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_NoReorder | ImGuiTableColumnFlags_NoHide);
+					ImGui::TableSetupColumn("Timings");
+					ImGui::TableHeadersRow();
+
+					ImGui::TableNextRow();
+					ImGui::TableNextColumn(); ImGui::TextUnformatted("Mean");
+					ImGui::TableNextColumn(); ImGui::Text("%.3f ms", frameStats_.mean());
+					ImGui::TableNextColumn(); ImGui::TextUnformatted("Median");
+					ImGui::TableNextColumn(); ImGui::Text("%.3f ms", frameStats_.median());
+					ImGui::TableNextColumn(); ImGui::TextUnformatted("Mode");
+					ImGui::TableNextColumn(); ImGui::Text("%.3f ms", frameStats_.mode());
+					ImGui::TableNextColumn(); ImGui::TextUnformatted("P75");
+					ImGui::TableNextColumn(); ImGui::Text("%.3f ms", frameStats_.percentile(0.75f));
+					ImGui::TableNextColumn(); ImGui::TextUnformatted("P90");
+					ImGui::TableNextColumn(); ImGui::Text("%.3f ms", frameStats_.percentile(0.9f));
+					ImGui::TableNextColumn(); ImGui::TextUnformatted("Sigma");
+					ImGui::TableNextColumn(); ImGui::Text("%.3f ms", frameStats_.sigma());
+					ImGui::TableNextColumn(); ImGui::TextUnformatted("Rel. Sigma");
+					ImGui::TableNextColumn(); ImGui::Text("%.3f%%", frameStats_.relativeSigma());
+					ImGui::TableNextColumn(); ImGui::TextUnformatted("Min");
+					ImGui::TableNextColumn(); ImGui::Text("%.3f ms", frameStats_.minimum());
+					ImGui::TableNextColumn(); ImGui::TextUnformatted("Max");
+					ImGui::TableNextColumn(); ImGui::Text("%.3f ms", frameStats_.maximum());
+					ImGui::TableNextColumn(); ImGui::TextUnformatted("Range");
+					ImGui::TableNextColumn(); ImGui::Text("%.3f ms", frameStats_.range());
+
+					ImGui::EndTable();
+				}
+				ImGui::TreePop();
+			}
 		}
 		ImGui::End();
 	}
@@ -203,6 +262,11 @@ void MyEventHandler::onFrameStart()
 #ifdef __ANDROID__
 void MyEventHandler::onTouchDown(const nc::TouchEvent &event)
 {
+	#if NCINE_WITH_IMGUI
+	if (passMouseEvents == false)
+		return;
+	#endif
+
 	if (event.pointers[0].x < nc::theApplication().width() * 0.5f)
 		setNumBunnies(InitialSize);
 	else
@@ -230,8 +294,15 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 		const bool batchingEnabled = nc::theApplication().renderingSettings().batchingEnabled;
 		nc::theApplication().renderingSettings().batchingEnabled = !batchingEnabled;
 	}
+	else if (event.sym == nc::KeySym::I)
+	{
+		const bool instancingEnabled = nc::theApplication().renderingSettings().instancingEnabled;
+		nc::theApplication().renderingSettings().instancingEnabled = !instancingEnabled;
+	}
+#ifndef __ANDROID__
 	else if (event.sym == nc::KeySym::V)
 		withVSync_ = !withVSync_;
+#endif
 	else if (event.sym == nc::KeySym::SPACE)
 		setNumBunnies(transforms_.size() + appendSize);
 	else if (event.sym == nc::KeySym::R)
@@ -257,14 +328,20 @@ void MyEventHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &e
 {
 	nc::Application::RenderingSettings &renderingSettings = nc::theApplication().renderingSettings();
 
-	if (event.buttonName == nc::ButtonName::Y)
+	if (event.buttonName == nc::ButtonName::A)
 		renderingSettings.batchingEnabled = !renderingSettings.batchingEnabled;
 	else if (event.buttonName == nc::ButtonName::X)
-		withVSync_ = !withVSync_;
+		renderingSettings.instancingEnabled = !renderingSettings.instancingEnabled;
+#ifndef __ANDROID__
 	else if (event.buttonName == nc::ButtonName::B)
-		setNumBunnies(InitialCapacity);
-	else if (event.buttonName == nc::ButtonName::A)
+		withVSync_ = !withVSync_;
+#endif
+	else if (event.buttonName == nc::ButtonName::Y)
+		setNumBunnies(InitialSize);
+	else if (event.buttonName == nc::ButtonName::LBUMPER)
 		setNumBunnies(transforms_.size() + appendSize);
+	else if (event.buttonName == nc::ButtonName::RBUMPER)
+		setNumBunnies(transforms_.size() - appendSize);
 #if NCINE_WITH_IMGUI
 	else if (event.buttonName == nc::ButtonName::BACK)
 		showImGui = !showImGui;
@@ -304,4 +381,41 @@ bool MyEventHandler::setNumBunnies(unsigned int count)
 	}
 
 	return true;
+}
+
+void MyEventHandler::updateBunny(unsigned int index, const nc::Vector2f &minBounds, const nc::Vector2f &maxBounds)
+{
+	Transform &transform = transforms_[index];
+	nc::Sprite &sprite = *sprites_[index];
+
+	transform.position += transform.velocity;
+	transform.velocity += nc::Vector2f(0.0f, gravity);
+
+	if (transform.position.x > maxBounds.x)
+	{
+		transform.velocity.x *= -1.0f;
+		transform.position.x = maxBounds.x;
+	}
+	else if (transform.position.x < minBounds.x)
+	{
+		transform.velocity.x *= -1.0f;
+		transform.position.x = minBounds.x;
+	}
+
+	if (transform.position.y < minBounds.y)
+	{
+		transform.velocity.y *= -0.8f;
+		transform.position.y = minBounds.y;
+
+		// Flip a coin
+		if (nc::random().fastInteger(0, 2) > 0)
+			transform.velocity += nc::Vector2f(0.0f, 3.0f + nc::random().fastReal() * 4.0f);
+	}
+	else if (transform.position.y > maxBounds.y)
+	{
+		transform.velocity.y = 0.0f;
+		transform.position.y = maxBounds.y;
+	}
+
+	sprite.setPosition(transform.position);
 }

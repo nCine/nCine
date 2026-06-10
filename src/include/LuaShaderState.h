@@ -32,6 +32,12 @@ class LuaShaderState
 	static int setUniformIntValue3(lua_State *L);
 	static int setUniformIntValue4(lua_State *L);
 
+	static int setUniformUintVector(lua_State *L);
+	static int setUniformUintValue1(lua_State *L);
+	static int setUniformUintValue2(lua_State *L);
+	static int setUniformUintValue3(lua_State *L);
+	static int setUniformUintValue4(lua_State *L);
+
 	static int setUniformIntVector2(lua_State *L);
 	static int setUniformIntVector3(lua_State *L);
 	static int setUniformIntVector4(lua_State *L);

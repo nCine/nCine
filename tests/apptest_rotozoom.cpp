@@ -76,7 +76,8 @@ void MyEventHandler::onFrameStart()
 {
 	const nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
 	debugString_.clear();
-	debugString_.formatAppend("batching: %s, culling: %s", settings.batchingEnabled ? "on" : "off", settings.cullingEnabled ? "on" : "off");
+	debugString_.formatAppend("batching: %s, instancing: %s, culling: %s",
+	                          settings.batchingEnabled ? "on" : "off", settings.instancingEnabled ? "on" : "off", settings.cullingEnabled ? "on" : "off");
 	debugText_->setString(debugString_.data());
 
 	if (pauseSprites_ == false)
@@ -156,6 +157,8 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 
 	if (event.sym == nc::KeySym::B)
 		renderingSettings.batchingEnabled = !renderingSettings.batchingEnabled;
+	else if (event.sym == nc::KeySym::I)
+		renderingSettings.instancingEnabled = !renderingSettings.instancingEnabled;
 	else if (event.sym == nc::KeySym::C)
 		renderingSettings.cullingEnabled = !renderingSettings.cullingEnabled;
 	else if (event.sym == nc::KeySym::F)
@@ -191,6 +194,8 @@ void MyEventHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &e
 
 	if (event.buttonName == nc::ButtonName::A)
 		renderingSettings.batchingEnabled = !renderingSettings.batchingEnabled;
+	else if (event.buttonName == nc::ButtonName::X)
+		renderingSettings.instancingEnabled = !renderingSettings.instancingEnabled;
 	else if (event.buttonName == nc::ButtonName::B)
 		renderingSettings.cullingEnabled = !renderingSettings.cullingEnabled;
 	else if (event.buttonName == nc::ButtonName::LBUMPER)
@@ -214,8 +219,10 @@ void MyEventHandler::checkClick(float x, float y)
 	{
 		nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
 		const float xPos = x - debugTextRect.x;
-		if (xPos <= debugTextRect.w * 0.55f)
+		if (xPos <= debugTextRect.w * 0.33f)
 			settings.batchingEnabled = !settings.batchingEnabled;
+		else if (xPos >= debugTextRect.w * 0.33f && xPos <= debugTextRect.w * 0.71f)
+			settings.instancingEnabled = !settings.instancingEnabled;
 		else
 			settings.cullingEnabled = !settings.cullingEnabled;
 	}

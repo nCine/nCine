@@ -35,6 +35,12 @@ namespace ShaderState {
 	static const char *setUniformIntVector3 = "set_uniform_int_vector3";
 	static const char *setUniformIntVector4 = "set_uniform_int_vector4";
 
+	static const char *setUniformUintVector = "set_uniform_uint_vector";
+	static const char *setUniformUintValue1 = "set_uniform_uint_value1";
+	static const char *setUniformUintValue2 = "set_uniform_uint_value2";
+	static const char *setUniformUintValue3 = "set_uniform_uint_value3";
+	static const char *setUniformUintValue4 = "set_uniform_uint_value4";
+
 	static const char *setUniformFloatVector = "set_uniform_float_vector";
 	static const char *setUniformFloatValue1 = "set_uniform_float_value1";
 	static const char *setUniformFloatValue2 = "set_uniform_float_value2";
@@ -54,7 +60,7 @@ namespace ShaderState {
 void LuaShaderState::expose(LuaStateManager *stateManager)
 {
 	lua_State *L = stateManager->state();
-	lua_createtable(L, 0, 25);
+	lua_createtable(L, 0, 30);
 
 	if (stateManager->apiType() == LuaStateManager::ApiType::FULL)
 	{
@@ -80,6 +86,12 @@ void LuaShaderState::expose(LuaStateManager *stateManager)
 	LuaUtils::addFunction(L, LuaNames::ShaderState::setUniformIntVector2, setUniformIntVector2);
 	LuaUtils::addFunction(L, LuaNames::ShaderState::setUniformIntVector3, setUniformIntVector3);
 	LuaUtils::addFunction(L, LuaNames::ShaderState::setUniformIntVector4, setUniformIntVector4);
+
+	LuaUtils::addFunction(L, LuaNames::ShaderState::setUniformUintVector, setUniformUintVector);
+	LuaUtils::addFunction(L, LuaNames::ShaderState::setUniformUintValue1, setUniformUintValue1);
+	LuaUtils::addFunction(L, LuaNames::ShaderState::setUniformUintValue2, setUniformUintValue2);
+	LuaUtils::addFunction(L, LuaNames::ShaderState::setUniformUintValue3, setUniformUintValue3);
+	LuaUtils::addFunction(L, LuaNames::ShaderState::setUniformUintValue4, setUniformUintValue4);
 
 	LuaUtils::addFunction(L, LuaNames::ShaderState::setUniformFloatVector, setUniformFloatVector);
 	LuaUtils::addFunction(L, LuaNames::ShaderState::setUniformFloatValue1, setUniformFloatValue1);
@@ -330,6 +342,89 @@ int LuaShaderState::setUniformIntVector4(lua_State *L)
 	bool uniformHasBeenSet = false;
 	if (shaderState)
 		uniformHasBeenSet = shaderState->setUniformInt(blockName, name, vector);
+	LuaUtils::push(L, uniformHasBeenSet);
+
+	return 1;
+}
+
+int LuaShaderState::setUniformUintVector(lua_State *L)
+{
+	static unsigned int vector[16];
+
+	ShaderState *shaderState = LuaUntrackedUserData<ShaderState>::retrieve(L, -4);
+	const char *blockName = LuaUtils::retrieve<const char *>(L, -3);
+	const char *name = LuaUtils::retrieve<const char *>(L, -2);
+	retrieveUniformVector<unsigned int>(L, -1, vector);
+
+	bool uniformHasBeenSet = false;
+	if (shaderState)
+		uniformHasBeenSet = shaderState->setUniformUint(blockName, name, vector);
+	LuaUtils::push(L, uniformHasBeenSet);
+
+	return 1;
+}
+
+int LuaShaderState::setUniformUintValue1(lua_State *L)
+{
+	ShaderState *shaderState = LuaUntrackedUserData<ShaderState>::retrieve(L, -4);
+	const char *blockName = LuaUtils::retrieve<const char *>(L, -3);
+	const char *name = LuaUtils::retrieve<const char *>(L, -2);
+	const unsigned int value0 = LuaUtils::retrieve<unsigned int>(L, -1);
+
+	bool uniformHasBeenSet = false;
+	if (shaderState)
+		uniformHasBeenSet = shaderState->setUniformUint(blockName, name, value0);
+	LuaUtils::push(L, uniformHasBeenSet);
+
+	return 1;
+}
+
+int LuaShaderState::setUniformUintValue2(lua_State *L)
+{
+	ShaderState *shaderState = LuaUntrackedUserData<ShaderState>::retrieve(L, -5);
+	const char *blockName = LuaUtils::retrieve<const char *>(L, -4);
+	const char *name = LuaUtils::retrieve<const char *>(L, -3);
+	const unsigned int value0 = LuaUtils::retrieve<unsigned int>(L, -2);
+	const unsigned int value1 = LuaUtils::retrieve<unsigned int>(L, -1);
+
+	bool uniformHasBeenSet = false;
+	if (shaderState)
+		uniformHasBeenSet = shaderState->setUniformUint(blockName, name, value0, value1);
+	LuaUtils::push(L, uniformHasBeenSet);
+
+	return 1;
+}
+
+int LuaShaderState::setUniformUintValue3(lua_State *L)
+{
+	ShaderState *shaderState = LuaUntrackedUserData<ShaderState>::retrieve(L, -6);
+	const char *blockName = LuaUtils::retrieve<const char *>(L, -5);
+	const char *name = LuaUtils::retrieve<const char *>(L, -4);
+	const unsigned int value0 = LuaUtils::retrieve<unsigned int>(L, -3);
+	const unsigned int value1 = LuaUtils::retrieve<unsigned int>(L, -2);
+	const unsigned int value2 = LuaUtils::retrieve<unsigned int>(L, -1);
+
+	bool uniformHasBeenSet = false;
+	if (shaderState)
+		uniformHasBeenSet = shaderState->setUniformUint(blockName, name, value0, value1, value2);
+	LuaUtils::push(L, uniformHasBeenSet);
+
+	return 1;
+}
+
+int LuaShaderState::setUniformUintValue4(lua_State *L)
+{
+	ShaderState *shaderState = LuaUntrackedUserData<ShaderState>::retrieve(L, -7);
+	const char *blockName = LuaUtils::retrieve<const char *>(L, -6);
+	const char *name = LuaUtils::retrieve<const char *>(L, -5);
+	const unsigned int value0 = LuaUtils::retrieve<unsigned int>(L, -4);
+	const unsigned int value1 = LuaUtils::retrieve<unsigned int>(L, -3);
+	const unsigned int value2 = LuaUtils::retrieve<unsigned int>(L, -2);
+	const unsigned int value3 = LuaUtils::retrieve<unsigned int>(L, -1);
+
+	bool uniformHasBeenSet = false;
+	if (shaderState)
+		uniformHasBeenSet = shaderState->setUniformUint(blockName, name, value0, value1, value2, value3);
 	LuaUtils::push(L, uniformHasBeenSet);
 
 	return 1;
