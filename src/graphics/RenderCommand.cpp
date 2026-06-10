@@ -61,6 +61,9 @@ void RenderCommand::issue()
 	if (geometry_.numIndices_ > 0)
 		offset = geometry_.vboParams().offset + (geometry_.firstVertex_ * geometry_.numElementsPerVertex_ * sizeof(GLfloat));
 #endif
+	if (numInstances_ > 0)
+		offset = geometry_.vboParams().offset + (geometry_.firstVertex_ * geometry_.numElementsPerVertex_ * sizeof(GLfloat));
+
 	material_.defineVertexFormat(geometry_.vboParams().object, geometry_.iboParams().object, offset);
 	geometry_.bind();
 	geometry_.draw(numInstances_);
@@ -92,13 +95,35 @@ void RenderCommand::commitNodeTransformation()
 	if (material_.shaderProgram_ && material_.shaderProgram_->status() == GLShaderProgram::Status::LINKED_WITH_INTROSPECTION)
 	{
 		GLUniformBlockCache *instanceBlock = material_.uniformBlock(Material::InstanceBlockName);
-		GLUniformCache *matrixUniform = instanceBlock
-		                                    ? instanceBlock->uniform(Material::ModelMatrixUniformName)
-		                                    : material_.uniform(Material::ModelMatrixUniformName);
-		if (matrixUniform)
+
+		bool setAsTransformAndTranslation = false;
+		GLUniformCache *transformUniform = instanceBlock
+		    ? instanceBlock->uniform(Material::ModelTransformUniformName)
+		    : material_.uniform(Material::ModelTransformUniformName);
+		GLUniformCache *translationUniform = instanceBlock
+		    ? instanceBlock->uniform(Material::ModelTranslationUniformName)
+		    : material_.uniform(Material::ModelTranslationUniformName);
+
+		if (transformUniform && translationUniform)
 		{
 			ZoneScopedN("Set model matrix");
-			matrixUniform->setFloatVector(modelMatrix_.data());
+
+			const float *m = modelMatrix_.data();
+			setAsTransformAndTranslation = transformUniform->setFloatValue(m[0], m[4], m[1], m[5]); // m00, m01, m10, m11
+			setAsTransformAndTranslation &= translationUniform->setFloatValue(m[12], m[13], m[14], 0.0f); // tx, ty, tz
+		}
+
+		if (setAsTransformAndTranslation == false)
+		{
+			GLUniformCache *matrixUniform = instanceBlock
+			    ? instanceBlock->uniform(Material::ModelMatrixUniformName)
+			    : material_.uniform(Material::ModelMatrixUniformName);
+
+			if (matrixUniform)
+			{
+				ZoneScopedN("Set model matrix");
+				matrixUniform->setFloatVector(modelMatrix_.data());
+			}
 		}
 	}
 

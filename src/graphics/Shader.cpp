@@ -54,6 +54,8 @@ namespace {
 		{
 			case Shader::DefaultVertex::SPRITE: return RenderResources::DefaultVertexShader::SPRITE;
 			case Shader::DefaultVertex::SPRITE_NOTEXTURE: return RenderResources::DefaultVertexShader::SPRITE_NOTEXTURE;
+			case Shader::DefaultVertex::SPRITE_ATTRIBS: return RenderResources::DefaultVertexShader::SPRITE_ATTRIBS;
+			case Shader::DefaultVertex::SPRITE_NOTEXTURE_ATTRIBS: return RenderResources::DefaultVertexShader::SPRITE_NOTEXTURE_ATTRIBS;
 			case Shader::DefaultVertex::MESHSPRITE: return RenderResources::DefaultVertexShader::MESHSPRITE;
 			case Shader::DefaultVertex::MESHSPRITE_NOTEXTURE: return RenderResources::DefaultVertexShader::MESHSPRITE_NOTEXTURE;
 			case Shader::DefaultVertex::TEXTNODE: return RenderResources::DefaultVertexShader::TEXTNODE;

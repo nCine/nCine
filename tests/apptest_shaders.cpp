@@ -174,7 +174,9 @@ void MyEventHandler::onInit()
 	debugText_->setColor(255, 255, 0, 255);
 	debugText_->setAlignment(nc::TextNode::Alignment::CENTER);
 
-	spriteShader_ = nctl::makeUnique<nc::Shader>("Sprite_Shader", nc::Shader::LoadMode::STRING, sprite_vs, sprite_fs);
+	nctl::StaticString<4096> shaderSourceVs;
+	shaderSourceVs.format("%s%s", common_functions_vs, sprite_vs);
+	spriteShader_ = nctl::makeUnique<nc::Shader>("Sprite_Shader", nc::Shader::LoadMode::STRING, shaderSourceVs.data(), sprite_fs);
 	FATAL_ASSERT(spriteShader_->isLinked());
 	for (unsigned int i = 0; i < NumSprites; i++)
 	{
@@ -182,11 +184,13 @@ void MyEventHandler::onInit()
 		sprites_.back()->setScale(0.5f);
 		spriteShaderStates_.pushBack(nctl::makeUnique<nc::ShaderState>(sprites_.back().get(), spriteShader_.get()));
 	}
-	batchedSpriteShader_ = nctl::makeUnique<nc::Shader>("Batched_Sprite_Shader", nc::Shader::LoadMode::STRING, nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS, batched_sprite_vs, sprite_fs);
+	shaderSourceVs.format("%s%s", common_functions_vs, batched_sprite_vs);
+	batchedSpriteShader_ = nctl::makeUnique<nc::Shader>("Batched_Sprite_Shader", nc::Shader::LoadMode::STRING, nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS, shaderSourceVs.data(), sprite_fs);
 	FATAL_ASSERT(batchedSpriteShader_->isLinked());
 	spriteShader_->registerBatchedShader(*batchedSpriteShader_);
 
-	meshShader_ = nctl::makeUnique<nc::Shader>("MeshSprite_Shader", nc::Shader::LoadMode::STRING, meshsprite_vs, meshsprite_fs);
+	shaderSourceVs.format("%s%s", common_functions_vs, meshsprite_vs);
+	meshShader_ = nctl::makeUnique<nc::Shader>("MeshSprite_Shader", nc::Shader::LoadMode::STRING, shaderSourceVs.data(), meshsprite_fs);
 	FATAL_ASSERT(meshShader_->isLinked());
 	for (unsigned int i = 0; i < NumSprites; i++)
 	{
@@ -196,7 +200,8 @@ void MyEventHandler::onInit()
 	}
 	setupMeshVertices(false);
 
-	batchedMeshShader_ = nctl::makeUnique<nc::Shader>("Batched_MeshSprite_Shader", nc::Shader::LoadMode::STRING, nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS, batched_meshsprite_vs, meshsprite_fs);
+	shaderSourceVs.format("%s%s", common_functions_vs, batched_meshsprite_vs);
+	batchedMeshShader_ = nctl::makeUnique<nc::Shader>("Batched_MeshSprite_Shader", nc::Shader::LoadMode::STRING, nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS, shaderSourceVs.data(), meshsprite_fs);
 	FATAL_ASSERT(batchedMeshShader_->isLinked());
 	meshShader_->registerBatchedShader(*batchedMeshShader_);
 
@@ -209,7 +214,8 @@ void MyEventHandler::onInit()
 	batchedMeshShader_->setAttribute("aTexCoords", sizeof(InvertedVertexTextureZ) + 4, 0);
 	batchedMeshShader_->setAttribute("aMeshIndex", sizeof(InvertedVertexTextureZ) + 4, 20);
 
-	multitextureShader_ = nctl::makeUnique<nc::Shader>("Multitexture_Shader", nc::Shader::LoadMode::STRING, multitexture_vs, multitexture_fs);
+	shaderSourceVs.format("%s%s", common_functions_vs, multitexture_vs);
+	multitextureShader_ = nctl::makeUnique<nc::Shader>("Multitexture_Shader", nc::Shader::LoadMode::STRING, shaderSourceVs.data(), multitexture_fs);
 	FATAL_ASSERT(multitextureShader_->isLinked());
 	for (unsigned int i = 0; i < NumSprites; i++)
 	{
@@ -222,7 +228,8 @@ void MyEventHandler::onInit()
 		multitextureShaderStates_.back()->setTexture(1, normalTexture_.get()); // GL_TEXTURE1
 		multitextureShaderStates_.back()->setUniformInt(nullptr, "uTexture1", 1); // GL_TEXTURE1
 	}
-	batchedMultitextureShader_ = nctl::makeUnique<nc::Shader>("Batched_Multitexture_Shader", nc::Shader::LoadMode::STRING, nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS, batched_multitexture_vs, multitexture_fs);
+	shaderSourceVs.format("%s%s", common_functions_vs, batched_multitexture_vs);
+	batchedMultitextureShader_ = nctl::makeUnique<nc::Shader>("Batched_Multitexture_Shader", nc::Shader::LoadMode::STRING, nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS, shaderSourceVs.data(), multitexture_fs);
 	FATAL_ASSERT(batchedMultitextureShader_->isLinked());
 	multitextureShader_->registerBatchedShader(*batchedMultitextureShader_);
 
@@ -230,10 +237,12 @@ void MyEventHandler::onInit()
 	nctl::String multitexture_fs_mrt(nctl::strnlen(multitexture_fs, 1024) + 32);
 	multitexture_fs_mrt.append("#define WITH_MRT\n#line 0\n");
 	multitexture_fs_mrt.formatAppend("%s", multitexture_fs);
-	multitextureMrtShader_ = nctl::makeUnique<nc::Shader>("Multitexture_MRT_Shader", nc::Shader::LoadMode::STRING, multitexture_vs, multitexture_fs_mrt.data());
+	shaderSourceVs.format("%s%s", common_functions_vs, multitexture_vs);
+	multitextureMrtShader_ = nctl::makeUnique<nc::Shader>("Multitexture_MRT_Shader", nc::Shader::LoadMode::STRING, shaderSourceVs.data(), multitexture_fs_mrt.data());
 	FATAL_ASSERT(multitextureMrtShader_->isLinked());
+	shaderSourceVs.format("%s%s", common_functions_vs, batched_multitexture_vs);
 	batchedMultitextureMrtShader_ = nctl::makeUnique<nc::Shader>("Batched_Multitexture_MRT_Shader", nc::Shader::LoadMode::STRING,
-	                                                             nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS, batched_multitexture_vs, multitexture_fs_mrt.data());
+	                                                             nc::Shader::Introspection::NO_UNIFORMS_IN_BLOCKS, shaderSourceVs.data(), multitexture_fs_mrt.data());
 	FATAL_ASSERT(batchedMultitextureMrtShader_->isLinked());
 	multitextureMrtShader_->registerBatchedShader(*batchedMultitextureMrtShader_);
 
@@ -366,7 +375,8 @@ void MyEventHandler::onPostUpdate()
 				const float sin2Second = sinf(angle + 90.0f) * sinf(angle + 90.0f);
 				const float sin2Third = sinf(angle + 180.0f) * sinf(angle + 180.0f);
 				const float sin2Fourth = sinf(angle + 270.0f) * sinf(angle + 270.0f);
-				meshSpriteShaderStates_[i]->setUniformFloat("InstanceBlock", "color", sin2First, sin2Second, sin2Third, 0.5f + 0.5f * sin2Fourth);
+				const nc::Color color(nc::Colorf(sin2First, sin2Second, sin2Third, 0.5f + 0.5f * sin2Fourth));
+				meshSpriteShaderStates_[i]->setUniformUint("InstanceBlock", "color", color.abgr());
 			}
 
 			const nc::DrawableNode *multitextureSprite = multitextureShaderStates_[i]->node();

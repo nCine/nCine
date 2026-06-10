@@ -1,15 +1,12 @@
 uniform mat4 uProjectionMatrix;
 uniform mat4 uViewMatrix;
 
-layout (std140) uniform InstanceBlock
-{
-	vec4 transform;
-	vec4 translation;
-	uint color;
-	uint spriteSize;
-	uint uvEndpointsU;
-	uint uvEndpointsV;
-};
+in vec4 aTransform;
+in vec4 aTranslation;
+in uint aColor;
+in uint aSpriteSize;
+in uint aUvEndpointsU;
+in uint aUvEndpointsV;
 
 out vec2 vTexCoords;
 out vec4 vColor;
@@ -43,18 +40,19 @@ vec4 unpackColor(uint c)
 
 void main()
 {
-	vec2 aPosition = vec2(0.5 - float(gl_VertexID >> 1), -0.5 + float(gl_VertexID & 1));
-	vec2 aTexCoords = vec2(1.0 - float(gl_VertexID >> 1), 1.0 - float(gl_VertexID & 1));
-	vec2 unpackedSpriteSize = unpackSpriteSize(spriteSize);
+	int vertexID = gl_VertexID & 3; // same as % 4
+	vec2 aPosition = vec2(0.5 - float(vertexID >> 1), -0.5 + float(vertexID & 1));
+	vec2 aTexCoords = vec2(1.0 - float(vertexID >> 1), 1.0 - float(vertexID & 1));
+	vec2 unpackedSpriteSize = unpackSpriteSize(aSpriteSize);
 	vec4 position = vec4(aPosition.x * unpackedSpriteSize.x, aPosition.y * unpackedSpriteSize.y, 0.0, 1.0);
 
 	vec2 worldPos = vec2(
-		transform.x * position.x + transform.y * position.y,
-		transform.z * position.x + transform.w * position.y
-	) + translation.xy;
+		aTransform.x * position.x + aTransform.y * position.y,
+		aTransform.z * position.x + aTransform.w * position.y
+	) + aTranslation.xy;
 
-	gl_Position = uProjectionMatrix * uViewMatrix * vec4(worldPos, translation.z, 1.0);
-	vec4 uvEndpoints = unpackUVEndpoints(uvEndpointsU, uvEndpointsV);
+	gl_Position = uProjectionMatrix * uViewMatrix * vec4(worldPos, aTranslation.z, 1.0);
+	vec4 uvEndpoints = unpackUVEndpoints(aUvEndpointsU, aUvEndpointsV);
 	vTexCoords = vec2(mix(uvEndpoints.x, uvEndpoints.y, aTexCoords.x), mix(uvEndpoints.z, uvEndpoints.w, aTexCoords.y));
-	vColor = unpackColor(color);
+	vColor = unpackColor(aColor);
 }

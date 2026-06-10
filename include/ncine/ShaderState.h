@@ -47,6 +47,12 @@ class DLL_PUBLIC ShaderState
 	bool setUniformInt(const char *blockName, const char *name, const Vector3i &vector);
 	bool setUniformInt(const char *blockName, const char *name, const Vector4i &vector);
 
+	bool setUniformUint(const char *blockName, const char *name, const unsigned int *vector);
+	bool setUniformUint(const char *blockName, const char *name, unsigned int value0);
+	bool setUniformUint(const char *blockName, const char *name, unsigned int value0, unsigned int value1);
+	bool setUniformUint(const char *blockName, const char *name, unsigned int value0, unsigned int value1, unsigned int value2);
+	bool setUniformUint(const char *blockName, const char *name, unsigned int value0, unsigned int value1, unsigned int value2, unsigned int value3);
+
 	bool setUniformFloat(const char *blockName, const char *name, const float *vector);
 	bool setUniformFloat(const char *blockName, const char *name, float value0);
 	bool setUniformFloat(const char *blockName, const char *name, float value0, float value1);

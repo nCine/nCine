@@ -3,14 +3,15 @@ uniform mat4 uViewMatrix;
 
 struct Instance
 {
-	mat4 modelMatrix;
-	vec4 color;
+	vec4 transform;
+	vec4 translation;
+	uint color;
 };
 
 layout (std140) uniform InstancesBlock
 {
 #ifndef BATCH_SIZE
-	#define BATCH_SIZE (819) // 64 Kb / 80 b
+	#define BATCH_SIZE (1365) // 64 KiB / 48 B
 #endif
 	Instance[BATCH_SIZE] instances;
 } block;
@@ -23,9 +24,24 @@ out vec4 vColor;
 
 #define i block.instances[aMeshIndex]
 
+vec4 unpackColor(uint c)
+{
+	return vec4(
+		float((c >> 0) & 0xFFu),
+		float((c >> 8) & 0xFFu),
+		float((c >> 16) & 0xFFu),
+		float((c >> 24) & 0xFFu)
+	) * (1.0 / 255.0);
+}
+
 void main()
 {
-	gl_Position = uProjectionMatrix * uViewMatrix * i.modelMatrix * vec4(aPosition, 0.0, 1.0);
+	vec2 worldPos = vec2(
+		i.transform.x * aPosition.x + i.transform.y * aPosition.y,
+		i.transform.z * aPosition.x + i.transform.w * aPosition.y
+	) + i.translation.xy;
+
+	gl_Position = uProjectionMatrix * uViewMatrix * vec4(worldPos, i.translation.z, 1.0);
 	vTexCoords = aTexCoords;
-	vColor = i.color;
+	vColor = unpackColor(i.color);
 }

@@ -228,7 +228,8 @@ void MyEventHandler::onFrameStart()
 	const nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
 	debugString_->clear();
 	debugString_->format("x: %.2f, y: %.2f, scale: %.2f, angle: %.2f", -camPos_.x, -camPos_.y, camScale_, -camRot_);
-	debugString_->formatAppend("\nbatching: %s, culling: %s, texture atlas: %s, viewport: %s", stringOnOff(settings.batchingEnabled),
+	debugString_->formatAppend("\nbatching: %s, instancing: %s, culling: %s, texture atlas: %s, viewport: %s",
+	                           stringOnOff(settings.batchingEnabled), stringOnOff(settings.instancingEnabled),
 	                           stringOnOff(settings.cullingEnabled), stringOnOff(withAtlas_), stringOnOff(withViewport_));
 	debugText_->setString(*debugString_);
 
@@ -312,6 +313,8 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 
 	if (event.sym == nc::KeySym::B)
 		renderingSettings.batchingEnabled = !renderingSettings.batchingEnabled;
+	else if (event.sym == nc::KeySym::I)
+		renderingSettings.instancingEnabled = !renderingSettings.instancingEnabled;
 	else if (event.sym == nc::KeySym::C)
 		renderingSettings.cullingEnabled = !renderingSettings.cullingEnabled;
 	else if (event.sym == nc::KeySym::T)
@@ -416,15 +419,17 @@ void MyEventHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &e
 
 	if (event.buttonName == nc::ButtonName::A)
 		renderingSettings.batchingEnabled = !renderingSettings.batchingEnabled;
+	else if (event.buttonName == nc::ButtonName::X)
+		renderingSettings.instancingEnabled = !renderingSettings.instancingEnabled;
 	else if (event.buttonName == nc::ButtonName::B)
 		renderingSettings.cullingEnabled = !renderingSettings.cullingEnabled;
-	else if (event.buttonName == nc::ButtonName::X)
+	else if (event.buttonName == nc::ButtonName::Y)
+		resetCamera();
+	else if (event.buttonName == nc::ButtonName::LBUMPER)
 	{
 		withAtlas_ = !withAtlas_;
 		withAtlas_ ? setupAtlas() : setupTextures();
 	}
-	else if (event.buttonName == nc::ButtonName::Y)
-		resetCamera();
 	else if (event.buttonName == nc::ButtonName::RBUMPER)
 	{
 		withViewport_ = !withViewport_;
@@ -504,16 +509,18 @@ void MyEventHandler::checkClick(float x, float y)
 	{
 		nc::Application::RenderingSettings &settings = nc::theApplication().renderingSettings();
 		const float xPos = x - debugTextRect.x;
-		if (xPos <= debugTextRect.w * 0.24f)
+		if (xPos <= debugTextRect.w * 0.19f)
 			settings.batchingEnabled = !settings.batchingEnabled;
-		else if (xPos >= debugTextRect.w * 0.24f && xPos <= debugTextRect.w * 0.45f)
+		else if (xPos >= debugTextRect.w * 0.19f && xPos <= debugTextRect.w * 0.40f)
+			settings.instancingEnabled = !settings.instancingEnabled;
+		else if (xPos >= debugTextRect.w * 0.40f && xPos <= debugTextRect.w * 0.57f)
 			settings.cullingEnabled = !settings.cullingEnabled;
-		else if (xPos >= debugTextRect.w * 0.45f && xPos <= debugTextRect.w * 0.77f)
+		else if (xPos >= debugTextRect.w * 0.57f && xPos <= debugTextRect.w * 0.81f)
 		{
 			withAtlas_ = !withAtlas_;
 			withAtlas_ ? setupAtlas() : setupTextures();
 		}
-		else if (xPos >= debugTextRect.w * 0.77f)
+		else if (xPos >= debugTextRect.w * 0.81f)
 		{
 			withViewport_ = !withViewport_;
 			setupViewport();

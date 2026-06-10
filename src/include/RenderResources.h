@@ -127,6 +127,8 @@ class RenderResources
 	{
 		SPRITE,
 		SPRITE_NOTEXTURE,
+		SPRITE_ATTRIBS,
+		SPRITE_NOTEXTURE_ATTRIBS,
 		MESHSPRITE,
 		MESHSPRITE_NOTEXTURE,
 		TEXTNODE,
@@ -207,7 +209,7 @@ class RenderResources
 	static const unsigned int NumDefaultFragmentShaders = static_cast<unsigned int>(DefaultFragmentShader::COUNT);
 	static ShaderProgramCompileInfo::ShaderCompileInfo defaultFragmentShaderInfos_[NumDefaultFragmentShaders];
 
-	static const unsigned int NumDefaultShaderPrograms = 18;
+	static const unsigned int NumDefaultShaderPrograms = 20;
 	static nctl::UniquePtr<GLShaderProgram> defaultShaderPrograms_[NumDefaultShaderPrograms];
 	/// Hash map from a shader program pointer to the pointer of its batched version
 	static nctl::HashMap<const GLShaderProgram *, GLShaderProgram *> batchedShaders_;
