@@ -68,10 +68,10 @@ void GLShaderUniforms::setDirty(bool isDirty)
 	forEach(uniformCaches_.begin(), uniformCaches_.end(), [isDirty](GLUniformCache &uniform) { uniform.setDirty(isDirty); });
 }
 
-GLUniformCache *GLShaderUniforms::uniform(const char *name)
+const GLUniformCache *GLShaderUniforms::uniform(const char *name) const
 {
 	ASSERT(name);
-	GLUniformCache *uniformCache = nullptr;
+	const GLUniformCache *uniformCache = nullptr;
 
 	if (shaderProgram_)
 		uniformCache = uniformCaches_.find(name);
@@ -79,6 +79,11 @@ GLUniformCache *GLShaderUniforms::uniform(const char *name)
 		LOGE_X("Cannot find uniform \"%s\", no shader program associated", name);
 
 	return uniformCache;
+}
+
+GLUniformCache *GLShaderUniforms::uniform(const char *name)
+{
+	return const_cast<GLUniformCache *>(static_cast<const GLShaderUniforms &>(*this).uniform(name));
 }
 
 void GLShaderUniforms::commitUniforms()

@@ -6,8 +6,10 @@
 class Statistics
 {
   public:
+	Statistics();
 	explicit Statistics(unsigned int capacity);
 
+	void setCapacity(unsigned int capacity);
 	inline unsigned int capacity() const { return capacity_; }
 	inline bool isEmpty() const { return size_ == 0; }
 	inline unsigned int size() const { return size_; }
@@ -42,7 +44,7 @@ class Statistics
 	/// Next index to write a value with circular wrapping
 	unsigned int writeIndex_ = 0;
 	/// If values have changed, statistics need to be recalculated
-	bool dirty = true;
+	bool dirty_ = true;
 
 	float sum_ = 0.0f;
 	float minimum_ = 0.0f;

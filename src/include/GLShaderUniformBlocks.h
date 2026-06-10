@@ -27,6 +27,7 @@ class GLShaderUniformBlocks
 
 	inline unsigned int numUniformBlocks() const { return uniformBlockCaches_.size(); }
 	inline bool hasUniformBlock(const char *name) const { return (uniformBlockCaches_.find(name) != nullptr); }
+	const GLUniformBlockCache *uniformBlock(const char *name) const;
 	GLUniformBlockCache *uniformBlock(const char *name);
 	inline const UniformHashMapType allUniformBlocks() const { return uniformBlockCaches_; }
 	void commitUniformBlocks();

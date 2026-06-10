@@ -132,7 +132,7 @@ class GLShaderProgram
 	nctl::Array<GLUniform> uniforms_;
 	static const int UniformBlocksInitialSize = 4;
 	nctl::Array<GLUniformBlock> uniformBlocks_;
-	static const int AttributesInitialSize = 4;
+	static const int AttributesInitialSize = 8;
 	nctl::Array<GLAttribute> attributes_;
 
 	nctl::StaticHashMap<nctl::String, int, GLVertexFormat::MaxAttributes> attributeLocations_;

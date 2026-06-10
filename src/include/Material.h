@@ -25,6 +25,10 @@ class Material
 		SPRITE_GRAY,
 		/// Shader program for Sprite classes with a solid color and no texture
 		SPRITE_NO_TEXTURE,
+		/// Shader program for Sprite classes using attributes for instances
+		SPRITE_ATTRIBS,
+		/// Shader program for Sprite classes using attributes for instances, with a solid color, no texture
+		SPRITE_NO_TEXTURE_ATTRIBS,
 		/// Shader program for MeshSprite classes
 		MESH_SPRITE,
 		/// Shader program for MeshSprite classes with grayscale font texture
@@ -62,7 +66,9 @@ class Material
 	// Shader uniform block and model matrix uniform names
 	static const char *InstanceBlockName;
 	static const char *InstancesBlockName; // for batched shaders
-	static const char *ModelMatrixUniformName;
+	static const char *ModelMatrixUniformName; // for legacy shaders using a `mat4`
+	static const char *ModelTransformUniformName;
+	static const char *ModelTranslationUniformName;
 
 	// Camera related shader uniform names
 	static const char *ProjectionMatrixUniformName;
@@ -73,7 +79,9 @@ class Material
 	static const char *TextureUniformName;
 	static const char *ColorUniformName;
 	static const char *SpriteSizeUniformName;
-	static const char *TexRectUniformName;
+	static const char *TexRectUniformName; // for legacy shaders using a `vec4`
+	static const char *UvEndpointsUUniformName;
+	static const char *UvEndpointsVUniformName;
 	static const char *PositionAttributeName;
 	static const char *TexCoordsAttributeName;
 	static const char *MeshIndexAttributeName;
@@ -92,6 +100,7 @@ class Material
 	inline ShaderProgramType shaderProgramType() const { return shaderProgramType_; }
 	bool setShaderProgramType(ShaderProgramType shaderProgramType);
 	inline const GLShaderProgram *shaderProgram() const { return shaderProgram_; }
+	inline GLShaderProgram *shaderProgram() { return shaderProgram_; }
 	void setShaderProgram(GLShaderProgram *program);
 
 	void setDefaultAttributesParameters();
@@ -103,8 +112,13 @@ class Material
 	/// Wrapper around `GLShaderUniformBlocks::hasUniformBlock()`
 	inline bool hasUniformBlock(const char *name) const { return shaderUniformBlocks_.hasUniformBlock(name); }
 
+	/// Wrapper around `GLShaderUniforms::uniform()` (constant overload)
+	inline const GLUniformCache *uniform(const char *name) const { return shaderUniforms_.uniform(name); }
 	/// Wrapper around `GLShaderUniforms::uniform()`
 	inline GLUniformCache *uniform(const char *name) { return shaderUniforms_.uniform(name); }
+
+	/// Wrapper around `GLShaderUniformBlocks::uniformBlock()` (constant version)
+	inline const GLUniformBlockCache *uniformBlock(const char *name) const { return shaderUniformBlocks_.uniformBlock(name); }
 	/// Wrapper around `GLShaderUniformBlocks::uniformBlock()`
 	inline GLUniformBlockCache *uniformBlock(const char *name) { return shaderUniformBlocks_.uniformBlock(name); }
 

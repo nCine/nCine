@@ -26,23 +26,30 @@ class NuklearDrawing;
 class DLL_PUBLIC Application
 {
   public:
+#if NCINE_WITH_SCENEGRAPH
 	/// Rendering settings that can be changed at run-time
 	struct RenderingSettings
 	{
 		RenderingSettings()
-		    : batchingEnabled(true), batchingWithIndices(false),
-		      cullingEnabled(true), minBatchSize(4), maxBatchSize(512) {}
+		    : batchingEnabled(true), batchingWithIndices(false), instancingEnabled(true), cullingEnabled(true),
+		      minBatchSize(4), maxBatchSize(1024), minInstancedBatchSize(4), maxInstancedBatchSize(4096) {}
 
-		/// True if batching is enabled
+		/// Enables batching with uniforms
 		bool batchingEnabled;
-		/// True if using indices for vertex batching
+		/// Uses indices for vertex batching with uniforms
 		bool batchingWithIndices;
-		/// True if node culling is enabled
+		/// Enables batching with instances (batching with uniforms should also be enabled)
+		bool instancingEnabled;
+		/// Enables node culling
 		bool cullingEnabled;
-		/// Minimum size for a batch to be collected
+		/// Minimum size for a batch with uniforms to be collected
 		unsigned int minBatchSize;
-		/// Maximum size for a batch before a forced split
+		/// Maximum size for a batch with uniforms before a forced split
 		unsigned int maxBatchSize;
+		/// Minimum size for a batch with instances to be collected
+		unsigned int minInstancedBatchSize;
+		/// Maximum size for a batch with instances before a forced split
+		unsigned int maxInstancedBatchSize;
 	};
 
 	/// GUI settings (for ImGui and Nuklear) that can be changed at run-time
@@ -50,7 +57,6 @@ class DLL_PUBLIC Application
 	{
 		GuiSettings();
 
-#if NCINE_WITH_SCENEGRAPH
 		/// ImGui drawable node layer
 		uint16_t imguiLayer;
 		/// Nuklear drawable node layer
@@ -61,8 +67,9 @@ class DLL_PUBLIC Application
 		/// Nuklear viewport
 		/*! \note The viewport should mirror the screen dimensions or mouse input would not work. Setting `nullptr` is the same as setting the screen */
 		Viewport *nuklearViewport;
-#endif
+
 	};
+#endif
 
 	struct Timings
 	{
@@ -87,10 +94,12 @@ class DLL_PUBLIC Application
 
 	/// Returns the configuration used to initialize the application
 	inline const AppConfiguration &appConfiguration() const { return appCfg_; }
+#if NCINE_WITH_SCENEGRAPH
 	/// Returns the run-time rendering settings
 	inline RenderingSettings &renderingSettings() { return renderingSettings_; }
 	/// Returns the run-time GUI settings
 	inline GuiSettings &guiSettings() { return guiSettings_; }
+#endif
 	/// Returns the run-time debug overlay settings, if debug overlay is available
 	inline IDebugOverlay::DisplaySettings &debugOverlaySettings()
 	{
@@ -158,8 +167,10 @@ class DLL_PUBLIC Application
 	bool hasFocus_;
 	bool shouldQuit_;
 	const AppConfiguration appCfg_;
+#if NCINE_WITH_SCENEGRAPH
 	RenderingSettings renderingSettings_;
 	GuiSettings guiSettings_;
+#endif
 	float timings_[Timings::COUNT];
 	IDebugOverlay::DisplaySettings debugOverlayNullSettings_;
 

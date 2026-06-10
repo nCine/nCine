@@ -544,7 +544,11 @@ void TextNode::updateRenderCommand()
 	{
 		GLUniformCache *colorUniform = instanceBlock_->uniform(Material::ColorUniformName);
 		if (colorUniform)
-			colorUniform->setFloatVector(Colorf(absColor()).data());
+		{
+			const bool setAsUint = colorUniform->setUintValue(absColor_.abgr());
+			if (setAsUint == false)
+				colorUniform->setFloatVector(Colorf(absColor()).data());
+		}
 	}
 }
 

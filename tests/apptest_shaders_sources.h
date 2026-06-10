@@ -1,5 +1,34 @@
 namespace {
 
+char const * const common_functions_vs = R"(
+vec2 unpackSpriteSize(uint ss)
+{
+	return vec2(float(ss & 0xFFFFu), float((ss >> 16u) & 0xFFFFu));
+}
+
+vec4 unpackUVEndpoints(uint epU, uint epV)
+{
+	const float InvU16 = 1.0 / 65535.0;
+
+	return vec4(
+		float(epU & 0xFFFFu) * InvU16,
+		float(epU >> 16u) * InvU16,
+		float(epV & 0xFFFFu) * InvU16,
+		float(epV >> 16u) * InvU16
+	);
+}
+
+vec4 unpackColor(uint c)
+{
+	return vec4(
+		float((c >> 0) & 0xFFu),
+		float((c >> 8) & 0xFFu),
+		float((c >> 16) & 0xFFu),
+		float((c >> 24) & 0xFFu)
+	) * (1.0 / 255.0);
+}
+)";
+
 char const * const sprite_vs = R"(
 uniform mat4 uProjectionMatrix;
 uniform mat4 uViewMatrix;
@@ -7,10 +36,12 @@ uniform mat4 uViewMatrix;
 // Instance data should go in a uniform block called `InstanceBlock` for batching to work
 layout (std140) uniform InstanceBlock
 {
-	mat4 modelMatrix;
-	vec4 texRect;
-	vec2 spriteSize;
+	vec4 transform;
+	vec4 translation;
 	float angle;
+	uint spriteSize;
+	uint uvEndpointsU;
+	uint uvEndpointsV;
 };
 
 out vec2 vTexCoords;
@@ -18,14 +49,21 @@ flat out vec2 vSpriteSize;
 
 void main()
 {
-	vec2 aPosition = vec2(0.5 - float(gl_VertexID >> 1), -0.5 + float(gl_VertexID % 2));
-	vec2 aTexCoords = vec2(1.0 - float(gl_VertexID >> 1), 1.0 - float(gl_VertexID % 2));
-	vec4 position = vec4(aPosition.x * spriteSize.x, aPosition.y * spriteSize.y, 0.0, 1.0);
+	vec2 aPosition = vec2(0.5 - float(gl_VertexID >> 1), -0.5 + float(gl_VertexID & 1));
+	vec2 aTexCoords = vec2(1.0 - float(gl_VertexID >> 1), 1.0 - float(gl_VertexID & 1));
+	vec2 unpackedSpriteSize = unpackSpriteSize(spriteSize);
+	vec4 position = vec4(aPosition.x * unpackedSpriteSize.x, aPosition.y * unpackedSpriteSize.y, 0.0, 1.0);
 
-	gl_Position = uProjectionMatrix * uViewMatrix * modelMatrix * position;
+	vec2 worldPos = vec2(
+		transform.x * position.x + transform.y * position.y,
+		transform.z * position.x + transform.w * position.y
+	) + translation.xy;
+
+	gl_Position = uProjectionMatrix * uViewMatrix * vec4(worldPos, translation.z, 1.0);
 	vec2 twistedCoords = vec2((cos(angle) * cos(angle) * 0.85 + 0.15) * aTexCoords.x, (sin(angle) * sin(angle) * 0.85 + 0.15) * aTexCoords.y);
-	vTexCoords = vec2(twistedCoords.x * texRect.x + texRect.y, twistedCoords.y * texRect.z + texRect.w);
-	vSpriteSize = spriteSize;
+	vec4 uvEndpoints = unpackUVEndpoints(uvEndpointsU, uvEndpointsV);
+	vTexCoords = vec2(mix(uvEndpoints.x, uvEndpoints.y, twistedCoords.x), mix(uvEndpoints.z, uvEndpoints.w, twistedCoords.y));
+	vSpriteSize = unpackedSpriteSize;
 }
 )";
 
@@ -35,17 +73,19 @@ uniform mat4 uViewMatrix;
 
 struct Instance
 {
-	mat4 modelMatrix;
-	vec4 texRect;
-	vec2 spriteSize;
+	vec4 transform;
+	vec4 translation;
 	float angle;
+	uint spriteSize;
+	uint uvEndpointsU;
+	uint uvEndpointsV;
 };
 
 // Single instances data will be collected in a uniform block called `InstancesBlock`
 layout (std140) uniform InstancesBlock
 {
 #ifndef BATCH_SIZE
-	#define BATCH_SIZE (682) // 64 Kb / 96 b
+	#define BATCH_SIZE (1365) // 64 KiB / 48 B
 #endif
 	Instance[BATCH_SIZE] instances;
 } block;
@@ -57,14 +97,21 @@ flat out vec2 vSpriteSize;
 
 void main()
 {
-	vec2 aPosition = vec2(-0.5 + float(((gl_VertexID + 2) / 3) % 2), 0.5 - float(((gl_VertexID + 1) / 3) % 2));
-	vec2 aTexCoords = vec2(float(((gl_VertexID + 2) / 3) % 2), float(((gl_VertexID + 1) / 3) % 2));
-	vec4 position = vec4(aPosition.x * i.spriteSize.x, aPosition.y * i.spriteSize.y, 0.0, 1.0);
+	vec2 aPosition = vec2(-0.5 + float(((gl_VertexID + 2) / 3) & 1), 0.5 - float(((gl_VertexID + 1) / 3) & 1));
+	vec2 aTexCoords = vec2(float(((gl_VertexID + 2) / 3) & 1), float(((gl_VertexID + 1) / 3) & 1));
+	vec2 unpackedSpriteSize = unpackSpriteSize(i.spriteSize);
+	vec4 position = vec4(aPosition.x * unpackedSpriteSize.x, aPosition.y * unpackedSpriteSize.y, 0.0, 1.0);
 
-	gl_Position = uProjectionMatrix * uViewMatrix * i.modelMatrix * position;
+	vec2 worldPos = vec2(
+		i.transform.x * position.x + i.transform.y * position.y,
+		i.transform.z * position.x + i.transform.w * position.y
+	) + i.translation.xy;
+
+	gl_Position = uProjectionMatrix * uViewMatrix * vec4(worldPos, i.translation.z, 1.0);
 	vec2 twistedCoords = vec2((cos(i.angle) * cos(i.angle) * 0.85 + 0.15) * aTexCoords.x, (sin(i.angle) * sin(i.angle) * 0.85 + 0.15) * aTexCoords.y);
-	vTexCoords = vec2(twistedCoords.x * i.texRect.x + i.texRect.y, twistedCoords.y * i.texRect.z + i.texRect.w);
-	vSpriteSize = i.spriteSize;
+	vec4 uvEndpoints = unpackUVEndpoints(i.uvEndpointsU, i.uvEndpointsV);
+	vTexCoords = vec2(mix(uvEndpoints.x, uvEndpoints.y, twistedCoords.x), mix(uvEndpoints.z, uvEndpoints.w, twistedCoords.y));
+	vSpriteSize = unpackedSpriteSize;
 }
 )";
 
@@ -127,10 +174,12 @@ uniform mat4 uViewMatrix;
 // Instance data should go in a uniform block called `InstanceBlock` for batching to work
 layout (std140) uniform InstanceBlock
 {
-	mat4 modelMatrix;
-	vec4 color;
-	vec4 texRect;
-	vec2 spriteSize;
+	vec4 transform;
+	vec4 translation;
+	uint color;
+	uint spriteSize;
+	uint uvEndpointsU;
+	uint uvEndpointsV;
 };
 
 in vec2 aTexCoords;
@@ -141,11 +190,18 @@ out vec4 vColor;
 
 void main()
 {
-	vec4 position = vec4(aPosition.x * spriteSize.x, aPosition.y * spriteSize.y, aDepth, 1.0);
+	vec2 unpackedSpriteSize = unpackSpriteSize(spriteSize);
+	vec4 position = vec4(aPosition.x * unpackedSpriteSize.x, aPosition.y * unpackedSpriteSize.y, aDepth, 1.0);
 
-	gl_Position = uProjectionMatrix * uViewMatrix * modelMatrix * position;
-	vTexCoords = vec2(aTexCoords.x * texRect.x + texRect.y, aTexCoords.y * texRect.z + texRect.w);
-	vColor = color;
+	vec2 worldPos = vec2(
+		transform.x * position.x + transform.y * position.y,
+		transform.z * position.x + transform.w * position.y
+	) + translation.xy;
+
+	gl_Position = uProjectionMatrix * uViewMatrix * vec4(worldPos, translation.z, 1.0);
+	vec4 uvEndpoints = unpackUVEndpoints(uvEndpointsU, uvEndpointsV);
+	vTexCoords = vec2(mix(uvEndpoints.x, uvEndpoints.y, aTexCoords.x), mix(uvEndpoints.z, uvEndpoints.w, aTexCoords.y));
+	vColor = unpackColor(color);
 }
 )";
 
@@ -155,17 +211,19 @@ uniform mat4 uViewMatrix;
 
 struct Instance
 {
-	mat4 modelMatrix;
-	vec4 color;
-	vec4 texRect;
-	vec2 spriteSize;
+	vec4 transform;
+	vec4 translation;
+	uint color;
+	uint spriteSize;
+	uint uvEndpointsU;
+	uint uvEndpointsV;
 };
 
 // Single instances data will be collected in a uniform block called `InstancesBlock`
 layout (std140) uniform InstancesBlock
 {
 #ifndef BATCH_SIZE
-	#define BATCH_SIZE (585) // 64 Kb / 112 b
+	#define BATCH_SIZE (1365) // 64 KiB / 48 B
 #endif
 	Instance[BATCH_SIZE] instances;
 } block;
@@ -181,11 +239,18 @@ out vec4 vColor;
 
 void main()
 {
-	vec4 position = vec4(aPosition.x * i.spriteSize.x, aPosition.y * i.spriteSize.y, aDepth, 1.0);
+	vec2 unpackedSpriteSize = unpackSpriteSize(i.spriteSize);
+	vec4 position = vec4(aPosition.x * unpackedSpriteSize.x, aPosition.y * unpackedSpriteSize.y, 0.0, 1.0);
 
-	gl_Position = uProjectionMatrix * uViewMatrix * i.modelMatrix * position;
-	vTexCoords = vec2(aTexCoords.x * i.texRect.x + i.texRect.y, aTexCoords.y * i.texRect.z + i.texRect.w);
-	vColor = i.color;
+	vec2 worldPos = vec2(
+		i.transform.x * position.x + i.transform.y * position.y,
+		i.transform.z * position.x + i.transform.w * position.y
+	) + i.translation.xy;
+
+	gl_Position = uProjectionMatrix * uViewMatrix * vec4(worldPos, i.translation.z, 1.0);
+	vec4 uvEndpoints = unpackUVEndpoints(i.uvEndpointsU, i.uvEndpointsV);
+	vTexCoords = vec2(mix(uvEndpoints.x, uvEndpoints.y, aTexCoords.x), mix(uvEndpoints.z, uvEndpoints.w, aTexCoords.y));
+	vColor = unpackColor(i.color);
 }
 )";
 
@@ -232,10 +297,12 @@ uniform mat4 uViewMatrix;
 // Instance data should go in a uniform block called `InstanceBlock` for batching to work
 layout (std140) uniform InstanceBlock
 {
-	mat4 modelMatrix;
-	vec4 texRect;
-	vec2 spriteSize;
+	vec4 transform;
+	vec4 translation;
 	float rotation;
+	uint spriteSize;
+	uint uvEndpointsU;
+	uint uvEndpointsV;
 };
 
 out vec3 vFragPos;
@@ -248,16 +315,23 @@ flat out float vRotation;
 
 void main()
 {
-	vec2 aPosition = vec2(0.5 - float(gl_VertexID >> 1), -0.5 + float(gl_VertexID % 2));
-	vec2 aTexCoords = vec2(1.0 - float(gl_VertexID >> 1), 1.0 - float(gl_VertexID % 2));
-	vec4 position = vec4(aPosition.x * spriteSize.x, aPosition.y * spriteSize.y, 0.0, 1.0);
+	vec2 aPosition = vec2(0.5 - float(gl_VertexID >> 1), -0.5 + float(gl_VertexID & 1));
+	vec2 aTexCoords = vec2(1.0 - float(gl_VertexID >> 1), 1.0 - float(gl_VertexID & 1));
+	vec2 unpackedSpriteSize = unpackSpriteSize(spriteSize);
+	vec4 position = vec4(aPosition.x * unpackedSpriteSize.x, aPosition.y * unpackedSpriteSize.y, 0.0, 1.0);
 
-	gl_Position = uProjectionMatrix * uViewMatrix * modelMatrix * position;
-	vFragPos = vec3(uViewMatrix * modelMatrix * position);
+	vec2 worldPos = vec2(
+		transform.x * position.x + transform.y * position.y,
+		transform.z * position.x + transform.w * position.y
+	) + translation.xy;
+
+	vFragPos = vec3(uViewMatrix * vec4(worldPos, translation.z, 1.0));
+	gl_Position = uProjectionMatrix * vec4(vFragPos, 1.0);
 #ifdef __ANDROID__
 	vFragPosNorm = normalize(vFragPos);
 #endif
-	vTexCoords = vec2(aTexCoords.x * texRect.x + texRect.y, aTexCoords.y * texRect.z + texRect.w);
+	vec4 uvEndpoints = unpackUVEndpoints(uvEndpointsU, uvEndpointsV);
+	vTexCoords = vec2(mix(uvEndpoints.x, uvEndpoints.y, aTexCoords.x), mix(uvEndpoints.z, uvEndpoints.w, aTexCoords.y));
 	vRotation = rotation;
 }
 )";
@@ -268,17 +342,19 @@ uniform mat4 uViewMatrix;
 
 struct Instance
 {
-	mat4 modelMatrix;
-	vec4 texRect;
-	vec2 spriteSize;
+	vec4 transform;
+	vec4 translation;
 	float rotation;
+	uint spriteSize;
+	uint uvEndpointsU;
+	uint uvEndpointsV;
 };
 
 // Single instances data will be collected in a uniform block called `InstancesBlock`
 layout (std140) uniform InstancesBlock
 {
 #ifndef BATCH_SIZE
-	#define BATCH_SIZE (682) // 64 Kb / 96 b
+	#define BATCH_SIZE (1365) // 64 KiB / 48 B
 #endif
 	Instance[BATCH_SIZE] instances;
 } block;
@@ -295,16 +371,23 @@ flat out float vRotation;
 
 void main()
 {
-	vec2 aPosition = vec2(-0.5 + float(((gl_VertexID + 2) / 3) % 2), 0.5 - float(((gl_VertexID + 1) / 3) % 2));
-	vec2 aTexCoords = vec2(float(((gl_VertexID + 2) / 3) % 2), float(((gl_VertexID + 1) / 3) % 2));
-	vec4 position = vec4(aPosition.x * i.spriteSize.x, aPosition.y * i.spriteSize.y, 0.0, 1.0);
+	vec2 aPosition = vec2(-0.5 + float(((gl_VertexID + 2) / 3) & 1), 0.5 - float(((gl_VertexID + 1) / 3) & 1));
+	vec2 aTexCoords = vec2(float(((gl_VertexID + 2) / 3) & 1), float(((gl_VertexID + 1) / 3) & 1));
+	vec2 unpackedSpriteSize = unpackSpriteSize(i.spriteSize);
+	vec4 position = vec4(aPosition.x * unpackedSpriteSize.x, aPosition.y * unpackedSpriteSize.y, 0.0, 1.0);
 
-	gl_Position = uProjectionMatrix * uViewMatrix * i.modelMatrix * position;
-	vFragPos = vec3(uViewMatrix * i.modelMatrix * position);
+	vec2 worldPos = vec2(
+		i.transform.x * position.x + i.transform.y * position.y,
+		i.transform.z * position.x + i.transform.w * position.y
+	) + i.translation.xy;
+
+	vFragPos = vec3(uViewMatrix * vec4(worldPos, i.translation.z, 1.0));
+	gl_Position = uProjectionMatrix * vec4(vFragPos, 1.0);
 #ifdef __ANDROID__
 	vFragPosNorm = normalize(vFragPos);
 #endif
-	vTexCoords = vec2(aTexCoords.x * i.texRect.x + i.texRect.y, aTexCoords.y * i.texRect.z + i.texRect.w);
+	vec4 uvEndpoints = unpackUVEndpoints(i.uvEndpointsU, i.uvEndpointsV);
+	vTexCoords = vec2(mix(uvEndpoints.x, uvEndpoints.y, aTexCoords.x), mix(uvEndpoints.z, uvEndpoints.w, aTexCoords.y));
 	vRotation = i.rotation;
 }
 )";

@@ -34,6 +34,11 @@ class GLUniformCache
 	bool setIntValue(GLint v0, GLint v1);
 	bool setIntValue(GLint v0, GLint v1, GLint v2);
 	bool setIntValue(GLint v0, GLint v1, GLint v2, GLint v3);
+	bool setUintVector(const GLuint *vec);
+	bool setUintValue(GLuint v0);
+	bool setUintValue(GLuint v0, GLuint v1);
+	bool setUintValue(GLuint v0, GLuint v1, GLuint v2);
+	bool setUintValue(GLuint v0, GLuint v1, GLuint v2, GLuint v3);
 
 	inline bool isDirty() const { return isDirty_; }
 	inline void setDirty(bool isDirty) { isDirty_ = isDirty; }
@@ -47,6 +52,7 @@ class GLUniformCache
 
 	bool checkFloat() const;
 	bool checkInt() const;
+	bool checkUint() const;
 	bool checkComponents(unsigned int requiredComponents) const;
 };
 

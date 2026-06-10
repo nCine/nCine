@@ -221,6 +221,85 @@ bool GLUniformCache::setIntValue(GLint v0, GLint v1, GLint v2, GLint v3)
 	return true;
 }
 
+bool GLUniformCache::setUintVector(const GLuint *vec)
+{
+	ASSERT(uniform_ == nullptr || dataPointer_ != nullptr);
+	if (uniform_ == nullptr || dataPointer_ == nullptr || checkUint() == false)
+	{
+		return false;
+	}
+
+	isDirty_ = true;
+	memcpy(dataPointer_, vec, sizeof(GLuint) * uniform_->numComponents());
+	return true;
+}
+
+bool GLUniformCache::setUintValue(GLuint v0)
+{
+	ASSERT(uniform_ == nullptr || dataPointer_ != nullptr);
+	if (uniform_ == nullptr || dataPointer_ == nullptr ||
+	    checkUint() == false || checkComponents(1) == false)
+	{
+		return false;
+	}
+
+	isDirty_ = true;
+	GLuint *data = reinterpret_cast<GLuint *>(dataPointer_);
+	data[0] = v0;
+	return true;
+}
+
+bool GLUniformCache::setUintValue(GLuint v0, GLuint v1)
+{
+	ASSERT(uniform_ == nullptr || dataPointer_ != nullptr);
+	if (uniform_ == nullptr || dataPointer_ == nullptr ||
+	    checkUint() == false || checkComponents(2) == false)
+	{
+		return false;
+	}
+
+	isDirty_ = true;
+	GLuint *data = reinterpret_cast<GLuint *>(dataPointer_);
+	data[0] = v0;
+	data[1] = v1;
+	return true;
+}
+
+bool GLUniformCache::setUintValue(GLuint v0, GLuint v1, GLuint v2)
+{
+	ASSERT(uniform_ == nullptr || dataPointer_ != nullptr);
+	if (uniform_ == nullptr || dataPointer_ == nullptr ||
+	    checkUint() == false || checkComponents(3) == false)
+	{
+		return false;
+	}
+
+	isDirty_ = true;
+	GLuint *data = reinterpret_cast<GLuint *>(dataPointer_);
+	data[0] = v0;
+	data[1] = v1;
+	data[2] = v2;
+	return true;
+}
+
+bool GLUniformCache::setUintValue(GLuint v0, GLuint v1, GLuint v2, GLuint v3)
+{
+	ASSERT(uniform_ == nullptr || dataPointer_ != nullptr);
+	if (uniform_ == nullptr || dataPointer_ == nullptr ||
+	    checkUint() == false || checkComponents(4) == false)
+	{
+		return false;
+	}
+
+	isDirty_ = true;
+	GLuint *data = reinterpret_cast<GLuint *>(dataPointer_);
+	data[0] = v0;
+	data[1] = v1;
+	data[2] = v2;
+	data[3] = v3;
+	return true;
+}
+
 bool GLUniformCache::commitValue()
 {
 	ASSERT(uniform_ == nullptr || dataPointer_ != nullptr);
@@ -257,6 +336,18 @@ bool GLUniformCache::commitValue()
 		case GL_INT_VEC4:
 			glUniform4iv(location, 1, reinterpret_cast<const GLint *>(dataPointer_));
 			break;
+		case GL_UNSIGNED_INT:
+			glUniform1uiv(location, 1, reinterpret_cast<const GLuint *>(dataPointer_));
+			break;
+		case GL_UNSIGNED_INT_VEC2:
+			glUniform2uiv(location, 1, reinterpret_cast<const GLuint *>(dataPointer_));
+			break;
+		case GL_UNSIGNED_INT_VEC3:
+			glUniform3uiv(location, 1, reinterpret_cast<const GLuint *>(dataPointer_));
+			break;
+		case GL_UNSIGNED_INT_VEC4:
+			glUniform4uiv(location, 1, reinterpret_cast<const GLuint *>(dataPointer_));
+			break;
 		case GL_FLOAT_MAT2:
 			glUniformMatrix2fv(location, 1, GL_FALSE, reinterpret_cast<const GLfloat *>(dataPointer_));
 			break;
@@ -278,7 +369,7 @@ bool GLUniformCache::commitValue()
 			glUniform1iv(location, 1, reinterpret_cast<const GLint *>(dataPointer_));
 			break;
 		default:
-			LOGW_X("No available case to handle type: %u", uniform_->type());
+			LOGD_X("No available case to handle type: %u", uniform_->type());
 			break;
 	}
 
@@ -294,7 +385,7 @@ bool GLUniformCache::checkFloat() const
 {
 	if (uniform_->basicType() != GL_FLOAT)
 	{
-		LOGE_X("Uniform \"%s\" is not floating point", uniform_->name());
+		LOGD_X("Uniform \"%s\" is not floating point", uniform_->name());
 		return false;
 	}
 	else
@@ -316,7 +407,18 @@ bool GLUniformCache::checkInt() const
 #endif
 	)
 	{
-		LOGE_X("Uniform \"%s\" is not integer", uniform_->name());
+		LOGD_X("Uniform \"%s\" is not a signed integer", uniform_->name());
+		return false;
+	}
+	else
+		return true;
+}
+
+bool GLUniformCache::checkUint() const
+{
+	if (uniform_->basicType() != GL_UNSIGNED_INT)
+	{
+		LOGD_X("Uniform \"%s\" is not an unsigned integer", uniform_->name());
 		return false;
 	}
 	else
@@ -327,7 +429,7 @@ bool GLUniformCache::checkComponents(unsigned int requiredComponents) const
 {
 	if (uniform_->numComponents() != requiredComponents)
 	{
-		LOGE_X("Uniform \"%s\" has %u components, not %u", uniform_->name(), uniform_->numComponents(), requiredComponents);
+		LOGD_X("Uniform \"%s\" has %u components, not %u", uniform_->name(), uniform_->numComponents(), requiredComponents);
 		return false;
 	}
 	else

@@ -35,7 +35,8 @@ class RenderBatcher
 	/*! \note It is a RAM buffer and cannot be handled by the `RenderBuffersManager` */
 	nctl::Array<ManagedBuffer> buffers_;
 
-	RenderCommand *collectCommands(nctl::Array<RenderCommand *>::ConstIterator start, nctl::Array<RenderCommand *>::ConstIterator end, nctl::Array<RenderCommand *>::ConstIterator &nextStart);
+	RenderCommand *collectCommandsWithUniforms(nctl::Array<RenderCommand *>::ConstIterator start, nctl::Array<RenderCommand *>::ConstIterator end, nctl::Array<RenderCommand *>::ConstIterator &nextStart);
+	RenderCommand *collectCommandsWithInstancing(nctl::Array<RenderCommand *>::ConstIterator start, nctl::Array<RenderCommand *>::ConstIterator end, nctl::Array<RenderCommand *>::ConstIterator &nextStart);
 
 	unsigned char *acquireMemory(unsigned int bytes);
 	void createBuffer(unsigned int size);

@@ -137,13 +137,23 @@ void BaseSprite::updateRenderCommand()
 	{
 		GLUniformCache *colorUniform = instanceBlock_->uniform(Material::ColorUniformName);
 		if (colorUniform)
-			colorUniform->setFloatVector(Colorf(absColor()).data());
+		{
+			const bool setAsUint = colorUniform->setUintValue(absColor_.abgr());
+			if (setAsUint == false)
+				colorUniform->setFloatVector(Colorf(absColor()).data());
+		}
 	}
 	if (dirtyBits_.test(DirtyBitPositions::SizeBit))
 	{
 		GLUniformCache *spriteSizeUniform = instanceBlock_->uniform(Material::SpriteSizeUniformName);
 		if (spriteSizeUniform)
-			spriteSizeUniform->setFloatValue(width_, height_);
+		{
+			const uint32_t packedSize = (uint32_t(width_) & 0xFFFFu) | ((uint32_t(height_) & 0xFFFFu) << 16);
+			const bool setAsUint = spriteSizeUniform->setUintValue(packedSize);
+
+			if (setAsUint == false)
+				spriteSizeUniform->setFloatValue(width_, height_);
+		}
 		dirtyBits_.reset(DirtyBitPositions::SizeBit);
 	}
 
@@ -153,16 +163,43 @@ void BaseSprite::updateRenderCommand()
 		{
 			renderCommand_->material().setTexture(*texture_);
 
-			GLUniformCache *texRectUniform = instanceBlock_->uniform(Material::TexRectUniformName);
-			if (texRectUniform)
+			bool setAsUint = false;
+			GLUniformCache *uvEndpointsUUniform = instanceBlock_->uniform(Material::UvEndpointsUUniformName);
+			GLUniformCache *uvEndpointsVUniform = instanceBlock_->uniform(Material::UvEndpointsVUniformName);
+			if (uvEndpointsUUniform && uvEndpointsVUniform)
 			{
 				const Vector2i texSize = texture_->size();
-				const float texScaleX = texRect_.w / float(texSize.x);
-				const float texBiasX = texRect_.x / float(texSize.x);
-				const float texScaleY = texRect_.h / float(texSize.y);
-				const float texBiasY = texRect_.y / float(texSize.y);
+				const float u0 = texRect_.x / float(texSize.x);
+				const float u1 = (texRect_.x + texRect_.w) / float(texSize.x);
+				const float v0 = texRect_.y / float(texSize.y);
+				const float v1 = (texRect_.y + texRect_.h) / float(texSize.y);
 
-				texRectUniform->setFloatValue(texScaleX, texBiasX, texScaleY, texBiasY);
+				const uint16_t packedU0 = uint16_t(u0 * 65535.0f + 0.5f);
+				const uint16_t packedU1 = uint16_t(u1 * 65535.0f + 0.5f);
+
+				const uint16_t packedV0 = uint16_t(v0 * 65535.0f + 0.5f);
+				const uint16_t packedV1 = uint16_t(v1 * 65535.0f + 0.5f);
+
+				const uint32_t uvEndpointsU = packedU0 | (uint32_t(packedU1) << 16);
+				const uint32_t uvEndpointsV = packedV0 | (uint32_t(packedV1) << 16);
+
+				setAsUint = uvEndpointsUUniform->setUintValue(uvEndpointsU);
+				setAsUint &= uvEndpointsVUniform->setUintValue(uvEndpointsV);
+			}
+
+			if (setAsUint == false)
+			{
+				GLUniformCache *texRectUniform = instanceBlock_->uniform(Material::TexRectUniformName);
+				if (texRectUniform)
+				{
+					const Vector2i texSize = texture_->size();
+					const float texScaleX = texRect_.w / float(texSize.x);
+					const float texBiasX = texRect_.x / float(texSize.x);
+					const float texScaleY = texRect_.h / float(texSize.y);
+					const float texBiasY = texRect_.y / float(texSize.y);
+
+					texRectUniform->setFloatValue(texScaleX, texBiasX, texScaleY, texBiasY);
+				}
 			}
 		}
 		else

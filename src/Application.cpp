@@ -193,14 +193,14 @@ Application::Application()
 
 Application::~Application() = default;
 
+#if NCINE_WITH_SCENEGRAPH
 Application::GuiSettings::GuiSettings()
-#ifdef WITH_SCENEGRAPH
     : imguiLayer(0xffff - 1024),
       nuklearLayer(0xffff - 512),
       imguiViewport(nullptr), nuklearViewport(nullptr)
-#endif
 {
 }
+#endif
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
