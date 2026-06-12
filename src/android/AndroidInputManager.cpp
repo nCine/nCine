@@ -1183,7 +1183,7 @@ void AndroidInputManager::deviceInfo(int deviceId, int joyId)
 			joyState.numHats_ = 1; // No more than one hat is supported
 
 		deviceInfoString.clear();
-		if (AndroidJniHelper::sdkVersion() >= 31)
+		if (AndroidJniHelper::sdkVersion() >= 31 && __ANDROID_API__ >= 31)
 		{
 			AndroidJniClass_VibratorManager vibratorManager = inputDevice.getVibratorManager();
 
