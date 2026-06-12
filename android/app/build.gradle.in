@@ -4,13 +4,12 @@ plugins {
 
 android {
 	namespace 'io.github.ncine'
-	buildToolsVersion "@GRADLE_BUILDTOOLS_VERSION@"
 	compileSdkVersion @GRADLE_COMPILESDK_VERSION@
 
 	defaultConfig {
 		applicationId 'io.github.ncine'
-		minSdkVersion @GRADLE_MINSDK_VERSION@
 		targetSdkVersion @GRADLE_TARGETSDK_VERSION@
+		minSdkVersion @GRADLE_MINSDK_VERSION@
 		versionCode @GRADLE_VERSIONCODE@
 		versionName "@GRADLE_VERSION@"
 	}
