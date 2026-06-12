@@ -4,13 +4,12 @@ plugins {
 
 android {
 	namespace '@NCPROJECT_REVERSE_DNS@'
-	buildToolsVersion "@GRADLE_BUILDTOOLS_VERSION@"
 	compileSdkVersion @GRADLE_COMPILESDK_VERSION@
 
 	defaultConfig {
 		applicationId '@NCPROJECT_REVERSE_DNS@'
-		minSdkVersion @GRADLE_MINSDK_VERSION@
 		targetSdkVersion @GRADLE_TARGETSDK_VERSION@
+		minSdkVersion @GRADLE_MINSDK_VERSION@
 		versionCode @GRADLE_VERSIONCODE@
 		versionName "@GRADLE_VERSION@"
 	}

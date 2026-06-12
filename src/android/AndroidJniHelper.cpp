@@ -141,10 +141,7 @@ void AndroidJniHelper::attachJVM(struct android_app *state)
 			AndroidJniWrap_InputMethodManager::init(state);
 			AndroidJniWrap_DisplayManager::init(state);
 
-			// Cache the value of SDK version to avoid going through JNI in the future
-			sdkVersion_ = AndroidJniClass_Version::sdkInt();
 			LOGI_X("Android API version - NDK: %d, JNI: %d", __ANDROID_API__, sdkVersion_);
-
 			AndroidJniClass_ApplicationInfo applicationInfo = AndroidJniWrap_Context::getApplicationInfo();
 			LOGI_X("SDK versions - min: %d, compile: %d, target: %d",
 			       applicationInfo.minSdkVersion(), applicationInfo.compileSdkVersion(), applicationInfo.targetSdkVersion());
@@ -176,6 +173,9 @@ void AndroidJniHelper::detachJVM()
 void AndroidJniHelper::initClasses()
 {
 	AndroidJniClass_Version::init();
+	// Cache the value of SDK version to avoid going through JNI in the future
+	sdkVersion_ = AndroidJniClass_Version::sdkInt();
+
 	AndroidJniClass_MotionRange::init();
 	AndroidJniClass_VibrationEffect::init();
 	AndroidJniClass_Vibrator::init();
@@ -391,6 +391,10 @@ void AndroidJniClass_Vibrator::vibrate(const AndroidJniClass_VibrationEffect &vi
 
 void AndroidJniClass_VibratorManager::init()
 {
+	// Early-out if SDK version requirements are not met
+	if (AndroidJniHelper::sdkVersion() < 31)
+		return;
+
 	javaClass_ = findClass("android/os/VibratorManager");
 	midCancel_ = getMethodID(javaClass_, "cancel", "()V");
 	midGetVibratorIds_ = getMethodID(javaClass_, "getVibratorIds", "()[I");
@@ -439,7 +443,9 @@ void AndroidJniClass_InputDevice::init()
 	midGetMotionRange_ = getMethodID(javaClass_, "getMotionRange", "(I)Landroid/view/InputDevice$MotionRange;");
 	midGetSources_ = getMethodID(javaClass_, "getSources", "()I");
 	midHasKeys_ = getMethodID(javaClass_, "hasKeys", "([I)[Z");
-	midGetVibratorManager_ = getMethodID(javaClass_, "getVibratorManager", "()Landroid/os/VibratorManager;");
+
+	if (AndroidJniHelper::sdkVersion() >= 31)
+		midGetVibratorManager_ = getMethodID(javaClass_, "getVibratorManager", "()Landroid/os/VibratorManager;");
 }
 
 AndroidJniClass_InputDevice AndroidJniClass_InputDevice::getDevice(int deviceId)
@@ -702,7 +708,9 @@ void AndroidJniClass_ApplicationInfo::init()
 {
 	javaClass_ = AndroidJniClass::findClass("android/content/pm/ApplicationInfo");
 
-	fidCompileSdkVersion_ = AndroidJniClass::getFieldID(javaClass_, "compileSdkVersion", "I");
+	if (AndroidJniHelper::sdkVersion() >= 31)
+		fidCompileSdkVersion_ = AndroidJniClass::getFieldID(javaClass_, "compileSdkVersion", "I");
+
 	fidDataDir_ = AndroidJniClass::getFieldID(javaClass_, "dataDir", "Ljava/lang/String;");
 	fidDeviceProtectedDataDir_ = AndroidJniClass::getFieldID(javaClass_, "deviceProtectedDataDir", "Ljava/lang/String;");
 	fidMinSdkVersion_ = AndroidJniClass::getFieldID(javaClass_, "minSdkVersion", "I");
