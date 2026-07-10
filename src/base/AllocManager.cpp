@@ -10,7 +10,7 @@
 	#define GLFW_VERSION_COMBINED (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 + GLFW_VERSION_REVISION)
 #endif
 
-#ifdef WITH_SDL
+#ifdef WITH_SDL2
 	#include <SDL2/SDL_stdinc.h>
 #endif
 
@@ -50,7 +50,7 @@ alignas(IAllocator::DefaultAlignment) static uint8_t glfwAllocatorBuffer[sizeof(
 static ProxyAllocator &glfwAllocator = reinterpret_cast<ProxyAllocator &>(glfwAllocatorBuffer);
 #endif
 
-#if defined(WITH_SDL)
+#if defined(WITH_SDL2)
 alignas(IAllocator::DefaultAlignment) static uint8_t sdl2AllocatorBuffer[sizeof(ProxyAllocator)];
 static ProxyAllocator &sdl2Allocator = reinterpret_cast<ProxyAllocator &>(sdl2AllocatorBuffer);
 #endif
@@ -96,7 +96,7 @@ IAllocator &theGlfwAllocator()
 
 IAllocator &theSdl2Allocator()
 {
-#if defined(WITH_SDL)
+#if defined(WITH_SDL2)
 	return sdl2Allocator;
 #else
 	return *mainAllocator;
@@ -149,7 +149,7 @@ namespace {
 	}
 #endif
 
-#if defined(WITH_SDL)
+#if defined(WITH_SDL2)
 	void *sdl2Allocate(size_t size)
 	{
 		return nctl::theSdl2Allocator().allocate(size);
@@ -215,7 +215,7 @@ AllocManager::AllocManager()
 
 	glfwInitAllocator(&allocator);
 #endif
-#if defined(WITH_SDL)
+#if defined(WITH_SDL2)
 	new (&sdl2Allocator) ProxyAllocator("SDL2", *mainAllocator);
 	SDL_SetMemoryFunctions(sdl2Allocate, sdl2ClearAllocate, sdl2Reallocate, sdl2Deallocate);
 #endif
@@ -236,7 +236,7 @@ AllocManager::~AllocManager()
 #if defined(WITH_GLFW) && GLFW_VERSION_COMBINED >= 3400
 	(&glfwAllocator)->~ProxyAllocator();
 #endif
-#if defined(WITH_SDL)
+#if defined(WITH_SDL2)
 	(&sdl2Allocator)->~ProxyAllocator();
 #endif
 #ifdef WITH_LUA

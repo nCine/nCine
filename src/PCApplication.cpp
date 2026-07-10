@@ -3,7 +3,7 @@
 #include "FileLogger.h"
 #include "FileSystem.h"
 
-#if defined(WITH_SDL)
+#if defined(WITH_SDL2)
 	#include <SDL.h>
 	#include "SdlGfxDevice.h"
 	#include "SdlInputManager.h"
@@ -105,7 +105,7 @@ void PCApplication::init(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandl
 	DisplayMode displayMode(8, 8, 8, 8, 24, 8, DisplayMode::DoubleBuffering::ENABLED, vSyncMode);
 
 	const IGfxDevice::WindowMode windowMode(appCfg_);
-#if defined(WITH_SDL)
+#if defined(WITH_SDL2)
 	gfxDevice_ = nctl::makeUnique<SdlGfxDevice>(windowMode, glContextInfo, displayMode);
 	inputManager_ = nctl::makeUnique<SdlInputManager>();
 #elif defined(WITH_GLFW)
@@ -155,7 +155,7 @@ void PCApplication::run()
 #endif
 }
 
-#if defined(WITH_SDL)
+#if defined(WITH_SDL2)
 void PCApplication::processEvents()
 {
 	ZoneScoped;

@@ -12,7 +12,7 @@ if(GLFW_FOUND AND NCINE_PREFERRED_BACKEND STREQUAL "GLFW")
 		${NCINE_ROOT}/src/graphics/GlfwGfxDevice.cpp
 	)
 elseif(SDL2_FOUND AND NCINE_PREFERRED_BACKEND STREQUAL "SDL2")
-	target_compile_definitions(ncine PRIVATE "WITH_SDL")
+	target_compile_definitions(ncine PRIVATE "WITH_SDL2")
 	target_link_libraries(ncine PRIVATE SDL2::SDL2)
 
 	list(APPEND PRIVATE_HEADERS
