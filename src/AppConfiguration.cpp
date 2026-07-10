@@ -263,7 +263,7 @@ void AppConfiguration::applyDefaults()
 #endif
 
 	// ----- Window -----
-#if defined(__linux__) && defined(WITH_SDL)
+#if defined(__linux__) && defined(WITH_SDL2)
 	// DPI queries do not seem to work reliably on X11 with SDL2
 	window.scaling = false;
 #endif

@@ -131,8 +131,8 @@ namespace {
 #ifdef WITH_GLFW
 		LOGD("WITH_GLFW");
 #endif
-#ifdef WITH_SDL
-		LOGD("WITH_SDL");
+#ifdef WITH_SDL2
+		LOGD("WITH_SDL2");
 #endif
 #ifdef WITH_QT5
 		LOGD("WITH_QT5");

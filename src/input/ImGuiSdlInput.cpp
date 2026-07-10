@@ -1,4 +1,4 @@
-// Based on imgui/backends/imgui_impl_sdl.cpp
+// Based on imgui/backends/imgui_impl_sdl2.cpp
 
 #include "ImGuiSdlInput.h"
 

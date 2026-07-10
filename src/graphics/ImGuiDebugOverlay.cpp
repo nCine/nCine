@@ -492,8 +492,8 @@ void ImGuiDebugOverlay::guiPreprocessorDefines()
 #ifdef WITH_GLFW
 			ImGui::TextUnformatted("WITH_GLFW");
 #endif
-#ifdef WITH_SDL
-			ImGui::TextUnformatted("WITH_SDL");
+#ifdef WITH_SDL2
+			ImGui::TextUnformatted("WITH_SDL2");
 #endif
 #ifdef WITH_QT5
 			ImGui::TextUnformatted("WITH_QT5");
@@ -1813,7 +1813,7 @@ void ImGuiDebugOverlay::guiAllocators()
 	#ifdef WITH_GLFW
 	allocators[2] = &nctl::theGlfwAllocator();
 	#endif
-	#ifdef WITH_SDL
+	#ifdef WITH_SDL2
 	allocators[3] = &nctl::theSdl2Allocator();
 	#endif
 	#ifdef WITH_IMGUI
