@@ -1,10 +1,5 @@
 #include "SdlInputManager.h"
-
-#ifdef __APPLE__
-	#include <SDL_keycode.h>
-#else
-	#include <SDL2/SDL_keycode.h>
-#endif
+#include <SDL3/SDL_keycode.h>
 
 namespace ncine {
 
@@ -22,11 +17,11 @@ KeySym SdlKeys::keySymValueToEnum(int keysym)
 		case SDLK_ESCAPE:			return KeySym::ESCAPE;
 		case SDLK_SPACE:			return KeySym::SPACE;
 		case SDLK_EXCLAIM:			return KeySym::EXCLAIM;
-		case SDLK_QUOTEDBL:			return KeySym::QUOTEDBL;
+		case SDLK_DBLAPOSTROPHE:	return KeySym::QUOTEDBL;
 		case SDLK_HASH:				return KeySym::HASH;
 		case SDLK_DOLLAR:			return KeySym::DOLLAR;
 		case SDLK_AMPERSAND:		return KeySym::AMPERSAND;
-		case SDLK_QUOTE:			return KeySym::QUOTE;
+		case SDLK_APOSTROPHE:		return KeySym::QUOTE;
 		case SDLK_LEFTPAREN:		return KeySym::LEFTPAREN;
 		case SDLK_RIGHTPAREN:		return KeySym::RIGHTPAREN;
 		case SDLK_ASTERISK:			return KeySym::ASTERISK;
@@ -58,33 +53,33 @@ KeySym SdlKeys::keySymValueToEnum(int keysym)
 		case SDLK_RIGHTBRACKET:		return KeySym::RIGHTBRACKET;
 		case SDLK_CARET:			return KeySym::CARET;
 		case SDLK_UNDERSCORE:		return KeySym::UNDERSCORE;
-		case SDLK_BACKQUOTE:		return KeySym::BACKQUOTE;
-		case SDLK_a:				return KeySym::A;
-		case SDLK_b:				return KeySym::B;
-		case SDLK_c:				return KeySym::C;
-		case SDLK_d:				return KeySym::D;
-		case SDLK_e:				return KeySym::E;
-		case SDLK_f:				return KeySym::F;
-		case SDLK_g:				return KeySym::G;
-		case SDLK_h:				return KeySym::H;
-		case SDLK_i:				return KeySym::I;
-		case SDLK_j:				return KeySym::J;
-		case SDLK_k:				return KeySym::K;
-		case SDLK_l:				return KeySym::L;
-		case SDLK_m:				return KeySym::M;
-		case SDLK_n:				return KeySym::N;
-		case SDLK_o:				return KeySym::O;
-		case SDLK_p:				return KeySym::P;
-		case SDLK_q:				return KeySym::Q;
-		case SDLK_r:				return KeySym::R;
-		case SDLK_s:				return KeySym::S;
-		case SDLK_t:				return KeySym::T;
-		case SDLK_u:				return KeySym::U;
-		case SDLK_v:				return KeySym::V;
-		case SDLK_w:				return KeySym::W;
-		case SDLK_x:				return KeySym::X;
-		case SDLK_y:				return KeySym::Y;
-		case SDLK_z:				return KeySym::Z;
+		case SDLK_GRAVE:			return KeySym::BACKQUOTE;
+		case SDLK_A:				return KeySym::A;
+		case SDLK_B:				return KeySym::B;
+		case SDLK_C:				return KeySym::C;
+		case SDLK_D:				return KeySym::D;
+		case SDLK_E:				return KeySym::E;
+		case SDLK_F:				return KeySym::F;
+		case SDLK_G:				return KeySym::G;
+		case SDLK_H:				return KeySym::H;
+		case SDLK_I:				return KeySym::I;
+		case SDLK_J:				return KeySym::J;
+		case SDLK_K:				return KeySym::K;
+		case SDLK_L:				return KeySym::L;
+		case SDLK_M:				return KeySym::M;
+		case SDLK_N:				return KeySym::N;
+		case SDLK_O:				return KeySym::O;
+		case SDLK_P:				return KeySym::P;
+		case SDLK_Q:				return KeySym::Q;
+		case SDLK_R:				return KeySym::R;
+		case SDLK_S:				return KeySym::S;
+		case SDLK_T:				return KeySym::T;
+		case SDLK_U:				return KeySym::U;
+		case SDLK_V:				return KeySym::V;
+		case SDLK_W:				return KeySym::W;
+		case SDLK_X:				return KeySym::X;
+		case SDLK_Y:				return KeySym::Y;
+		case SDLK_Z:				return KeySym::Z;
 		case SDLK_DELETE:			return KeySym::DELETE;
 
 		case SDLK_KP_0:				return KeySym::KP0;
@@ -157,23 +152,23 @@ KeySym SdlKeys::keySymValueToEnum(int keysym)
 	// clang-format on
 }
 
-int SdlKeys::keyModMaskToEnumMask(int keymod)
+int SdlKeys::keyModMaskToEnumMask(uint16_t keymod)
 {
 	int result = 0;
 
 	if (keymod != 0)
 	{
-		result |= (keymod & KMOD_LSHIFT) ? KeyMod::LSHIFT : 0;
-		result |= (keymod & KMOD_RSHIFT) ? KeyMod::RSHIFT : 0;
-		result |= (keymod & KMOD_LCTRL) ? KeyMod::LCTRL : 0;
-		result |= (keymod & KMOD_RCTRL) ? KeyMod::RCTRL : 0;
-		result |= (keymod & KMOD_LALT) ? KeyMod::LALT : 0;
-		result |= (keymod & KMOD_RALT) ? KeyMod::RALT : 0;
-		result |= (keymod & KMOD_LGUI) ? KeyMod::LSUPER : 0;
-		result |= (keymod & KMOD_RGUI) ? KeyMod::RSUPER : 0;
-		result |= (keymod & KMOD_NUM) ? KeyMod::NUM : 0;
-		result |= (keymod & KMOD_CAPS) ? KeyMod::CAPS : 0;
-		result |= (keymod & KMOD_MODE) ? KeyMod::MODE : 0;
+		result |= (keymod & SDL_KMOD_LSHIFT) ? KeyMod::LSHIFT : 0;
+		result |= (keymod & SDL_KMOD_RSHIFT) ? KeyMod::RSHIFT : 0;
+		result |= (keymod & SDL_KMOD_LCTRL) ? KeyMod::LCTRL : 0;
+		result |= (keymod & SDL_KMOD_RCTRL) ? KeyMod::RCTRL : 0;
+		result |= (keymod & SDL_KMOD_LALT) ? KeyMod::LALT : 0;
+		result |= (keymod & SDL_KMOD_RALT) ? KeyMod::RALT : 0;
+		result |= (keymod & SDL_KMOD_LGUI) ? KeyMod::LSUPER : 0;
+		result |= (keymod & SDL_KMOD_RGUI) ? KeyMod::RSUPER : 0;
+		result |= (keymod & SDL_KMOD_NUM) ? KeyMod::NUM : 0;
+		result |= (keymod & SDL_KMOD_CAPS) ? KeyMod::CAPS : 0;
+		result |= (keymod & SDL_KMOD_MODE) ? KeyMod::MODE : 0;
 	}
 
 	return result;
@@ -193,11 +188,11 @@ int SdlKeys::enumToKeySymValue(KeySym keysym)
 		case KeySym::ESCAPE:			return SDLK_ESCAPE;
 		case KeySym::SPACE:				return SDLK_SPACE;
 		case KeySym::EXCLAIM:			return SDLK_EXCLAIM;
-		case KeySym::QUOTEDBL:			return SDLK_QUOTEDBL;
+		case KeySym::QUOTEDBL:			return SDLK_DBLAPOSTROPHE;
 		case KeySym::HASH:				return SDLK_HASH;
 		case KeySym::DOLLAR:			return SDLK_DOLLAR;
 		case KeySym::AMPERSAND:			return SDLK_AMPERSAND;
-		case KeySym::QUOTE:				return SDLK_QUOTE;
+		case KeySym::QUOTE:				return SDLK_APOSTROPHE;
 		case KeySym::LEFTPAREN:			return SDLK_LEFTPAREN;
 		case KeySym::RIGHTPAREN:		return SDLK_RIGHTPAREN;
 		case KeySym::ASTERISK:			return SDLK_ASTERISK;
@@ -229,33 +224,33 @@ int SdlKeys::enumToKeySymValue(KeySym keysym)
 		case KeySym::RIGHTBRACKET:		return SDLK_RIGHTBRACKET;
 		case KeySym::CARET:				return SDLK_CARET;
 		case KeySym::UNDERSCORE:		return SDLK_UNDERSCORE;
-		case KeySym::BACKQUOTE:			return SDLK_BACKQUOTE;
-		case KeySym::A:					return SDLK_a;
-		case KeySym::B:					return SDLK_b;
-		case KeySym::C:					return SDLK_c;
-		case KeySym::D:					return SDLK_d;
-		case KeySym::E:					return SDLK_e;
-		case KeySym::F:					return SDLK_f;
-		case KeySym::G:					return SDLK_g;
-		case KeySym::H:					return SDLK_h;
-		case KeySym::I:					return SDLK_i;
-		case KeySym::J:					return SDLK_j;
-		case KeySym::K:					return SDLK_k;
-		case KeySym::L:					return SDLK_l;
-		case KeySym::M:					return SDLK_m;
-		case KeySym::N:					return SDLK_n;
-		case KeySym::O:					return SDLK_o;
-		case KeySym::P:					return SDLK_p;
-		case KeySym::Q:					return SDLK_q;
-		case KeySym::R:					return SDLK_r;
-		case KeySym::S:					return SDLK_s;
-		case KeySym::T:					return SDLK_t;
-		case KeySym::U:					return SDLK_u;
-		case KeySym::V:					return SDLK_v;
-		case KeySym::W:					return SDLK_w;
-		case KeySym::X:					return SDLK_x;
-		case KeySym::Y:					return SDLK_y;
-		case KeySym::Z:					return SDLK_z;
+		case KeySym::BACKQUOTE:			return SDLK_GRAVE;
+		case KeySym::A:					return SDLK_A;
+		case KeySym::B:					return SDLK_B;
+		case KeySym::C:					return SDLK_C;
+		case KeySym::D:					return SDLK_D;
+		case KeySym::E:					return SDLK_E;
+		case KeySym::F:					return SDLK_F;
+		case KeySym::G:					return SDLK_G;
+		case KeySym::H:					return SDLK_H;
+		case KeySym::I:					return SDLK_I;
+		case KeySym::J:					return SDLK_J;
+		case KeySym::K:					return SDLK_K;
+		case KeySym::L:					return SDLK_L;
+		case KeySym::M:					return SDLK_M;
+		case KeySym::N:					return SDLK_N;
+		case KeySym::O:					return SDLK_O;
+		case KeySym::P:					return SDLK_P;
+		case KeySym::Q:					return SDLK_Q;
+		case KeySym::R:					return SDLK_R;
+		case KeySym::S:					return SDLK_S;
+		case KeySym::T:					return SDLK_T;
+		case KeySym::U:					return SDLK_U;
+		case KeySym::V:					return SDLK_V;
+		case KeySym::W:					return SDLK_W;
+		case KeySym::X:					return SDLK_X;
+		case KeySym::Y:					return SDLK_Y;
+		case KeySym::Z:					return SDLK_Z;
 		case KeySym::DELETE:			return SDLK_DELETE;
 
 		case KeySym::KP0:				return SDLK_KP_0;

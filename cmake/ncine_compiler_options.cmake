@@ -52,6 +52,10 @@ if(EMSCRIPTEN)
 		target_link_libraries(ncine PUBLIC GLFW::GLFW)
 	endif()
 
+	if(SDL3_FOUND)
+		target_link_libraries(ncine PUBLIC SDL3::SDL3)
+	endif()
+
 	if(SDL2_FOUND)
 		target_link_libraries(ncine PUBLIC SDL2::SDL2)
 	endif()

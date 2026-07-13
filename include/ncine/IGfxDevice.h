@@ -276,7 +276,7 @@ class DLL_PUBLIC IGfxDevice
 	bool scaleWindowSize(bool windowScaling);
 
 	friend class Application;
-#if defined(WITH_SDL2)
+#if defined(WITH_SDL2) || defined(WITH_SDL3)
 	friend class PCApplication;
 #endif
 

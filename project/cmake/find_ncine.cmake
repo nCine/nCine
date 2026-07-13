@@ -87,6 +87,9 @@ if(EXISTS ${NCINE_CONFIG_H})
 		elseif(NCINE_CONFIG_STRING STREQUAL "#define NCINE_WITH_GLFW 1")
 			set(NCINE_WITH_GLFW ON)
 			message(STATUS "NCINE_WITH_GLFW: " ${NCINE_WITH_GLFW})
+		elseif(NCINE_CONFIG_STRING STREQUAL "#define NCINE_WITH_SDL3 1")
+			set(NCINE_WITH_SDL3 ON)
+			message(STATUS "NCINE_WITH_SDL3: " ${NCINE_WITH_SDL3})
 		elseif(NCINE_CONFIG_STRING STREQUAL "#define NCINE_WITH_SDL2 1")
 			set(NCINE_WITH_SDL2 ON)
 			message(STATUS "NCINE_WITH_SDL2: " ${NCINE_WITH_SDL2})
@@ -185,7 +188,7 @@ if(MSVC)
 	endif()
 
 	find_path(MSVC_BINDIR
-		NAMES glfw3.dll SDL2.dll
+		NAMES glfw3.dll SDL2.dll SDL3.dll
 		PATHS ${NCINE_LOCATION_DIR} ${NCINE_EXTERNAL_DIR} ${PARENT_SOURCE_DIR}/nCine-external ${PARENT_BINARY_DIR}/nCine-external
 		PATH_SUFFIXES bin bin/${MSVC_ARCH_SUFFIX}
 		DOC "Path to the nCine external MSVC DLL libraries directory"
@@ -193,7 +196,7 @@ if(MSVC)
 
 	if(NOT NCINE_DYNAMIC_LIBRARY)
 		find_path(MSVC_LIBDIR
-			NAMES glfw3.lib SDL2.lib
+			NAMES glfw3.lib SDL2.lib SDL3.lib
 			PATHS ${NCINE_EXTERNAL_DIR} ${PARENT_SOURCE_DIR}/nCine-external ${PARENT_BINARY_DIR}/nCine-external
 			PATH_SUFFIXES lib/${MSVC_ARCH_SUFFIX}
 			DOC "Path to the nCine external MSVC import libraries directory"
@@ -216,7 +219,7 @@ if(MSVC)
 	endif()
 elseif(APPLE)
 	find_path(FRAMEWORKS_DIR
-		NAMES glfw.framework sdl2.framework
+		NAMES glfw.framework sdl2.framework sdl3.framework
 		PATHS ${NCINE_LOCATION_DIR}/../../Frameworks ${NCINE_EXTERNAL_DIR} ${PARENT_SOURCE_DIR}/nCine-external ${PARENT_BINARY_DIR}/nCine-external
 		PATH_SUFFIXES bin/${ARCH_SUFFIX}
 		DOC "Path to the nCine frameworks directory")

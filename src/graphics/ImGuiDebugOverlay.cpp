@@ -492,6 +492,9 @@ void ImGuiDebugOverlay::guiPreprocessorDefines()
 #ifdef WITH_GLFW
 			ImGui::TextUnformatted("WITH_GLFW");
 #endif
+#ifdef WITH_SDL3
+			ImGui::TextUnformatted("WITH_SDL3");
+#endif
 #ifdef WITH_SDL2
 			ImGui::TextUnformatted("WITH_SDL2");
 #endif
@@ -1806,15 +1809,15 @@ void ImGuiDebugOverlay::guiAllocators()
 {
 #ifdef WITH_ALLOCATORS
 	const unsigned int NumAllocators = 7;
-	const char *allocatorNames[NumAllocators] = { "Default", "String", "GLFW", "SDL2", "ImGui", "Nuklear", "Lua" };
+	const char *allocatorNames[NumAllocators] = { "Default", "String", "GLFW", "SDL", "ImGui", "Nuklear", "Lua" };
 	nctl::IAllocator *allocators[NumAllocators] = { &nctl::theDefaultAllocator(), &nctl::theStringAllocator(),
 	                                                nullptr, nullptr, nullptr, nullptr, nullptr };
 
 	#ifdef WITH_GLFW
 	allocators[2] = &nctl::theGlfwAllocator();
 	#endif
-	#ifdef WITH_SDL2
-	allocators[3] = &nctl::theSdl2Allocator();
+	#if defined(WITH_SDL2) || defined(WITH_SDL3)
+	allocators[3] = &nctl::theSdlAllocator();
 	#endif
 	#ifdef WITH_IMGUI
 	allocators[4] = &nctl::theImGuiAllocator();

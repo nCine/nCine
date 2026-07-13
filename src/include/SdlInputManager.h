@@ -4,7 +4,12 @@
 #include "IInputManager.h"
 #include <nctl/StaticArray.h>
 
+#ifdef WITH_SDL2
 typedef struct _SDL_Joystick SDL_Joystick;
+#else
+typedef struct SDL_Joystick SDL_Joystick;
+typedef uint32_t SDL_JoystickID;
+#endif
 union SDL_Event;
 
 namespace ncine {
@@ -14,7 +19,11 @@ class SdlKeys
 {
   public:
 	static KeySym keySymValueToEnum(int keysym);
+#ifdef WITH_SDL2
 	static int keyModMaskToEnumMask(int keymod);
+#else
+	static int keyModMaskToEnumMask(uint16_t keymod);
+#endif
 	static int enumToKeySymValue(KeySym keysym);
 	static int enumToScancode(KeySym keysym);
 };
@@ -61,8 +70,13 @@ class SdlKeyboardState : public KeyboardState
 	static const unsigned int MaxKeyStateArrayLength = 512;
 
 	int keyStateArrayLength_;
+#ifdef WITH_SDL2
 	const unsigned char *keyState_;
 	unsigned char prevKeyState_[MaxKeyStateArrayLength];
+#else
+	const bool *keyState_;
+	bool prevKeyState_[MaxKeyStateArrayLength];
+#endif
 
 	void copyKeyStateToPrev();
 
@@ -87,7 +101,11 @@ class SdlJoystickState : public JoystickState
 	static const unsigned int MaxNumButtons = 32;
 
 	SDL_Joystick *sdlJoystick_;
+#ifdef WITH_SDL2
 	unsigned char prevButtonState_[MaxNumButtons];
+#else
+	bool prevButtonState_[MaxNumButtons];
+#endif
 
 	void copyButtonStateToPrev();
 	void resetPrevButtonState();
@@ -142,6 +160,11 @@ class SdlInputManager : public IInputManager
 	static JoyAxisEvent joyAxisEvent_;
 	static JoyConnectionEvent joyConnectionEvent_;
 
+#ifdef WITH_SDL3
+	static int joystickIDCount_;
+	static SDL_JoystickID *joystickIDs_;
+#endif
+
 	static char joyGuidString_[33];
 
 	/// Deleted copy constructor
@@ -150,7 +173,9 @@ class SdlInputManager : public IInputManager
 	SdlInputManager &operator=(const SdlInputManager &) = delete;
 
 	static void handleJoyDeviceEvent(const SDL_Event &event);
+#ifdef WITH_SDL2
 	static int joyInstanceIdToDeviceIndex(int32_t instanceId);
+#endif
 };
 
 }

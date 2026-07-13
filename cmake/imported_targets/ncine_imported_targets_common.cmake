@@ -32,8 +32,9 @@ if(NOT MSVC AND NOT ANDROID)
 		include(check_atomic)
 		find_package(OpenGLES2)
 	endif()
-	# Look for both GLFW and SDL2 to make the fallback logic work
+	# Look for GLFW, SDL3, and SDL2 to make the fallback logic work
 	find_package(GLFW)
+	find_package(SDL3)
 	find_package(SDL2)
 	if(NCINE_WITH_PNG)
 		find_package(PNG)

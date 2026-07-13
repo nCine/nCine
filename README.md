@@ -81,7 +81,7 @@ Copyright (c) 2011-2026 Angelo Theodorou.
 ### Dependencies
 
 - GLEW
-- GLFW 3.x, SDL 2, Qt 5
+- GLFW 3.x, SDL 2, SDL 3, Qt 5
 - libpng, libwebp
 - OpenAL-soft, libogg, libvorbis, libvorbisfile
 - Lua 5.5

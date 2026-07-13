@@ -19,7 +19,7 @@
 
 #if defined(WITH_GLFW)
 	#include "ImGuiGlfwInput.h"
-#elif defined(WITH_SDL2)
+#elif defined(WITH_SDL2) || defined(WITH_SDL3)
 	#include "ImGuiSdlInput.h"
 #elif defined(WITH_QT5)
 	#include "ImGuiQt5Input.h"
@@ -123,7 +123,7 @@ void ImGuiDrawing::newFrame()
 {
 #if defined(WITH_GLFW)
 	ImGuiGlfwInput::newFrame();
-#elif defined(WITH_SDL2)
+#elif defined(WITH_SDL2) || defined(WITH_SDL3)
 	ImGuiSdlInput::newFrame();
 #elif defined(WITH_QT5)
 	ImGuiQt5Input::newFrame();

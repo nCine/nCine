@@ -11,6 +11,19 @@ if(GLFW_FOUND AND NCINE_PREFERRED_BACKEND STREQUAL "GLFW")
 		${NCINE_ROOT}/src/input/GlfwKeys.cpp
 		${NCINE_ROOT}/src/graphics/GlfwGfxDevice.cpp
 	)
+elseif(SDL3_FOUND AND NCINE_PREFERRED_BACKEND STREQUAL "SDL3")
+	target_compile_definitions(ncine PRIVATE "WITH_SDL3")
+	target_link_libraries(ncine PRIVATE SDL3::SDL3)
+
+	list(APPEND PRIVATE_HEADERS
+		${NCINE_ROOT}/src/include/SdlInputManager.h
+		${NCINE_ROOT}/src/include/SdlGfxDevice.h
+	)
+	list(APPEND SOURCES
+		${NCINE_ROOT}/src/input/Sdl3InputManager.cpp
+		${NCINE_ROOT}/src/input/Sdl3Keys.cpp
+		${NCINE_ROOT}/src/graphics/Sdl3GfxDevice.cpp
+	)
 elseif(SDL2_FOUND AND NCINE_PREFERRED_BACKEND STREQUAL "SDL2")
 	target_compile_definitions(ncine PRIVATE "WITH_SDL2")
 	target_link_libraries(ncine PRIVATE SDL2::SDL2)
@@ -20,9 +33,9 @@ elseif(SDL2_FOUND AND NCINE_PREFERRED_BACKEND STREQUAL "SDL2")
 		${NCINE_ROOT}/src/include/SdlGfxDevice.h
 	)
 	list(APPEND SOURCES
-		${NCINE_ROOT}/src/input/SdlInputManager.cpp
-		${NCINE_ROOT}/src/input/SdlKeys.cpp
-		${NCINE_ROOT}/src/graphics/SdlGfxDevice.cpp
+		${NCINE_ROOT}/src/input/Sdl2InputManager.cpp
+		${NCINE_ROOT}/src/input/Sdl2Keys.cpp
+		${NCINE_ROOT}/src/graphics/Sdl2GfxDevice.cpp
 	)
 elseif(Qt5_FOUND AND NCINE_PREFERRED_BACKEND STREQUAL "QT5")
 	target_compile_definitions(ncine PRIVATE "WITH_QT5")

@@ -3,8 +3,13 @@
 #include "FileLogger.h"
 #include "FileSystem.h"
 
-#if defined(WITH_SDL2)
-	#include <SDL.h>
+#if defined(WITH_SDL2) || defined(WITH_SDL3)
+	#if defined(WITH_SDL2)
+		#include <SDL.h>
+	#elif defined(WITH_SDL3)
+		#include <SDL3/SDL.h>
+	#endif
+
 	#include "SdlGfxDevice.h"
 	#include "SdlInputManager.h"
 	#ifdef WITH_NUKLEAR
@@ -105,7 +110,7 @@ void PCApplication::init(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandl
 	DisplayMode displayMode(8, 8, 8, 8, 24, 8, DisplayMode::DoubleBuffering::ENABLED, vSyncMode);
 
 	const IGfxDevice::WindowMode windowMode(appCfg_);
-#if defined(WITH_SDL2)
+#if defined(WITH_SDL2) || defined(WITH_SDL3)
 	gfxDevice_ = nctl::makeUnique<SdlGfxDevice>(windowMode, glContextInfo, displayMode);
 	inputManager_ = nctl::makeUnique<SdlInputManager>();
 #elif defined(WITH_GLFW)
@@ -155,7 +160,7 @@ void PCApplication::run()
 #endif
 }
 
-#if defined(WITH_SDL2)
+#if defined(WITH_SDL2) || defined(WITH_SDL3)
 void PCApplication::processEvents()
 {
 	ZoneScoped;
@@ -180,6 +185,7 @@ void PCApplication::processEvents()
 
 	while (SDL_PollEvent(&event))
 	{
+	#ifdef WITH_SDL2
 		switch (event.type)
 		{
 			case SDL_QUIT:
@@ -198,13 +204,13 @@ void PCApplication::processEvents()
 					SDL_Window *windowHandle = SDL_GetWindowFromID(event.window.windowID);
 					SDL_GL_GetDrawableSize(windowHandle, &gfxDevice_->drawableWidth_, &gfxDevice_->drawableHeight_);
 					// With `SDL_HINT_WINDOWS_DPI_SCALING`, the event data will contain pre-scaled width and height
-	#ifndef __APPLE__
+		#ifndef __APPLE__
 					const int newWidth = gfxDevice_->drawableWidth_;
 					const int newHeight = gfxDevice_->drawableHeight_;
-	#else
+		#else
 					const int newWidth = event.window.data1;
 					const int newHeight = event.window.data2;
-	#endif
+		#endif
 					gfxDevice_->width_ = newWidth;
 					gfxDevice_->height_ = newHeight;
 					gfxDevice_->isFullscreen_ = SDL_GetWindowFlags(windowHandle) & SDL_WINDOW_FULLSCREEN;
@@ -223,6 +229,58 @@ void PCApplication::processEvents()
 				SdlInputManager::parseEvent(event);
 				break;
 		}
+	#elif WITH_SDL3
+		switch (event.type)
+		{
+			case SDL_EVENT_QUIT:
+				shouldQuit_ = SdlInputManager::shouldQuitOnRequest();
+				break;
+			case SDL_EVENT_DISPLAY_ADDED:
+			case SDL_EVENT_DISPLAY_REMOVED:
+			case SDL_EVENT_DISPLAY_MOVED:
+			case SDL_EVENT_DISPLAY_ORIENTATION:
+			case SDL_EVENT_DISPLAY_DESKTOP_MODE_CHANGED:
+			case SDL_EVENT_DISPLAY_CURRENT_MODE_CHANGED:
+			case SDL_EVENT_DISPLAY_CONTENT_SCALE_CHANGED:
+			case SDL_EVENT_DISPLAY_USABLE_BOUNDS_CHANGED:
+				gfxDevice_->updateMonitors();
+				break;
+			case SDL_EVENT_WINDOW_FOCUS_GAINED:
+				setFocus(true);
+				break;
+			case SDL_EVENT_WINDOW_FOCUS_LOST:
+				setFocus(false);
+				break;
+			case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+			{
+				SDL_Window *windowHandle = SDL_GetWindowFromID(event.window.windowID);
+				SDL_GetWindowSizeInPixels(windowHandle, &gfxDevice_->drawableWidth_, &gfxDevice_->drawableHeight_);
+				// With `SDL_HINT_WINDOWS_DPI_SCALING`, the event data will contain pre-scaled width and height
+		#ifndef __APPLE__
+				const int newWidth = gfxDevice_->drawableWidth_;
+				const int newHeight = gfxDevice_->drawableHeight_;
+		#else
+				const int newWidth = event.window.data1;
+				const int newHeight = event.window.data2;
+		#endif
+				gfxDevice_->width_ = newWidth;
+				gfxDevice_->height_ = newHeight;
+				gfxDevice_->isFullscreen_ = SDL_GetWindowFlags(windowHandle) & SDL_WINDOW_FULLSCREEN;
+				resizeScreenViewport(newWidth, newHeight);
+			}
+				break;
+			case SDL_EVENT_WINDOW_RESIZED:
+				if (gfxDevice_->backendScalesWindowSize_)
+				{
+					// Check if the scale factor has changed and the callback needs to be invoked
+					updateScalingFactor();
+				}
+				break;
+			default:
+				SdlInputManager::parseEvent(event);
+				break;
+		}
+	#endif
 	}
 
 	#ifdef WITH_NUKLEAR
