@@ -1,20 +1,18 @@
-#include <cstring> // for memset()
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include <nctl/CString.h>
 
 #include "common_macros.h"
 #include "SdlInputManager.h"
+#include "SdlGfxDevice.h"
 #include "IInputEventHandler.h"
 #include "Application.h"
 #include "JoyMapping.h"
 
 #ifdef WITH_IMGUI
-	#include "SdlGfxDevice.h"
 	#include "ImGuiSdlInput.h"
 #endif
 
 #ifdef WITH_NUKLEAR
-	#include "SdlGfxDevice.h"
 	#include "NuklearSdlInput.h"
 #endif
 
@@ -42,9 +40,29 @@ JoyHatEvent SdlInputManager::joyHatEvent_;
 JoyAxisEvent SdlInputManager::joyAxisEvent_;
 JoyConnectionEvent SdlInputManager::joyConnectionEvent_;
 
+int SdlInputManager::joystickIDCount_ = 0;
+SDL_JoystickID *SdlInputManager::joystickIDs_ = nullptr;
 char SdlInputManager::joyGuidString_[33];
 
 namespace {
+
+	int getJoystickIndex(const SDL_JoystickID *joystickIDs, int joystickIDCount, SDL_JoystickID joystickID)
+	{
+		int joystickIndex = -1;
+		if (joystickID != 0)
+		{
+			for (int i = 0; i < joystickIDCount; i++)
+			{
+				if (joystickIDs[i] == joystickID)
+				{
+					joystickIndex = i;
+					break;
+				}
+			}
+		}
+
+		return joystickIndex;
+	}
 
 	MouseButton sdlToNcineMouseButton(int button)
 	{
@@ -123,7 +141,8 @@ SdlKeyboardState::SdlKeyboardState()
 	keyState_ = SDL_GetKeyboardState(&keyStateArrayLength_);
 	FATAL_ASSERT(keyStateArrayLength_ <= MaxKeyStateArrayLength);
 
-	memset(prevKeyState_, 0, keyStateArrayLength_);
+	for (unsigned int i = 0; i < keyStateArrayLength_; i++)
+		prevKeyState_[i] = false;
 }
 
 bool SdlKeyboardState::isKeyDown(KeySym key) const
@@ -132,7 +151,7 @@ bool SdlKeyboardState::isKeyDown(KeySym key) const
 	if (sdlKey == SDL_SCANCODE_UNKNOWN)
 		return false;
 	else
-		return keyState_[sdlKey] != 0;
+		return keyState_[sdlKey];
 }
 
 bool SdlKeyboardState::isKeyPressed(KeySym key) const
@@ -141,7 +160,7 @@ bool SdlKeyboardState::isKeyPressed(KeySym key) const
 	if (sdlKey == SDL_SCANCODE_UNKNOWN)
 		return false;
 	else
-		return (keyState_[sdlKey] != 0 && prevKeyState_[sdlKey] == 0);
+		return (keyState_[sdlKey] == true && prevKeyState_[sdlKey] == false);
 }
 
 bool SdlKeyboardState::isKeyReleased(KeySym key) const
@@ -150,12 +169,13 @@ bool SdlKeyboardState::isKeyReleased(KeySym key) const
 	if (sdlKey == SDL_SCANCODE_UNKNOWN)
 		return false;
 	else
-		return (keyState_[sdlKey] == 0 && prevKeyState_[sdlKey] != 0);
+		return (keyState_[sdlKey] == false && prevKeyState_[sdlKey] == true);
 }
 
 void SdlKeyboardState::copyKeyStateToPrev()
 {
-	memcpy(prevKeyState_, keyState_, keyStateArrayLength_ * sizeof(unsigned char));
+	for (unsigned int i = 0; i < keyStateArrayLength_; i++)
+		prevKeyState_[i] = keyState_[i];
 }
 
 ///////////////////////////////////////////////////////////
@@ -165,14 +185,15 @@ void SdlKeyboardState::copyKeyStateToPrev()
 SdlJoystickState::SdlJoystickState()
     : sdlJoystick_(nullptr)
 {
-	memset(prevButtonState_, 0, MaxNumButtons * sizeof(unsigned char));
+	for (unsigned int i = 0; i < MaxNumButtons; i++)
+		prevButtonState_[i] = false;
 }
 
 bool SdlJoystickState::isButtonDown(int buttonId) const
 {
 	bool isDown = false;
 	if (sdlJoystick_ != nullptr)
-		isDown = SDL_JoystickGetButton(sdlJoystick_, buttonId) != 0;
+		isDown = SDL_GetJoystickButton(sdlJoystick_, buttonId);
 	return isDown;
 }
 
@@ -181,7 +202,7 @@ bool SdlJoystickState::isButtonPressed(int buttonId) const
 	ASSERT(buttonId < static_cast<int>(MaxNumButtons));
 	bool isPressed = false;
 	if (buttonId >= 0 && buttonId < static_cast<int>(MaxNumButtons))
-		isPressed = (SDL_JoystickGetButton(sdlJoystick_, buttonId) != 0 && prevButtonState_[buttonId] == 0);
+		isPressed = (SDL_GetJoystickButton(sdlJoystick_, buttonId) == true && prevButtonState_[buttonId] == false);
 	return isPressed;
 }
 
@@ -190,7 +211,7 @@ bool SdlJoystickState::isButtonReleased(int buttonId) const
 	ASSERT(buttonId < static_cast<int>(MaxNumButtons));
 	bool isReleased = false;
 	if (buttonId >= 0 && buttonId < static_cast<int>(MaxNumButtons))
-		isReleased = (SDL_JoystickGetButton(sdlJoystick_, buttonId) == 0 && prevButtonState_[buttonId] != 0);
+		isReleased = (SDL_GetJoystickButton(sdlJoystick_, buttonId) == false && prevButtonState_[buttonId] == true);
 	return isReleased;
 }
 
@@ -198,7 +219,7 @@ unsigned char SdlJoystickState::hatState(int hatId) const
 {
 	unsigned char hatState = 0;
 	if (sdlJoystick_ != nullptr)
-		hatState = SDL_JoystickGetHat(sdlJoystick_, hatId);
+		hatState = SDL_GetJoystickHat(sdlJoystick_, hatId);
 
 	return hatState;
 }
@@ -207,7 +228,7 @@ short int SdlJoystickState::axisValue(int axisId) const
 {
 	short int axisValue = 0;
 	if (sdlJoystick_ != nullptr)
-		axisValue = SDL_JoystickGetAxis(sdlJoystick_, axisId);
+		axisValue = SDL_GetJoystickAxis(sdlJoystick_, axisId);
 	return axisValue;
 }
 
@@ -222,12 +243,13 @@ float SdlJoystickState::axisNormValue(int axisId) const
 void SdlJoystickState::copyButtonStateToPrev()
 {
 	for (unsigned int i = 0; i < MaxNumButtons; i++)
-		prevButtonState_[i] = SDL_JoystickGetButton(sdlJoystick_, i);
+		prevButtonState_[i] = SDL_GetJoystickButton(sdlJoystick_, i);
 }
 
 void SdlJoystickState::resetPrevButtonState()
 {
-	memset(prevButtonState_, 0, MaxNumButtons);
+	for (unsigned int i = 0; i < MaxNumButtons; i++)
+		prevButtonState_[i] = false;
 }
 
 ///////////////////////////////////////////////////////////
@@ -236,26 +258,26 @@ void SdlJoystickState::resetPrevButtonState()
 
 SdlInputManager::SdlInputManager()
 {
-	const unsigned int ret = SDL_WasInit(SDL_INIT_VIDEO);
-	FATAL_ASSERT_MSG(ret != 0, "SDL video subsystem is not initialized");
+	const SDL_InitFlags flags = SDL_WasInit(SDL_INIT_VIDEO);
+	FATAL_ASSERT_MSG((flags & SDL_INIT_VIDEO) != 0, "SDL video subsystem is not initialized");
 
 	// Initializing the joystick subsystem
 	SDL_InitSubSystem(SDL_INIT_JOYSTICK);
 	// Enabling joystick event processing
-	SDL_JoystickEventState(SDL_ENABLE);
+	SDL_SetJoystickEventsEnabled(true);
 
 	memset(sdlJoysticks_, 0, sizeof(SDL_Joystick *) * MaxNumJoysticks);
 
 	// Opening attached joysticks
-	const int numJoysticks = SDL_NumJoysticks();
-	for (int i = 0; i < numJoysticks; i++)
+	joystickIDs_ = SDL_GetJoysticks(&joystickIDCount_);
+	for (int i = 0; i < joystickIDCount_; i++)
 	{
-		sdlJoysticks_[i] = SDL_JoystickOpen(i);
+		sdlJoysticks_[i] = SDL_OpenJoystick(joystickIDs_[i]);
 		if (sdlJoysticks_[i])
 		{
 			SDL_Joystick *sdlJoy = sdlJoysticks_[i];
 			LOGI_X("Joystick %d \"%s\" - %d hats, %d axes, %d buttons, %d balls",
-			       i, SDL_JoystickName(sdlJoy), SDL_JoystickNumHats(sdlJoy), SDL_JoystickNumAxes(sdlJoy), SDL_JoystickNumButtons(sdlJoy), SDL_JoystickNumBalls(sdlJoy));
+			       i, SDL_GetJoystickName(sdlJoy), SDL_GetNumJoystickHats(sdlJoy), SDL_GetNumJoystickAxes(sdlJoy), SDL_GetNumJoystickButtons(sdlJoy), SDL_GetNumJoystickBalls(sdlJoy));
 		}
 	}
 
@@ -285,10 +307,14 @@ SdlInputManager::~SdlInputManager()
 	{
 		if (isJoyPresent(i))
 		{
-			SDL_JoystickClose(sdlJoysticks_[i]);
+			SDL_CloseJoystick(sdlJoysticks_[i]);
 			sdlJoysticks_[i] = nullptr;
 		}
 	}
+
+	SDL_free(joystickIDs_);
+	joystickIDs_ = nullptr;
+	joystickIDCount_ = 0;
 
 	SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 }
@@ -330,7 +356,7 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 	if (inputEventHandler_ == nullptr)
 		return;
 
-	if (event.type == SDL_JOYDEVICEADDED || event.type == SDL_JOYDEVICEREMOVED)
+	if (event.type == SDL_EVENT_JOYSTICK_ADDED || event.type == SDL_EVENT_JOYSTICK_REMOVED)
 	{
 		handleJoyDeviceEvent(event);
 		return;
@@ -339,22 +365,22 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 	// Filling static event structures
 	switch (event.type)
 	{
-		case SDL_KEYDOWN:
-		case SDL_KEYUP:
-			keyboardEvent_.scancode = event.key.keysym.scancode;
-			keyboardEvent_.sym = SdlKeys::keySymValueToEnum(event.key.keysym.sym);
-			keyboardEvent_.mod = SdlKeys::keyModMaskToEnumMask(event.key.keysym.mod);
+		case SDL_EVENT_KEY_DOWN:
+		case SDL_EVENT_KEY_UP:
+			keyboardEvent_.scancode = event.key.scancode;
+			keyboardEvent_.sym = SdlKeys::keySymValueToEnum(event.key.key);
+			keyboardEvent_.mod = SdlKeys::keyModMaskToEnumMask(event.key.mod);
 			break;
-		case SDL_TEXTINPUT:
+		case SDL_EVENT_TEXT_INPUT:
 			nctl::strncpy(textInputEvent_.text, event.text.text, 4);
 			break;
-		case SDL_MOUSEBUTTONDOWN:
-		case SDL_MOUSEBUTTONUP:
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
+		case SDL_EVENT_MOUSE_BUTTON_UP:
 			mouseEvent_.x = event.button.x;
 			mouseEvent_.y = theApplication().heightInt() - event.button.y;
 			mouseEvent_.button = sdlToNcineMouseButton(event.button.button);
 			break;
-		case SDL_MOUSEMOTION:
+		case SDL_EVENT_MOUSE_MOTION:
 			if (mouseCursorMode_ != MouseCursorMode::DISABLED)
 			{
 				mouseState_.x = event.motion.x;
@@ -367,53 +393,56 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 			}
 			mouseState_.buttons_[mouseState_.currentStateIndex_] = event.motion.state;
 			break;
-		case SDL_MOUSEWHEEL:
+		case SDL_EVENT_MOUSE_WHEEL:
 			scrollEvent_.x = static_cast<float>(event.wheel.x);
 			scrollEvent_.y = static_cast<float>(event.wheel.y);
 			break;
-		case SDL_JOYBUTTONDOWN:
-		case SDL_JOYBUTTONUP:
-			joyButtonEvent_.joyId = joyInstanceIdToDeviceIndex(event.jbutton.which);
+		case SDL_EVENT_JOYSTICK_BUTTON_DOWN:
+		case SDL_EVENT_JOYSTICK_BUTTON_UP:
+			joyButtonEvent_.joyId = getJoystickIndex(joystickIDs_, joystickIDCount_, event.jbutton.which);
 			joyButtonEvent_.buttonId = event.jbutton.button;
 			break;
-		case SDL_JOYAXISMOTION:
-			joyAxisEvent_.joyId = joyInstanceIdToDeviceIndex(event.jaxis.which);
+		case SDL_EVENT_JOYSTICK_AXIS_MOTION:
+			joyAxisEvent_.joyId = getJoystickIndex(joystickIDs_, joystickIDCount_, event.jaxis.which);
 			joyAxisEvent_.axisId = event.jaxis.axis;
 			joyAxisEvent_.value = event.jaxis.value;
 			joyAxisEvent_.normValue = joyAxisEvent_.value / float(MaxAxisValue);
 			break;
-		case SDL_JOYHATMOTION:
-			joyHatEvent_.joyId = joyInstanceIdToDeviceIndex(event.jhat.which);
+		case SDL_EVENT_JOYSTICK_HAT_MOTION:
+			joyHatEvent_.joyId = getJoystickIndex(joystickIDs_, joystickIDCount_, event.jhat.which);
 			joyHatEvent_.hatId = event.jhat.hat;
 			joyHatEvent_.hatState = event.jhat.value;
 			break;
-		case SDL_FINGERDOWN:
-		case SDL_FINGERMOTION:
-		case SDL_FINGERUP:
-			touchEvent_.count = SDL_GetNumTouchFingers(event.tfinger.touchId);
-			for (unsigned int i = 0; i < touchEvent_.count; i++)
+		case SDL_EVENT_FINGER_DOWN:
+		case SDL_EVENT_FINGER_MOTION:
+		case SDL_EVENT_FINGER_UP:
+		{
+			int fingerCount = 0;
+			SDL_Finger **fingers = SDL_GetTouchFingers(event.tfinger.touchID, &fingerCount);
+			touchEvent_.count = fingerCount;
+			for (int i = 0; i < fingerCount; i++)
 			{
-				SDL_Finger *finger = SDL_GetTouchFinger(event.tfinger.touchId, i);
+				SDL_Finger *finger = fingers[i];
 				TouchEvent::Pointer &pointer = touchEvent_.pointers[i];
 				pointer.id = static_cast<int>(finger->id);
 				pointer.x = theApplication().width() * finger->x;
 				pointer.y = theApplication().height() * (1.0f - finger->y);
 				pointer.pressure = finger->pressure;
 			}
+		}
 			break;
-		case SDL_DROPBEGIN:
+		case SDL_EVENT_DROP_BEGIN:
 			dropEvent_.numPaths = 0;
 			break;
-		case SDL_DROPTEXT:
-		case SDL_DROPFILE:
+		case SDL_EVENT_DROP_TEXT:
+		case SDL_EVENT_DROP_FILE:
 			// Skip long paths instead of truncating them
 			if (dropEvent_.numPaths < DropEvent::MaxNumPaths &&
-			    nctl::strnlen(event.drop.file, DropEvent::MaxPathLength) < DropEvent::MaxPathLength - 1)
+			    nctl::strnlen(event.drop.data, DropEvent::MaxPathLength) < DropEvent::MaxPathLength - 1)
 			{
-				nctl::strncpy(dropEvent_.paths[dropEvent_.numPaths], event.drop.file, DropEvent::MaxPathLength);
+				nctl::strncpy(dropEvent_.paths[dropEvent_.numPaths], event.drop.data, DropEvent::MaxPathLength);
 				dropEvent_.numPaths++;
 			}
-			SDL_free(event.drop.file);
 			break;
 		default:
 			break;
@@ -422,59 +451,59 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 	// Calling the event handler method
 	switch (event.type)
 	{
-		case SDL_KEYDOWN:
+		case SDL_EVENT_KEY_DOWN:
 			inputEventHandler_->onKeyPressed(keyboardEvent_);
 			break;
-		case SDL_KEYUP:
+		case SDL_EVENT_KEY_UP:
 			inputEventHandler_->onKeyReleased(keyboardEvent_);
 			break;
-		case SDL_TEXTINPUT:
+		case SDL_EVENT_TEXT_INPUT:
 			inputEventHandler_->onTextInput(textInputEvent_);
 			break;
-		case SDL_MOUSEBUTTONDOWN:
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 			inputEventHandler_->onMouseButtonPressed(mouseEvent_);
 			break;
-		case SDL_MOUSEBUTTONUP:
+		case SDL_EVENT_MOUSE_BUTTON_UP:
 			inputEventHandler_->onMouseButtonReleased(mouseEvent_);
 			break;
-		case SDL_MOUSEMOTION:
+		case SDL_EVENT_MOUSE_MOTION:
 			inputEventHandler_->onMouseMoved(mouseState_);
 			break;
-		case SDL_MOUSEWHEEL:
+		case SDL_EVENT_MOUSE_WHEEL:
 			inputEventHandler_->onScrollInput(scrollEvent_);
 			break;
-		case SDL_JOYBUTTONDOWN:
+		case SDL_EVENT_JOYSTICK_BUTTON_DOWN:
 			joyMapping_.onJoyButtonPressed(joyButtonEvent_);
 			inputEventHandler_->onJoyButtonPressed(joyButtonEvent_);
 			break;
-		case SDL_JOYBUTTONUP:
+		case SDL_EVENT_JOYSTICK_BUTTON_UP:
 			joyMapping_.onJoyButtonReleased(joyButtonEvent_);
 			inputEventHandler_->onJoyButtonReleased(joyButtonEvent_);
 			break;
-		case SDL_JOYAXISMOTION:
+		case SDL_EVENT_JOYSTICK_AXIS_MOTION:
 			joyMapping_.onJoyAxisMoved(joyAxisEvent_);
 			inputEventHandler_->onJoyAxisMoved(joyAxisEvent_);
 			break;
-		case SDL_JOYHATMOTION:
+		case SDL_EVENT_JOYSTICK_HAT_MOTION:
 			joyMapping_.onJoyHatMoved(joyHatEvent_);
 			inputEventHandler_->onJoyHatMoved(joyHatEvent_);
 			break;
-		case SDL_FINGERDOWN:
+		case SDL_EVENT_FINGER_DOWN:
 			if (touchEvent_.count == 0)
 				inputEventHandler_->onTouchDown(touchEvent_);
 			else
 				inputEventHandler_->onPointerDown(touchEvent_);
 			break;
-		case SDL_FINGERMOTION:
+		case SDL_EVENT_FINGER_MOTION:
 			inputEventHandler_->onTouchMove(touchEvent_);
 			break;
-		case SDL_FINGERUP:
+		case SDL_EVENT_FINGER_UP:
 			if (touchEvent_.count == 0)
 				inputEventHandler_->onTouchUp(touchEvent_);
 			else
 				inputEventHandler_->onPointerUp(touchEvent_);
 			break;
-		case SDL_DROPCOMPLETE:
+		case SDL_EVENT_DROP_COMPLETE:
 			if (dropEvent_.numPaths > 0)
 				inputEventHandler_->onFilesDropped(dropEvent_);
 			break;
@@ -485,7 +514,11 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 
 const MouseState &SdlInputManager::mouseState() const
 {
-	mouseState_.buttons_[mouseState_.currentStateIndex_] = SDL_GetMouseState(&mouseState_.x, &mouseState_.y);
+	float mouseX = 0.0f;
+	float mouseY = 0.0f;
+	mouseState_.buttons_[mouseState_.currentStateIndex_] = SDL_GetMouseState(&mouseX, &mouseY);
+	mouseState_.x = static_cast<int>(mouseX);
+	mouseState_.y = static_cast<int>(mouseY);
 	return mouseState_;
 }
 
@@ -494,7 +527,7 @@ bool SdlInputManager::isJoyPresent(int joyId) const
 	ASSERT(joyId >= 0);
 	ASSERT_MSG_X(joyId < int(MaxNumJoysticks), "joyId is %d and the maximum is %u", joyId, MaxNumJoysticks - 1);
 
-	if (sdlJoysticks_[joyId] && SDL_JoystickGetAttached(sdlJoysticks_[joyId]))
+	if (sdlJoysticks_[joyId] && SDL_JoystickConnected(sdlJoysticks_[joyId]))
 		return true;
 	else
 		return false;
@@ -503,7 +536,7 @@ bool SdlInputManager::isJoyPresent(int joyId) const
 const char *SdlInputManager::joyName(int joyId) const
 {
 	if (isJoyPresent(joyId))
-		return SDL_JoystickName(sdlJoysticks_[joyId]);
+		return SDL_GetJoystickName(sdlJoysticks_[joyId]);
 	else
 		return nullptr;
 }
@@ -513,8 +546,8 @@ const char *SdlInputManager::joyGuid(int joyId) const
 	if (isJoyPresent(joyId))
 	{
 #ifndef __EMSCRIPTEN__
-		const SDL_JoystickGUID joystickGuid = SDL_JoystickGetGUID(sdlJoysticks_[joyId]);
-		SDL_JoystickGetGUIDString(joystickGuid, joyGuidString_, 33);
+		const SDL_GUID joystickGuid = SDL_GetJoystickGUID(sdlJoysticks_[joyId]);
+		SDL_GUIDToString(joystickGuid, joyGuidString_, 33);
 #else
 		memset(joyGuidString_, 0, 33);
 		nctl::strncpy(joyGuidString_, "default", 7);
@@ -530,7 +563,7 @@ int SdlInputManager::joyNumButtons(int joyId) const
 	int numButtons = -1;
 
 	if (isJoyPresent(joyId))
-		numButtons = SDL_JoystickNumButtons(sdlJoysticks_[joyId]);
+		numButtons = SDL_GetNumJoystickButtons(sdlJoysticks_[joyId]);
 
 	return numButtons;
 }
@@ -540,7 +573,7 @@ int SdlInputManager::joyNumHats(int joyId) const
 	int numHats = -1;
 
 	if (isJoyPresent(joyId))
-		numHats = SDL_JoystickNumHats(sdlJoysticks_[joyId]);
+		numHats = SDL_GetNumJoystickHats(sdlJoysticks_[joyId]);
 
 	return numHats;
 }
@@ -550,7 +583,7 @@ int SdlInputManager::joyNumAxes(int joyId) const
 	int numAxes = -1;
 
 	if (isJoyPresent(joyId))
-		numAxes = SDL_JoystickNumAxes(sdlJoysticks_[joyId]);
+		numAxes = SDL_GetNumJoystickAxes(sdlJoysticks_[joyId]);
 
 	return numAxes;
 }
@@ -570,7 +603,11 @@ bool SdlInputManager::hasJoyVibration(int joyId) const
 	bool hasVibration = false;
 
 	if (isJoyPresent(joyId))
-		hasVibration = SDL_JoystickHasRumble(sdlJoysticks_[joyId]);
+	{
+		const SDL_PropertiesID props = SDL_GetJoystickProperties(sdlJoysticks_[joyId]);
+		if (props != 0)
+			hasVibration = SDL_GetBooleanProperty(props, SDL_PROP_JOYSTICK_CAP_RUMBLE_BOOLEAN, false);
+	}
 
 	return hasVibration;
 }
@@ -587,7 +624,7 @@ void SdlInputManager::joyVibrate(int joyId, float lowFreqIntensity, float highFr
 
 		const unsigned short int leftIntensity = static_cast<unsigned short int>(lowFreqIntensity * MaxVibrationValue);
 		const unsigned short int rightIntensity = static_cast<unsigned short int>(highFreqIntensity * MaxVibrationValue);
-		SDL_JoystickRumble(sdlJoysticks_[joyId], leftIntensity, rightIntensity, duration);
+		SDL_RumbleJoystick(sdlJoysticks_[joyId], leftIntensity, rightIntensity, duration);
 	}
 }
 
@@ -599,15 +636,15 @@ void SdlInputManager::setMouseCursorMode(MouseCursorMode mode)
 		switch (mode)
 		{
 			case MouseCursorMode::NORMAL:
-				SDL_ShowCursor(SDL_ENABLE);
-				SDL_SetRelativeMouseMode(SDL_FALSE);
+				SDL_ShowCursor();
+				SDL_SetWindowRelativeMouseMode(SdlGfxDevice::windowHandle(), false);
 				break;
 			case MouseCursorMode::HIDDEN:
-				SDL_ShowCursor(SDL_DISABLE);
-				SDL_SetRelativeMouseMode(SDL_FALSE);
+				SDL_HideCursor();
+				SDL_SetWindowRelativeMouseMode(SdlGfxDevice::windowHandle(), false);
 				break;
 			case MouseCursorMode::DISABLED:
-				const int supported = SDL_SetRelativeMouseMode(SDL_TRUE);
+				const int supported = SDL_SetWindowRelativeMouseMode(SdlGfxDevice::windowHandle(), true);
 				changeMode = (supported == 0);
 				break;
 		}
@@ -628,35 +665,43 @@ void SdlInputManager::setMouseCursorMode(MouseCursorMode mode)
 
 void SdlInputManager::handleJoyDeviceEvent(const SDL_Event &event)
 {
-	if (event.type == SDL_JOYDEVICEADDED)
+	const SDL_JoystickID joystickID = event.jdevice.which;
+
+	if (event.type == SDL_EVENT_JOYSTICK_ADDED)
 	{
-		const int deviceIndex = event.jdevice.which;
+		SDL_free(joystickIDs_);
+		joystickIDs_ = SDL_GetJoysticks(&joystickIDCount_);
+
+		const int deviceIndex = getJoystickIndex(joystickIDs_, joystickIDCount_, joystickID);
+		if (deviceIndex < 0)
+			return;
+
 		joyConnectionEvent_.joyId = deviceIndex;
-		sdlJoysticks_[deviceIndex] = SDL_JoystickOpen(deviceIndex);
+		sdlJoysticks_[deviceIndex] = SDL_OpenJoystick(joystickID);
 
 		SDL_Joystick *joy = sdlJoysticks_[deviceIndex];
 
 #ifndef __EMSCRIPTEN__
-		const SDL_JoystickGUID joystickGuid = SDL_JoystickGetGUID(joy);
-		SDL_JoystickGetGUIDString(joystickGuid, joyGuidString_, 33);
+		const SDL_GUID joystickGuid = SDL_GetJoystickGUID(joy);
+		SDL_GUIDToString(joystickGuid, joyGuidString_, 33);
 #else
 		memset(joyGuidString_, 0, 33);
 		nctl::strncpy(joyGuidString_, "default", 7);
 #endif
 
 		LOGI_X("Joystick %d \"%s\" (GUID: \"%s\") has been connected - %d hats, %d axes, %d buttons, %d balls",
-		       deviceIndex, SDL_JoystickName(joy), joyGuidString_, SDL_JoystickNumHats(joy), SDL_JoystickNumAxes(joy), SDL_JoystickNumButtons(joy), SDL_JoystickNumBalls(joy));
+		       deviceIndex, SDL_GetJoystickName(joy), joyGuidString_, SDL_GetNumJoystickHats(joy), SDL_GetNumJoystickAxes(joy), SDL_GetNumJoystickButtons(joy), SDL_GetNumJoystickBalls(joy));
 		joyMapping_.onJoyConnected(joyConnectionEvent_);
 		inputEventHandler_->onJoyConnected(joyConnectionEvent_);
 	}
-	else if (event.type == SDL_JOYDEVICEREMOVED)
+	else if (event.type == SDL_EVENT_JOYSTICK_REMOVED)
 	{
-		const int deviceIndex = joyInstanceIdToDeviceIndex(event.jdevice.which);
-		if (deviceIndex == -1)
+		const int deviceIndex = getJoystickIndex(joystickIDs_, joystickIDCount_, joystickID);
+		if (deviceIndex < 0)
 			return;
 
 		joyConnectionEvent_.joyId = deviceIndex;
-		SDL_JoystickClose(sdlJoysticks_[deviceIndex]);
+		SDL_CloseJoystick(sdlJoysticks_[deviceIndex]);
 		sdlJoysticks_[deviceIndex] = nullptr;
 
 		// Compacting the array of SDL joystick pointers
@@ -664,25 +709,13 @@ void SdlInputManager::handleJoyDeviceEvent(const SDL_Event &event)
 			sdlJoysticks_[i] = sdlJoysticks_[i + 1];
 		sdlJoysticks_[MaxNumJoysticks - 1] = nullptr;
 
+		SDL_free(joystickIDs_);
+		joystickIDs_ = SDL_GetJoysticks(&joystickIDCount_);
+
 		LOGI_X("Joystick %d has been disconnected", deviceIndex);
 		inputEventHandler_->onJoyDisconnected(joyConnectionEvent_);
 		joyMapping_.onJoyDisconnected(joyConnectionEvent_);
 	}
-}
-
-int SdlInputManager::joyInstanceIdToDeviceIndex(int32_t instanceId)
-{
-	int deviceIndex = -1;
-	for (int i = 0; i < MaxNumJoysticks; i++)
-	{
-		const SDL_JoystickID id = SDL_JoystickInstanceID(sdlJoysticks_[i]);
-		if (instanceId == id)
-		{
-			deviceIndex = i;
-			break;
-		}
-	}
-	return deviceIndex;
 }
 
 }

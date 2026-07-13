@@ -651,8 +651,8 @@ void ImGuiSdlInput::closeGamepads()
 	{
 		for (SDL_GameController *gamepad : gamepads_)
 			SDL_GameControllerClose(gamepad);
-		gamepads_.resize(0);
 	}
+	gamepads_.resize(0);
 }
 
 void ImGuiSdlInput::setGamepadMode(GamepadMode mode, SDL_GameController **manualGamepadsArray, unsigned int manualGamepadsCount)

@@ -46,6 +46,12 @@ if(MSVC OR INSTALL_LIBRARIES_MINGW)
 				COMMENT "Copying GLFW DLL...")
 			set_target_properties(copy_glfw_dll PROPERTIES FOLDER "CustomCopyTargets")
 		endif()
+		if(SDL3_FOUND AND NCINE_WITH_SDL3)
+			add_custom_target(copy_sdl3_dll ALL
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SDL3_IMPORTED_LOCATION} $<TARGET_FILE_DIR:${NCPROJECT_EXE_NAME}>
+				COMMENT "Copying SDL3 DLL...")
+			set_target_properties(copy_sdl3_dll PROPERTIES FOLDER "CustomCopyTargets")
+		endif()
 		if(SDL2_FOUND AND NCINE_WITH_SDL2)
 			add_custom_target(copy_sdl2_dll ALL
 				COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SDL2_IMPORTED_LOCATION} $<TARGET_FILE_DIR:${NCPROJECT_EXE_NAME}>

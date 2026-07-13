@@ -20,7 +20,7 @@
 
 #if defined(WITH_GLFW)
 	#include "NuklearGlfwInput.h"
-#elif defined(WITH_SDL2)
+#elif defined(WITH_SDL2) || defined(WITH_SDL3)
 	#include "NuklearSdlInput.h"
 #elif defined(WITH_QT5)
 	#include "NuklearQt5Input.h"
@@ -140,7 +140,7 @@ void NuklearDrawing::newFrame()
 {
 #if defined(WITH_GLFW)
 	NuklearGlfwInput::newFrame();
-#elif defined(WITH_SDL2)
+#elif defined(WITH_SDL2) || defined(WITH_SDL3)
 	NuklearSdlInput::newFrame();
 #elif defined(WITH_QT5)
 	NuklearQt5Input::newFrame();

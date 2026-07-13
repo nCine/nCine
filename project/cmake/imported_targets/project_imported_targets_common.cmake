@@ -23,6 +23,7 @@ if(NOT NCINE_DYNAMIC_LIBRARY OR (NOT CMAKE_SKIP_RPATH AND NOT CMAKE_SKIP_INSTALL
 			find_package(OpenGLES2)
 		endif()
 		find_package(GLFW)
+		find_package(SDL3)
 		find_package(SDL2)
 		find_package(PNG)
 		find_package(OpenAL)

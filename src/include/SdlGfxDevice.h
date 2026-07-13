@@ -1,10 +1,10 @@
 #ifndef CLASS_NCINE_SDLGFXDEVICE
 #define CLASS_NCINE_SDLGFXDEVICE
 
-#ifdef __APPLE__
-	#include <SDL_video.h>
-#else
+#ifdef WITH_SDL2
 	#include <SDL2/SDL_video.h>
+#else
+	#include <SDL3/SDL_video.h>
 #endif
 
 #include "IGfxDevice.h"
@@ -48,6 +48,11 @@ class SdlGfxDevice : public IGfxDevice
 	static SDL_Window *windowHandle_;
 	/// SDL2 OpenGL context handle
 	SDL_GLContext glContextHandle_;
+
+#ifdef WITH_SDL3
+	int displayIDCount_;
+	SDL_DisplayID *displayIDs_;
+#endif
 
 	/// Deleted copy constructor
 	SdlGfxDevice(const SdlGfxDevice &) = delete;

@@ -2,7 +2,7 @@
 	#define GLEW_NO_GLU
 	#include <GL/glew.h>
 #endif
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 #include "common_macros.h"
 #include "SdlGfxDevice.h"
@@ -13,6 +13,29 @@
 #endif
 
 namespace ncine {
+
+namespace {
+
+int getDisplayIndexForWindow(SDL_Window *windowHandle, const SDL_DisplayID *displayIDs, int displayIDCount)
+{
+	int displayIndex = -1;
+	const SDL_DisplayID displayID = SDL_GetDisplayForWindow(windowHandle);
+	if (displayID != 0)
+	{
+		for (int i = 0; i < displayIDCount; i++)
+		{
+			if (displayIDs[i] == displayID)
+			{
+				displayIndex = i;
+				break;
+			}
+		}
+	}
+
+	return displayIndex;
+}
+
+}
 
 ///////////////////////////////////////////////////////////
 // STATIC DEFINITIONS
@@ -25,13 +48,11 @@ SDL_Window *SdlGfxDevice::windowHandle_ = nullptr;
 ///////////////////////////////////////////////////////////
 
 SdlGfxDevice::SdlGfxDevice(const WindowMode &windowMode, const GLContextInfo &glContextInfo, const DisplayMode &displayMode)
-    : IGfxDevice(windowMode, glContextInfo, displayMode)
+    : IGfxDevice(windowMode, glContextInfo, displayMode), displayIDCount_(0), displayIDs_(nullptr)
 {
-#if defined(_WIN32) && SDL_VERSION_ATLEAST(2, 24, 0)
+#if defined(_WIN32)
 	if (windowMode.hasWindowScaling)
 	{
-		// The hint should be set after calling `SDL_Init()`
-		SDL_SetHint(SDL_HINT_WINDOWS_DPI_SCALING, "1");
 		// Disable automatic window scaling, SDL will take care of it
 		backendScalesWindowSize_ = true;
 	}
@@ -44,7 +65,11 @@ SdlGfxDevice::SdlGfxDevice(const WindowMode &windowMode, const GLContextInfo &gl
 
 SdlGfxDevice::~SdlGfxDevice()
 {
-	SDL_GL_DeleteContext(glContextHandle_);
+	SDL_free(displayIDs_);
+	displayIDs_ = nullptr;
+	displayIDCount_ = 0;
+
+	SDL_GL_DestroyContext(glContextHandle_);
 	glContextHandle_ = nullptr;
 	SDL_DestroyWindow(windowHandle_);
 	windowHandle_ = nullptr;
@@ -68,21 +93,15 @@ void SdlGfxDevice::setFullscreen(bool fullscreen)
 		return;
 
 	isFullscreen_ = fullscreen;
-#ifdef __EMSCRIPTEN__
-	// Emscripten needs `SDL_WINDOW_FULLSCREEN_DESKTOP` to request fullscreen
-	const int flags = isFullscreen_ ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0;
-#else
-	const int flags = isFullscreen_ ? SDL_WINDOW_FULLSCREEN : 0;
-#endif
-	SDL_SetWindowFullscreen(windowHandle_, flags);
+	SDL_SetWindowFullscreen(windowHandle_, isFullscreen_);
 
 	SDL_GetWindowSize(windowHandle_, &width_, &height_);
-	SDL_GL_GetDrawableSize(windowHandle_, &drawableWidth_, &drawableHeight_);
+	SDL_GetWindowSizeInPixels(windowHandle_, &drawableWidth_, &drawableHeight_);
 }
 
 void SdlGfxDevice::setResizable(bool resizable)
 {
-	SDL_SetWindowResizable(windowHandle_, resizable ? SDL_TRUE : SDL_FALSE);
+	SDL_SetWindowResizable(windowHandle_, resizable ? true : false);
 	isResizable_ = resizable;
 }
 
@@ -118,12 +137,13 @@ void SdlGfxDevice::setWindowSize(int width, int height)
 	if (width <= 0 || height <= 0 || (width == width_ && height == height_))
 		return;
 
-	unsigned int flags = SDL_GetWindowFlags(windowHandle_);
-	if ((flags & SDL_WINDOW_FULLSCREEN_DESKTOP) == 0)
+	const SDL_WindowFlags flags = SDL_GetWindowFlags(windowHandle_);
+	// Not in desktop fullscreen, either windowed or using exclusive fullscreen
+	if ((flags & SDL_WINDOW_FULLSCREEN) == 0 || SDL_GetWindowFullscreenMode(windowHandle_) != nullptr)
 	{
 		SDL_SetWindowSize(windowHandle_, width, height);
 		SDL_GetWindowSize(windowHandle_, &width_, &height_);
-		SDL_GL_GetDrawableSize(windowHandle_, &drawableWidth_, &drawableHeight_);
+		SDL_GetWindowSizeInPixels(windowHandle_, &drawableWidth_, &drawableHeight_);
 	}
 }
 
@@ -136,26 +156,26 @@ void SdlGfxDevice::setWindowIcon(const char *windowIconFilename)
 {
 	nctl::UniquePtr<IImageLoader> image = IImageLoader::createFromFile(windowIconFilename);
 	const unsigned int bytesPerPixel = image->numChannels();
-	const Uint32 pixelFormat = (bytesPerPixel == 4) ? SDL_PIXELFORMAT_ABGR8888 : SDL_PIXELFORMAT_BGR888;
+	const SDL_PixelFormat pixelFormat = (bytesPerPixel == 4) ? SDL_PIXELFORMAT_ABGR8888 : SDL_PIXELFORMAT_XBGR8888;
 
 	SDL_Surface *surface = nullptr;
 	const int pitch = image->width() * bytesPerPixel;
 	void *pixels = reinterpret_cast<void *>(image->pixels());
-	surface = SDL_CreateRGBSurfaceWithFormatFrom(pixels, image->width(), image->height(), bytesPerPixel * 8, pitch, pixelFormat);
+	surface = SDL_CreateSurfaceFrom(image->width(), image->height(), pixelFormat, pixels, pitch);
 	SDL_SetWindowIcon(windowHandle_, surface);
-	SDL_FreeSurface(surface);
+	SDL_DestroySurface(surface);
 }
 
 void SdlGfxDevice::flashWindow() const
 {
-#if SDL_MAJOR_VERSION >= 2 && SDL_PATCHLEVEL >= 16 && !defined(__EMSCRIPTEN__)
+#if !defined(__EMSCRIPTEN__)
 	SDL_FlashWindow(windowHandle_, SDL_FLASH_UNTIL_FOCUSED);
 #endif
 }
 
 unsigned int SdlGfxDevice::windowMonitorIndex() const
 {
-	const int retrievedIndex = windowHandle_ ? SDL_GetWindowDisplayIndex(windowHandle_) : 0;
+	const int retrievedIndex = windowHandle_ ? getDisplayIndexForWindow(windowHandle_, displayIDs_, displayIDCount_) : 0;
 	const unsigned int index = (retrievedIndex >= 0) ? static_cast<unsigned int>(retrievedIndex) : 0;
 	return index;
 }
@@ -165,24 +185,24 @@ const IGfxDevice::VideoMode &SdlGfxDevice::currentVideoMode(unsigned int monitor
 	if (monitorIndex >= numMonitors_)
 		monitorIndex = 0;
 
-	SDL_DisplayMode mode;
-	SDL_GetCurrentDisplayMode(monitorIndex, &mode);
-	convertVideoModeInfo(mode, currentVideoMode_);
+	const SDL_DisplayID displayID = displayIDs_[monitorIndex];
+	const SDL_DisplayMode *mode = SDL_GetCurrentDisplayMode(displayID);
+	convertVideoModeInfo(*mode, currentVideoMode_);
 
 	return currentVideoMode_;
 }
 
 bool SdlGfxDevice::setVideoMode(unsigned int modeIndex)
 {
-	int displayIndex = SDL_GetWindowDisplayIndex(windowHandle_);
+	int displayIndex = getDisplayIndexForWindow(windowHandle_, displayIDs_, displayIDCount_);
 	if (displayIndex < 0 || displayIndex >= numMonitors_)
 		displayIndex = 0;
 
 	if (modeIndex < monitors_[displayIndex].numVideoModes)
 	{
-		SDL_DisplayMode mode;
-		SDL_GetDisplayMode(displayIndex, modeIndex, &mode);
-		return SDL_SetWindowDisplayMode(windowHandle_, &mode);
+		const SDL_DisplayID displayID = displayIDs_[displayIndex];
+		const SDL_DisplayMode *mode = SDL_GetCurrentDisplayMode(displayID);
+		return SDL_SetWindowFullscreenMode(windowHandle_, mode);
 	}
 	return false;
 }
@@ -198,16 +218,15 @@ void SdlGfxDevice::swapBuffers()
 
 void SdlGfxDevice::initGraphics()
 {
-	const int err = SDL_InitSubSystem(SDL_INIT_VIDEO);
-	FATAL_ASSERT_MSG_X(!err, "SDL_InitSubSystem(SDL_INIT_VIDEO) failed: %s", SDL_GetError());
+	const bool success = SDL_InitSubSystem(SDL_INIT_VIDEO);
+	FATAL_ASSERT_MSG_X(success == true, "SDL_InitSubSystem(SDL_INIT_VIDEO) failed: %s", SDL_GetError());
 }
 
 void SdlGfxDevice::initDevice(const WindowMode &windowMode)
 {
 	// At this point `updateMonitors()` has already been called by `initWindowScaling()`
 
-	SDL_SetHint(SDL_HINT_VIDEO_X11_FORCE_EGL, "1");
-	// setting OpenGL attributes
+	// Setting OpenGL attributes
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, displayMode_.redBits());
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, displayMode_.greenBits());
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, displayMode_.blueBits());
@@ -223,9 +242,7 @@ void SdlGfxDevice::initDevice(const WindowMode &windowMode)
 #elif defined(__EMSCRIPTEN__)
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
 #else
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, glContextInfo_.coreProfile
-	                                                     ? SDL_GL_CONTEXT_PROFILE_CORE
-	                                                     : SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, glContextInfo_.coreProfile ? SDL_GL_CONTEXT_PROFILE_CORE : SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
 #endif
 	if (glContextInfo_.forwardCompatible == false)
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
@@ -235,7 +252,7 @@ void SdlGfxDevice::initDevice(const WindowMode &windowMode)
 	Uint32 flags = SDL_WINDOW_OPENGL;
 #ifndef __EMSCRIPTEN__
 	if (windowMode.hasWindowScaling)
-		flags |= SDL_WINDOW_ALLOW_HIGHDPI;
+		flags |= SDL_WINDOW_HIGH_PIXEL_DENSITY;
 #endif
 
 #ifndef __EMSCRIPTEN__
@@ -246,75 +263,68 @@ void SdlGfxDevice::initDevice(const WindowMode &windowMode)
 	const bool ignoreAnyWindowPosition = (windowMode.windowPositionX == AppConfiguration::Window::IgnorePosition ||
 	                                      windowMode.windowPositionY == AppConfiguration::Window::IgnorePosition);
 	const Vector2i windowCenter(windowMode.windowPositionX + windowMode.width / 2, windowMode.windowPositionY + windowMode.height / 2);
-	const unsigned int monitorIndex = (ignoreAnyWindowPosition == false) ? containingMonitorIndex(windowCenter) : 0;
-	const bool desktopFullscreen = (width_ <= 0 || height_ <= 0) && windowMode.refreshRate <= 0.0f; // If fullscreen is requested, current video mode will not be changed
+	const unsigned int monitorIndex = ignoreAnyWindowPosition ? 0 : containingMonitorIndex(windowCenter);
+	// If fullscreen is requested, current video mode will not be changed
+	const bool desktopFullscreen = isFullscreen_ && (windowMode.refreshRate <= 0.0f) && (windowMode.width <= 0 || windowMode.height <= 0);
 
-	const SDL_DisplayMode *closestModePtr = nullptr;
+	bool closestModeFound = false;
 	SDL_DisplayMode closestMode;
-	if (isFullscreen_)
-	{
-		if (desktopFullscreen)
-			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-		else
-		{
-			// Either the size or the refresh rate are not equal to current video mode
-			SDL_DisplayMode currentMode;
-			SDL_GetCurrentDisplayMode(monitorIndex, &currentMode);
 
-			SDL_DisplayMode targetMode;
-			targetMode.w = (windowMode.width > 0) ? windowMode.width : currentMode.w;
-			targetMode.h = (windowMode.height > 0) ? windowMode.height : currentMode.h;
-			targetMode.format = 0; // don't care
-			targetMode.refresh_rate = (windowMode.refreshRate > 0.0f) ? static_cast<int>(windowMode.refreshRate) : currentMode.refresh_rate;
-			targetMode.driverdata = nullptr; // initialize to `nullptr`
-			closestModePtr = SDL_GetClosestDisplayMode(monitorIndex, &targetMode, &closestMode);
-		}
+	const SDL_DisplayID displayID = displayIDs_[monitorIndex];
+	if (isFullscreen_ && desktopFullscreen == false)
+	{
+		const SDL_DisplayMode *currentMode = SDL_GetCurrentDisplayMode(displayID);
+
+		const int targetWidth = (windowMode.width > 0) ? windowMode.width : currentMode->w;
+		const int targetHeight = (windowMode.height > 0) ? windowMode.height : currentMode->h;
+		const float targetRefreshRate = (windowMode.refreshRate > 0.0f) ? windowMode.refreshRate : currentMode->refresh_rate;
+		const bool includeHighDensityModes = false;
+		closestModeFound = SDL_GetClosestFullscreenDisplayMode(displayID, targetWidth, targetHeight, targetRefreshRate, includeHighDensityModes, &closestMode);
+		ASSERT_MSG_X(closestModeFound, "Unable to find a suitable fullscreen display mode");
 	}
-#else
-	if (isFullscreen_)
-		flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 #endif
 
 	const bool windowPositionIsValid = (containingMonitorIndex(windowMode) != -1);
+
 	const int windowPosX = (windowMode.windowPositionX != AppConfiguration::Window::IgnorePosition && windowPositionIsValid)
-	                           ? windowMode.windowPositionX : SDL_WINDOWPOS_CENTERED;
+	        ? windowMode.windowPositionX : SDL_WINDOWPOS_CENTERED;
 	const int windowPosY = (windowMode.windowPositionY != AppConfiguration::Window::IgnorePosition && windowPositionIsValid)
-	                           ? windowMode.windowPositionY : SDL_WINDOWPOS_CENTERED;
-	windowHandle_ = SDL_CreateWindow("", windowPosX, windowPosY, width_, height_, flags);
+	        ? windowMode.windowPositionY : SDL_WINDOWPOS_CENTERED;
+
+	windowHandle_ = SDL_CreateWindow("", width_, height_, flags);
 	FATAL_ASSERT_MSG_X(windowHandle_, "SDL_CreateWindow failed: %s", SDL_GetError());
 
-#ifndef __EMSCRIPTEN__
-	if (closestModePtr != nullptr)
-	{
-		const int result = SDL_SetWindowDisplayMode(windowHandle_, closestModePtr);
-		ASSERT_MSG_X(result == 0, "SDL_SetWindowDisplayMode failed: %s", SDL_GetError());
-		SDL_SetWindowFullscreen(windowHandle_, SDL_WINDOW_FULLSCREEN);
-	}
+	SDL_SetWindowPosition(windowHandle_, windowPosX, windowPosY);
 
-	// Set the current video mode as the default one (for a call to `setFullscreen(true)` without a `setVideoMode()`)
-	if (isFullscreen_ == false)
+#ifndef __EMSCRIPTEN__
+	if (isFullscreen_)
 	{
-		SDL_DisplayMode currentMode;
-		SDL_GetCurrentDisplayMode(monitorIndex, &currentMode);
-		const int result = SDL_SetWindowDisplayMode(windowHandle_, &currentMode);
-		ASSERT_MSG_X(result == 0, "SDL_SetWindowDisplayMode failed: %s", SDL_GetError());
+		bool success = false;
+
+		if (desktopFullscreen)
+			success = SDL_SetWindowFullscreenMode(windowHandle_, nullptr);
+		else if (closestModeFound == true)
+			success = SDL_SetWindowFullscreenMode(windowHandle_, &closestMode);
+
+		ASSERT_MSG_X(success, "SDL_SetWindowFullscreenMode failed: %s", SDL_GetError());
+
+		success = SDL_SetWindowFullscreen(windowHandle_, true);
+		ASSERT_MSG_X(success, "SDL_SetWindowFullscreen failed: %s", SDL_GetError());
+	}
+	else
+	{
+		// Default mode used by a later call to setFullscreen(true)
+		const SDL_DisplayMode *currentMode = SDL_GetCurrentDisplayMode(displayID);
+		const bool success = SDL_SetWindowFullscreenMode(windowHandle_, currentMode);
+		ASSERT_MSG_X(success, "SDL_SetWindowFullscreenMode failed: %s", SDL_GetError());
 	}
 #endif
 
 	SDL_GetWindowSize(windowHandle_, &width_, &height_);
-	SDL_GL_GetDrawableSize(windowHandle_, &drawableWidth_, &drawableHeight_);
+	SDL_GetWindowSizeInPixels(windowHandle_, &drawableWidth_, &drawableHeight_);
 	initGLViewport();
 
-	SDL_SetWindowResizable(windowHandle_, isResizable_ ? SDL_TRUE : SDL_FALSE);
-
-#ifndef __EMSCRIPTEN__
-	// resolution should be set to current screen size
-	if (desktopFullscreen)
-	{
-		SDL_GetWindowSize(windowHandle_, &width_, &height_);
-		isFullscreen_ = true;
-	}
-#endif
+	SDL_SetWindowResizable(windowHandle_, isResizable_);
 
 	glContextHandle_ = SDL_GL_CreateContext(windowHandle_);
 	FATAL_ASSERT_MSG_X(glContextHandle_, "SDL_GL_CreateContext failed: %s", SDL_GetError());
@@ -332,36 +342,40 @@ void SdlGfxDevice::initDevice(const WindowMode &windowMode)
 
 void SdlGfxDevice::updateMonitors()
 {
-	const int monitorCount = SDL_GetNumVideoDisplays();
-	ASSERT(monitorCount >= 1);
-	numMonitors_ = (monitorCount < MaxMonitors) ? monitorCount : MaxMonitors;
+	SDL_free(displayIDs_);
+
+	displayIDs_ = SDL_GetDisplays(&displayIDCount_);
+	FATAL_ASSERT_MSG_X(displayIDs_ != nullptr, "SDL_GetDisplays failed: %s", SDL_GetError());
+	ASSERT(displayIDCount_ >= 1);
+	numMonitors_ = (displayIDCount_ < MaxMonitors) ? displayIDCount_ : MaxMonitors;
 
 	for (unsigned int i = 0; i < numMonitors_; i++)
 	{
-		monitors_[i].name = SDL_GetDisplayName(i);
+		SDL_DisplayID displayID = displayIDs_[i];
+		monitors_[i].name = SDL_GetDisplayName(displayID);
 		ASSERT(monitors_[i].name != nullptr);
 
 		SDL_Rect bounds;
-		SDL_GetDisplayBounds(i, &bounds);
+		SDL_GetDisplayBounds(displayID, &bounds);
 		monitors_[i].position.x = bounds.x;
 		monitors_[i].position.y = bounds.y;
 
-		float hDpi, vDpi;
-		SDL_GetDisplayDPI(i, nullptr, &hDpi, &vDpi);
-		monitors_[i].dpi.x = hDpi;
-		monitors_[i].dpi.y = vDpi;
-		monitors_[i].scale.x = hDpi / DefaultDpi;
-		monitors_[i].scale.y = vDpi / DefaultDpi;
+		const float displayScale = SDL_GetDisplayContentScale(displayID);
+		monitors_[i].dpi.x = displayScale * DefaultDpi;
+		monitors_[i].dpi.y = displayScale * DefaultDpi;
+		monitors_[i].scale.x = displayScale;
+		monitors_[i].scale.y = displayScale;
 
-		const int modeCount = SDL_GetNumDisplayModes(i);
+		int modeCount = 0;
+		SDL_DisplayMode **displayModes = SDL_GetFullscreenDisplayModes(displayID, &modeCount);
 		monitors_[i].numVideoModes = (modeCount < MaxVideoModes) ? modeCount : MaxVideoModes;
 
-		SDL_DisplayMode mode;
 		for (unsigned int j = 0; j < monitors_[i].numVideoModes; j++)
 		{
-			SDL_GetDisplayMode(i, j, &mode);
+			const SDL_DisplayMode &mode = *displayModes[j];
 			convertVideoModeInfo(mode, monitors_[i].videoModes[j]);
 		}
+		SDL_free(displayModes);
 	}
 }
 
@@ -388,7 +402,7 @@ void SdlGfxDevice::convertVideoModeInfo(const SDL_DisplayMode &sdlVideoMode, IGf
 			videoMode.greenBits = 3;
 			videoMode.blueBits = 2;
 			break;
-		case SDL_PIXELFORMAT_RGB444:
+		case SDL_PIXELFORMAT_XRGB4444:
 		case SDL_PIXELFORMAT_ARGB4444:
 		case SDL_PIXELFORMAT_RGBA4444:
 		case SDL_PIXELFORMAT_ABGR4444:
@@ -397,8 +411,8 @@ void SdlGfxDevice::convertVideoModeInfo(const SDL_DisplayMode &sdlVideoMode, IGf
 			videoMode.greenBits = 4;
 			videoMode.blueBits = 4;
 			break;
-		case SDL_PIXELFORMAT_RGB555:
-		case SDL_PIXELFORMAT_BGR555:
+		case SDL_PIXELFORMAT_XRGB1555:
+		case SDL_PIXELFORMAT_XBGR1555:
 		case SDL_PIXELFORMAT_ARGB1555:
 		case SDL_PIXELFORMAT_RGBA5551:
 		case SDL_PIXELFORMAT_ABGR1555:
@@ -415,9 +429,9 @@ void SdlGfxDevice::convertVideoModeInfo(const SDL_DisplayMode &sdlVideoMode, IGf
 			break;
 		case SDL_PIXELFORMAT_RGB24:
 		case SDL_PIXELFORMAT_BGR24:
-		case SDL_PIXELFORMAT_RGB888:
+		case SDL_PIXELFORMAT_XRGB8888:
 		case SDL_PIXELFORMAT_RGBX8888:
-		case SDL_PIXELFORMAT_BGR888:
+		case SDL_PIXELFORMAT_XBGR8888:
 		case SDL_PIXELFORMAT_BGRX8888:
 		case SDL_PIXELFORMAT_ARGB8888:
 		case SDL_PIXELFORMAT_RGBA8888:

@@ -48,7 +48,13 @@ const char *backendName()
 #ifdef __ANDROID__
 	return "Android";
 #else
-	#if NCINE_WITH_SDL2
+	#if NCINE_WITH_SDL3
+		#ifdef __EMSCRIPTEN__
+	return "SDL3 (Emscripten)";
+		#else
+	return "SDL3";
+		#endif
+	#elif NCINE_WITH_SDL2
 		#ifdef __EMSCRIPTEN__
 	return "SDL2 (Emscripten)";
 		#else

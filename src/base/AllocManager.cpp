@@ -8,10 +8,10 @@
 #ifdef WITH_GLFW
 	#include <GLFW/glfw3.h>
 	#define GLFW_VERSION_COMBINED (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 + GLFW_VERSION_REVISION)
-#endif
-
-#ifdef WITH_SDL2
+#elif WITH_SDL2
 	#include <SDL2/SDL_stdinc.h>
+#elif WITH_SDL3
+	#include <SDL3/SDL_stdinc.h>
 #endif
 
 #ifdef WITH_IMGUI
@@ -48,11 +48,9 @@ static MallocAllocator &mallocAllocator = reinterpret_cast<MallocAllocator &>(ma
 #if defined(WITH_GLFW) && GLFW_VERSION_COMBINED >= 3400
 alignas(IAllocator::DefaultAlignment) static uint8_t glfwAllocatorBuffer[sizeof(ProxyAllocator)];
 static ProxyAllocator &glfwAllocator = reinterpret_cast<ProxyAllocator &>(glfwAllocatorBuffer);
-#endif
-
-#if defined(WITH_SDL2)
-alignas(IAllocator::DefaultAlignment) static uint8_t sdl2AllocatorBuffer[sizeof(ProxyAllocator)];
-static ProxyAllocator &sdl2Allocator = reinterpret_cast<ProxyAllocator &>(sdl2AllocatorBuffer);
+#elif defined(WITH_SDL2) || defined(WITH_SDL3)
+alignas(IAllocator::DefaultAlignment) static uint8_t sdlAllocatorBuffer[sizeof(ProxyAllocator)];
+static ProxyAllocator &sdlAllocator = reinterpret_cast<ProxyAllocator &>(sdlAllocatorBuffer);
 #endif
 
 #ifdef WITH_IMGUI
@@ -94,10 +92,10 @@ IAllocator &theGlfwAllocator()
 #endif
 }
 
-IAllocator &theSdl2Allocator()
+IAllocator &theSdlAllocator()
 {
-#if defined(WITH_SDL2)
-	return sdl2Allocator;
+#if defined(WITH_SDL2) || defined(WITH_SDL3)
+	return sdlAllocator;
 #else
 	return *mainAllocator;
 #endif
@@ -147,29 +145,27 @@ namespace {
 	{
 		return nctl::theGlfwAllocator().deallocate(block);
 	}
-#endif
-
-#if defined(WITH_SDL2)
-	void *sdl2Allocate(size_t size)
+#elif defined(WITH_SDL2) || defined(WITH_SDL3)
+	void *sdlAllocate(size_t size)
 	{
-		return nctl::theSdl2Allocator().allocate(size);
+		return nctl::theSdlAllocator().allocate(size);
 	}
 
-	void *sdl2ClearAllocate(size_t nmemb, size_t size)
+	void *sdlClearAllocate(size_t nmemb, size_t size)
 	{
-		void *ptr = nctl::theSdl2Allocator().allocate(nmemb * size);
+		void *ptr = nctl::theSdlAllocator().allocate(nmemb * size);
 		memset(ptr, 0, nmemb * size);
 		return ptr;
 	}
 
-	void *sdl2Reallocate(void *block, size_t size)
+	void *sdlReallocate(void *block, size_t size)
 	{
-		return nctl::theSdl2Allocator().reallocate(block, size);
+		return nctl::theSdlAllocator().reallocate(block, size);
 	}
 
-	void sdl2Deallocate(void *block)
+	void sdlDeallocate(void *block)
 	{
-		return nctl::theSdl2Allocator().deallocate(block);
+		return nctl::theSdlAllocator().deallocate(block);
 	}
 #endif
 
@@ -214,10 +210,9 @@ AllocManager::AllocManager()
 	allocator.user = nullptr;
 
 	glfwInitAllocator(&allocator);
-#endif
-#if defined(WITH_SDL2)
-	new (&sdl2Allocator) ProxyAllocator("SDL2", *mainAllocator);
-	SDL_SetMemoryFunctions(sdl2Allocate, sdl2ClearAllocate, sdl2Reallocate, sdl2Deallocate);
+#elif defined(WITH_SDL2) || defined(WITH_SDL3)
+	new (&sdlAllocator) ProxyAllocator("SDL", *mainAllocator);
+	SDL_SetMemoryFunctions(sdlAllocate, sdlClearAllocate, sdlReallocate, sdlDeallocate);
 #endif
 #ifdef WITH_IMGUI
 	new (&imguiAllocator) ProxyAllocator("ImGui", *mainAllocator);
@@ -235,9 +230,8 @@ AllocManager::~AllocManager()
 {
 #if defined(WITH_GLFW) && GLFW_VERSION_COMBINED >= 3400
 	(&glfwAllocator)->~ProxyAllocator();
-#endif
-#if defined(WITH_SDL2)
-	(&sdl2Allocator)->~ProxyAllocator();
+#elif defined(WITH_SDL2) || defined(WITH_SDL3)
+	(&sdlAllocator)->~ProxyAllocator();
 #endif
 #ifdef WITH_LUA
 	(&luaAllocator)->~ProxyAllocator();

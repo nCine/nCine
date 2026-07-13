@@ -543,7 +543,7 @@ bool JoyMapping::onJoyConnected(const JoyConnectionEvent &event)
 
 void JoyMapping::onJoyDisconnected(const JoyConnectionEvent &event)
 {
-#ifdef WITH_SDL2
+#if defined(WITH_SDL2) || defined(WITH_SDL3)
 	// Compacting the array of mapping indices
 	for (int i = event.joyId; i < MaxNumJoysticks - 1; i++)
 		mappingIndices_[i] = mappingIndices_[i + 1];

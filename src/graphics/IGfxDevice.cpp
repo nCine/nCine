@@ -65,7 +65,11 @@ EM_BOOL IGfxDevice::focus_callback(int eventType, const EmscriptenFocusEvent *ev
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
+#ifdef __ANDROID__
+const float IGfxDevice::DefaultDpi = 160.0f;
+#else
 const float IGfxDevice::DefaultDpi = 96.0f;
+#endif
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS AND DESTRUCTOR

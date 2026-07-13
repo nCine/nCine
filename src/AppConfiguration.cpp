@@ -263,8 +263,8 @@ void AppConfiguration::applyDefaults()
 #endif
 
 	// ----- Window -----
-#if defined(__linux__) && defined(WITH_SDL2)
-	// DPI queries do not seem to work reliably on X11 with SDL2
+#if defined(__linux__) && (defined(WITH_SDL2) || defined(WITH_SDL3))
+	// DPI queries do not seem to work reliably on X11 with SDL2/SDL3
 	window.scaling = false;
 #endif
 	window.title = "nCine";
