@@ -11,6 +11,7 @@
 #include "common_macros.h"
 #include "GLTexture.h"
 #include "GLFramebufferObject.h"
+#include "GLClearColor.h"
 #include "Qt5GfxDevice.h"
 #include "PCApplication.h"
 #include "Qt5Widget.h"
@@ -196,6 +197,15 @@ void Qt5GfxDevice::resetFramebufferObjectBinding()
 	GLFramebufferObject::setBoundHandle(GL_FRAMEBUFFER, glHandle);
 }
 
+void Qt5GfxDevice::forceOpaqueAlpha()
+{
+	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_TRUE);
+	GLClearColor::setColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+}
+
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -208,7 +218,7 @@ void Qt5GfxDevice::initDevice(const WindowMode &windowMode)
 	format.setRedBufferSize(displayMode_.redBits());
 	format.setGreenBufferSize(displayMode_.greenBits());
 	format.setBlueBufferSize(displayMode_.blueBits());
-	//format.setAlphaBufferSize(displayMode_.alphaBits());
+	format.setAlphaBufferSize(displayMode_.alphaBits());
 	format.setSwapBehavior(displayMode_.isDoubleBuffered() ? QSurfaceFormat::DoubleBuffer : QSurfaceFormat::SingleBuffer);
 	format.setDepthBufferSize(displayMode_.depthBits());
 	format.setStencilBufferSize(displayMode_.stencilBits());
@@ -266,7 +276,7 @@ void Qt5GfxDevice::updateMonitors()
 		ASSERT(charsToCopy > 0);
 		monitorNames_[i].setLength(charsToCopy + 1);
 		for (int j = 0; j < charsToCopy; j++)
-			monitorNames_[i][j] = static_cast<char>(screens[i]->name().at(j).cell());
+			monitorNames_[i][j] = static_cast<char>(screens[i]->name().at(j).toLatin1());
 		monitorNames_[i][charsToCopy] = '\0';
 		monitorNames_[i].setLength(charsToCopy);
 
@@ -320,7 +330,7 @@ void Qt5GfxDevice::setSize(int width, int height)
 	width_ = width;
 	height_ = height;
 	QWidget *window = widget_.window();
-	const int pixelRatio = window->devicePixelRatio();
+	const qreal pixelRatio = window->devicePixelRatio();
 	drawableWidth_ = width_ * pixelRatio;
 	drawableHeight_ = height_ * pixelRatio;
 }

@@ -3,7 +3,6 @@
 #include "Qt5InputManager.h"
 #include "Qt5Widget.h"
 #include "IInputEventHandler.h"
-#include "FileLogger.h"
 #include "PCApplication.h"
 #include "JoyMapping.h"
 
@@ -389,8 +388,10 @@ void Qt5InputManager::updateJoystickStates()
 
 		for (unsigned int buttonId = 0; buttonId < Qt5JoystickState::NumButtons; buttonId++)
 		{
-			const bool newButtonState = state.isButtonPressed(buttonId);
-			if (state.buttonState_[state.currentStateIndex_][buttonId] != newButtonState)
+			const bool newButtonState = state.isButtonDown(buttonId);
+			const bool oldButtonState = state.buttonState_[state.currentStateIndex_][buttonId];
+
+			if (oldButtonState != newButtonState)
 			{
 				state.buttonState_[state.currentStateIndex_][buttonId] = newButtonState;
 				if (inputEventHandler_ != nullptr)
@@ -628,8 +629,8 @@ void Qt5InputManager::wheelEvent(QWheelEvent *event)
 {
 	if (inputEventHandler_)
 	{
-		scrollEvent_.x = event->angleDelta().x() / 60.0f;
-		scrollEvent_.y = event->angleDelta().y() / 60.0f;
+		scrollEvent_.x = event->angleDelta().x() / 120.0f;
+		scrollEvent_.y = event->angleDelta().y() / 120.0f;
 		inputEventHandler_->onScrollInput(scrollEvent_);
 	}
 }
@@ -651,7 +652,7 @@ void Qt5InputManager::dropEvent(QDropEvent *event)
 					continue;
 
 				for (int i = 0; i < text.length(); i++)
-					dropEvent_.paths[destIndex][i] = static_cast<char>(text.at(i).cell());
+					dropEvent_.paths[destIndex][i] = static_cast<char>(text.at(i).toLatin1());
 				destIndex++;
 
 				if (destIndex >= DropEvent::MaxNumPaths)
@@ -720,11 +721,13 @@ void Qt5InputManager::setMouseCursorMode(MouseCursorMode mode)
 
 void Qt5InputManager::updateTouchEvent(const QTouchEvent *event)
 {
-	touchEvent_.count = event->touchPoints().size();
+	const QList<QTouchEvent::TouchPoint> &touchPoints = event->touchPoints();
+
+	touchEvent_.count = touchPoints.size();
 	for (unsigned int i = 0; i < touchEvent_.count && i < TouchEvent::MaxPointers; i++)
 	{
 		TouchEvent::Pointer &pointer = touchEvent_.pointers[i];
-		const QTouchEvent::TouchPoint &touchPoint = event->touchPoints().at(i);
+		const QTouchEvent::TouchPoint &touchPoint = touchPoints.at(i);
 
 		pointer.id = touchPoint.id();
 		pointer.x = touchPoint.pos().x();

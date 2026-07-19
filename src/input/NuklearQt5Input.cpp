@@ -153,8 +153,8 @@ bool NuklearQt5Input::event(QEvent *event)
 		{
 			/* mouse wheel */
 			QWheelEvent *wheelEvent = static_cast<QWheelEvent *>(event);
-			scroll_.x += wheelEvent->angleDelta().x() / 60.0f;
-			scroll_.y += wheelEvent->angleDelta().y() / 60.0f;
+			scroll_.x += wheelEvent->angleDelta().x() / 120.0f;
+			scroll_.y += wheelEvent->angleDelta().y() / 120.0f;
 			return true;
 		}
 		default:

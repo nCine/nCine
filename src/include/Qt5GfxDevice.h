@@ -49,6 +49,8 @@ class Qt5GfxDevice : public IGfxDevice
 	void bindDefaultDrawFramebufferObject();
 	/// Resets the OpenGL state cache to bind the default Qt5 Framebuffer Object
 	void resetFramebufferObjectBinding();
+	/// Forces the framebuffer's alpha channel to fully opaque
+	void forceOpaqueAlpha();
 
   private:
 	Qt5Widget &widget_;
