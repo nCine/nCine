@@ -11,10 +11,12 @@
 #include "common_macros.h"
 #include "GLTexture.h"
 #include "GLFramebufferObject.h"
+#include "GLBufferObject.h"
+#include "GLShaderProgram.h"
 #include "GLClearColor.h"
-#include "Qt5GfxDevice.h"
+#include "QtGfxDevice.h"
 #include "PCApplication.h"
-#include "Qt5Widget.h"
+#include "QtWidget.h"
 
 namespace ncine {
 
@@ -22,19 +24,23 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-QScreen *Qt5GfxDevice::screenPointers_[MaxMonitors];
-nctl::StaticString<Qt5GfxDevice::MaxMonitorNameLength> Qt5GfxDevice::monitorNames_[MaxMonitors];
+QScreen *QtGfxDevice::screenPointers_[MaxMonitors];
+nctl::StaticString<QtGfxDevice::MaxMonitorNameLength> QtGfxDevice::monitorNames_[MaxMonitors];
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-Qt5GfxDevice::Qt5GfxDevice(const WindowMode &windowMode, const GLContextInfo &glContextInfo, const DisplayMode &displayMode, Qt5Widget &widget)
+QtGfxDevice::QtGfxDevice(const WindowMode &windowMode, const GLContextInfo &glContextInfo, const DisplayMode &displayMode, QtWidget &widget)
     : IGfxDevice(windowMode, glContextInfo, displayMode), widget_(widget)
 {
-#if QT_VERSION >= 0x050600
+#if QT_VERSION < QT_VERSION_CHECK(6,0,0)
 	const Qt::ApplicationAttribute scalingAttribute = windowMode.hasWindowScaling ? Qt::AA_EnableHighDpiScaling : Qt::AA_DisableHighDpiScaling;
 	QCoreApplication::setAttribute(scalingAttribute);
+#else
+	// High DPI scaling is always enabled starting with Qt6 and cannot be disabled anymore
+	if (windowMode.hasWindowScaling == false)
+		LOGW("Disabling window scaling was requested but Qt6 always enables High DPI scaling");
 #endif
 
 	initWindowScaling(windowMode);
@@ -45,12 +51,12 @@ Qt5GfxDevice::Qt5GfxDevice(const WindowMode &windowMode, const GLContextInfo &gl
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void Qt5GfxDevice::setSwapInterval(int interval)
+void QtGfxDevice::setSwapInterval(int interval)
 {
 	widget_.format().setSwapInterval(interval);
 }
 
-void Qt5GfxDevice::setFullscreen(bool fullscreen)
+void QtGfxDevice::setFullscreen(bool fullscreen)
 {
 	if (isFullscreen_ == fullscreen)
 		return;
@@ -68,7 +74,7 @@ void Qt5GfxDevice::setFullscreen(bool fullscreen)
 	// width and height are updated by the resize event that calls `resizeWindow()`
 }
 
-void Qt5GfxDevice::setResizable(bool resizable)
+void QtGfxDevice::setResizable(bool resizable)
 {
 	QWidget *window = widget_.window();
 	if (resizable == false)
@@ -81,31 +87,31 @@ void Qt5GfxDevice::setResizable(bool resizable)
 	isResizable_ = resizable;
 }
 
-int Qt5GfxDevice::windowPositionX() const
+int QtGfxDevice::windowPositionX() const
 {
 	QWidget *window = widget_.window();
 	return window->pos().x();
 }
 
-int Qt5GfxDevice::windowPositionY() const
+int QtGfxDevice::windowPositionY() const
 {
 	QWidget *window = widget_.window();
 	return window->pos().y();
 }
 
-const Vector2i Qt5GfxDevice::windowPosition() const
+const Vector2i QtGfxDevice::windowPosition() const
 {
 	QWidget *window = widget_.window();
 	return Vector2i(window->pos().x(), window->pos().y());
 }
 
-void Qt5GfxDevice::setWindowPosition(int x, int y)
+void QtGfxDevice::setWindowPosition(int x, int y)
 {
 	QWidget *window = widget_.window();
 	window->move(x, y);
 }
 
-void Qt5GfxDevice::setWindowSize(int width, int height)
+void QtGfxDevice::setWindowSize(int width, int height)
 {
 	// change resolution only in case it is valid and it really changes
 	if (width <= 0 || height <= 0 || (width == width_ && height == height_))
@@ -122,24 +128,24 @@ void Qt5GfxDevice::setWindowSize(int width, int height)
 	// width and height are updated by the resize event that calls `resizeWindow()`
 }
 
-void Qt5GfxDevice::setWindowTitle(const char *windowTitle)
+void QtGfxDevice::setWindowTitle(const char *windowTitle)
 {
 	QWidget *window = widget_.window();
 	window->setWindowTitle(windowTitle);
 }
 
-void Qt5GfxDevice::setWindowIcon(const char *windowIconFilename)
+void QtGfxDevice::setWindowIcon(const char *windowIconFilename)
 {
 	QWidget *window = widget_.window();
 	window->setWindowIcon(QIcon(windowIconFilename));
 }
 
-void Qt5GfxDevice::flashWindow() const
+void QtGfxDevice::flashWindow() const
 {
 	QApplication::alert(&widget_, 0);
 }
 
-unsigned int Qt5GfxDevice::primaryMonitorIndex() const
+unsigned int QtGfxDevice::primaryMonitorIndex() const
 {
 	QScreen *screen = QApplication::primaryScreen();
 
@@ -148,7 +154,7 @@ unsigned int Qt5GfxDevice::primaryMonitorIndex() const
 	return index;
 }
 
-unsigned int Qt5GfxDevice::windowMonitorIndex() const
+unsigned int QtGfxDevice::windowMonitorIndex() const
 {
 	// Fallback value if a monitor containing the window cannot be found
 	QScreen *screen = QApplication::primaryScreen();
@@ -161,7 +167,7 @@ unsigned int Qt5GfxDevice::windowMonitorIndex() const
 	return index;
 }
 
-const IGfxDevice::VideoMode &Qt5GfxDevice::currentVideoMode(unsigned int monitorIndex) const
+const IGfxDevice::VideoMode &QtGfxDevice::currentVideoMode(unsigned int monitorIndex) const
 {
 	if (monitorIndex >= numMonitors_)
 		monitorIndex = 0;
@@ -170,7 +176,7 @@ const IGfxDevice::VideoMode &Qt5GfxDevice::currentVideoMode(unsigned int monitor
 }
 
 #ifdef WITH_GLEW
-void Qt5GfxDevice::initGlew()
+void QtGfxDevice::initGlew()
 {
 	const GLenum err = glewInit();
 	FATAL_ASSERT_MSG_X(err == GLEW_OK, "GLEW error: %s", glewGetErrorString(err));
@@ -179,25 +185,37 @@ void Qt5GfxDevice::initGlew()
 }
 #endif
 
-void Qt5GfxDevice::resetTextureBinding()
+void QtGfxDevice::resetTextureBinding()
 {
 	GLTexture::bindHandle(GL_TEXTURE_2D, 0);
 }
 
-void Qt5GfxDevice::bindDefaultDrawFramebufferObject()
+void QtGfxDevice::bindDefaultDrawFramebufferObject()
 {
 	const GLuint glHandle = widget_.defaultFramebufferObject();
 	GLFramebufferObject::bindHandle(GL_DRAW_FRAMEBUFFER, glHandle);
 }
 
 /*! \note It should be used after each `QOpenGLWidget::makeCurrent()` call */
-void Qt5GfxDevice::resetFramebufferObjectBinding()
+void QtGfxDevice::resetFramebufferObjectBinding()
 {
 	const GLuint glHandle = widget_.defaultFramebufferObject();
 	GLFramebufferObject::setBoundHandle(GL_FRAMEBUFFER, glHandle);
 }
 
-void Qt5GfxDevice::forceOpaqueAlpha()
+void QtGfxDevice::resetBufferObjectBinding()
+{
+	GLBufferObject::bindHandle(GL_ARRAY_BUFFER, 0);
+	GLBufferObject::bindHandle(GL_ELEMENT_ARRAY_BUFFER, 0);
+	GLBufferObject::bindHandle(GL_UNIFORM_BUFFER, 0);
+}
+
+void QtGfxDevice::resetShaderProgramBinding()
+{
+	GLShaderProgram::setBoundProgram(0);
+}
+
+void QtGfxDevice::forceOpaqueAlpha()
 {
 	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_TRUE);
 	GLClearColor::setColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -205,12 +223,21 @@ void Qt5GfxDevice::forceOpaqueAlpha()
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
+/*! \note `IGfxDevice::update()` only caches the intended clear color for Qt instead of
+ *  actually clearing. This performs the real clear at the start of the next frame. */
+void QtGfxDevice::clearScreen()
+{
+#ifdef WITH_SCENEGRAPH
+	if (theApplication().appConfiguration().features.scenegraph == false)
+#endif
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+}
 
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void Qt5GfxDevice::initDevice(const WindowMode &windowMode)
+void QtGfxDevice::initDevice(const WindowMode &windowMode)
 {
 	// At this point `updateMonitors()` has already been called by `initWindowScaling()`
 
@@ -259,7 +286,7 @@ void Qt5GfxDevice::initDevice(const WindowMode &windowMode)
 	initGLViewport();
 }
 
-void Qt5GfxDevice::updateMonitors()
+void QtGfxDevice::updateMonitors()
 {
 	const QList<QScreen *> screens = QApplication::screens();
 
@@ -308,7 +335,7 @@ void Qt5GfxDevice::updateMonitors()
 	}
 }
 
-int Qt5GfxDevice::retrieveMonitorIndex(QScreen *screen) const
+int QtGfxDevice::retrieveMonitorIndex(QScreen *screen) const
 {
 	if (screen == nullptr)
 		return -1;
@@ -325,7 +352,7 @@ int Qt5GfxDevice::retrieveMonitorIndex(QScreen *screen) const
 	return index;
 }
 
-void Qt5GfxDevice::setSize(int width, int height)
+void QtGfxDevice::setSize(int width, int height)
 {
 	width_ = width;
 	height_ = height;

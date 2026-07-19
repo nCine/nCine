@@ -5,7 +5,7 @@
 #include <ncine/IInputEventHandler.h>
 #include <nctl/StaticArray.h>
 
-#if defined(__ANDROID__) || NCINE_WITH_QT5 || NCINE_WITH_SDL2 || NCINE_WITH_SDL3
+#if defined(__ANDROID__) || NCINE_WITH_QT5 || NCINE_WITH_QT6 || NCINE_WITH_SDL2 || NCINE_WITH_SDL3
 	#define HAS_TOUCH (1)
 #endif
 

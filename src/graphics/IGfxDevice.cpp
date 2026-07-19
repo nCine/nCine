@@ -10,7 +10,7 @@
 	#include "Application.h"
 #endif
 
-#ifdef WITH_QT5
+#if defined(WITH_QT5) || defined(WITH_QT6)
 	#include "GLClearColor.h"
 #endif
 
@@ -124,7 +124,7 @@ IGfxDevice::IGfxDevice(const WindowMode &windowMode, const GLContextInfo &glCont
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-/*! \internal Having this method inlined does not seem to work correctly with Qt5 on Linux */
+/*! \internal Having this method inlined does not seem to work correctly with Qt on Linux */
 unsigned int IGfxDevice::numMonitors() const
 {
 	return numMonitors_;
@@ -162,7 +162,7 @@ void IGfxDevice::initWindowScaling(const WindowMode &windowMode)
 #ifndef __EMSCRIPTEN__
 	if (backendScalesWindowSize_ == false && windowMode.hasWindowScaling)
 	{
-	#ifdef WITH_QT5
+	#if defined(WITH_QT5) || defined(WITH_QT6)
 		setWindowSize(width_ * factor, height_ * factor);
 	#else
 		width_ *= factor;
@@ -239,7 +239,7 @@ void IGfxDevice::update()
 	if (theApplication().appConfiguration().features.scenegraph == false)
 #endif
 	{
-#if defined(WITH_QT5)
+#if defined(WITH_QT5) || defined(WITH_QT6)
 		GLClearColor::setColor(0.0f, 0.0f, 0.0f, 1.0f);
 #else
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);

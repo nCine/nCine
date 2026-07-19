@@ -1,12 +1,13 @@
-#include "Qt5Widget.h"
-#include "Qt5GfxDevice.h"
-#include "Qt5InputManager.h"
+#include "QtWidget.h"
+#include "QtGfxDevice.h"
+#include "QtInputManager.h"
 #include "PCApplication.h"
 #include "IAppEventHandler.h"
 
 #include <QApplication>
 #include <QCoreApplication>
 #include <QResizeEvent>
+#include <QTimer>
 
 namespace ncine {
 
@@ -14,7 +15,7 @@ namespace ncine {
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-Qt5Widget::Qt5Widget(QWidget *parent, nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)(), int argc, char **argv)
+QtWidget::QtWidget(QWidget *parent, nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)(), int argc, char **argv)
     : QOpenGLWidget(parent),
       application_(static_cast<PCApplication &>(theApplication())),
       createAppEventHandler_(createAppEventHandler),
@@ -26,7 +27,7 @@ Qt5Widget::Qt5Widget(QWidget *parent, nctl::UniquePtr<IAppEventHandler> (*create
 	connect(this, SIGNAL(frameSwapped()), this, SLOT(autoUpdate()));
 
 	ASSERT(createAppEventHandler_);
-	application_.qt5Widget_ = this;
+	application_.qtWidget_ = this;
 	application_.init(createAppEventHandler_, argc, argv);
 	application_.setAutoSuspension(false);
 
@@ -42,7 +43,7 @@ Qt5Widget::Qt5Widget(QWidget *parent, nctl::UniquePtr<IAppEventHandler> (*create
 	}
 }
 
-Qt5Widget::~Qt5Widget()
+QtWidget::~QtWidget()
 {
 	shutdown();
 }
@@ -51,26 +52,28 @@ Qt5Widget::~Qt5Widget()
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-IAppEventHandler &Qt5Widget::appEventHandler()
+IAppEventHandler &QtWidget::appEventHandler()
 {
 	return *application_.appEventHandler_;
 }
 
 /*! \note This custom version of the method also resets the FBO binding */
-void Qt5Widget::makeCurrent()
+void QtWidget::makeCurrent()
 {
 	QOpenGLWidget::makeCurrent();
-	Qt5GfxDevice &gfxDevice = static_cast<Qt5GfxDevice &>(*application_.gfxDevice_);
+	QtGfxDevice &gfxDevice = static_cast<QtGfxDevice &>(*application_.gfxDevice_);
 	gfxDevice.resetFramebufferObjectBinding();
+	gfxDevice.resetBufferObjectBinding();
+	gfxDevice.resetShaderProgramBinding();
 }
 
 ///////////////////////////////////////////////////////////
 // PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-bool Qt5Widget::event(QEvent *event)
+bool QtWidget::event(QEvent *event)
 {
-	Qt5InputManager *inputManager = static_cast<Qt5InputManager *>(&application_.inputManager());
+	QtInputManager *inputManager = static_cast<QtInputManager *>(&application_.inputManager());
 
 	if (event->type() == QEvent::FocusIn)
 		application_.setFocus(true);
@@ -107,7 +110,7 @@ bool Qt5Widget::event(QEvent *event)
 			const QSize size = static_cast<QResizeEvent *>(event)->size();
 			if (size.width() != application_.widthInt() || size.height() != application_.heightInt())
 			{
-				Qt5GfxDevice &gfxDevice = static_cast<Qt5GfxDevice &>(*application_.gfxDevice_);
+				QtGfxDevice &gfxDevice = static_cast<QtGfxDevice &>(*application_.gfxDevice_);
 
 				makeCurrent();
 				gfxDevice.setSize(size.width(), size.height());
@@ -118,6 +121,11 @@ bool Qt5Widget::event(QEvent *event)
 		}
 		case QEvent::Close:
 		{
+			// This event might be sent again by a quitting Qt application,
+			// in this case there is nothing left to do.
+			if (isInitialized_ == false)
+				return true;
+
 			const bool shouldQuit = inputManager ? inputManager->shouldQuitOnRequest() : true;
 			if (shouldQuit)
 			{
@@ -134,9 +142,9 @@ bool Qt5Widget::event(QEvent *event)
 	}
 }
 
-void Qt5Widget::initializeGL()
+void QtWidget::initializeGL()
 {
-	Qt5GfxDevice &gfxDevice = static_cast<Qt5GfxDevice &>(*application_.gfxDevice_);
+	QtGfxDevice &gfxDevice = static_cast<QtGfxDevice &>(*application_.gfxDevice_);
 
 	connect(QApplication::instance(), SIGNAL(screenAdded(QScreen *)), this, SLOT(screenConfigurationChange(QScreen *)));
 	connect(QApplication::instance(), SIGNAL(screenRemoved(QScreen *)), this, SLOT(screenConfigurationChange(QScreen *)));
@@ -149,18 +157,18 @@ void Qt5Widget::initializeGL()
 	isInitialized_ = true;
 }
 
-void Qt5Widget::resizeGL(int w, int h)
+void QtWidget::resizeGL(int w, int h)
 {
 	if (isInitialized_)
 	{
-		Qt5GfxDevice &gfxDevice = static_cast<Qt5GfxDevice &>(*application_.gfxDevice_);
+		QtGfxDevice &gfxDevice = static_cast<QtGfxDevice &>(*application_.gfxDevice_);
 		gfxDevice.setSize(w, h);
 		application_.resizeScreenViewport(w, h);
 		gfxDevice.resetTextureBinding();
 	}
 }
 
-void Qt5Widget::paintGL()
+void QtWidget::paintGL()
 {
 	// Avoid calling this method from the resize event
 	static bool insidePaintEvent = false;
@@ -170,20 +178,24 @@ void Qt5Widget::paintGL()
 		insidePaintEvent = true;
 		if (application_.shouldQuit() == false)
 		{
-			Qt5GfxDevice &gfxDevice = static_cast<Qt5GfxDevice &>(*application_.gfxDevice_);
+			QtGfxDevice &gfxDevice = static_cast<QtGfxDevice &>(*application_.gfxDevice_);
+			gfxDevice.resetBufferObjectBinding();
+			gfxDevice.resetShaderProgramBinding();
+			gfxDevice.clearScreen(); // clearing only if scenegraph is disabled
 			application_.run();
 			gfxDevice.forceOpaqueAlpha();
 		}
 		else
 		{
 			shutdown();
-			QCoreApplication::quit();
+			// Quitting the application is deferred, so Qt can finish flushing this paint cycle
+			QTimer::singleShot(0, QCoreApplication::instance(), &QCoreApplication::quit);
 		}
 		insidePaintEvent = false;
 	}
 }
 
-QSize Qt5Widget::minimumSizeHint() const
+QSize QtWidget::minimumSizeHint() const
 {
 	if (application_.appConfiguration().window.resizable == true)
 		return QSize(-1, -1);
@@ -194,7 +206,7 @@ QSize Qt5Widget::minimumSizeHint() const
 		return QSize(application_.appCfg_.window.resolution.x, application_.appCfg_.window.resolution.y);
 }
 
-QSize Qt5Widget::sizeHint() const
+QSize QtWidget::sizeHint() const
 {
 	if (isInitialized_)
 		return QSize(application_.widthInt(), application_.heightInt());
@@ -206,24 +218,24 @@ QSize Qt5Widget::sizeHint() const
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void Qt5Widget::autoUpdate()
+void QtWidget::autoUpdate()
 {
 	if (shouldUpdate_)
 		update();
 }
 
-void Qt5Widget::screenConfigurationChange(QScreen *screen)
+void QtWidget::screenConfigurationChange(QScreen *screen)
 {
-	Qt5GfxDevice &gfxDevice = static_cast<Qt5GfxDevice &>(*application_.gfxDevice_);
+	QtGfxDevice &gfxDevice = static_cast<QtGfxDevice &>(*application_.gfxDevice_);
 	gfxDevice.updateMonitors();
 }
 
-void Qt5Widget::shutdown()
+void QtWidget::shutdown()
 {
 	if (isInitialized_)
 	{
 		application_.shutdownCommon();
-		application_.qt5Widget_ = nullptr;
+		application_.qtWidget_ = nullptr;
 		isInitialized_ = false;
 	}
 	disconnect(QApplication::instance(), SIGNAL(screenRemoved(QScreen *)));

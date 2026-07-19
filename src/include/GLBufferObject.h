@@ -71,6 +71,7 @@ class GLBufferObject
 	static bool bindHandle(GLenum target, GLuint glHandle);
 
 	friend class RenderVaoPool;
+	friend class QtGfxDevice;
 };
 
 }

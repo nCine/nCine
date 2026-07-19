@@ -21,8 +21,8 @@
 	#include "ImGuiGlfwInput.h"
 #elif defined(WITH_SDL2) || defined(WITH_SDL3)
 	#include "ImGuiSdlInput.h"
-#elif defined(WITH_QT5)
-	#include "ImGuiQt5Input.h"
+#elif defined(WITH_QT5) || defined(WITH_QT6)
+	#include "ImGuiQtInput.h"
 #elif defined(__ANDROID__)
 	#include <nctl/CString.h>
 	#include "FileSystem.h" // for savePath()
@@ -125,8 +125,8 @@ void ImGuiDrawing::newFrame()
 	ImGuiGlfwInput::newFrame();
 #elif defined(WITH_SDL2) || defined(WITH_SDL3)
 	ImGuiSdlInput::newFrame();
-#elif defined(WITH_QT5)
-	ImGuiQt5Input::newFrame();
+#elif defined(WITH_QT5) || defined(WITH_QT6)
+	ImGuiQtInput::newFrame();
 #elif defined(__ANDROID__)
 	ImGuiAndroidInput::newFrame();
 #endif

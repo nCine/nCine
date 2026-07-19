@@ -14,8 +14,8 @@
 #include "GLDebug.h"
 #include "tracy.h"
 
-#ifdef WITH_QT5
-	#include "Qt5GfxDevice.h"
+#if defined(WITH_QT5) || defined(WITH_QT6)
+	#include "QtGfxDevice.h"
 #endif
 
 namespace ncine {
@@ -500,8 +500,8 @@ void Viewport::draw(unsigned int nextIndex)
 
 	if (type_ == Type::WITH_TEXTURE)
 	{
-#ifdef WITH_QT5
-		Qt5GfxDevice &gfxDevice = static_cast<Qt5GfxDevice &>(theApplication().gfxDevice());
+#if defined(WITH_QT5) || defined(WITH_QT6)
+		QtGfxDevice &gfxDevice = static_cast<QtGfxDevice &>(theApplication().gfxDevice());
 		gfxDevice.bindDefaultDrawFramebufferObject();
 #else
 		fbo_->unbind(GL_DRAW_FRAMEBUFFER);

@@ -22,8 +22,8 @@
 	#include "NuklearGlfwInput.h"
 #elif defined(WITH_SDL2) || defined(WITH_SDL3)
 	#include "NuklearSdlInput.h"
-#elif defined(WITH_QT5)
-	#include "NuklearQt5Input.h"
+#elif defined(WITH_QT5) || defined(WITH_QT6)
+	#include "NuklearQtInput.h"
 #elif defined(__ANDROID__)
 	#include "NuklearAndroidInput.h"
 #endif
@@ -142,8 +142,8 @@ void NuklearDrawing::newFrame()
 	NuklearGlfwInput::newFrame();
 #elif defined(WITH_SDL2) || defined(WITH_SDL3)
 	NuklearSdlInput::newFrame();
-#elif defined(WITH_QT5)
-	NuklearQt5Input::newFrame();
+#elif defined(WITH_QT5) || defined(WITH_QT6)
+	NuklearQtInput::newFrame();
 #elif defined(__ANDROID__)
 	NuklearAndroidInput::newFrame();
 #endif

@@ -229,7 +229,7 @@ class DLL_PUBLIC Application
 #endif
 	friend class Viewport; // for `onDrawViewport()`
 	friend class GlfwInputManager; // for `resizeScreenViewport()`
-	friend class Qt5Widget; // for `resizeScreenViewport()`
+	friend class QtWidget; // for `resizeScreenViewport()`
 };
 
 // Meyers' Singleton

@@ -1,7 +1,7 @@
 #include "common_macros.h"
 #include <nctl/CString.h>
-#include "Qt5InputManager.h"
-#include "Qt5Widget.h"
+#include "QtInputManager.h"
+#include "QtWidget.h"
 #include "IInputEventHandler.h"
 #include "PCApplication.h"
 #include "JoyMapping.h"
@@ -16,11 +16,11 @@
 #endif
 
 #ifdef WITH_IMGUI
-	#include "ImGuiQt5Input.h"
+	#include "ImGuiQtInput.h"
 #endif
 
 #ifdef WITH_NUKLEAR
-	#include "NuklearQt5Input.h"
+	#include "NuklearQtInput.h"
 #endif
 
 namespace ncine {
@@ -32,27 +32,27 @@ namespace ncine {
 const int IInputManager::MaxNumJoysticks = 4;
 const unsigned short int IInputManager::MaxVibrationValue = 0;
 
-TouchEvent Qt5InputManager::touchEvent_;
-Qt5MouseState Qt5InputManager::mouseState_;
-MouseEvent Qt5InputManager::mouseEvent_;
-Qt5ScrollEvent Qt5InputManager::scrollEvent_;
-Qt5KeyboardState Qt5InputManager::keyboardState_;
-KeyboardEvent Qt5InputManager::keyboardEvent_;
-TextInputEvent Qt5InputManager::textInputEvent_;
-Qt5JoystickState Qt5InputManager::nullJoystickState_;
+TouchEvent QtInputManager::touchEvent_;
+QtMouseState QtInputManager::mouseState_;
+MouseEvent QtInputManager::mouseEvent_;
+QtScrollEvent QtInputManager::scrollEvent_;
+QtKeyboardState QtInputManager::keyboardState_;
+KeyboardEvent QtInputManager::keyboardEvent_;
+TextInputEvent QtInputManager::textInputEvent_;
+QtJoystickState QtInputManager::nullJoystickState_;
 
 #ifdef WITH_QT5GAMEPAD
-Qt5JoystickState Qt5InputManager::joystickStates_[MaxNumJoysticks];
-JoyButtonEvent Qt5InputManager::joyButtonEvent_;
-JoyHatEvent Qt5InputManager::joyHatEvent_;
-JoyAxisEvent Qt5InputManager::joyAxisEvent_;
-JoyConnectionEvent Qt5InputManager::joyConnectionEvent_;
-const float Qt5JoystickState::AxisEventTolerance = 0.001f;
+QtJoystickState QtInputManager::joystickStates_[MaxNumJoysticks];
+JoyButtonEvent QtInputManager::joyButtonEvent_;
+JoyHatEvent QtInputManager::joyHatEvent_;
+JoyAxisEvent QtInputManager::joyAxisEvent_;
+JoyConnectionEvent QtInputManager::joyConnectionEvent_;
+const float QtJoystickState::AxisEventTolerance = 0.001f;
 #endif
 
 namespace {
 
-	MouseButton qt5ToNcineMouseButton(int button)
+	MouseButton qtToNcineMouseButton(int button)
 	{
 		if (button == Qt::LeftButton)
 			return MouseButton::LEFT;
@@ -81,35 +81,47 @@ namespace {
 		}
 	}
 
+	void mouseEventPos(const QMouseEvent *event, int &x, int &y)
+	{
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+		const QPointF pos = event->position();
+		x = qRound(pos.x());
+		y = qRound(pos.y());
+#else
+		x = event->x();
+		y = event->y();
+#endif
+	}
+
 }
 
 ///////////////////////////////////////////////////////////
-// Qt5MouseState
+// QtMouseState
 ///////////////////////////////////////////////////////////
 
-Qt5MouseState::Qt5MouseState()
+QtMouseState::QtMouseState()
     : currentStateIndex_(0), buttonStates_{Qt::NoButton, Qt::NoButton} {}
 
-bool Qt5MouseState::isButtonDown(MouseButton button) const
+bool QtMouseState::isButtonDown(MouseButton button) const
 {
 	return checkMouseButton(buttonStates_[currentStateIndex_], button);
 }
 
-bool Qt5MouseState::isButtonPressed(MouseButton button) const
+bool QtMouseState::isButtonPressed(MouseButton button) const
 {
 	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
 	return (checkMouseButton(buttonStates_[currentStateIndex_], button) == true &&
 	        checkMouseButton(buttonStates_[prevStateIndex], button) == false);
 }
 
-bool Qt5MouseState::isButtonReleased(MouseButton button) const
+bool QtMouseState::isButtonReleased(MouseButton button) const
 {
 	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
 	return (checkMouseButton(buttonStates_[currentStateIndex_], button) == false &&
 	        checkMouseButton(buttonStates_[prevStateIndex], button) == true);
 }
 
-void Qt5MouseState::copyButtonStateToPrev()
+void QtMouseState::copyButtonStateToPrev()
 {
 	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
 	buttonStates_[prevStateIndex] = buttonStates_[currentStateIndex_];
@@ -117,17 +129,17 @@ void Qt5MouseState::copyButtonStateToPrev()
 }
 
 ///////////////////////////////////////////////////////////
-// Qt5KeyboardState
+// QtKeyboardState
 ///////////////////////////////////////////////////////////
 
-Qt5KeyboardState::Qt5KeyboardState()
+QtKeyboardState::QtKeyboardState()
     : currentStateIndex_(0)
 {
 	memset(keys_[0], 0, NumKeys * sizeof(unsigned char));
 	memset(keys_[1], 0, NumKeys * sizeof(unsigned char));
 }
 
-bool Qt5KeyboardState::isKeyDown(KeySym key) const
+bool QtKeyboardState::isKeyDown(KeySym key) const
 {
 	const unsigned int keyIndex = static_cast<unsigned int>(key);
 	if (key == KeySym::UNKNOWN)
@@ -136,7 +148,7 @@ bool Qt5KeyboardState::isKeyDown(KeySym key) const
 		return keys_[currentStateIndex_][keyIndex] != 0;
 }
 
-bool Qt5KeyboardState::isKeyPressed(KeySym key) const
+bool QtKeyboardState::isKeyPressed(KeySym key) const
 {
 	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
 	const unsigned int keyIndex = static_cast<unsigned int>(key);
@@ -146,7 +158,7 @@ bool Qt5KeyboardState::isKeyPressed(KeySym key) const
 		return keys_[currentStateIndex_][keyIndex] != 0 && keys_[prevStateIndex][keyIndex] == 0;
 }
 
-bool Qt5KeyboardState::isKeyReleased(KeySym key) const
+bool QtKeyboardState::isKeyReleased(KeySym key) const
 {
 	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
 	const unsigned int keyIndex = static_cast<unsigned int>(key);
@@ -156,7 +168,7 @@ bool Qt5KeyboardState::isKeyReleased(KeySym key) const
 		return keys_[currentStateIndex_][keyIndex] == 0 && keys_[prevStateIndex][keyIndex] != 0;
 }
 
-void Qt5KeyboardState::copyKeyStateToPrev()
+void QtKeyboardState::copyKeyStateToPrev()
 {
 	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
 	memcpy(keys_[prevStateIndex], keys_[currentStateIndex_], NumKeys * sizeof(unsigned char));
@@ -164,7 +176,7 @@ void Qt5KeyboardState::copyKeyStateToPrev()
 }
 
 ///////////////////////////////////////////////////////////
-// Qt5JoystickState
+// QtJoystickState
 ///////////////////////////////////////////////////////////
 
 #ifdef WITH_QT5GAMEPAD
@@ -188,7 +200,7 @@ bool gamepadButtonState(const QGamepad &gamepad, int buttonId)
 	}
 }
 
-Qt5JoystickState::Qt5JoystickState()
+QtJoystickState::QtJoystickState()
 {
 	memset(buttonState_[0], 0, NumButtons * sizeof(unsigned char));
 	memset(buttonState_[1], 0, NumButtons * sizeof(unsigned char));
@@ -198,12 +210,12 @@ Qt5JoystickState::Qt5JoystickState()
 		axesValuesState_[i] = 0.0f;
 }
 
-bool Qt5JoystickState::isButtonDown(int buttonId) const
+bool QtJoystickState::isButtonDown(int buttonId) const
 {
 	return gamepadButtonState(*gamepad_, buttonId);
 }
 
-bool Qt5JoystickState::isButtonPressed(int buttonId) const
+bool QtJoystickState::isButtonPressed(int buttonId) const
 {
 	ASSERT(buttonId < NumButtons);
 	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
@@ -213,7 +225,7 @@ bool Qt5JoystickState::isButtonPressed(int buttonId) const
 	return isPressed;
 }
 
-bool Qt5JoystickState::isButtonReleased(int buttonId) const
+bool QtJoystickState::isButtonReleased(int buttonId) const
 {
 	ASSERT(buttonId < NumButtons);
 	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
@@ -223,7 +235,7 @@ bool Qt5JoystickState::isButtonReleased(int buttonId) const
 	return isReleased;
 }
 
-unsigned char Qt5JoystickState::hatState(int hatId) const
+unsigned char QtJoystickState::hatState(int hatId) const
 {
 	unsigned char state = HatState::CENTERED;
 
@@ -243,7 +255,7 @@ unsigned char Qt5JoystickState::hatState(int hatId) const
 	return state;
 }
 
-short int Qt5JoystickState::axisValue(int axisId) const
+short int QtJoystickState::axisValue(int axisId) const
 {
 	switch (axisId)
 	{
@@ -257,7 +269,7 @@ short int Qt5JoystickState::axisValue(int axisId) const
 	}
 }
 
-float Qt5JoystickState::axisNormValue(int axisId) const
+float QtJoystickState::axisNormValue(int axisId) const
 {
 	switch (axisId)
 	{
@@ -271,14 +283,14 @@ float Qt5JoystickState::axisNormValue(int axisId) const
 	}
 }
 
-void Qt5JoystickState::copyButtonStateToPrev()
+void QtJoystickState::copyButtonStateToPrev()
 {
 	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
 	memcpy(buttonState_[prevStateIndex], buttonState_[currentStateIndex_], NumButtons * sizeof(unsigned char));
 	currentStateIndex_ = prevStateIndex;
 }
 
-void Qt5JoystickState::resetPrevButtonState()
+void QtJoystickState::resetPrevButtonState()
 {
 	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
 	memset(buttonState_[prevStateIndex], 0, NumButtons * sizeof(unsigned char));
@@ -289,7 +301,7 @@ void Qt5JoystickState::resetPrevButtonState()
 // CONSTRUCTORS and DESTRUCTOR
 ///////////////////////////////////////////////////////////
 
-Qt5InputManager::Qt5InputManager(Qt5Widget &widget)
+QtInputManager::QtInputManager(QtWidget &widget)
     : widget_(widget)
 {
 #ifdef WITH_QT5GAMEPAD
@@ -300,22 +312,22 @@ Qt5InputManager::Qt5InputManager(Qt5Widget &widget)
 	joyMapping_.init(this);
 
 #ifdef WITH_IMGUI
-	ImGuiQt5Input::init(&widget);
+	ImGuiQtInput::init(&widget);
 #endif
 
 #ifdef WITH_NUKLEAR
-	NuklearQt5Input::init(&widget);
+	NuklearQtInput::init(&widget);
 #endif
 }
 
-Qt5InputManager::~Qt5InputManager()
+QtInputManager::~QtInputManager()
 {
 #ifdef WITH_NUKLEAR
-	NuklearQt5Input::shutdown();
+	NuklearQtInput::shutdown();
 #endif
 
 #ifdef WITH_IMGUI
-	ImGuiQt5Input::shutdown();
+	ImGuiQtInput::shutdown();
 #endif
 }
 
@@ -324,9 +336,9 @@ Qt5InputManager::~Qt5InputManager()
 ///////////////////////////////////////////////////////////
 
 #ifdef WITH_QT5GAMEPAD
-void Qt5InputManager::updateJoystickStates()
+void QtInputManager::updateJoystickStates()
 {
-	// Compacting the array of Qt5 connected gamepads
+	// Compacting the array of Qt connected gamepads
 	int notConnectedIndex = 0;
 	int connectedIndex = 0;
 	while (notConnectedIndex < MaxNumJoysticks)
@@ -382,11 +394,11 @@ void Qt5InputManager::updateJoystickStates()
 
 	for (int joyId = 0; joyId < MaxNumJoysticks; joyId++)
 	{
-		Qt5JoystickState &state = joystickStates_[joyId];
+		QtJoystickState &state = joystickStates_[joyId];
 		if (state.gamepad_ == nullptr)
 			continue;
 
-		for (unsigned int buttonId = 0; buttonId < Qt5JoystickState::NumButtons; buttonId++)
+		for (unsigned int buttonId = 0; buttonId < QtJoystickState::NumButtons; buttonId++)
 		{
 			const bool newButtonState = state.isButtonDown(buttonId);
 			const bool oldButtonState = state.buttonState_[state.currentStateIndex_][buttonId];
@@ -426,10 +438,10 @@ void Qt5InputManager::updateJoystickStates()
 			}
 		}
 
-		for (unsigned int axisId = 0; axisId < Qt5JoystickState::NumAxes; axisId++)
+		for (unsigned int axisId = 0; axisId < QtJoystickState::NumAxes; axisId++)
 		{
 			const float newAxisValue = state.axisNormValue(axisId);
-			if (fabsf(state.axesValuesState_[axisId] - newAxisValue) > Qt5JoystickState::AxisEventTolerance)
+			if (fabsf(state.axesValuesState_[axisId] - newAxisValue) > QtJoystickState::AxisEventTolerance)
 			{
 				state.axesValuesState_[axisId] = newAxisValue;
 				if (inputEventHandler_)
@@ -447,7 +459,7 @@ void Qt5InputManager::updateJoystickStates()
 }
 #endif
 
-void Qt5InputManager::copyButtonStatesToPrev()
+void QtInputManager::copyButtonStatesToPrev()
 {
 	mouseState_.copyButtonStateToPrev();
 	keyboardState_.copyKeyStateToPrev();
@@ -459,7 +471,7 @@ void Qt5InputManager::copyButtonStatesToPrev()
 #endif
 }
 
-bool Qt5InputManager::shouldQuitOnRequest()
+bool QtInputManager::shouldQuitOnRequest()
 {
 	bool shouldQuit = true;
 
@@ -469,14 +481,14 @@ bool Qt5InputManager::shouldQuitOnRequest()
 	return shouldQuit;
 }
 
-bool Qt5InputManager::event(QEvent *event)
+bool QtInputManager::event(QEvent *event)
 {
 #ifdef WITH_IMGUI
-	ImGuiQt5Input::event(event);
+	ImGuiQtInput::event(event);
 #endif
 
 #ifdef WITH_NUKLEAR
-	NuklearQt5Input::event(event);
+	NuklearQtInput::event(event);
 #endif
 
 	switch (event->type())
@@ -519,13 +531,13 @@ bool Qt5InputManager::event(QEvent *event)
 	}
 }
 
-void Qt5InputManager::keyPressEvent(QKeyEvent *event)
+void QtInputManager::keyPressEvent(QKeyEvent *event)
 {
 	if (inputEventHandler_)
 	{
 		keyboardEvent_.scancode = static_cast<int>(event->nativeScanCode());
-		keyboardEvent_.sym = Qt5Keys::keySymValueToEnum(event->key());
-		keyboardEvent_.mod = Qt5Keys::keyModMaskToEnumMask(event->modifiers());
+		keyboardEvent_.sym = QtKeys::keySymValueToEnum(event->key());
+		keyboardEvent_.mod = QtKeys::keyModMaskToEnumMask(event->modifiers());
 		if (keyboardEvent_.sym != KeySym::UNKNOWN)
 		{
 			const unsigned int keySym = static_cast<unsigned int>(keyboardEvent_.sym);
@@ -541,13 +553,13 @@ void Qt5InputManager::keyPressEvent(QKeyEvent *event)
 	}
 }
 
-void Qt5InputManager::keyReleaseEvent(QKeyEvent *event)
+void QtInputManager::keyReleaseEvent(QKeyEvent *event)
 {
 	if (inputEventHandler_)
 	{
 		keyboardEvent_.scancode = static_cast<int>(event->nativeScanCode());
-		keyboardEvent_.sym = Qt5Keys::keySymValueToEnum(event->key());
-		keyboardEvent_.mod = Qt5Keys::keyModMaskToEnumMask(event->modifiers());
+		keyboardEvent_.sym = QtKeys::keySymValueToEnum(event->key());
+		keyboardEvent_.mod = QtKeys::keyModMaskToEnumMask(event->modifiers());
 		if (keyboardEvent_.sym != KeySym::UNKNOWN)
 		{
 			const unsigned int keySym = static_cast<unsigned int>(keyboardEvent_.sym);
@@ -557,42 +569,54 @@ void Qt5InputManager::keyReleaseEvent(QKeyEvent *event)
 	}
 }
 
-void Qt5InputManager::mousePressEvent(QMouseEvent *event)
+void QtInputManager::mousePressEvent(QMouseEvent *event)
 {
 	if (inputEventHandler_)
 	{
-		mouseEvent_.x = event->x();
-		mouseEvent_.y = theApplication().heightInt() - event->y();
-		mouseEvent_.button = qt5ToNcineMouseButton(event->button());
+		int x = 0;
+		int y = 0;
+		mouseEventPos(event, x, y);
+
+		mouseEvent_.x = x;
+		mouseEvent_.y = theApplication().heightInt() - y;
+		mouseEvent_.button = qtToNcineMouseButton(event->button());
 		mouseState_.buttonStates_[mouseState_.currentStateIndex_] = event->buttons();
 		inputEventHandler_->onMouseButtonPressed(mouseEvent_);
 	}
 }
 
-void Qt5InputManager::mouseReleaseEvent(QMouseEvent *event)
+void QtInputManager::mouseReleaseEvent(QMouseEvent *event)
 {
 	if (inputEventHandler_)
 	{
-		mouseEvent_.x = event->x();
-		mouseEvent_.y = theApplication().heightInt() - event->y();
-		mouseEvent_.button = qt5ToNcineMouseButton(event->button());
+		int x = 0;
+		int y = 0;
+		mouseEventPos(event, x, y);
+
+		mouseEvent_.x = x;
+		mouseEvent_.y = theApplication().heightInt() - y;
+		mouseEvent_.button = qtToNcineMouseButton(event->button());
 		mouseState_.buttonStates_[mouseState_.currentStateIndex_] = event->buttons();
 		inputEventHandler_->onMouseButtonReleased(mouseEvent_);
 	}
 }
 
-void Qt5InputManager::mouseMoveEvent(QMouseEvent *event)
+void QtInputManager::mouseMoveEvent(QMouseEvent *event)
 {
 	if (inputEventHandler_)
 	{
-		mouseState_.x = event->x();
-		mouseState_.y = theApplication().heightInt() - event->y();
+		int x = 0;
+		int y = 0;
+		mouseEventPos(event, x, y);
+
+		mouseState_.x = x;
+		mouseState_.y = theApplication().heightInt() - y;
 		mouseState_.buttonStates_[mouseState_.currentStateIndex_] = event->buttons();
 		inputEventHandler_->onMouseMoved(mouseState_);
 	}
 }
 
-void Qt5InputManager::touchBeginEvent(QTouchEvent *event)
+void QtInputManager::touchBeginEvent(QTouchEvent *event)
 {
 	if (inputEventHandler_)
 	{
@@ -601,7 +625,7 @@ void Qt5InputManager::touchBeginEvent(QTouchEvent *event)
 	}
 }
 
-void Qt5InputManager::touchUpdateEvent(QTouchEvent *event)
+void QtInputManager::touchUpdateEvent(QTouchEvent *event)
 {
 	if (inputEventHandler_)
 	{
@@ -616,7 +640,7 @@ void Qt5InputManager::touchUpdateEvent(QTouchEvent *event)
 	}
 }
 
-void Qt5InputManager::touchEndEvent(QTouchEvent *event)
+void QtInputManager::touchEndEvent(QTouchEvent *event)
 {
 	if (inputEventHandler_)
 	{
@@ -625,7 +649,7 @@ void Qt5InputManager::touchEndEvent(QTouchEvent *event)
 	}
 }
 
-void Qt5InputManager::wheelEvent(QWheelEvent *event)
+void QtInputManager::wheelEvent(QWheelEvent *event)
 {
 	if (inputEventHandler_)
 	{
@@ -635,7 +659,7 @@ void Qt5InputManager::wheelEvent(QWheelEvent *event)
 	}
 }
 
-void Qt5InputManager::dropEvent(QDropEvent *event)
+void QtInputManager::dropEvent(QDropEvent *event)
 {
 	if (inputEventHandler_)
 	{
@@ -667,7 +691,7 @@ void Qt5InputManager::dropEvent(QDropEvent *event)
 }
 
 #ifdef WITH_QT5GAMEPAD
-bool Qt5InputManager::isJoyPresent(int joyId) const
+bool QtInputManager::isJoyPresent(int joyId) const
 {
 	ASSERT(joyId >= 0);
 	ASSERT_MSG_X(joyId < int(MaxNumJoysticks), "joyId is %d and the maximum is %u", joyId, MaxNumJoysticks - 1);
@@ -677,7 +701,7 @@ bool Qt5InputManager::isJoyPresent(int joyId) const
 	return joystickStates_[joyId].gamepad_->isConnected();
 }
 
-const char *Qt5InputManager::joyName(int joyId) const
+const char *QtInputManager::joyName(int joyId) const
 {
 	if (isJoyPresent(joyId))
 		return joystickStates_[joyId].name_;
@@ -685,7 +709,7 @@ const char *Qt5InputManager::joyName(int joyId) const
 		return nullptr;
 }
 
-const JoystickState &Qt5InputManager::joystickState(int joyId) const
+const JoystickState &QtInputManager::joystickState(int joyId) const
 {
 	if (isJoyPresent(joyId))
 		return joystickStates_[joyId];
@@ -694,7 +718,7 @@ const JoystickState &Qt5InputManager::joystickState(int joyId) const
 }
 #endif
 
-void Qt5InputManager::setMouseCursorMode(MouseCursorMode mode)
+void QtInputManager::setMouseCursorMode(MouseCursorMode mode)
 {
 	if (mode != mouseCursorMode_)
 	{
@@ -724,9 +748,13 @@ void Qt5InputManager::setMouseCursorMode(MouseCursorMode mode)
 // PRIVATE FUNCTIONS
 //////////////////////////////////////////////////////////
 
-void Qt5InputManager::updateTouchEvent(const QTouchEvent *event)
+void QtInputManager::updateTouchEvent(const QTouchEvent *event)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+	const QList<QEventPoint> &touchPoints = event->points();
+#else
 	const QList<QTouchEvent::TouchPoint> &touchPoints = event->touchPoints();
+#endif
 
 	touchEvent_.count = touchPoints.size();
 	for (unsigned int i = 0; i < touchEvent_.count && i < TouchEvent::MaxPointers; i++)
@@ -734,9 +762,18 @@ void Qt5InputManager::updateTouchEvent(const QTouchEvent *event)
 		TouchEvent::Pointer &pointer = touchEvent_.pointers[i];
 		const QTouchEvent::TouchPoint &touchPoint = touchPoints.at(i);
 
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+		const QPointF pos = touchPoint.position();
+		const int x = qRound(pos.x());
+		const int y = qRound(pos.y());
+#else
+		const int x = touchPoint.pos().x();
+		const int y = touchPoint.pos().y();
+#endif
+
 		pointer.id = touchPoint.id();
-		pointer.x = touchPoint.pos().x();
-		pointer.y = theApplication().height() - touchPoint.pos().y();
+		pointer.x = x;
+		pointer.y = theApplication().height() - y;
 		pointer.pressure = touchPoint.pressure();
 	}
 }

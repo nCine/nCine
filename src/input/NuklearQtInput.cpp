@@ -1,5 +1,5 @@
-#include "NuklearQt5Input.h"
-#include "Qt5Widget.h"
+#include "NuklearQtInput.h"
+#include "QtWidget.h"
 #include "IInputManager.h"
 #include "Application.h"
 
@@ -13,18 +13,18 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-bool NuklearQt5Input::inputEnabled_ = true;
-Qt5Widget *NuklearQt5Input::widget_ = nullptr;
+bool NuklearQtInput::inputEnabled_ = true;
+QtWidget *NuklearQtInput::widget_ = nullptr;
 
-unsigned int NuklearQt5Input::text_[NK_QT5_TEXT_MAX];
-int NuklearQt5Input::textLength_;
-struct nk_vec2 NuklearQt5Input::scroll_;
+unsigned int NuklearQtInput::text_[NK_QT_TEXT_MAX];
+int NuklearQtInput::textLength_;
+struct nk_vec2 NuklearQtInput::scroll_;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void NuklearQt5Input::init(Qt5Widget *widget)
+void NuklearQtInput::init(QtWidget *widget)
 {
 	ASSERT(widget);
 	widget_ = widget;
@@ -35,13 +35,13 @@ void NuklearQt5Input::init(Qt5Widget *widget)
 	NuklearContext::ctx_.clip.userdata = nk_handle_ptr(nullptr);
 }
 
-void NuklearQt5Input::shutdown()
+void NuklearQtInput::shutdown()
 {
 	NuklearContext::shutdown();
 	widget_ = nullptr;
 }
 
-void NuklearQt5Input::newFrame()
+void NuklearQtInput::newFrame()
 {
 	NuklearContext::width_ = theApplication().width();
 	NuklearContext::height_ = theApplication().height();
@@ -124,7 +124,7 @@ void NuklearQt5Input::newFrame()
 	scroll_ = nk_vec2(0.0f, 0.0f);
 }
 
-bool NuklearQt5Input::event(QEvent *event)
+bool NuklearQtInput::event(QEvent *event)
 {
 	if (inputEnabled_ == false)
 		return false;
@@ -137,14 +137,22 @@ bool NuklearQt5Input::event(QEvent *event)
 			QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
 
 			/* text input */
-			if (keyEvent->text().length() > 0 && textLength_ < NK_QT5_TEXT_MAX)
+			if (keyEvent->text().length() > 0 && textLength_ < NK_QT_TEXT_MAX)
 				text_[textLength_++] = keyEvent->text().data()->unicode();
 			return true;
 		}
 		case QEvent::MouseButtonDblClick:
 		{
 			QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
-			const int x = mouseEvent->x(), y = mouseEvent->y();
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+			const QPointF pos = mouseEvent->position();
+			const int x = qRound(pos.x());
+			const int y = qRound(pos.y());
+#else
+			const int x = mouseEvent->x();
+			const int y = mouseEvent->y();
+#endif
+
 			if (mouseEvent->button() == Qt::LeftButton)
 				nk_input_button(ctx, NK_BUTTON_DOUBLE, x, y, true);
 			return true;
@@ -166,7 +174,7 @@ bool NuklearQt5Input::event(QEvent *event)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void NuklearQt5Input::clipboardPaste(nk_handle usr, struct nk_text_edit *edit)
+void NuklearQtInput::clipboardPaste(nk_handle usr, struct nk_text_edit *edit)
 {
 	QClipboard *clipboard = QApplication::clipboard();
 	const char *text = clipboard->text().toStdString().c_str();
@@ -174,7 +182,7 @@ void NuklearQt5Input::clipboardPaste(nk_handle usr, struct nk_text_edit *edit)
 		nk_textedit_paste(edit, text, nk_strlen(text));
 }
 
-void NuklearQt5Input::clipboardCopy(nk_handle usr, const char *text, int len)
+void NuklearQtInput::clipboardCopy(nk_handle usr, const char *text, int len)
 {
 	if (len == 0)
 		return;

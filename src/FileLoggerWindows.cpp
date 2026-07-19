@@ -107,7 +107,7 @@ bool enableVirtualTerminalProcessing()
 void writeOutputDebug(const char *logEntry)
 {
 	if (IsDebuggerPresent())
-		OutputDebugString(logEntry);
+		OutputDebugStringA(logEntry);
 }
 
 }

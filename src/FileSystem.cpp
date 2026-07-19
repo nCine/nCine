@@ -543,7 +543,7 @@ nctl::String FileSystem::currentDir()
 {
 	nctl::String returnedPath(MaxPathLength);
 #ifdef _WIN32
-	GetCurrentDirectory(MaxPathLength, buffer);
+	GetCurrentDirectoryA(MaxPathLength, buffer);
 #else
 	::getcwd(buffer, MaxPathLength);
 #endif
@@ -554,7 +554,7 @@ nctl::String FileSystem::currentDir()
 bool FileSystem::setCurrentDir(const char *path)
 {
 #ifdef _WIN32
-	const int status = SetCurrentDirectory(path);
+	const int status = SetCurrentDirectoryA(path);
 	return (status != 0);
 #else
 	const int status = ::chdir(path);
@@ -897,7 +897,7 @@ bool FileSystem::rename(const char *oldPath, const char *newPath)
 		return false;
 
 #ifdef _WIN32
-	const int status = MoveFile(oldPath, newPath);
+	const int status = MoveFileA(oldPath, newPath);
 	return (status != 0);
 #else
 	#ifdef __ANDROID__
@@ -917,7 +917,7 @@ bool FileSystem::copy(const char *oldPath, const char *newPath)
 		return false;
 
 #ifdef _WIN32
-	const int status = CopyFile(oldPath, newPath, TRUE);
+	const int status = CopyFileA(oldPath, newPath, TRUE);
 	return (status != 0);
 #elif defined(__linux__)
 	#ifdef __ANDROID__
@@ -981,7 +981,7 @@ long int FileSystem::fileSize(const char *path)
 		return -1;
 
 #ifdef _WIN32
-	HANDLE hFile = CreateFile(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+	HANDLE hFile = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
 	LARGE_INTEGER fileSize;
 	fileSize.QuadPart = 0;
 	const int status = GetFileSizeEx(hFile, &fileSize);
@@ -1006,7 +1006,7 @@ FileSystem::FileDate FileSystem::lastModificationTime(const char *path)
 {
 	FileDate date = {};
 #ifdef _WIN32
-	HANDLE hFile = CreateFile(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+	HANDLE hFile = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
 	FILETIME fileTime;
 	const int status = GetFileTime(hFile, nullptr, nullptr, &fileTime);
 	if (status != 0)
@@ -1037,7 +1037,7 @@ FileSystem::FileDate FileSystem::lastAccessTime(const char *path)
 {
 	FileDate date = {};
 #ifdef _WIN32
-	HANDLE hFile = CreateFile(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+	HANDLE hFile = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
 	FILETIME fileTime;
 	const int status = GetFileTime(hFile, nullptr, &fileTime, nullptr);
 	if (status != 0)

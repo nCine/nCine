@@ -1,6 +1,6 @@
-#include "ImGuiQt5Input.h"
+#include "ImGuiQtInput.h"
 #include "Application.h"
-#include "Qt5Widget.h"
+#include "QtWidget.h"
 
 #include <qevent.h>
 #include <QApplication>
@@ -17,12 +17,12 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-bool ImGuiQt5Input::inputEnabled_ = true;
-bool ImGuiQt5Input::mousePressed_[5] = { false, false, false, false, false };
-QCursor ImGuiQt5Input::mouseCursors_[ImGuiMouseCursor_COUNT] = {};
-QCursor ImGuiQt5Input::blankCursor_;
-Qt5Widget *ImGuiQt5Input::widget_ = nullptr;
-nctl::UniquePtr<QGamepad> ImGuiQt5Input::gamepad_;
+bool ImGuiQtInput::inputEnabled_ = true;
+bool ImGuiQtInput::mousePressed_[5] = { false, false, false, false, false };
+QCursor ImGuiQtInput::mouseCursors_[ImGuiMouseCursor_COUNT] = {};
+QCursor ImGuiQtInput::blankCursor_;
+QtWidget *ImGuiQtInput::widget_ = nullptr;
+nctl::UniquePtr<QGamepad> ImGuiQtInput::gamepad_;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -188,7 +188,7 @@ namespace {
 
 }
 
-void ImGuiQt5Input::init(Qt5Widget *widget)
+void ImGuiQtInput::init(QtWidget *widget)
 {
 	ASSERT(widget);
 	widget_ = widget;
@@ -198,7 +198,12 @@ void ImGuiQt5Input::init(Qt5Widget *widget)
 
 	// Setup back-end capabilities flags
 	ImGuiIO &io = ImGui::GetIO();
+#ifdef WITH_QT6
+	io.BackendPlatformName = "nCine_Qt6";
+#else
 	io.BackendPlatformName = "nCine_Qt5";
+#endif
+
 	io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors; // We can honor GetMouseCursor() values (optional)
 	io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos; // We can honor io.WantSetMousePos requests (optional, rarely used)
 	io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
@@ -224,7 +229,7 @@ void ImGuiQt5Input::init(Qt5Widget *widget)
 #endif
 }
 
-void ImGuiQt5Input::shutdown()
+void ImGuiQtInput::shutdown()
 {
 	widget_ = nullptr;
 
@@ -235,7 +240,7 @@ void ImGuiQt5Input::shutdown()
 	ImGui::DestroyContext();
 }
 
-void ImGuiQt5Input::newFrame()
+void ImGuiQtInput::newFrame()
 {
 	ImGuiIO &io = ImGui::GetIO();
 	io.DisplaySize = ImVec2(theApplication().width(), theApplication().height());
@@ -248,7 +253,7 @@ void ImGuiQt5Input::newFrame()
 	updateGamepads();
 }
 
-bool ImGuiQt5Input::event(QEvent *event)
+bool ImGuiQtInput::event(QEvent *event)
 {
 	if (inputEnabled_ == false)
 		return false;
@@ -296,7 +301,12 @@ bool ImGuiQt5Input::event(QEvent *event)
 		case QEvent::MouseMove:
 		{
 			QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+			const QPointF pos = mouseEvent->position();
+			io.AddMousePosEvent(pos.x(), pos.y());
+#else
 			io.AddMousePosEvent(mouseEvent->x(), mouseEvent->y());
+#endif
 			return true;
 		}
 		case QEvent::Wheel:
@@ -322,7 +332,7 @@ bool ImGuiQt5Input::event(QEvent *event)
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
 
-void ImGuiQt5Input::updateMouseData()
+void ImGuiQtInput::updateMouseData()
 {
 	ImGuiIO &io = ImGui::GetIO();
 
@@ -331,7 +341,7 @@ void ImGuiQt5Input::updateMouseData()
 		widget_->cursor().setPos(static_cast<int>(io.MousePos.x), static_cast<int>(io.MousePos.y));
 }
 
-void ImGuiQt5Input::updateMouseCursor()
+void ImGuiQtInput::updateMouseCursor()
 {
 	ImGuiIO &io = ImGui::GetIO();
 	if (io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange)
@@ -344,7 +354,7 @@ void ImGuiQt5Input::updateMouseCursor()
 		widget_->setCursor(mouseCursors_[imguiCursor]);
 }
 
-void ImGuiQt5Input::updateGamepads()
+void ImGuiQtInput::updateGamepads()
 {
 #ifdef WITH_QT5GAMEPAD
 	ImGuiIO &io = ImGui::GetIO();

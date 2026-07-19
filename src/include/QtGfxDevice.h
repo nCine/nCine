@@ -1,5 +1,5 @@
-#ifndef CLASS_NCINE_QT5GFXDEVICE
-#define CLASS_NCINE_QT5GFXDEVICE
+#ifndef CLASS_NCINE_QTGFXDEVICE
+#define CLASS_NCINE_QTGFXDEVICE
 
 #include <nctl/StaticString.h>
 #include "IGfxDevice.h"
@@ -10,13 +10,13 @@ class QScreen;
 
 namespace ncine {
 
-class Qt5Widget;
+class QtWidget;
 
-/// The Qt5 based graphics device
-class Qt5GfxDevice : public IGfxDevice
+/// The Qt based graphics device
+class QtGfxDevice : public IGfxDevice
 {
   public:
-	Qt5GfxDevice(const WindowMode &windowMode, const GLContextInfo &glContextInfo, const DisplayMode &displayMode, Qt5Widget &widget);
+	QtGfxDevice(const WindowMode &windowMode, const GLContextInfo &glContextInfo, const DisplayMode &displayMode, QtWidget &widget);
 
 	void setSwapInterval(int interval) override;
 
@@ -47,24 +47,30 @@ class Qt5GfxDevice : public IGfxDevice
 #endif
 	void resetTextureBinding();
 	void bindDefaultDrawFramebufferObject();
-	/// Resets the OpenGL state cache to bind the default Qt5 Framebuffer Object
+	/// Resets the OpenGL state cache to bind the default Qt Framebuffer Object
 	void resetFramebufferObjectBinding();
+	/// Resets the OpenGL state cache for vertex, index, and uniform buffer bindings
+	void resetBufferObjectBinding();
+	/// Resets the OpenGL state cache for the currently bound shader program
+	void resetShaderProgramBinding();
 	/// Forces the framebuffer's alpha channel to fully opaque
 	void forceOpaqueAlpha();
+	/// Clears the screen at the start of a frame when the scenegraph is disabled
+	void clearScreen();
 
   private:
-	Qt5Widget &widget_;
+	QtWidget &widget_;
 
-	/// Qt5 screen pointers
+	/// Qt screen pointers
 	/*! \note Used to retrieve the index in the monitors array */
 	static QScreen *screenPointers_[MaxMonitors];
 	static const unsigned int MaxMonitorNameLength = 128;
 	static nctl::StaticString<MaxMonitorNameLength> monitorNames_[MaxMonitors];
 
 	/// Deleted copy constructor
-	Qt5GfxDevice(const Qt5GfxDevice &) = delete;
+	QtGfxDevice(const QtGfxDevice &) = delete;
 	/// Deleted assignment operator
-	Qt5GfxDevice &operator=(const Qt5GfxDevice &) = delete;
+	QtGfxDevice &operator=(const QtGfxDevice &) = delete;
 
 	/// Initilizes the OpenGL graphic context
 	void initDevice(const WindowMode &windowMode);
@@ -76,8 +82,8 @@ class Qt5GfxDevice : public IGfxDevice
 	/// Called by the resize event
 	void setSize(int width, int height);
 
-	friend class Qt5Widget; // for `updateMonitors()`
-	friend class Qt5InputManager;
+	friend class QtWidget; // for `updateMonitors()`
+	friend class QtInputManager;
 };
 
 }

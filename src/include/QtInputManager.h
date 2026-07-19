@@ -1,5 +1,5 @@
-#ifndef CLASS_NCINE_QT5INPUTMANAGER
-#define CLASS_NCINE_QT5INPUTMANAGER
+#ifndef CLASS_NCINE_QTINPUTMANAGER
+#define CLASS_NCINE_QTINPUTMANAGER
 
 #include <qevent.h>
 #include "IInputManager.h"
@@ -17,21 +17,21 @@ class QWheelEvent;
 
 namespace ncine {
 
-class Qt5Widget;
+class QtWidget;
 
-/// Utility functions to convert between engine key enumerations and Qt5 ones
-class Qt5Keys
+/// Utility functions to convert between engine key enumerations and Qt ones
+class QtKeys
 {
   public:
 	static KeySym keySymValueToEnum(int keysym);
 	static int keyModMaskToEnumMask(Qt::KeyboardModifiers keymod);
 };
 
-/// Information about Qt5 mouse state
-class Qt5MouseState : public MouseState
+/// Information about Qt mouse state
+class QtMouseState : public MouseState
 {
   public:
-	Qt5MouseState();
+	QtMouseState();
 
 	bool isButtonDown(MouseButton button) const override;
 	bool isButtonPressed(MouseButton button) const override;
@@ -43,23 +43,23 @@ class Qt5MouseState : public MouseState
 
 	void copyButtonStateToPrev();
 
-	friend class Qt5InputManager;
+	friend class QtInputManager;
 };
 
-/// Information about a Qt5 scroll event
-class Qt5ScrollEvent : public ScrollEvent
+/// Information about a Qt scroll event
+class QtScrollEvent : public ScrollEvent
 {
   public:
-	Qt5ScrollEvent() {}
+	QtScrollEvent() {}
 
-	friend class Qt5InputManager;
+	friend class QtInputManager;
 };
 
-/// Simulated information about Qt5 keyboard state
-class Qt5KeyboardState : public KeyboardState
+/// Simulated information about Qt keyboard state
+class QtKeyboardState : public KeyboardState
 {
   public:
-	Qt5KeyboardState();
+	QtKeyboardState();
 
 	bool isKeyDown(KeySym key) const override;
 	bool isKeyPressed(KeySym key) const override;
@@ -72,15 +72,15 @@ class Qt5KeyboardState : public KeyboardState
 
 	void copyKeyStateToPrev();
 
-	friend class Qt5InputManager;
+	friend class QtInputManager;
 };
 
-/// Information about Qt5 joystick state
+/// Information about Qt joystick state
 #ifdef WITH_QT5GAMEPAD
-class Qt5JoystickState : public JoystickState
+class QtJoystickState : public JoystickState
 {
   public:
-	Qt5JoystickState();
+	QtJoystickState();
 
 	bool isButtonDown(int buttonId) const override;
 	bool isButtonPressed(int buttonId) const override;
@@ -108,13 +108,13 @@ class Qt5JoystickState : public JoystickState
 	void copyButtonStateToPrev();
 	void resetPrevButtonState();
 
-	friend class Qt5InputManager;
+	friend class QtInputManager;
 };
 #else
-class Qt5JoystickState : public JoystickState
+class QtJoystickState : public JoystickState
 {
   public:
-	Qt5JoystickState() {}
+	QtJoystickState() {}
 
 	inline bool isButtonDown(int buttonId) const override { return false; }
 	inline bool isButtonPressed(int buttonId) const override { return false; }
@@ -125,18 +125,18 @@ class Qt5JoystickState : public JoystickState
 	inline float axisNormValue(int axisId) const override { return 0.0f; }
 
   private:
-	friend class Qt5InputManager;
+	friend class QtInputManager;
 };
 #endif
 
-/// The class for parsing and dispatching Qt5 input events
-class Qt5InputManager : public IInputManager
+/// The class for parsing and dispatching Qt input events
+class QtInputManager : public IInputManager
 {
   public:
 	/// The constructor takes care of opening available joysticks
-	Qt5InputManager(Qt5Widget &widget);
+	QtInputManager(QtWidget &widget);
 	/// The destructor releases every opened joystick
-	~Qt5InputManager() override;
+	~QtInputManager() override;
 
 #ifdef WITH_QT5GAMEPAD
 	void updateJoystickStates();
@@ -163,9 +163,9 @@ class Qt5InputManager : public IInputManager
 	bool isJoyPresent(int joyId) const override;
 	const char *joyName(int joyId) const override;
 	const char *joyGuid(int joyId) const override { return nullptr; }
-	inline int joyNumButtons(int joyId) const override { return Qt5JoystickState::NumButtons; }
+	inline int joyNumButtons(int joyId) const override { return QtJoystickState::NumButtons; }
 	inline int joyNumHats(int joyId) const override { return 1; }
-	inline int joyNumAxes(int joyId) const override { return Qt5JoystickState::NumAxes; }
+	inline int joyNumAxes(int joyId) const override { return QtJoystickState::NumAxes; }
 	const JoystickState &joystickState(int joyId) const override;
 #else
 	inline bool isJoyPresent(int joyId) const override { return false; }
@@ -185,29 +185,29 @@ class Qt5InputManager : public IInputManager
 	static const int MaxNumJoysticks = 4;
 
 	static TouchEvent touchEvent_;
-	static Qt5MouseState mouseState_;
+	static QtMouseState mouseState_;
 	static MouseEvent mouseEvent_;
-	static Qt5ScrollEvent scrollEvent_;
-	static Qt5KeyboardState keyboardState_;
+	static QtScrollEvent scrollEvent_;
+	static QtKeyboardState keyboardState_;
 	static KeyboardEvent keyboardEvent_;
 	static TextInputEvent textInputEvent_;
-	static Qt5JoystickState nullJoystickState_;
+	static QtJoystickState nullJoystickState_;
 #ifdef WITH_QT5GAMEPAD
-	static Qt5JoystickState joystickStates_[MaxNumJoysticks];
+	static QtJoystickState joystickStates_[MaxNumJoysticks];
 	static JoyButtonEvent joyButtonEvent_;
 	static JoyHatEvent joyHatEvent_;
 	static JoyAxisEvent joyAxisEvent_;
 	static JoyConnectionEvent joyConnectionEvent_;
 #endif
 
-	Qt5Widget &widget_;
+	QtWidget &widget_;
 
 	void updateTouchEvent(const QTouchEvent *event);
 
 	/// Deleted copy constructor
-	Qt5InputManager(const Qt5InputManager &) = delete;
+	QtInputManager(const QtInputManager &) = delete;
 	/// Deleted assignment operator
-	Qt5InputManager &operator=(const Qt5InputManager &) = delete;
+	QtInputManager &operator=(const QtInputManager &) = delete;
 };
 
 }
