@@ -160,8 +160,11 @@ class GLShaderProgram
 	/// Deleted assignment operator
 	GLShaderProgram &operator=(const GLShaderProgram &) = delete;
 
+	inline static void setBoundProgram(GLuint program) {boundProgram_ = program; }
+
 	friend class GLShaderUniforms;
 	friend class GLShaderUniformBlocks;
+	friend class QtGfxDevice;
 };
 
 }

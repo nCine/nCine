@@ -21,8 +21,8 @@ class DLL_PUBLIC IGfxDevice
 {
   public:
 	static const unsigned int MaxMonitors = 4;
-#if defined(WITH_QT5)
-	// Qt5 cannot query the list of supported video modes of a monitor
+#if defined(WITH_QT5) || defined(WITH_QT6)
+	// Qt cannot query the list of supported video modes of a monitor
 	static const unsigned int MaxVideoModes = 1;
 #elif defined(__ANDROID__)
 	static const unsigned int MaxVideoModes = 16;

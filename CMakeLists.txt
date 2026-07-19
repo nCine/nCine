@@ -41,6 +41,7 @@ if(NOT (
 	(NCINE_PREFERRED_BACKEND STREQUAL "GLFW" AND GLFW_FOUND) OR
 	(NCINE_PREFERRED_BACKEND STREQUAL "SDL3" AND SDL3_FOUND) OR
 	(NCINE_PREFERRED_BACKEND STREQUAL "SDL2" AND SDL2_FOUND) OR
+	(NCINE_PREFERRED_BACKEND STREQUAL "QT6" AND Qt6_FOUND) OR
 	(NCINE_PREFERRED_BACKEND STREQUAL "QT5" AND Qt5_FOUND)
 ))
 	# Choose a fallback backend
@@ -50,10 +51,12 @@ if(NOT (
 		set(NCINE_PREFERRED_BACKEND "SDL3")
 	elseif(SDL2_FOUND)
 		set(NCINE_PREFERRED_BACKEND "SDL2")
+	elseif(Qt6_FOUND)
+		set(NCINE_PREFERRED_BACKEND "QT6")
 	elseif(Qt5_FOUND)
 		set(NCINE_PREFERRED_BACKEND "QT5")
 	else()
-		message(FATAL_ERROR "None of the supported backends (GLFW, SDL3, SDL2, and Qt5) was found.")
+		message(FATAL_ERROR "None of the supported backends (GLFW, SDL3, SDL2, Qt6, and Qt5) was found.")
 	endif()
 
 	message(WARNING "Preferred backend unavailable, using ${NCINE_PREFERRED_BACKEND}")

@@ -66,6 +66,8 @@ const char *backendName()
 		#else
 	return "GLFW";
 		#endif
+	#elif NCINE_WITH_QT6
+	return "Qt6";
 	#elif NCINE_WITH_QT5
 	return "Qt5";
 	#endif

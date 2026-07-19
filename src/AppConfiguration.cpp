@@ -267,6 +267,10 @@ void AppConfiguration::applyDefaults()
 	// DPI queries do not seem to work reliably on X11 with SDL2/SDL3
 	window.scaling = false;
 #endif
+#if defined(WITH_QT6)
+	// High DPI scaling is always enabled starting with Qt6 and cannot be disabled anymore
+	window.scaling = true;
+#endif
 	window.title = "nCine";
 	window.iconFilename = "icons/icon48.png";
 

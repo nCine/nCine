@@ -1,11 +1,11 @@
-#ifdef WITH_QT5
+#if defined(WITH_QT5) || defined(WITH_QT6)
 	#include <QApplication>
-	#include <ncine/Qt5Widget.h>
+	#include <ncine/QtWidget.h>
 #endif
 
 #include <ncine/PCApplication.h>
 
-#if defined(_WIN32) && !defined(WITH_QT5)
+#if defined(_WIN32) && !(defined(WITH_QT5) || defined(WITH_QT6))
 	#include <ncine/common_windefines.h>
 	#include <windef.h>
 
@@ -28,20 +28,20 @@ class IAppEventHandler;
 
 nctl::UniquePtr<ncine::IAppEventHandler> createAppEventHandler();
 
-#if defined(_WIN32) && !defined(WITH_QT5)
+#if defined(_WIN32) && !(defined(WITH_QT5) || defined(WITH_QT6))
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 #else
 int main(int argc, char **argv)
 #endif
 {
-#if defined(_WIN32) && !defined(WITH_QT5)
+#if defined(_WIN32) && !(defined(WITH_QT5) || defined(WITH_QT6))
 	int argc = __argc;
 	char **argv = __argv;
 #endif
 
-#ifdef WITH_QT5
+#if defined(WITH_QT5) || defined(WITH_QT6)
 	QApplication app(argc, argv);
-	ncine::Qt5Widget *ncWidget = new ncine::Qt5Widget(createAppEventHandler, argc, argv);
+	ncine::QtWidget *ncWidget = new ncine::QtWidget(createAppEventHandler, argc, argv);
 	ncWidget->show();
 	return app.exec();
 #else

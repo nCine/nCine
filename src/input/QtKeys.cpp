@@ -1,8 +1,8 @@
-#include "Qt5InputManager.h"
+#include "QtInputManager.h"
 
 namespace ncine {
 
-KeySym Qt5Keys::keySymValueToEnum(int keysym)
+KeySym QtKeys::keySymValueToEnum(int keysym)
 {
 	// clang-format off
 	switch (keysym)
@@ -135,7 +135,7 @@ KeySym Qt5Keys::keySymValueToEnum(int keysym)
 	// clang-format on
 }
 
-int Qt5Keys::keyModMaskToEnumMask(Qt::KeyboardModifiers keymod)
+int QtKeys::keyModMaskToEnumMask(Qt::KeyboardModifiers keymod)
 {
 	int result = 0;
 

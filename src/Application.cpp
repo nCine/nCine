@@ -137,6 +137,9 @@ namespace {
 #ifdef WITH_SDL2
 		LOGD("WITH_SDL2");
 #endif
+#ifdef WITH_QT6
+		LOGD("WITH_QT6");
+#endif
 #ifdef WITH_QT5
 		LOGD("WITH_QT5");
 #endif

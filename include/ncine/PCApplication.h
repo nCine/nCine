@@ -5,7 +5,7 @@
 
 namespace ncine {
 
-class Qt5Widget;
+class QtWidget;
 
 /// Handler class for nCine applications on PC
 class DLL_PUBLIC PCApplication : public Application
@@ -18,8 +18,8 @@ class DLL_PUBLIC PCApplication : public Application
 	/// Suspension state from last frame
 	bool wasSuspended_;
 
-	/// A pointer to the custom Qt5 widget
-	Qt5Widget *qt5Widget_;
+	/// A pointer to the custom Qt widget
+	QtWidget *qtWidget_;
 
 	/// Must be called at the beginning to initialize the application
 	void init(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandler)(), int argc, char **argv);
@@ -33,7 +33,7 @@ class DLL_PUBLIC PCApplication : public Application
 
 	/// Private constructor
 	PCApplication()
-	    : Application(), wasSuspended_(false), qt5Widget_(nullptr) {}
+	    : Application(), wasSuspended_(false), qtWidget_(nullptr) {}
 	/// Private destructor
 	~PCApplication() = default;
 	/// Deleted copy constructor
@@ -42,7 +42,7 @@ class DLL_PUBLIC PCApplication : public Application
 	PCApplication &operator=(const PCApplication &) = delete;
 
 	friend DLL_PUBLIC Application &theApplication();
-	friend class Qt5Widget;
+	friend class QtWidget;
 };
 
 /// Meyers' Singleton

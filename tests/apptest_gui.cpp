@@ -9,11 +9,13 @@
 #endif
 #include "apptest_datapath.h"
 
-#if (NCINE_WITH_IMGUI || NCINE_WITH_NUKLEAR || NCINE_WITH_QT5)
+#if (NCINE_WITH_IMGUI || NCINE_WITH_NUKLEAR || NCINE_WITH_QT5 || NCINE_WITH_QT6)
 	#define HAS_GUI (1)
 	#ifdef __ANDROID__
 		#undef NCINE_WITH_QT5
 		#define NCINE_WITH_QT5 (0)
+		#undef NCINE_WITH_QT6
+		#define NCINE_WITH_QT6 (0)
 		#include <ncine/AndroidApplication.h>
 	#endif
 #endif
@@ -28,7 +30,7 @@
 	#include <ncine/nuklear.h>
 #endif
 
-#if NCINE_WITH_QT5
+#if NCINE_WITH_QT5 || NCINE_WITH_QT6
 	#include <QApplication>
 	#include <QPushButton>
 	#include <QCheckBox>
@@ -38,7 +40,7 @@
 	#include <QColorDialog>
 	#include <QLineEdit>
 	#include <QVBoxLayout>
-	#include <ncine/Qt5Widget.h>
+	#include <ncine/QtWidget.h>
 #endif
 
 namespace {
@@ -83,7 +85,7 @@ bool prevShowNuklear = true;
 bool nuklearWindowNeverCreated = true;
 #endif
 
-#if NCINE_WITH_QT5
+#if NCINE_WITH_QT5 || NCINE_WITH_QT6
 QCheckBox *pauseCheck = nullptr;
 QRadioButton *slowRadioButton = nullptr;
 QRadioButton *fastRadioButton = nullptr;
@@ -296,7 +298,7 @@ void MyEventHandler::onFrameStart()
 	}
 #endif
 
-#if NCINE_WITH_QT5
+#if NCINE_WITH_QT5 || NCINE_WITH_QT6
 	static nctl::String labelString;
 
 	if (pauseCheck)
@@ -402,7 +404,7 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 	// Not checking additional keys so that the text input is unhindered
 }
 
-#if NCINE_WITH_QT5
+#if NCINE_WITH_QT5 || NCINE_WITH_QT6
 
 int main(int argc, char **argv)
 {
@@ -414,7 +416,11 @@ int main(int argc, char **argv)
 
 	pauseCheck = new QCheckBox;
 	pauseCheck->setText("Pause");
+	#if NCINE_WITH_QT5
 	QObject::connect(pauseCheck, &QCheckBox::stateChanged, setPause);
+	#else
+	QObject::connect(pauseCheck, &QCheckBox::checkStateChanged, setPause);
+	#endif
 
 	QHBoxLayout *firstLineLayout = new QHBoxLayout(nullptr);
 	firstLineLayout->addWidget(quitButton);
@@ -463,7 +469,7 @@ int main(int argc, char **argv)
 	vLayout->addWidget(unlinkedLineEdit);
 	vLayout->addLayout(dummyLayout);
 
-	ncine::Qt5Widget *ncWidget = new nc::Qt5Widget(createAppEventHandler, argc, argv);
+	ncine::QtWidget *ncWidget = new nc::QtWidget(createAppEventHandler, argc, argv);
 	const nc::AppConfiguration appCfg = nc::theApplication().appConfiguration();
 	QWidget window;
 	window.setWindowTitle(appCfg.window.title.data());
@@ -476,7 +482,7 @@ int main(int argc, char **argv)
 	QWidget *w = new QWidget(&window);
 	w->setLayout(hLayout);
 
-	const int qt5GuiWidth = vLayout->sizeHint().width();
+	const int qtGuiWidth = vLayout->sizeHint().width();
 	const int screenWidth = nc::theApplication().gfxDevice().currentVideoMode().width;
 	const int screenHeight = nc::theApplication().gfxDevice().currentVideoMode().height;
 
@@ -484,7 +490,7 @@ int main(int argc, char **argv)
 	const int width = configResolutionIsValid ? nc::theApplication().gfxDevice().width() : screenWidth;
 	const int height = configResolutionIsValid ? nc::theApplication().gfxDevice().height() : screenHeight;
 
-	nc::theApplication().gfxDevice().setWindowSize(width - qt5GuiWidth, height);
+	nc::theApplication().gfxDevice().setWindowSize(width - qtGuiWidth, height);
 	window.setGeometry((screenWidth - width) / 2, (screenHeight - height) / 2, width, height);
 	if (appCfg.window.resizable == false)
 	{

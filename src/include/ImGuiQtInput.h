@@ -1,5 +1,5 @@
-#ifndef CLASS_NCINE_IMGUIQT5INPUT
-#define CLASS_NCINE_IMGUIQT5INPUT
+#ifndef CLASS_NCINE_IMGUIQTINPUT
+#define CLASS_NCINE_IMGUIQTINPUT
 
 #include "imgui.h"
 #include <QCursor>
@@ -10,13 +10,13 @@ class QGamepad;
 
 namespace ncine {
 
-class Qt5Widget;
+class QtWidget;
 
-/// The class that handles Qt5 input for ImGui
-class ImGuiQt5Input
+/// The class that handles Qt input for ImGui
+class ImGuiQtInput
 {
   public:
-	static void init(Qt5Widget *widget);
+	static void init(QtWidget *widget);
 	static void shutdown();
 	static void newFrame();
 	static bool event(QEvent *event);
@@ -29,7 +29,7 @@ class ImGuiQt5Input
 	static QCursor mouseCursors_[ImGuiMouseCursor_COUNT];
 	static QCursor blankCursor_;
 
-	static Qt5Widget *widget_;
+	static QtWidget *widget_;
 	static nctl::UniquePtr<QGamepad> gamepad_;
 
 	static void updateMouseData();

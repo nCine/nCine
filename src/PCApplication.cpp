@@ -19,9 +19,9 @@
 	#include <GLFW/glfw3.h>
 	#include "GlfwGfxDevice.h"
 	#include "GlfwInputManager.h"
-#elif defined(WITH_QT5)
-	#include "Qt5GfxDevice.h"
-	#include "Qt5InputManager.h"
+#elif defined(WITH_QT5) || defined(WITH_QT6)
+	#include "QtGfxDevice.h"
+	#include "QtInputManager.h"
 #endif
 
 #ifdef __EMSCRIPTEN__
@@ -116,10 +116,10 @@ void PCApplication::init(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandl
 #elif defined(WITH_GLFW)
 	gfxDevice_ = nctl::makeUnique<GlfwGfxDevice>(windowMode, glContextInfo, displayMode);
 	inputManager_ = nctl::makeUnique<GlfwInputManager>();
-#elif defined(WITH_QT5)
-	FATAL_ASSERT_MSG(qt5Widget_, "The Qt5 widget has not been assigned");
-	gfxDevice_ = nctl::makeUnique<Qt5GfxDevice>(windowMode, glContextInfo, displayMode, *qt5Widget_);
-	inputManager_ = nctl::makeUnique<Qt5InputManager>(*qt5Widget_);
+#elif defined(WITH_QT5) || defined(WITH_QT6)
+	FATAL_ASSERT_MSG(qtWidget_, "The Qt widget has not been assigned");
+	gfxDevice_ = nctl::makeUnique<QtGfxDevice>(windowMode, glContextInfo, displayMode, *qtWidget_);
+	inputManager_ = nctl::makeUnique<QtInputManager>(*qtWidget_);
 #endif
 	gfxDevice_->setWindowTitle(appCfg_.window.title.data());
 	nctl::String windowIconFilePath = fs::joinPath(fs::dataPath(), appCfg_.window.iconFilename);
@@ -128,18 +128,18 @@ void PCApplication::init(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandl
 
 	timings_[Timings::PRE_INIT] = profileStartTime_.secondsSince();
 
-#ifndef WITH_QT5
-	// Common initialization on Qt5 is performed later, when OpenGL can be used
+#if !(defined(WITH_QT5) || defined(WITH_QT6))
+	// Common initialization on Qt is performed later, when OpenGL can be used
 	initCommon();
 #endif
 }
 
 void PCApplication::run()
 {
-#if !defined(WITH_QT5)
+#if !(defined(WITH_QT5) || defined(WITH_QT6))
 	processEvents();
 #elif defined(WITH_QT5GAMEPAD)
-	static_cast<Qt5InputManager &>(*inputManager_).updateJoystickStates();
+	static_cast<QtInputManager &>(*inputManager_).updateJoystickStates();
 #endif
 
 	const bool suspended = shouldSuspend();
@@ -155,8 +155,8 @@ void PCApplication::run()
 	if (suspended == false)
 		step();
 
-#if defined(WITH_QT5)
-	static_cast<Qt5InputManager &>(*inputManager_).copyButtonStatesToPrev();
+#if defined(WITH_QT5) || defined(WITH_QT6)
+	static_cast<QtInputManager &>(*inputManager_).copyButtonStatesToPrev();
 #endif
 }
 

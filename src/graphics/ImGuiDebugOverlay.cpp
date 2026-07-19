@@ -499,6 +499,9 @@ void ImGuiDebugOverlay::guiPreprocessorDefines()
 #ifdef WITH_SDL2
 			ImGui::TextUnformatted("WITH_SDL2");
 #endif
+#ifdef WITH_QT6
+			ImGui::TextUnformatted("WITH_QT6");
+#endif
 #ifdef WITH_QT5
 			ImGui::TextUnformatted("WITH_QT5");
 #endif

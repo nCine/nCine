@@ -64,7 +64,7 @@ class GLFramebufferObject
 
 	static void setBoundHandle(GLenum target, GLuint glHandle);
 
-	friend class Qt5GfxDevice;
+	friend class QtGfxDevice;
 };
 
 }
