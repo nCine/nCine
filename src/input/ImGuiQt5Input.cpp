@@ -1,5 +1,4 @@
 #include "ImGuiQt5Input.h"
-#include "IInputManager.h"
 #include "Application.h"
 #include "Qt5Widget.h"
 
@@ -38,7 +37,8 @@ namespace {
 		QClipboard *clipboard = QApplication::clipboard();
 		const int charsToCopy = clipboard->text().length() < 1024 ? clipboard->text().length() : 1024;
 		for (int i = 0; i < charsToCopy; i++)
-			clipboardString[i] = static_cast<char>(clipboard->text().at(i).cell());
+			clipboardString[i] = static_cast<char>(clipboard->text().at(i).toLatin1());
+		clipboardString[charsToCopy] = '\0';
 
 		return clipboardString;
 	}

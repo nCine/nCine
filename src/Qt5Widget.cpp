@@ -114,7 +114,7 @@ bool Qt5Widget::event(QEvent *event)
 				application_.resizeScreenViewport(size.width(), size.height());
 				doneCurrent();
 			}
-			return QWidget::event(event);
+			return QOpenGLWidget::event(event);
 		}
 		case QEvent::Close:
 		{
@@ -130,7 +130,7 @@ bool Qt5Widget::event(QEvent *event)
 			return true;
 		}
 		default:
-			return QWidget::event(event);
+			return QOpenGLWidget::event(event);
 	}
 }
 
@@ -169,7 +169,11 @@ void Qt5Widget::paintGL()
 	{
 		insidePaintEvent = true;
 		if (application_.shouldQuit() == false)
+		{
+			Qt5GfxDevice &gfxDevice = static_cast<Qt5GfxDevice &>(*application_.gfxDevice_);
 			application_.run();
+			gfxDevice.forceOpaqueAlpha();
+		}
 		else
 		{
 			shutdown();

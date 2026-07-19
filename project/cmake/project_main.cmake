@@ -84,7 +84,7 @@ if(IS_DIRECTORY ${GENERATED_INCLUDE_DIR})
 	target_include_directories(${NCPROJECT_EXE_NAME} PRIVATE ${GENERATED_INCLUDE_DIR})
 endif()
 
-if(WIN32 AND NCINE_WTH_QT5)
+if(WIN32 AND NCINE_WITH_QT5)
 	target_link_libraries(${NCPROJECT_EXE_NAME} PRIVATE Qt5::WinMain)
 elseif(MINGW)
 	# Should be linked before `ncine_main`

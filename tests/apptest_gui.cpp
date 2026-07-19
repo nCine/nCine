@@ -130,7 +130,7 @@ void setText(const QString &text)
 {
 	const int charsToCopy = text.length() < MaxBufferLength - 1 ? text.length() : MaxBufferLength - 1;
 	for (int i = 0; i < charsToCopy; i++)
-		textBuffer[i] = static_cast<char>(text.at(i).cell());
+		textBuffer[i] = static_cast<char>(text.at(i).toLatin1());
 	textBuffer[charsToCopy] = '\0';
 }
 #endif
