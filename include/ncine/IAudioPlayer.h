@@ -161,7 +161,7 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	void setAirAbsorptionFactor(float factor);
 
 	/// Returns the player room rolloff factor
-	inline float roomRolloffFactor() const { return roomRooloffFactor_; }
+	inline float roomRolloffFactor() const { return roomRolloffFactor_; }
 	/// Sets the player room rolloff factor
 	void setRoomRolloffFactor(float factor);
 
@@ -226,7 +226,7 @@ class DLL_PUBLIC IAudioPlayer : public Object
 	/// Player air absorption factor value
 	float airAbsorptionFactor_;
 	/// Player room rolloff factor value
-	float roomRooloffFactor_;
+	float roomRolloffFactor_;
 	/// Player cone outer gain HF value
 	float coneOuterGainHF_;
 

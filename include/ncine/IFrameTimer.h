@@ -6,7 +6,7 @@
 namespace ncine {
 
 /// Frame time and average FPS calculator interface class
-class IFrameTimer
+class DLL_PUBLIC IFrameTimer
 {
   public:
 	virtual ~IFrameTimer();

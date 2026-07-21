@@ -1,10 +1,10 @@
 #ifndef CLASS_NCINE_RENDERCOMMAND
 #define CLASS_NCINE_RENDERCOMMAND
 
+#include "Rect.h"
 #include "Matrix4x4.h"
 #include "Material.h"
 #include "Geometry.h"
-#include "Texture.h"
 
 namespace ncine {
 

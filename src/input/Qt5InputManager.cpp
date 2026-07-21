@@ -669,6 +669,11 @@ void Qt5InputManager::dropEvent(QDropEvent *event)
 #ifdef WITH_QT5GAMEPAD
 bool Qt5InputManager::isJoyPresent(int joyId) const
 {
+	ASSERT(joyId >= 0);
+	ASSERT_MSG_X(joyId < int(MaxNumJoysticks), "joyId is %d and the maximum is %u", joyId, MaxNumJoysticks - 1);
+	if (joyId < 0 || joyId >= int(MaxNumJoysticks))
+		return false;
+
 	return joystickStates_[joyId].gamepad_->isConnected();
 }
 

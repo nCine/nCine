@@ -7,6 +7,7 @@
 #include "InputEvents.h"
 #include "Vector2.h"
 
+#include "Texture.h"
 #include "Viewport.h"
 #include "Camera.h"
 #include "DrawableNode.h"

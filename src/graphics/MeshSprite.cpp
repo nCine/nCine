@@ -1,7 +1,7 @@
 #include <cstring> // for memcpy()
 #include "MeshSprite.h"
+#include "Texture.h"
 #include "RenderCommand.h"
-#include "RenderResources.h"
 #include "tracy.h"
 
 namespace ncine {

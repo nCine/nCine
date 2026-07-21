@@ -1,6 +1,7 @@
 #ifndef CLASS_MYEVENTHANDLER
 #define CLASS_MYEVENTHANDLER
 
+#include <ncine/config.h>
 #include <ncine/IAppEventHandler.h>
 #include <ncine/IInputEventHandler.h>
 #include <nctl/StaticArray.h>
@@ -46,9 +47,11 @@ class MyEventHandler :
 	nctl::StaticArray<nctl::UniquePtr<nc::Texture>, NumTextures> textures_;
 	nctl::StaticArray<nctl::UniquePtr<nc::Sprite>, NumSprites> sprites_;
 
+#if NCINE_WITH_VORBIS
 	nctl::UniquePtr<nc::AudioBuffer> audioBuffer_;
 	nctl::UniquePtr<nc::AudioBufferPlayer> bufferPlayer_;
 	nctl::UniquePtr<nc::AudioStreamPlayer> streamPlayer_;
+#endif
 
 	nctl::UniquePtr<nc::Font> font_;
 	nctl::UniquePtr<nc::TextNode> textNode_;

@@ -146,7 +146,7 @@ JoyMapping::MappedJoystick::Guid::Guid()
 }
 
 JoyMapping::JoyMapping()
-    : mappings_(256), inputManager_(nullptr), inputEventHandler_(nullptr)
+    : mappings_(512), inputManager_(nullptr), inputEventHandler_(nullptr)
 {
 	for (unsigned int i = 0; i < MaxNumJoysticks; i++)
 		mappingIndices_[i] = InvalidMappingIndex;
@@ -445,7 +445,7 @@ void JoyMapping::onJoyAxisMoved(const JoyAxisEvent &event)
 		const MappedJoystick::Axis &axis = mappings_[mappingIndex].axes[event.axisId];
 
 		// Regular axis
-		if (mappedAxisEvent_.axisName != AxisName::UNKNOWN)
+		if (axis.name != AxisName::UNKNOWN)
 		{
 			mappedAxisEvent_.joyId = event.joyId;
 			mappedAxisEvent_.axisName = axis.name;
@@ -566,7 +566,7 @@ bool JoyMapping::isJoyMapped(int joyId) const
 
 const JoyMappedStateImpl &JoyMapping::joyMappedState(int joyId) const
 {
-	if (joyId < 0 || joyId > MaxNumJoysticks)
+	if (joyId < 0 || joyId >= MaxNumJoysticks)
 		return nullMappedJoyState_;
 	else
 		return mappedJoyStates_[joyId];
@@ -725,7 +725,12 @@ bool JoyMapping::parseMappingFromString(const char *mappingString, MappedJoystic
 	unsigned int subLength = static_cast<unsigned int>(subEnd - subStart);
 
 	const unsigned int GuidNumCharacters = 32;
-	if (subLength > GuidNumCharacters)
+	const bool specialGuid =
+		(strncmp(subStart, "default", 7) == 0) ||
+		(strncmp(subStart, "xinput", 6) == 0) ||
+		(strncmp(subStart, "hidapi", 6) == 0);
+
+	if (specialGuid == false && subLength != GuidNumCharacters)
 	{
 		LOGE_X("GUID length is %u instead of %u characters", subLength, GuidNumCharacters);
 		return false;
@@ -744,8 +749,9 @@ bool JoyMapping::parseMappingFromString(const char *mappingString, MappedJoystic
 	trimSpaces(&subStart, &subEnd);
 
 	subLength = static_cast<unsigned int>(subEnd - subStart);
-	memcpy(map.name, subStart, nctl::min(subLength, MaxNameLength));
-	map.name[nctl::min(subLength, MaxNameLength)] = '\0';
+	const unsigned int copyLength = nctl::min(subLength, MaxNameLength - 1);
+	memcpy(map.name, subStart, copyLength);
+	map.name[copyLength] = '\0';
 
 	subStartUntrimmed = subEndUntrimmed + 1; // name plus the following ',' character
 	subEndUntrimmed = strchr(subStartUntrimmed, ',');
@@ -916,7 +922,7 @@ int JoyMapping::parseAxisMapping(const char *start, const char *end, MappedJoyst
 	axis.max = 1.0f;
 	axis.min = -1.0f;
 
-	if (end - start <= 5 && (start[0] == 'a' || start[1] == 'a'))
+	if ((end - start) >= 2 && (end - start) <= 5 && (start[0] == 'a' || start[1] == 'a'))
 	{
 		const char *digits = &start[1];
 
@@ -995,13 +1001,17 @@ int JoyMapping::hatStateToIndex(unsigned char hatState) const
 
 void JoyMapping::trimSpaces(const char **start, const char **end) const
 {
-	while (**start == ' ' || **start == '\t')
+	while (*start < *end && (**start == ' ' || **start == '\t'))
 		(*start)++;
 
-	(*end)--;
-	while (**end == ' ' || **end == '\t')
-		(*end)--;
-	(*end)++;
+	while (*start < *end)
+	{
+		const char c = *(*end - 1);
+		if (c == ' ' || c == '\t')
+			(*end)--;
+		else
+			break;
+	}
 }
 
 }
