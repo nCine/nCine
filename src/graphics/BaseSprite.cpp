@@ -1,4 +1,5 @@
 #include "BaseSprite.h"
+#include "Texture.h"
 #include "RenderCommand.h"
 #include "tracy.h"
 

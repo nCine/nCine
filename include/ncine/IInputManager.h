@@ -37,8 +37,7 @@ class DLL_PUBLIC IInputManager
 	static const float RightStickDeadZone;
 	static const float TriggerDeadZone;
 
-	IInputManager() {}
-	virtual ~IInputManager() {}
+	virtual ~IInputManager();
 	/// Gets the current input event handler for the manager
 	static inline IInputEventHandler *handler() { return inputEventHandler_; }
 	/// Sets the input event handler for the manager

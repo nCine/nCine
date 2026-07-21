@@ -324,24 +324,27 @@ void MyEventHandler::onFrameStart()
 	sprites_[DPAD_DOWN]->setScale(dpadDownIsDown ? buttonPressedSize : buttonUnpressedSize);
 	sprites_[DPAD_RIGHT]->setScale(dpadRighgtIsDown ? buttonPressedSize : buttonUnpressedSize);
 
-	const bool hasVibration = inputManager.hasJoyVibration(firstJoy);
-	if (joyMappedState.isButtonPressed(nc::ButtonName::BACK))
+	if (firstJoy >= 0)
 	{
-		performVibration = !performVibration;
-		if (hasVibration && performVibration == false)
-			inputManager.joyVibrate(firstJoy, 0.0f, 0.0f, 0);
-	}
+		const bool hasVibration = inputManager.hasJoyVibration(firstJoy);
+		if (joyMappedState.isButtonPressed(nc::ButtonName::BACK))
+		{
+			performVibration = !performVibration;
+			if (hasVibration && performVibration == false)
+				inputManager.joyVibrate(firstJoy, 0.0f, 0.0f, 0);
+		}
 
-	if (hasVibration && performVibration)
-	{
-		float intensities[2] = { 0.0f, 0.0f };
-		if (joyLeftTrigger > nc::IInputManager::TriggerDeadZone)
-			intensities[0] = joyLeftTrigger;
-		if (joyRightTrigger > nc::IInputManager::TriggerDeadZone)
-			intensities[1] = joyRightTrigger;
+		if (hasVibration && performVibration)
+		{
+			float intensities[2] = { 0.0f, 0.0f };
+			if (joyLeftTrigger > nc::IInputManager::TriggerDeadZone)
+				intensities[0] = joyLeftTrigger;
+			if (joyRightTrigger > nc::IInputManager::TriggerDeadZone)
+				intensities[1] = joyRightTrigger;
 
-		const int frameTimeMs = static_cast<int>(nc::theApplication().frameTime() * 1000.0f);
-		inputManager.joyVibrate(firstJoy, intensities[0], intensities[1], frameTimeMs);
+			const int frameTimeMs = static_cast<int>(nc::theApplication().frameTime() * 1000.0f);
+			inputManager.joyVibrate(firstJoy, intensities[0], intensities[1], frameTimeMs);
+		}
 	}
 }
 

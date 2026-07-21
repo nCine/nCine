@@ -52,7 +52,7 @@ IAudioPlayer::IAudioPlayer(ObjectType type, const char *name)
       gain_(DefaultGain), pitch_(DefaultPitch),
       position_(0.0f, 0.0f, 0.0f), velocity_(0.0f, 0.0f, 0.0f), direction_(0.0f, 0.0f, 0.0f),
       coneInnerAngle_(DefaultConeAngle), coneOuterAngle_(DefaultConeAngle), coneOuterGain_(DefaultConeOuterGain),
-      airAbsorptionFactor_(DefaultAirAbsorptionFactor), roomRooloffFactor_(DefaultRoomRolloffFactor),
+      airAbsorptionFactor_(DefaultAirAbsorptionFactor), roomRolloffFactor_(DefaultRoomRolloffFactor),
       coneOuterGainHF_(DefaultConeOuterGainHF),
       effectSlotId_(0), auxFilterId_(0), directFilterId_(0)
 {
@@ -197,9 +197,9 @@ void IAudioPlayer::setAirAbsorptionFactor(float factor)
 
 void IAudioPlayer::setRoomRolloffFactor(float factor)
 {
-	roomRooloffFactor_ = nctl::clamp(factor, AL_MIN_ROOM_ROLLOFF_FACTOR, AL_MAX_ROOM_ROLLOFF_FACTOR);
+	roomRolloffFactor_ = nctl::clamp(factor, AL_MIN_ROOM_ROLLOFF_FACTOR, AL_MAX_ROOM_ROLLOFF_FACTOR);
 	if (hasEfxExtension() && hasSource())
-		alSourcef(sourceId_, AL_ROOM_ROLLOFF_FACTOR, roomRooloffFactor_);
+		alSourcef(sourceId_, AL_ROOM_ROLLOFF_FACTOR, roomRolloffFactor_);
 }
 
 void IAudioPlayer::setConeOuterGainHF(float gain)
@@ -296,7 +296,7 @@ void IAudioPlayer::applySourceProperties()
 		if (hasEfxExtension())
 		{
 			alSourcef(sourceId_, AL_AIR_ABSORPTION_FACTOR, airAbsorptionFactor_);
-			alSourcef(sourceId_, AL_ROOM_ROLLOFF_FACTOR, roomRooloffFactor_);
+			alSourcef(sourceId_, AL_ROOM_ROLLOFF_FACTOR, roomRolloffFactor_);
 			alSourcef(sourceId_, AL_CONE_OUTER_GAINHF, coneOuterGainHF_);
 
 			const ALint auxSendNumber = 0; // Always using auxiliary send number 0

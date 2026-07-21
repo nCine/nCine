@@ -1,5 +1,6 @@
 #include <cstring> // for memcpy()
 #include "GLShaderProgram.h"
+#include "Texture.h"
 #include "RenderBatcher.h"
 #include "RenderCommand.h"
 #include "RenderCommandPool.h"
@@ -10,7 +11,6 @@
 #include "tracy.h"
 
 #ifdef WITH_TRACY
-	#include <nctl/StaticString.h>
 	nctl::StaticString<64> zoneTextString;
 #endif
 

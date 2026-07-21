@@ -526,11 +526,10 @@ bool SdlInputManager::isJoyPresent(int joyId) const
 {
 	ASSERT(joyId >= 0);
 	ASSERT_MSG_X(joyId < int(MaxNumJoysticks), "joyId is %d and the maximum is %u", joyId, MaxNumJoysticks - 1);
-
-	if (sdlJoysticks_[joyId] && SDL_JoystickConnected(sdlJoysticks_[joyId]))
-		return true;
-	else
+	if (joyId < 0 || joyId >= int(MaxNumJoysticks))
 		return false;
+
+	return (sdlJoysticks_[joyId] && SDL_JoystickConnected(sdlJoysticks_[joyId]));
 }
 
 const char *SdlInputManager::joyName(int joyId) const

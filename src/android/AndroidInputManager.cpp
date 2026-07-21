@@ -470,6 +470,8 @@ bool AndroidInputManager::isJoyPresent(int joyId) const
 {
 	ASSERT(joyId >= 0);
 	ASSERT_MSG_X(joyId < int(MaxNumJoysticks), "joyId is %d and the maximum is %u", joyId, MaxNumJoysticks - 1);
+	if (joyId < 0 || joyId >= int(MaxNumJoysticks))
+		return false;
 
 	const int deviceId = joystickStates_[joyId].deviceId_;
 	return (deviceId != -1);
