@@ -34,6 +34,29 @@ if(MINGW OR MSYS)
 		endif()
 	endfunction()
 
+	function(get_imported_target_property TARGET PROPERTY VAR)
+		# Try the generic property first.
+		get_target_property(_value ${TARGET} ${PROPERTY})
+		if(_value AND NOT _value MATCHES "-NOTFOUND$")
+			set(${VAR} "${_value}" PARENT_SCOPE)
+			return()
+		endif()
+
+		# Then try configuration-specific properties.
+		get_target_property(_configs ${TARGET} IMPORTED_CONFIGURATIONS)
+		if(_configs)
+			foreach(config ${_configs})
+				get_target_property(_value ${TARGET} ${PROPERTY}_${config})
+				if(_value AND NOT _value MATCHES "-NOTFOUND$")
+					set(${VAR} "${_value}" PARENT_SCOPE)
+					return()
+				endif()
+			endforeach()
+		endif()
+
+		unset(${VAR} PARENT_SCOPE)
+	endfunction()
+
 	if(NOT CMAKE_SKIP_RPATH AND NOT CMAKE_SKIP_INSTALL_RPATH)
 		set(INSTALL_LIBRARIES_MINGW TRUE)
 
@@ -55,8 +78,32 @@ if(MINGW OR MSYS)
 	endif()
 
 	# --------------------------------
-	if(GLEW_FOUND)
+	if(TARGET GLEW::GLEW)
+		# Config package: use the imported target and ensure it has generic
+		# IMPORTED_LOCATION/IMPORTED_IMPLIB properties for installation.
+		get_imported_target_property(GLEW::GLEW IMPORTED_LOCATION _glew_location)
+		get_imported_target_property(GLEW::GLEW IMPORTED_IMPLIB _glew_implib)
+
+		 if(_glew_location)
+			set_target_properties(GLEW::GLEW PROPERTIES
+				IMPORTED_LOCATION "${_glew_location}")
+		else()
+			set_msys_dll(GLEW glew32)
+			if(GLEW_DLL_LIBRARY)
+				set_target_properties(GLEW::GLEW PROPERTIES
+					IMPORTED_LOCATION "${GLEW_DLL_LIBRARY}")
+			endif()
+		endif()
+
+		if(_glew_implib)
+			set_target_properties(GLEW::GLEW PROPERTIES
+				IMPORTED_IMPLIB "${_glew_implib}")
+		endif()
+	else()
+		# Legacy FindGLEW.cmake module
 		set_msys_dll(GLEW glew32)
+
+		add_library(GLEW::GLEW SHARED IMPORTED)
 		set_target_properties(GLEW::GLEW PROPERTIES
 			IMPORTED_IMPLIB ${GLEW_LIBRARIES}
 			IMPORTED_LOCATION ${GLEW_DLL_LIBRARY}
@@ -109,7 +156,7 @@ if(MINGW OR MSYS)
 	endif()
 
 	if(PNG_FOUND)
-		set_msys_dll(ZLIB "libzlib;zlib1")
+		set_msys_dll(ZLIB "libz;zlib1")
 		set_target_properties(ZLIB::ZLIB PROPERTIES
 			IMPORTED_LOCATION ${ZLIB_DLL_LIBRARY})
 

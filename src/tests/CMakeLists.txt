@@ -8,6 +8,15 @@ if(WIN32)
 			COMMENT "Copying DLLs to src/tests..."
 		)
 		set_target_properties(copy_dlls_srctests PROPERTIES FOLDER "CustomCopyTargets")
+
+		# Copy OpenAL32.dll next to the executables so the bundled version is loaded in preference to any system-installed one
+		get_target_property(OPENAL_IMPORTED_LOCATION OpenAL::AL IMPORTED_LOCATION)
+		add_custom_target(copy_openal_dll_srctests_exe ALL
+			COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/src/tests/$<CONFIG>
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${OPENAL_IMPORTED_LOCATION} ${CMAKE_BINARY_DIR}/src/tests/$<CONFIG>
+			COMMENT "Copying OpenAL DLL to src/tests executables directory..."
+		)
+		set_target_properties(copy_openal_dll_srctests_exe PROPERTIES FOLDER "CustomCopyTargets")
 	elseif(INSTALL_LIBRARIES_MINGW)
 		add_custom_target(copy_dlls_srctests ALL
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MSYS_DLL_FILES} ${CMAKE_BINARY_DIR}/src/tests
@@ -27,14 +36,14 @@ if(WIN32)
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GLES_IMPORTED_LOCATION} ${CMAKE_BINARY_DIR}/src/tests
 			COMMENT "Copying ANGLE DLLs to src/tests..."
 		)
-		set_target_properties(copy_angle_dll_tests PROPERTIES FOLDER "CustomCopyTargets")
+		set_target_properties(copy_angle_dll_srctests PROPERTIES FOLDER "CustomCopyTargets")
 	endif()
 endif()
 
 if(NCINE_WITH_CRASHPAD AND EXISTS ${CRASHPAD_HANDLER_EXE})
 	add_custom_target(copy_crashpad_handler_srctests ALL
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CRASHPAD_HANDLER_EXE} ${CMAKE_BINARY_DIR}/src/tests
-		COMMENT "Copying Crashpad handler to sc/tests..."
+		COMMENT "Copying Crashpad handler to src/tests..."
 	)
 	set_target_properties(copy_crashpad_handler_srctests PROPERTIES FOLDER "CustomCopyTargets")
 endif()

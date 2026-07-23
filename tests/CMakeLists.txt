@@ -8,6 +8,15 @@ if(WIN32)
 			COMMENT "Copying DLLs to tests..."
 		)
 		set_target_properties(copy_dlls_tests PROPERTIES FOLDER "CustomCopyTargets")
+
+		# Copy OpenAL32.dll next to the executables so the bundled version is loaded in preference to any system-installed one
+		get_target_property(OPENAL_IMPORTED_LOCATION OpenAL::AL IMPORTED_LOCATION)
+		add_custom_target(copy_openal_dll_tests_exe ALL
+			COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/tests/$<CONFIG>
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${OPENAL_IMPORTED_LOCATION} ${CMAKE_BINARY_DIR}/tests/$<CONFIG>
+			COMMENT "Copying OpenAL DLL to tests executables directory..."
+		)
+		set_target_properties(copy_openal_dll_tests_exe PROPERTIES FOLDER "CustomCopyTargets")
 	elseif(INSTALL_LIBRARIES_MINGW)
 		add_custom_target(copy_dlls_tests ALL
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MSYS_DLL_FILES} ${CMAKE_BINARY_DIR}/tests

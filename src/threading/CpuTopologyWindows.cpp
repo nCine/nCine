@@ -41,29 +41,28 @@ bool fillWindowsCpuInfo(nctl::Array<WindowsCpuInfo> &winCpuInfos)
 		return false;
 	}
 
-	char *ptr = reinterpret_cast<char *>(info);
 	const char *end = reinterpret_cast<char *>(info) + len;
-
 	unsigned int numCpus = 0;
+
+	char *ptr = reinterpret_cast<char *>(info);
 	while (ptr < end)
 	{
-		SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX *entry = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX *)ptr;
+		SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX *entry = reinterpret_cast<SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX *>(ptr);
 		if (entry->Relationship == RelationProcessorCore)
 		{
 			PROCESSOR_RELATIONSHIP *proc = &entry->Processor;
-			ULONG_PTR mask = proc->GroupMask[0].Mask;
-			for (DWORD i = 0; i < sizeof(ULONG_PTR) * 8; ++i)
-			{
-				if (mask & ((ULONG_PTR)1 << i))
-					numCpus++;
-			}
+
+			for (WORD g = 0; g < proc->GroupCount; g++)
+				numCpus += countBits(proc->GroupMask[g].Mask);
 		}
+
 		ptr += entry->Size;
 	}
 
 	winCpuInfos.setCapacity(numCpus);
 
 	unsigned int coreId = 0;
+
 	ptr = reinterpret_cast<char *>(info);
 	while (ptr < end)
 	{
@@ -71,36 +70,42 @@ bool fillWindowsCpuInfo(nctl::Array<WindowsCpuInfo> &winCpuInfos)
 		if (entry->Relationship == RelationProcessorCore)
 		{
 			PROCESSOR_RELATIONSHIP *proc = &entry->Processor;
-			ULONG_PTR mask = proc->GroupMask[0].Mask;
-			int smtCount = countBits(mask);
-			int bitIndex = 0;
 
-			GROUP_AFFINITY *ga = proc->GroupMask;
+			int smtCount = 0;
+			for (WORD g = 0; g < proc->GroupCount; g++)
+				smtCount += countBits(proc->GroupMask[g].Mask);
+
+			int bitIndex = 0;
 			for (WORD g = 0; g < proc->GroupCount; g++)
 			{
-				KAFFINITY mask = ga[g].Mask;
-				WORD group = ga[g].Group;
-				for (DWORD i = 0; i < sizeof(ULONG_PTR) * 8; ++i)
+				const KAFFINITY mask = proc->GroupMask[g].Mask;
+				const WORD group = proc->GroupMask[g].Group;
+
+				for (DWORD i = 0; i < sizeof(KAFFINITY) * 8; i++)
 				{
-					if (mask & ((ULONG_PTR)1 << i))
+					if (mask & (KAFFINITY(1) << i))
 					{
 						winCpuInfos.emplaceBack();
-						WindowsCpuInfo &info = winCpuInfos.back();
+						WindowsCpuInfo &cpu = winCpuInfos.back();
 
-						info.id = i;
-						info.coreId = coreId;
-						info.packageId = proc->GroupMask[0].Group;
-						info.efficiencyClass = proc->EfficiencyClass;
-						info.isLogical = (smtCount > 1 && bitIndex > 0);
+						cpu.id = i;
+						cpu.coreId = coreId;
+						cpu.packageId = group;
+						cpu.efficiencyClass = proc->EfficiencyClass;
+						cpu.isLogical = (smtCount > 1 && bitIndex > 0);
+
 						bitIndex++;
 					}
 				}
-				coreId++;
 			}
+
+			coreId++;
 		}
 
 		ptr += entry->Size;
 	}
+
+	return true;
 }
 
 bool sortTiers(const WindowsCpuInfo &a, const WindowsCpuInfo &b)
