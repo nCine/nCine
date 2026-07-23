@@ -295,6 +295,9 @@ class DLL_PUBLIC SceneNode : public Object
 	/// Swaps the child pointer of a parent when moving an object
 	void swapChildPointer(SceneNode *first, SceneNode *second);
 
+	/// Called right after the anchor point has been set directly as an absolute value
+	virtual void absAnchorPointHasChanged() {}
+
 	virtual void transform();
 };
 
@@ -371,6 +374,7 @@ inline void SceneNode::setAbsAnchorPoint(float x, float y)
 	anchorPoint_.set(x, y);
 	dirtyBits_.set(DirtyBitPositions::TransformationBit);
 	dirtyBits_.set(DirtyBitPositions::AabbBit);
+	absAnchorPointHasChanged();
 }
 
 inline void SceneNode::setAbsAnchorPoint(const Vector2f &point)
@@ -378,6 +382,7 @@ inline void SceneNode::setAbsAnchorPoint(const Vector2f &point)
 	anchorPoint_ = point;
 	dirtyBits_.set(DirtyBitPositions::TransformationBit);
 	dirtyBits_.set(DirtyBitPositions::AabbBit);
+	absAnchorPointHasChanged();
 }
 
 inline void SceneNode::setScale(float scaleFactor)

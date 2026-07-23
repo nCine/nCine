@@ -27,14 +27,10 @@ BaseSprite::BaseSprite(SceneNode *parent, Texture *texture, const Vector2f &posi
 
 void BaseSprite::setSize(float width, float height)
 {
-	// Update anchor points when size changes
-	if (anchorPoint_.x != 0.0f)
-		anchorPoint_.x = (anchorPoint_.x / width_) * width;
-	if (anchorPoint_.y != 0.0f)
-		anchorPoint_.y = (anchorPoint_.y / height_) * height;
-
 	width_ = width;
 	height_ = height;
+	// Recompute the anchor point from its fraction and the new size
+	updateAnchorPoint();
 	dirtyBits_.set(DirtyBitPositions::SizeBit);
 	dirtyBits_.set(DirtyBitPositions::AabbBit);
 }

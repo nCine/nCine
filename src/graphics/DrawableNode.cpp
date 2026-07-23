@@ -76,6 +76,7 @@ const Vector2f DrawableNode::AnchorTopRight(1.0f, 1.0f);
 
 DrawableNode::DrawableNode(SceneNode *parent, float xx, float yy)
     : SceneNode(parent, xx, yy), width_(0.0f), height_(0.0f),
+      anchorPointFraction_(0.5f, 0.5f), anchorIsAbsolute_(false),
       renderCommand_(nctl::makeUnique<RenderCommand>()),
       lastFrameRendered_(0)
 {
@@ -150,7 +151,9 @@ void DrawableNode::setAnchorPoint(float xx, float yy)
 {
 	const float clampedX = nctl::clamp(xx, 0.0f, 1.0f);
 	const float clampedY = nctl::clamp(yy, 0.0f, 1.0f);
-	anchorPoint_.set((clampedX - 0.5f) * width(), (clampedY - 0.5f) * height());
+	anchorPointFraction_.set(clampedX, clampedY);
+	anchorIsAbsolute_ = false;
+	updateAnchorPoint();
 }
 
 bool DrawableNode::isBlendingEnabled() const
@@ -204,6 +207,14 @@ void DrawableNode::setBlendingFactors(BlendingFactor srcBlendingFactor, Blending
 // PROTECTED FUNCTIONS
 ///////////////////////////////////////////////////////////
 
+/*! \note Does nothing if `setAbsAnchorPoint()` set the anchor point more recently than `setAnchorPoint()` did, so that
+ *  an explicit absolute anchor point survives a later content/size change instead of being overwritten by a fraction. */
+void DrawableNode::updateAnchorPoint()
+{
+	if (anchorIsAbsolute_ == false)
+		anchorPoint_.set((anchorPointFraction_.x - 0.5f) * width_, (anchorPointFraction_.y - 0.5f) * height_);
+}
+
 void DrawableNode::updateAabb()
 {
 	ZoneScoped;
@@ -249,6 +260,7 @@ void DrawableNode::updateCulling()
 DrawableNode::DrawableNode(const DrawableNode &other)
     : SceneNode(other),
       width_(other.width_), height_(other.height_),
+      anchorPointFraction_(other.anchorPointFraction_), anchorIsAbsolute_(other.anchorIsAbsolute_),
       renderCommand_(nctl::makeUnique<RenderCommand>()),
       lastFrameRendered_(0)
 {

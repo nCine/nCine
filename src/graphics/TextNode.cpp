@@ -400,8 +400,6 @@ void TextNode::calculateBoundaries() const
 	if (font_ && dirtyBoundaries_)
 	{
 		ZoneScoped;
-		const float oldWidth = width_;
-		const float oldHeight = height_;
 
 		lineLengths_.clear();
 		float xAdvanceMax = 0.0f; // longest line
@@ -459,11 +457,8 @@ void TextNode::calculateBoundaries() const
 		mutableNode->height_ = yAdvance_;
 		mutableNode->dirtyBits_.set(DirtyBitPositions::AabbBit);
 
-		if (oldWidth > 0.0f && oldHeight > 0.0f)
-		{
-			mutableNode->anchorPoint_.x = (anchorPoint_.x / oldWidth) * width_;
-			mutableNode->anchorPoint_.y = (anchorPoint_.y / oldHeight) * height_;
-		}
+		// Recompute the anchor point from its fraction and the new size
+		mutableNode->updateAnchorPoint();
 
 		dirtyBoundaries_ = false;
 	}
