@@ -83,7 +83,7 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	inline Vector2f absSize() const { return Vector2f(absWidth(), absHeight()); }
 
 	/// Gets the transformation anchor point
-	inline Vector2f anchorPoint() const { return (anchorPoint_ / size()) + 0.5f; }
+	inline Vector2f anchorPoint() const { return anchorPointFraction_; }
 	/// Sets the transformation anchor point
 	void setAnchorPoint(float xx, float yy);
 	/// Sets the transformation anchor point with a `Vector2f`
@@ -114,6 +114,19 @@ class DLL_PUBLIC DrawableNode : public SceneNode
 	float width_;
 	/// Node height in pixel
 	float height_;
+
+	/// The anchor point as a 0..1 fraction of width and height, as last set by `setAnchorPoint()`
+	/*! \note Kept around so `updateAnchorPoint()` can be called again whenever a subclass changes width or height. */
+	Vector2f anchorPointFraction_;
+	/// True after `setAbsAnchorPoint()` last set the anchor point, rather than `setAnchorPoint()`
+	/*! \note While true, `updateAnchorPoint()` leaves the explicit absolute anchor point alone
+	 *  instead of overwriting it with one derived from the fractional value. */
+	bool anchorIsAbsolute_;
+
+	/// Recomputes the absolute anchor point from the fractional value and the current width and height
+	void updateAnchorPoint();
+	/// Stops treating the anchor point as a fractional value after an explicit `setAbsAnchorPoint()`
+	void absAnchorPointHasChanged() override { anchorIsAbsolute_ = true; }
 
 	/// The render command class associated with this node
 	nctl::UniquePtr<RenderCommand> renderCommand_;
