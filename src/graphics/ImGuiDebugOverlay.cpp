@@ -541,6 +541,9 @@ void ImGuiDebugOverlay::guiPreprocessorDefines()
 #ifdef WITH_RENDERDOC
 			ImGui::TextUnformatted("WITH_RENDERDOC");
 #endif
+#ifdef WITH_CRASHPAD
+			ImGui::TextUnformatted("WITH_CRASHPAD");
+#endif
 			ImGui::TreePop();
 		}
 	}

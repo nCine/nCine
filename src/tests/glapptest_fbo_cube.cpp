@@ -97,6 +97,7 @@ const GLushort cubeIndices[] = {
 	// clang-format on
 };
 
+bool captureMouse = true;
 #if NCINE_WITH_IMGUI
 nctl::String auxString;
 bool showImGui = true;
@@ -185,6 +186,7 @@ void MyEventHandler::onInit()
 void MyEventHandler::onFrameStart()
 {
 #if NCINE_WITH_IMGUI
+	captureMouse = (ImGui::GetIO().WantCaptureMouse == false);
 	if (showImGui)
 	{
 		ImGui::SetNextWindowSize(ImVec2(300.0f, 125.0f), ImGuiCond_FirstUseEver);
@@ -272,17 +274,19 @@ void MyEventHandler::onResizeWindow(int width, int height)
 #ifdef __ANDROID__
 void MyEventHandler::onTouchDown(const nc::TouchEvent &event)
 {
-	pauseTri_ = true;
+	if (captureMouse)
+		pauseTri_ = true;
 }
 
 void MyEventHandler::onTouchUp(const nc::TouchEvent &event)
 {
-	pauseTri_ = false;
+	if (captureMouse)
+		pauseTri_ = false;
 }
 
 void MyEventHandler::onPointerDown(const nc::TouchEvent &event)
 {
-	if (event.count == 2)
+	if (captureMouse && event.count == 2)
 	{
 		pauseTri_ = false;
 		pauseCube_ = true;
@@ -291,7 +295,7 @@ void MyEventHandler::onPointerDown(const nc::TouchEvent &event)
 
 void MyEventHandler::onPointerUp(const nc::TouchEvent &event)
 {
-	if (event.count == 2)
+	if (captureMouse && event.count == 2)
 	{
 		pauseTri_ = true;
 		pauseCube_ = false;
@@ -318,18 +322,24 @@ void MyEventHandler::onKeyReleased(const nc::KeyboardEvent &event)
 
 void MyEventHandler::onMouseButtonPressed(const nc::MouseEvent &event)
 {
-	if (event.button == nc::MouseButton::LEFT)
-		pauseTri_ = true;
-	else if (event.button == nc::MouseButton::RIGHT)
-		pauseCube_ = true;
+	if (captureMouse)
+	{
+		if (event.button == nc::MouseButton::LEFT)
+			pauseTri_ = true;
+		else if (event.button == nc::MouseButton::RIGHT)
+			pauseCube_ = true;
+	}
 }
 
 void MyEventHandler::onMouseButtonReleased(const nc::MouseEvent &event)
 {
-	if (event.button == nc::MouseButton::LEFT)
-		pauseTri_ = false;
-	else if (event.button == nc::MouseButton::RIGHT)
-		pauseCube_ = false;
+	if (captureMouse)
+	{
+		if (event.button == nc::MouseButton::LEFT)
+			pauseTri_ = false;
+		else if (event.button == nc::MouseButton::RIGHT)
+			pauseCube_ = false;
+	}
 }
 
 void MyEventHandler::onJoyMappedButtonReleased(const nc::JoyMappedButtonEvent &event)
