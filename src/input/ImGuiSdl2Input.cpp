@@ -240,6 +240,7 @@ bool ImGuiSdlInput::inputEnabled_ = true;
 SDL_Window *ImGuiSdlInput::window_ = nullptr;
 unsigned long int ImGuiSdlInput::time_ = 0;
 char *ImGuiSdlInput::clipboardTextData_ = nullptr;
+bool ImGuiSdlInput::isWayland_ = false;
 
 unsigned int ImGuiSdlInput::mouseWindowID_ = 0;
 int ImGuiSdlInput::mouseButtonsDown_ = 0;
@@ -273,18 +274,19 @@ void ImGuiSdlInput::init(SDL_Window *window)
 	io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors; // We can honor GetMouseCursor() values (optional)
 	io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos; // We can honor io.WantSetMousePos requests (optional, rarely used)
 
+	const char *sdlVideoDriver = SDL_GetCurrentVideoDriver();
 	window_ = window;
+	isWayland_ = strcmp(sdlVideoDriver, "Wayland") == 0;
 
 	// Check and store if we are on a SDL backend that supports SDL_GetGlobalMouseState() and SDL_CaptureMouse()
 	// ("wayland" and "rpi" don't support it, but we chose to use a white-list instead of a black-list)
 	mouseCanUseGlobalState_ = false;
 	mouseCaptureMode_ = MouseCaptureMode::DISABLED;
 #if SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE
-	const char *sdlBackend = SDL_GetCurrentVideoDriver();
 	const char *captureAndGlobalStateWhitelist[] = { "windows", "cocoa", "x11", "DIVE", "VMAN" };
 	for (const char *item : captureAndGlobalStateWhitelist)
 	{
-		if (strncmp(sdlBackend, item, strlen(item)) == 0)
+		if (strncmp(sdlVideoDriver, item, strlen(item)) == 0)
 		{
 			mouseCanUseGlobalState_ = true;
 			mouseCaptureMode_ = (strcmp(item, "x11") == 0) ? MouseCaptureMode::ENABLED_AFTER_DRAG : MouseCaptureMode::ENABLED;
