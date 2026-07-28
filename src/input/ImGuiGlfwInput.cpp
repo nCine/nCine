@@ -342,11 +342,11 @@ namespace {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-bool ImGuiGlfwInput::isWayland_ = false;
 bool ImGuiGlfwInput::inputEnabled_ = true;
 GLFWwindow *ImGuiGlfwInput::window_ = nullptr;
 GLFWwindow *ImGuiGlfwInput::mouseWindow_ = nullptr;
 double ImGuiGlfwInput::time_ = 0.0;
+bool ImGuiGlfwInput::isWayland_ = false;
 GLFWcursor *ImGuiGlfwInput::mouseCursors_[ImGuiMouseCursor_COUNT] = {};
 GLFWcursor *ImGuiGlfwInput::lastMouseCursor_ = nullptr;
 ImVec2 ImGuiGlfwInput::lastValidMousePos_ = { FLT_MAX, FLT_MAX };
@@ -378,9 +378,9 @@ void ImGuiGlfwInput::init(GLFWwindow *window, bool withCallbacks)
 #endif
 	io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos; // We can honor io.WantSetMousePos requests (optional, rarely used)
 
-	isWayland_ = isWayland();
 	window_ = window;
 	time_ = 0.0;
+	isWayland_ = isWayland();
 
 	ImGuiPlatformIO &platformIo = ImGui::GetPlatformIO();
 	platformIo.Platform_SetClipboardTextFn = [](ImGuiContext *context, const char *text) { glfwSetClipboardString(nullptr, text); };

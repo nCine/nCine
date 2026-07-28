@@ -35,10 +35,10 @@ namespace {
 		strncpy(clipboard, text, MaxClipboardLength);
 	}
 
-	ImGuiKey keyCodeToImGuiKey(int32_t key_code)
+	ImGuiKey keyCodeToImGuiKey(int32_t keyCode)
 	{
 		// clang-format off
-		switch (key_code)
+		switch (keyCode)
 		{
 			case AKEYCODE_TAB:                  return ImGuiKey_Tab;
 			case AKEYCODE_DPAD_LEFT:            return ImGuiKey_LeftArrow;
@@ -308,6 +308,8 @@ bool ImGuiAndroidInput::processEvent(const AInputEvent *event)
 					{
 						io.AddMousePosEvent(AMotionEvent_getX(event, eventPointerIndex), AMotionEvent_getY(event, eventPointerIndex));
 						io.AddMouseButtonEvent(0, eventAction == AMOTION_EVENT_ACTION_DOWN);
+						if (eventAction == AMOTION_EVENT_ACTION_UP) // (#6627, #9474)
+							io.AddMousePosEvent(-FLT_MAX, -FLT_MAX);
 					}
 					break;
 				}

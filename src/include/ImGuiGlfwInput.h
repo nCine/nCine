@@ -20,12 +20,13 @@ class ImGuiGlfwInput
 	static inline void setInputEnabled(bool inputEnabled) { inputEnabled_ = inputEnabled; }
 
   private:
-	static bool isWayland_;
 	static bool inputEnabled_;
 
 	static GLFWwindow *window_;
 	static GLFWwindow *mouseWindow_;
 	static double time_;
+	static bool isWayland_;
+
 	static GLFWcursor *mouseCursors_[ImGuiMouseCursor_COUNT];
 	static GLFWcursor *lastMouseCursor_;
 	static ImVec2 lastValidMousePos_;

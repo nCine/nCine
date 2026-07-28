@@ -46,6 +46,7 @@ class ImGuiSdlInput
 	static SDL_Window *window_;
 	static unsigned long int time_;
 	static char *clipboardTextData_;
+	static bool isWayland_;
 
 #ifdef WITH_SDL3
 	// Text input handling

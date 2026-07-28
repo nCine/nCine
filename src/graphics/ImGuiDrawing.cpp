@@ -182,6 +182,19 @@ void ImGuiDrawing::destroyTexture(ImTextureData *tex)
 
 void ImGuiDrawing::updateTexture(ImTextureData *tex)
 {
+	// Backup GL_UNPACK state that we modify, restore on exit.
+	GLint lastUnpackRowLength = 0; (void)lastUnpackRowLength;
+	GLint lastUnpackAlignment = 0; (void)lastUnpackAlignment;
+	const bool lastUnpackStateSaveAndRestore = (tex->Status == ImTextureStatus_WantCreate || tex->Status == ImTextureStatus_WantUpdates);
+	if (lastUnpackStateSaveAndRestore)
+	{
+#ifdef GL_UNPACK_ROW_LENGTH // Not on WebGL/ES
+		glGetIntegerv(GL_UNPACK_ROW_LENGTH, &lastUnpackRowLength);
+		glGetIntegerv(GL_UNPACK_ALIGNMENT, &lastUnpackAlignment);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+#endif
+	}
+
 	// FIXME: Consider backing up and restoring
 	if (tex->Status == ImTextureStatus_WantCreate || tex->Status == ImTextureStatus_WantUpdates)
 	{
@@ -209,6 +222,9 @@ void ImGuiDrawing::updateTexture(ImTextureData *tex)
 		texture->texParameteri(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		texture->texParameteri(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		texture->texParameteri(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+#if GL_UNPACK_ROW_LENGTH // Not on WebGL/ES
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+#endif
 		texture->texImage2D(0, GL_RGBA, tex->Width, tex->Height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
 		if (textures_.loadFactor() >= 0.8f)
@@ -235,7 +251,6 @@ void ImGuiDrawing::updateTexture(ImTextureData *tex)
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, tex->Width);
 		for (ImTextureRect &r : tex->Updates)
 			texturePtr->texSubImage2D(0, r.x, r.y, r.w, r.h, GL_RGBA, GL_UNSIGNED_BYTE, tex->GetPixelsAt(r.x, r.y));
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 #else
 		// GL ES doesn't have GL_UNPACK_ROW_LENGTH, so we need to (A) copy to a contiguous buffer or (B) upload line by line.
 		for (ImTextureRect &r : tex->Updates)
@@ -254,6 +269,15 @@ void ImGuiDrawing::updateTexture(ImTextureData *tex)
 	}
 	else if (tex->Status == ImTextureStatus_WantDestroy && tex->UnusedFrames > 0)
 		destroyTexture(tex);
+
+	// Restore GL_UNPACK state
+	if (lastUnpackStateSaveAndRestore)
+	{
+#ifdef GL_UNPACK_ROW_LENGTH
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, lastUnpackRowLength);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, lastUnpackAlignment);
+#endif
+	}
 }
 
 #ifdef WITH_SCENEGRAPH
