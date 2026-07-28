@@ -41,6 +41,7 @@ const char *renderModeToString(nc::Font::RenderMode renderMode)
 {
 	switch (renderMode)
 	{
+		default:
 		case nc::Font::RenderMode::GLYPH_IN_ALPHA:
 			return "GLYPH_IN_ALPHA";
 		case nc::Font::RenderMode::GLYPH_IN_RED:

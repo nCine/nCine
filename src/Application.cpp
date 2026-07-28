@@ -10,7 +10,7 @@
 #include "FrameTimer.h"
 #include <nctl/StaticString.h>
 
-#if WITH_ALLOCATORS
+#ifdef WITH_ALLOCATORS
 	#include "IInputManager.h"
 #endif
 

@@ -613,7 +613,7 @@ void AppConfiguration::readEnvVariables()
 
 	// NCINE_APPCFG_DATA_PATH
 	old_.dataPath = dataPath();
-	constexpr const char EnvDataPath[] = ENV2(ENV_PREFIX, ENV_DATA_PATH);
+	constexpr const char EnvDataPath[] = ENV_PREFIX ENV_DATA_PATH;
 	readStringEnvVar(EnvDataPath, dataPath());
 }
 
