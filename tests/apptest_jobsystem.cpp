@@ -11,6 +11,7 @@
 #include <nctl/Array.h>
 #include <nctl/StaticString.h>
 #include "Statistics.h"
+#include "apptest_datapath.h"
 
 #include <ncine/tracy.h>
 
@@ -356,8 +357,11 @@ nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 
 void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 {
+	setDataPath(config);
+
 	config.jobSystem.enabled = true;
 	config.jobSystem.numThreads = 0;
+	config.features.scenegraph = false;
 }
 
 void MyEventHandler::onInit()

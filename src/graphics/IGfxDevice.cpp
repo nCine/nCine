@@ -6,13 +6,16 @@
 #include "GLBlending.h"
 #include "GLViewport.h"
 
+#if defined(WITH_SCENEGRAPH) || defined(__EMSCRIPTEN__)
+	#include "Application.h"
+#endif
+
 #ifdef WITH_QT5
 	#include "GLClearColor.h"
 #endif
 
 #ifdef __EMSCRIPTEN__
 	#include <emscripten/html5.h>
-	#include "Application.h"
 	#include "IAppEventHandler.h"
 #endif
 
@@ -229,13 +232,19 @@ void IGfxDevice::setupGL()
 void IGfxDevice::update()
 {
 	swapBuffers();
-#if !defined(WITH_SCENEGRAPH)
-	#if defined(WITH_QT5)
-	GLClearColor::setColor(0.0f, 0.0f, 0.0f, 1.0f);
-	#else
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	#endif
+
+	// If the scenegraph is not enabled or not compiled,
+	// the screen needs to be cleared at some point.
+#if defined(WITH_SCENEGRAPH)
+	if (theApplication().appConfiguration().features.scenegraph == false)
 #endif
+	{
+#if defined(WITH_QT5)
+		GLClearColor::setColor(0.0f, 0.0f, 0.0f, 1.0f);
+#else
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+#endif
+	}
 }
 
 bool IGfxDevice::scaleWindowSize(bool windowScaling)
