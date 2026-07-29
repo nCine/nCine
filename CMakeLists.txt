@@ -33,9 +33,9 @@ include(imported_targets/ncine_imported_targets_android)
 include(imported_targets/ncine_imported_targets_emscripten)
 
 include(ncine_get_version)
-include(ncine_imgui)
-include(ncine_nuklear)
-include(ncine_tracy)
+include(download/ncine_imgui)
+include(download/ncine_nuklear)
+include(download/ncine_tracy)
 
 if(NOT (
 	(NCINE_PREFERRED_BACKEND STREQUAL "GLFW" AND GLFW_FOUND) OR
@@ -182,6 +182,8 @@ include(ncine_strip_binaries)
 include(ncine_installation)
 include(ncine_build_documentation)
 include(ncine_build_tests)
+include(download/ncine_gtest)
 include(ncine_build_unit_tests)
+include(download/ncine_gbenchmark)
 include(ncine_build_benchmarks)
 include(ncine_build_android)

@@ -35,7 +35,7 @@ if(NCINE_WITH_NUKLEAR)
 		endif()
 	else()
 		# Download Nuklear repository at configure time
-		configure_file(cmake/ncine_nuklear_download.in nuklear-download/CMakeLists.txt)
+		configure_file(cmake/download/ncine_nuklear_download.in nuklear-download/CMakeLists.txt)
 
 		execute_process(
 			COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/nuklear-src/include_only)

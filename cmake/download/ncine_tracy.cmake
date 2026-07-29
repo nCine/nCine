@@ -35,7 +35,7 @@ if(NCINE_WITH_TRACY)
 		endif()
 	else()
 		# Download Tracy repository at configure time
-		configure_file(cmake/ncine_tracy_download.in tracy-download/CMakeLists.txt)
+		configure_file(cmake/download/ncine_tracy_download.in tracy-download/CMakeLists.txt)
 
 		execute_process(
 			COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/tracy-src/include_only)
