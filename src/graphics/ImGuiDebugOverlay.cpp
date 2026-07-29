@@ -559,6 +559,7 @@ void ImGuiDebugOverlay::guiVersionStrings()
 		ImGui::Text("Git short hash: %s", VersionStrings::GitShortHash);
 		ImGui::Text("Git last commit date: %s", VersionStrings::GitLastCommitDate);
 		ImGui::Text("Git branch: %s", VersionStrings::GitBranch);
+		ImGui::Text("Git tag: %s", VersionStrings::GitTag);
 #endif
 		ImGui::Text("Compilation date: %s", VersionStrings::CompilationDate);
 		ImGui::Text("Compilation time: %s", VersionStrings::CompilationTime);

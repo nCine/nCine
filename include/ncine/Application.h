@@ -67,7 +67,6 @@ class DLL_PUBLIC Application
 		/// Nuklear viewport
 		/*! \note The viewport should mirror the screen dimensions or mouse input would not work. Setting `nullptr` is the same as setting the screen */
 		Viewport *nuklearViewport;
-
 	};
 #endif
 

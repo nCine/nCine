@@ -870,7 +870,7 @@ void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 
 	config.audio.enabled = false;
 	config.jobSystem.enabled = false;
-	config.features.debugOverlay = false;
+	config.features.scenegraph = false;
 }
 
 void MyEventHandler::onInit()
