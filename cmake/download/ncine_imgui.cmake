@@ -36,7 +36,7 @@ if(NCINE_WITH_IMGUI)
 		endif()
 	else()
 		# Download Dear ImGui repository at configure time
-		configure_file(cmake/ncine_imgui_download.in imgui-download/CMakeLists.txt)
+		configure_file(cmake/download/ncine_imgui_download.in imgui-download/CMakeLists.txt)
 
 		execute_process(
 			COMMAND	${CMAKE_COMMAND} -E remove -f ${CMAKE_BINARY_DIR}/imgui-src/imconfig.h
