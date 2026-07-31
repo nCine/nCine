@@ -520,6 +520,9 @@ void ImGuiDebugOverlay::guiPreprocessorDefines()
 #ifdef WITH_WEBP
 			ImGui::TextUnformatted("WITH_WEBP");
 #endif
+#ifdef WITH_QOI
+			ImGui::TextUnformatted("WITH_QOI");
+#endif
 #ifdef WITH_LUA
 			ImGui::TextUnformatted("WITH_LUA");
 #endif

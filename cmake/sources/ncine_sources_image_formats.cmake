@@ -18,3 +18,13 @@ if(WEBP_FOUND)
 		${NCINE_ROOT}/src/graphics/ImageLoaderWebP.cpp
 		${NCINE_ROOT}/src/graphics/ImageSaverWebP.cpp)
 endif()
+if(NCINE_WITH_QOI)
+	target_compile_definitions(ncine PRIVATE "WITH_QOI")
+
+	list(APPEND HEADERS ${NCINE_ROOT}/include/ncine/ImageSaverQoi.h)
+	list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/ImageLoaderQoi.h)
+	list(APPEND SOURCES
+		${QOI_SOURCE_DIR}/qoi.h
+		${NCINE_ROOT}/src/graphics/ImageLoaderQoi.cpp
+		${NCINE_ROOT}/src/graphics/ImageSaverQoi.cpp)
+endif()

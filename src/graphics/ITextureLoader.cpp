@@ -14,6 +14,9 @@
 #ifdef WITH_WEBP
 	#include "ImageLoaderWebP.h"
 #endif
+#ifdef WITH_QOI
+	#include "ImageLoaderQoi.h"
+#endif
 
 #include "FileSystem.h"
 #include "IFile.h"
@@ -150,6 +153,13 @@ nctl::UniquePtr<ITextureLoader> ITextureLoader::createLoader(nctl::UniquePtr<IFi
 	else if (fs::hasExtension(filename, "webp"))
 	{
 		nctl::UniquePtr<ImageLoaderWebP> imgLoader = nctl::makeUnique<ImageLoaderWebP>(nctl::move(fileHandle));
+		return nctl::makeUnique<TextureLoaderImage>(nctl::move(imgLoader));
+	}
+#endif
+#ifdef WITH_QOI
+	else if (fs::hasExtension(filename, "qoi"))
+	{
+		nctl::UniquePtr<ImageLoaderQoi> imgLoader = nctl::makeUnique<ImageLoaderQoi>(nctl::move(fileHandle));
 		return nctl::makeUnique<TextureLoaderImage>(nctl::move(imgLoader));
 	}
 #endif

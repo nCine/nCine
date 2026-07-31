@@ -36,6 +36,7 @@ include(ncine_get_version)
 include(download/ncine_imgui)
 include(download/ncine_nuklear)
 include(download/ncine_tracy)
+include(download/ncine_qoi)
 
 if(NOT (
 	(NCINE_PREFERRED_BACKEND STREQUAL "GLFW" AND GLFW_FOUND) OR
@@ -132,6 +133,10 @@ if(NCINE_WITH_TRACY)
 	target_include_directories(ncine
 		PUBLIC $<BUILD_INTERFACE:${TRACY_INCLUDE_ONLY_DIR}/tracy>
 		PUBLIC $<INSTALL_INTERFACE:include/tracy>)
+endif()
+if(NCINE_WITH_QOI)
+	target_include_directories(ncine
+		PRIVATE $<BUILD_INTERFACE:${QOI_SOURCE_DIR}>)
 endif()
 target_include_directories(ncine
 	INTERFACE $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>

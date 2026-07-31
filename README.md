@@ -82,7 +82,7 @@ Copyright (c) 2011-2026 Angelo Theodorou.
 
 - GLEW
 - GLFW 3.x, SDL 2, SDL 3, Qt 5, Qt 6
-- libpng, libwebp
+- libpng, libwebp, QOI
 - OpenAL-soft, libogg, libvorbis, libvorbisfile
 - Lua 5.5
 - Dear ImGui, Nuklear

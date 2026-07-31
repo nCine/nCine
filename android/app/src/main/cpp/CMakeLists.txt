@@ -70,6 +70,10 @@ if(NCINE_WITH_TRACY)
 		PUBLIC $<BUILD_INTERFACE:${TRACY_INCLUDE_ONLY_DIR}/tracy>
 		PUBLIC $<INSTALL_INTERFACE:include/tracy>)
 endif()
+if(NCINE_WITH_QOI)
+	target_include_directories(ncine
+		PRIVATE $<BUILD_INTERFACE:${QOI_SOURCE_DIR}>)
+endif()
 
 target_compile_definitions(ncine PRIVATE ${ANDROID_GENERATED_FLAGS})
 target_link_libraries(ncine PRIVATE ${PRIVATE_LINK_LIBRARIES})

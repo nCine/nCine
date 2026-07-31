@@ -10,6 +10,9 @@
 #if NCINE_WITH_WEBP
 	#include <ncine/ImageSaverWebP.h>
 #endif
+#if NCINE_WITH_QOI
+	#include <ncine/ImageSaverQoi.h>
+#endif
 #include <ncine/Sprite.h>
 #include <ncine/TextNode.h>
 #include <ncine/Shader.h>
@@ -375,14 +378,38 @@ void MyEventHandler::onFrameStart()
 						}
 
 #if !defined(__EMSCRIPTEN__) && !defined(__ANDROID__)
+						// Indices always follow declaration order, whichever savers are actually compiled in
+						enum { FormatPng = 0,
+	#if NCINE_WITH_WEBP
+						       FormatWebP,
+	#endif
+	#if NCINE_WITH_QOI
+						       FormatQoi,
+	#endif
+						};
+
 						ImGui::SameLine();
 						static int selectedFormat = 0;
-						const char *extensions[] = { "png", "webp" };
+						const char *extensions[] = { "png",
+	#if NCINE_WITH_WEBP
+							"webp",
+	#endif
+	#if NCINE_WITH_QOI
+							"qoi",
+	#endif
+						};
 						ImGui::InputText("##Saving", saveTexelsFilename.data(), saveTexelsFilename.capacity(), ImGuiInputTextFlags_CallbackResize, inputTextCallback, &saveTexelsFilename);
 						if (saveTexelsFilename.isEmpty())
 							saveTexelsFilename.format("texels.%s", extensions[selectedFormat]);
-	#if NCINE_WITH_WEBP
-						const char *formats[] = { "Png", "WebP" };
+	#if NCINE_WITH_WEBP || NCINE_WITH_QOI
+						const char *formats[] = { "Png",
+		#if NCINE_WITH_WEBP
+							"WebP",
+		#endif
+		#if NCINE_WITH_QOI
+							"QOI",
+		#endif
+						};
 						ImGui::SameLine();
 						ImGui::PushItemWidth(ImGui::GetFontSize() * 5.0f);
 						ImGui::Combo("##SaveFormat", &selectedFormat, formats, IM_COUNTOF(formats));
@@ -394,28 +421,33 @@ void MyEventHandler::onFrameStart()
 						{
 							bool hasSaved = false;
 
-							if (selectedFormat == 0)
+							nc::IImageSaver::Properties props;
+							props.width = w;
+							props.height = h;
+							props.format = nc::IImageSaver::Format::RGBA8;
+							props.pixels = pixels.get();
+
+							if (selectedFormat == FormatPng)
 							{
 								nc::ImageSaverPng saver;
-								nc::ImageSaverPng::Properties props;
-								props.width = w;
-								props.height = h;
-								props.format = nc::IImageSaver::Format::RGBA8;
-								props.pixels = pixels.get();
 								hasSaved = saver.saveToFile(props, saveTexelsFilename.data());
 							}
 	#if NCINE_WITH_WEBP
-							else if (selectedFormat == 1)
+							else if (selectedFormat == FormatWebP)
 							{
 								nc::ImageSaverWebP saver;
-								nc::ImageSaverWebP::Properties props;
 								nc::ImageSaverWebP::WebPProperties webpProps;
-								props.width = w;
-								props.height = h;
-								props.format = nc::IImageSaver::Format::RGBA8;
-								props.pixels = pixels.get();
 								webpProps.lossless = true;
 								hasSaved = saver.saveToFile(props, webpProps, saveTexelsFilename.data());
+							}
+	#endif
+	#if NCINE_WITH_QOI
+							else if (selectedFormat == FormatQoi)
+							{
+								nc::ImageSaverQoi saver;
+								nc::ImageSaverQoi::QoiProperties qoiProps;
+								qoiProps.colorSpace = nc::ImageSaverQoi::ColorSpace::LINEAR;
+								hasSaved = saver.saveToFile(props, qoiProps, saveTexelsFilename.data());
 							}
 	#endif
 
