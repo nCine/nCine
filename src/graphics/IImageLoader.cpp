@@ -6,6 +6,9 @@
 #ifdef WITH_WEBP
 	#include "ImageLoaderWebP.h"
 #endif
+#ifdef WITH_QOI
+	#include "ImageLoaderQoi.h"
+#endif
 #include "IFile.h"
 #include "FileSystem.h"
 
@@ -74,6 +77,10 @@ nctl::UniquePtr<IImageLoader> IImageLoader::createLoader(nctl::UniquePtr<IFile> 
 #ifdef WITH_WEBP
 	if (fs::hasExtension(filename, "webp"))
 		return nctl::makeUnique<ImageLoaderWebP>(nctl::move(fileHandle));
+#endif
+#ifdef WITH_QOI
+	if (fs::hasExtension(filename, "qoi"))
+		return nctl::makeUnique<ImageLoaderQoi>(nctl::move(fileHandle));
 #endif
 
 	LOGF_X("Extension unknown: \"%s\"", fs::extension(filename));

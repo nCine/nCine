@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.10)
+
+project(qoi-download NONE)
+
+include(ExternalProject)
+ExternalProject_Add(qoi
+	GIT_REPOSITORY    https://github.com/phoboslab/qoi.git
+	GIT_TAG           "${QOI_VERSION_TAG}"
+	GIT_SHALLOW       TRUE
+	SOURCE_DIR        "${CMAKE_BINARY_DIR}/qoi-src"
+	CONFIGURE_COMMAND ""
+	BUILD_COMMAND     ""
+	INSTALL_COMMAND   ""
+	TEST_COMMAND      ""
+)

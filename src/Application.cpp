@@ -158,6 +158,9 @@ namespace {
 #ifdef WITH_WEBP
 		LOGD("WITH_WEBP");
 #endif
+#ifdef WITH_QOI
+		LOGD("WITH_QOI");
+#endif
 #ifdef WITH_LUA
 		LOGD("WITH_LUA");
 #endif
