@@ -541,10 +541,8 @@ void ImGuiSdlInput::updateIme()
 
 	// Stop previous input
 	if ((!(imeData.WantVisible || imeData.WantTextInput) || imeWindow_ != window) && imeWindow_ != nullptr)
-	{
-		SDL_StopTextInput(imeWindow_);
 		imeWindow_ = nullptr;
-	}
+
 	if ((!imeDirty_ && imeWindow_ == window) || (window == nullptr))
 		return;
 
@@ -560,8 +558,6 @@ void ImGuiSdlInput::updateIme()
 		SDL_SetTextInputArea(window, &r, 0);
 		imeWindow_ = window;
 	}
-	if (!SDL_TextInputActive(window) && (imeData.WantVisible || imeData.WantTextInput))
-		SDL_StartTextInput(window);
 }
 
 void ImGuiSdlInput::updateMouseData()

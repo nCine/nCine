@@ -137,7 +137,8 @@ bool NuklearQtInput::event(QEvent *event)
 			QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
 
 			/* text input */
-			if (keyEvent->text().length() > 0 && textLength_ < NK_QT_TEXT_MAX)
+			// Non-printable keys should be skipped
+			if (keyEvent->text().length() > 0 && keyEvent->text().at(0).isPrint() && textLength_ < NK_QT_TEXT_MAX)
 				text_[textLength_++] = keyEvent->text().data()->unicode();
 			return true;
 		}
@@ -177,7 +178,9 @@ bool NuklearQtInput::event(QEvent *event)
 void NuklearQtInput::clipboardPaste(nk_handle usr, struct nk_text_edit *edit)
 {
 	QClipboard *clipboard = QApplication::clipboard();
-	const char *text = clipboard->text().toStdString().c_str();
+	// Keeping the converted buffer alive in a named variable
+	const QByteArray utf8Text = clipboard->text().toUtf8();
+	const char *text = utf8Text.constData();
 	if (text)
 		nk_textedit_paste(edit, text, nk_strlen(text));
 }

@@ -283,6 +283,9 @@ SdlInputManager::SdlInputManager()
 
 	joyMapping_.init(this);
 
+	// Starting text input once here to keep it always enabled, so that `onTextInput()` behaves the same as on SDL2
+	SDL_StartTextInput(SdlGfxDevice::windowHandle());
+
 #ifdef WITH_IMGUI
 	ImGuiSdlInput::init(SdlGfxDevice::windowHandle());
 #endif
@@ -301,6 +304,8 @@ SdlInputManager::~SdlInputManager()
 #ifdef WITH_IMGUI
 	ImGuiSdlInput::shutdown();
 #endif
+
+	SDL_StopTextInput(SdlGfxDevice::windowHandle());
 
 	// Close a joystick if opened
 	for (unsigned int i = 0; i < MaxNumJoysticks; i++)

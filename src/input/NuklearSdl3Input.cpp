@@ -11,7 +11,6 @@ namespace ncine {
 
 bool NuklearSdlInput::inputEnabled_ = true;
 SDL_Window *NuklearSdlInput::window_ = nullptr;
-bool NuklearSdlInput::editWasActive_ = false;
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -44,7 +43,6 @@ void NuklearSdlInput::newFrame()
 
 void NuklearSdlInput::inputBegin()
 {
-	updateTextInput();
 	nk_input_begin(NuklearContext::context());
 }
 
@@ -180,9 +178,10 @@ bool NuklearSdlInput::processEvent(const SDL_Event *event)
 
 void NuklearSdlInput::clipboardPaste(nk_handle usr, struct nk_text_edit *edit)
 {
-	const char *text = SDL_GetClipboardText();
+	char *text = SDL_GetClipboardText();
 	if (text)
 		nk_textedit_paste(edit, text, nk_strlen(text));
+	SDL_free(text);
 }
 
 void NuklearSdlInput::clipboardCopy(nk_handle usr, const char *text, int len)
@@ -190,51 +189,6 @@ void NuklearSdlInput::clipboardCopy(nk_handle usr, const char *text, int len)
 	if (len == 0)
 		return;
 	SDL_SetClipboardText(text);
-}
-
-void NuklearSdlInput::updateTextInput()
-{
-	nk_context *ctx = NuklearContext::context();
-
-	bool active = false;
-
-	/* Determine if Nuklear is using any top-level "edit" widget.
-	 * Popups take higher priority because they block any incomming input.
-	 * This will not work, if the widget is not updating context state properly. */
-	if (!ctx->active)
-		active = false;
-	else if (ctx->active->popup.win)
-		active = ctx->active->popup.win->edit.active;
-	else
-		active = ctx->active->edit.active;
-
-	/* decide, if TextInputActive should be unchanged/stoped/started
-	 * and change its state accordingly for owned SDL Window */
-	if (active != editWasActive_)
-	{
-		const bool windowEditActive = SDL_TextInputActive(window_);
-
-		/* If you ever hit this check, it means that the demo and your app
-		 * (or something else) are all trying to manage TextInputActive state.
-		 * This can cause subtle bugs where the state won't be what you expect.
-		 * You can safely remove this assert and the demo will keep working,
-		 * but make sure it does not cause any issues for you */
-		//ASSERT_MSG(windowEditActive == editWasActive_, "Something else changed TextInputActive state for this Window");
-
-		if (!windowEditActive && !editWasActive_ && active)
-			SDL_StartTextInput(window_);
-		else if (windowEditActive && editWasActive_ && !active)
-			SDL_StopTextInput(window_);
-		editWasActive_ = active;
-	}
-
-	/* FIXME:
-	 * for full SDL3 integration, you also need to find current edit widget
-	 * bounds and the text cursor offset, and pass this data into SDL_SetTextInputArea.
-	 * This is currently not possible to do safely as Nuklear does not support it.
-	 * https://wiki.libsdl.org/SDL3/SDL_SetTextInputArea
-	 * https://github.com/Immediate-Mode-UI/Nuklear/pull/857
-	 */
 }
 
 }

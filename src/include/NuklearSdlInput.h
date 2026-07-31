@@ -26,15 +26,9 @@ class NuklearSdlInput
   private:
 	static bool inputEnabled_;
 	static SDL_Window *window_;
-#ifdef WITH_SDL3
-	static bool editWasActive_;
-#endif
 
 	static void clipboardPaste(nk_handle usr, struct nk_text_edit *edit);
 	static void clipboardCopy(nk_handle usr, const char *text, int len);
-#ifdef WITH_SDL3
-	static void updateTextInput();
-#endif
 };
 
 }

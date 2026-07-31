@@ -178,9 +178,10 @@ bool NuklearSdlInput::processEvent(const SDL_Event *event)
 
 void NuklearSdlInput::clipboardPaste(nk_handle usr, struct nk_text_edit *edit)
 {
-	const char *text = SDL_GetClipboardText();
+	char *text = SDL_GetClipboardText();
 	if (text)
 		nk_textedit_paste(edit, text, nk_strlen(text));
+	SDL_free(text);
 }
 
 void NuklearSdlInput::clipboardCopy(nk_handle usr, const char *text, int len)

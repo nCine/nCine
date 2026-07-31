@@ -1,7 +1,9 @@
 #include "ImGuiQtInput.h"
 #include "Application.h"
 #include "QtWidget.h"
+#include "imgui_internal.h" // for `ImGui::ClearActiveID()`
 
+#include <cstring> // for `memcpy()`
 #include <qevent.h>
 #include <QApplication>
 #include <QClipboard>
@@ -30,15 +32,17 @@ nctl::UniquePtr<QGamepad> ImGuiQtInput::gamepad_;
 
 namespace {
 
-	char clipboardString[1024];
+	const int ClipboardStringMaxSize = 1024;
+	char clipboardString[ClipboardStringMaxSize];
 
 	const char *clipboardText(ImGuiContext *context)
 	{
 		QClipboard *clipboard = QApplication::clipboard();
-		const int charsToCopy = clipboard->text().length() < 1024 ? clipboard->text().length() : 1024;
-		for (int i = 0; i < charsToCopy; i++)
-			clipboardString[i] = static_cast<char>(clipboard->text().at(i).toLatin1());
-		clipboardString[charsToCopy] = '\0';
+		const QByteArray utf8Text = clipboard->text().toUtf8();
+
+		const int bytesToCopy = utf8Text.size() < ClipboardStringMaxSize - 1 ? utf8Text.size() : ClipboardStringMaxSize - 1;
+		memcpy(clipboardString, utf8Text.constData(), bytesToCopy);
+		clipboardString[bytesToCopy] = '\0';
 
 		return clipboardString;
 	}
@@ -322,6 +326,7 @@ bool ImGuiQtInput::event(QEvent *event)
 			return true;
 		case QEvent::FocusOut:
 			io.AddFocusEvent(false);
+			ImGui::ClearActiveID();
 			return true;
 		default:
 			return false;

@@ -9,6 +9,8 @@
 #define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
 #define NK_INCLUDE_FONT_BAKING
 #define NK_INCLUDE_DEFAULT_FONT
+// Backends feed key state by polling `isKeyDown()` every frame
+#define NK_KEYSTATE_BASED_INPUT
 
 struct nk_context;
 struct nk_buffer;
