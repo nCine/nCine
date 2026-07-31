@@ -137,7 +137,8 @@ bool NuklearQtInput::event(QEvent *event)
 			QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
 
 			/* text input */
-			if (keyEvent->text().length() > 0 && textLength_ < NK_QT_TEXT_MAX)
+			// Non-printable keys should be skipped
+			if (keyEvent->text().length() > 0 && keyEvent->text().at(0).isPrint() && textLength_ < NK_QT_TEXT_MAX)
 				text_[textLength_++] = keyEvent->text().data()->unicode();
 			return true;
 		}

@@ -52,6 +52,8 @@ class ImGuiSdlInput
 	// Text input handling
 	static SDL_Window *imeWindow_;
 	static bool imeDirty_;
+	/// Whether this backend currently holds an acquisition on `imeWindow_`
+	static bool textInputActive_;
 #endif
 
 	// Mouse handling

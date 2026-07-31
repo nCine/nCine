@@ -9,6 +9,7 @@ typedef struct _SDL_Joystick SDL_Joystick;
 #else
 typedef struct SDL_Joystick SDL_Joystick;
 typedef uint32_t SDL_JoystickID;
+struct SDL_Window;
 #endif
 union SDL_Event;
 
@@ -126,6 +127,12 @@ class SdlInputManager : public IInputManager
 	static void copyButtonStatesToPrev();
 	static void parseEvent(const SDL_Event &event);
 
+#ifdef WITH_SDL3
+	// Reference counting for text input mode helps Imgui and Nuklear work together on text input
+	static void acquireTextInput(SDL_Window *window);
+	static void releaseTextInput(SDL_Window *window);
+#endif
+
 	const MouseState &mouseState() const override;
 	inline const KeyboardState &keyboardState() const override { return keyboardState_; }
 
@@ -163,6 +170,7 @@ class SdlInputManager : public IInputManager
 #ifdef WITH_SDL3
 	static int joystickIDCount_;
 	static SDL_JoystickID *joystickIDs_;
+	static int textInputRefCount_;
 #endif
 
 	static char joyGuidString_[33];

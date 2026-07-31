@@ -1,6 +1,7 @@
 // Based on imgui/backends/imgui_impl_sdl3.cpp
 
 #include "ImGuiSdlInput.h"
+#include "SdlInputManager.h"
 
 #if defined(_WIN32) && !defined(__WINRT__)
 struct HWND__;
@@ -263,6 +264,7 @@ bool ImGuiSdlInput::isWayland_ = false;
 
 SDL_Window *ImGuiSdlInput::imeWindow_ = nullptr;
 bool ImGuiSdlInput::imeDirty_ = false;
+bool ImGuiSdlInput::textInputActive_ = false;
 
 unsigned int ImGuiSdlInput::mouseWindowID_ = 0;
 int ImGuiSdlInput::mouseButtonsDown_ = 0;
@@ -542,7 +544,11 @@ void ImGuiSdlInput::updateIme()
 	// Stop previous input
 	if ((!(imeData.WantVisible || imeData.WantTextInput) || imeWindow_ != window) && imeWindow_ != nullptr)
 	{
-		SDL_StopTextInput(imeWindow_);
+		if (textInputActive_)
+		{
+			SdlInputManager::releaseTextInput(imeWindow_);
+			textInputActive_ = false;
+		}
 		imeWindow_ = nullptr;
 	}
 	if ((!imeDirty_ && imeWindow_ == window) || (window == nullptr))
@@ -560,8 +566,11 @@ void ImGuiSdlInput::updateIme()
 		SDL_SetTextInputArea(window, &r, 0);
 		imeWindow_ = window;
 	}
-	if (!SDL_TextInputActive(window) && (imeData.WantVisible || imeData.WantTextInput))
-		SDL_StartTextInput(window);
+	if (!textInputActive_ && (imeData.WantVisible || imeData.WantTextInput))
+	{
+		SdlInputManager::acquireTextInput(window);
+		textInputActive_ = true;
+	}
 }
 
 void ImGuiSdlInput::updateMouseData()

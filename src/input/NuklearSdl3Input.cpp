@@ -2,6 +2,7 @@
 
 #include <SDL3/SDL.h>
 #include "NuklearSdlInput.h"
+#include "SdlInputManager.h"
 
 namespace ncine {
 
@@ -208,23 +209,15 @@ void NuklearSdlInput::updateTextInput()
 	else
 		active = ctx->active->edit.active;
 
-	/* decide, if TextInputActive should be unchanged/stoped/started
-	 * and change its state accordingly for owned SDL Window */
+	/* ImGui independently wants to do the same for its own active widget, so the
+	 * actual Start/Stop calls go through a reference count instead of reading
+	 * back `SDL_TextInputActive()`, which does not tell them apart. */
 	if (active != editWasActive_)
 	{
-		const bool windowEditActive = SDL_TextInputActive(window_);
-
-		/* If you ever hit this check, it means that the demo and your app
-		 * (or something else) are all trying to manage TextInputActive state.
-		 * This can cause subtle bugs where the state won't be what you expect.
-		 * You can safely remove this assert and the demo will keep working,
-		 * but make sure it does not cause any issues for you */
-		//ASSERT_MSG(windowEditActive == editWasActive_, "Something else changed TextInputActive state for this Window");
-
-		if (!windowEditActive && !editWasActive_ && active)
-			SDL_StartTextInput(window_);
-		else if (windowEditActive && editWasActive_ && !active)
-			SDL_StopTextInput(window_);
+		if (active)
+			SdlInputManager::acquireTextInput(window_);
+		else
+			SdlInputManager::releaseTextInput(window_);
 		editWasActive_ = active;
 	}
 

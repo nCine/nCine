@@ -42,6 +42,7 @@ JoyConnectionEvent SdlInputManager::joyConnectionEvent_;
 
 int SdlInputManager::joystickIDCount_ = 0;
 SDL_JoystickID *SdlInputManager::joystickIDs_ = nullptr;
+int SdlInputManager::textInputRefCount_ = 0;
 char SdlInputManager::joyGuidString_[33];
 
 namespace {
@@ -331,6 +332,21 @@ bool SdlInputManager::shouldQuitOnRequest()
 		shouldQuit = inputEventHandler_->onQuitRequest();
 
 	return shouldQuit;
+}
+
+void SdlInputManager::acquireTextInput(SDL_Window *window)
+{
+	if (textInputRefCount_ == 0)
+		SDL_StartTextInput(window);
+	textInputRefCount_++;
+}
+
+void SdlInputManager::releaseTextInput(SDL_Window *window)
+{
+	ASSERT(textInputRefCount_ > 0);
+	textInputRefCount_--;
+	if (textInputRefCount_ == 0)
+		SDL_StopTextInput(window);
 }
 
 void SdlInputManager::copyButtonStatesToPrev()

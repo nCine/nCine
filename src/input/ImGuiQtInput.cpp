@@ -1,6 +1,7 @@
 #include "ImGuiQtInput.h"
 #include "Application.h"
 #include "QtWidget.h"
+#include "imgui_internal.h" // for `ImGui::ClearActiveID()`
 
 #include <qevent.h>
 #include <QApplication>
@@ -322,6 +323,7 @@ bool ImGuiQtInput::event(QEvent *event)
 			return true;
 		case QEvent::FocusOut:
 			io.AddFocusEvent(false);
+			ImGui::ClearActiveID();
 			return true;
 		default:
 			return false;

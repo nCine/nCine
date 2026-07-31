@@ -42,8 +42,8 @@ namespace {
 
 	const int numNonCtrlKeys = 2;
 	const int nuklearGlfwNonCtrlKeys[numNonCtrlKeys * 2] = {
-		NK_KEY_TEXT_WORD_LEFT, GLFW_KEY_LEFT,
-		NK_KEY_TEXT_WORD_RIGHT, GLFW_KEY_RIGHT
+		NK_KEY_LEFT, GLFW_KEY_LEFT,
+		NK_KEY_RIGHT, GLFW_KEY_RIGHT
 	};
 
 }

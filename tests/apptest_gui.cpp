@@ -22,6 +22,9 @@
 
 #if NCINE_WITH_IMGUI
 	#include <ncine/imgui.h>
+	#if NCINE_WITH_NUKLEAR
+		#include <ncine/imgui_internal.h> // for `ImGui::ClearActiveID()`
+	#endif
 #endif
 
 #if NCINE_WITH_NUKLEAR
@@ -289,7 +292,12 @@ void MyEventHandler::onFrameStart()
 				}
 				bgColor.set(bg.r, bg.g, bg.b, bg.a);
 
-				nk_edit_string_zero_terminated(ctx, NK_EDIT_FIELD, textBuffer, sizeof(textBuffer) - 1, nk_filter_default);
+				const nk_flags editFlags = nk_edit_string_zero_terminated(ctx, NK_EDIT_FIELD, textBuffer, sizeof(textBuffer) - 1, nk_filter_default);
+	#if NCINE_WITH_IMGUI
+				// ImGui has no notion of losing focus to a widget outside of its own windows
+				if (editFlags & NK_EDIT_ACTIVATED)
+					ImGui::ClearActiveID();
+	#endif
 				nk_edit_string_zero_terminated(ctx, NK_EDIT_FIELD, nuklearTextInput, sizeof(nuklearTextInput) - 1, nk_filter_default);
 			}
 			nk_end(ctx);
@@ -329,7 +337,7 @@ void MyEventHandler::onFrameStart()
 		}
 	}
 
-	if (lineEdit && lineEdit->isModified() == false)
+	if (lineEdit && lineEdit->text() != QLatin1String(textBuffer))
 		lineEdit->setText(textBuffer);
 #endif
 
