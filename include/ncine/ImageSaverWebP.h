@@ -12,7 +12,7 @@ class DLL_PUBLIC ImageSaverWebP : public IImageSaver
 	struct WebPProperties
 	{
 		WebPProperties()
-		    : quality(75.0f), lossless(false) {}
+		    : quality(75.0f), lossless(true) {}
 
 		float quality;
 		bool lossless;

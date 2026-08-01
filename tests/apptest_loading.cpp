@@ -6,13 +6,7 @@
 #include "apptest_loading.h"
 #include <ncine/Application.h>
 #include <ncine/Texture.h>
-#include <ncine/ImageSaverPng.h>
-#if NCINE_WITH_WEBP
-	#include <ncine/ImageSaverWebP.h>
-#endif
-#if NCINE_WITH_QOI
-	#include <ncine/ImageSaverQoi.h>
-#endif
+#include <ncine/IImageSaver.h>
 #include <ncine/Sprite.h>
 #include <ncine/TextNode.h>
 #include <ncine/Shader.h>
@@ -398,7 +392,9 @@ void MyEventHandler::onFrameStart()
 							"qoi",
 	#endif
 						};
+						ImGui::PushItemWidth(ImGui::GetFontSize() * 21.0f);
 						ImGui::InputText("##Saving", saveTexelsFilename.data(), saveTexelsFilename.capacity(), ImGuiInputTextFlags_CallbackResize, inputTextCallback, &saveTexelsFilename);
+						ImGui::PopItemWidth();
 						if (saveTexelsFilename.isEmpty())
 							saveTexelsFilename.format("texels.%s", extensions[selectedFormat]);
 	#if NCINE_WITH_WEBP || NCINE_WITH_QOI
@@ -426,30 +422,7 @@ void MyEventHandler::onFrameStart()
 							props.height = h;
 							props.format = nc::IImageSaver::Format::RGBA8;
 							props.pixels = pixels.get();
-
-							if (selectedFormat == FormatPng)
-							{
-								nc::ImageSaverPng saver;
-								hasSaved = saver.saveToFile(props, saveTexelsFilename.data());
-							}
-	#if NCINE_WITH_WEBP
-							else if (selectedFormat == FormatWebP)
-							{
-								nc::ImageSaverWebP saver;
-								nc::ImageSaverWebP::WebPProperties webpProps;
-								webpProps.lossless = true;
-								hasSaved = saver.saveToFile(props, webpProps, saveTexelsFilename.data());
-							}
-	#endif
-	#if NCINE_WITH_QOI
-							else if (selectedFormat == FormatQoi)
-							{
-								nc::ImageSaverQoi saver;
-								nc::ImageSaverQoi::QoiProperties qoiProps;
-								qoiProps.colorSpace = nc::ImageSaverQoi::ColorSpace::LINEAR;
-								hasSaved = saver.saveToFile(props, qoiProps, saveTexelsFilename.data());
-							}
-	#endif
+							hasSaved = nc::IImageSaver::save(props, saveTexelsFilename.data());
 
 							if (hasSaved == false)
 								LOGW_X("Cannot save texels to \"%s\"", saveTexelsFilename.data());
