@@ -49,6 +49,9 @@ MemoryFile::MemoryFile(const char *bufferName, unsigned long int bufferSize)
 
 	ownedBuffer_ = nctl::makeUnique<uint8_t[]>(bufferSize);
 	bufferPtr_ = ownedBuffer_.get();
+
+	// The memory file appears to be already opened when first created
+	fileDescriptor_ = 0;
 }
 
 MemoryFile::MemoryFile(unsigned long int bufferSize)
@@ -65,6 +68,9 @@ MemoryFile::MemoryFile(const char *bufferName, nctl::UniquePtr<unsigned char []>
 
 	ownedBuffer_ = nctl::move(buffer);
 	bufferPtr_ = ownedBuffer_.get();
+
+	// The memory file appears to be already opened when first created
+	fileDescriptor_ = 0;
 }
 
 MemoryFile::MemoryFile(nctl::UniquePtr<unsigned char []> buffer, unsigned long int bufferSize)
@@ -78,11 +84,10 @@ MemoryFile::MemoryFile(nctl::UniquePtr<unsigned char []> buffer, unsigned long i
 
 void MemoryFile::open(unsigned char mode)
 {
-	// Checking if the file is already opened
-	if (fileDescriptor_ >= 0)
-		LOGW_X("Memory file \"%s\" at address 0x%lx is already opened", filename_.data(), bufferPtr_);
-	else
-		isWritable_ = (mode & OpenMode::WRITE);
+	// A memory file does not need a real opening step, as its buffer already exists
+	fileDescriptor_ = 0;
+	isWritable_ = (mode & OpenMode::WRITE);
+	seekOffset_ = 0;
 }
 
 void MemoryFile::close()

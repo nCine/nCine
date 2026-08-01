@@ -22,18 +22,18 @@ class IImageLoader
 
 	virtual ~IImageLoader();
 
-	/// Returns true if the texture has been correctly loaded
+	/// Returns true if the image has been correctly loaded
 	inline bool hasLoaded() const { return hasLoaded_; }
 
-	/// Returns texture width
+	/// Returns image width
 	inline int width() const { return width_; }
-	/// Returns texture height
+	/// Returns image height
 	inline int height() const { return height_; }
-	/// Returns texture size as a `Vector2<int>` class
+	/// Returns image size as a `Vector2<int>` class
 	inline Vector2i size() const { return Vector2i(width_, height_); }
-	/// Returns texture data size in bytes
+	/// Returns image data size in bytes
 	inline unsigned long dataSize() const { return dataSize_; }
-	/// Returns the texture format object
+	/// Returns the image format object
 	inline const Format &format() const { return format_; }
 	/// Returns the number of color channels based on the image format
 	unsigned int numChannels() const;
@@ -43,15 +43,15 @@ class IImageLoader
 	/// Returns a pointer to pixel data
 	inline unsigned char *pixels() { return pixels_.get(); }
 
-	/// Returns the proper texture loader according to the memory buffer name extension
+	/// Returns the proper image loader according to the memory buffer name extension
 	static nctl::UniquePtr<IImageLoader> createFromMemory(const char *bufferName, const unsigned char *bufferPtr, unsigned long int bufferSize);
-	/// Returns the proper texture loader according to the file extension
+	/// Returns the proper image loader according to the file extension
 	static nctl::UniquePtr<IImageLoader> createFromFile(const char *filename);
 
   protected:
 	/// A flag indicating if the loading process has been successful
 	bool hasLoaded_;
-	/// Texture file handle
+	/// Image file handle
 	nctl::UniquePtr<IFile> fileHandle_;
 
 	int width_;

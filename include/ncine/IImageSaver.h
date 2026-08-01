@@ -38,10 +38,19 @@ class DLL_PUBLIC IImageSaver
 	virtual bool saveToFile(const Properties &properties, const char *filename) = 0;
 	virtual bool saveToFile(const Properties &properties, nctl::UniquePtr<IFile> fileHandle) = 0;
 
-	void flipPixels(const Properties &properties, unsigned char *dest);
-
 	static unsigned int imageFormatToBpp(const Format format);
 	static unsigned int dataSize(const Properties &properties);
+
+	/// Saves the image directly to a file, choosing the proper saver according to the extension and using format-specific defaults
+	/*! \return `true` on success, `false` otherwise (including when the extension is not recognized) */
+	static bool save(const Properties &properties, const char *filename);
+
+  protected:
+	void flipPixels(const Properties &properties, unsigned char *dest);
+
+  private:
+	/// Returns the proper image saver according to the file extension, using format-specific defaults
+	static nctl::UniquePtr<IImageSaver> createSaver(const char *filename);
 };
 
 }

@@ -10,13 +10,7 @@
 #include <ncine/TextNode.h>
 #include <ncine/Viewport.h>
 #include <ncine/Camera.h>
-#include <ncine/ImageSaverPng.h>
-#if NCINE_WITH_WEBP
-	#include <ncine/ImageSaverWebP.h>
-#endif
-#if NCINE_WITH_QOI
-	#include <ncine/ImageSaverQoi.h>
-#endif
+#include <ncine/IImageSaver.h>
 #include "apptest_datapath.h"
 
 namespace {
@@ -327,49 +321,43 @@ void MyEventHandler::onFrameStart()
 					if (currentTexture->format() == nc::Texture::Format::RGBA8)
 						props.format = nc::IImageSaver::Format::RGBA8;
 
-					ImGui::SameLine();
-					if (ImGui::Button("Save PNG"))
-					{
-						nc::ImageSaverPng saver;
-						nc::Texture &tex = *currentViewport.texture();
-						nctl::UniquePtr<unsigned char[]> buffer = nctl::makeUnique<unsigned char[]>(tex.dataSize());
-						const bool savedToMemory = tex.saveToMemory(buffer.get());
-						if (savedToMemory)
-						{
-							props.pixels = buffer.get();
-							// Recycling comboString for screenshot filename
-							comboString.format("viewport%d_%dx%d.png", currentComboViewport, currentViewportSize.x, currentViewportSize.y);
-							saver.saveToFile(props, comboString.data());
-						}
-					}
+					// Indices always follow declaration order, whichever savers are actually compiled in
+					enum { FormatPng = 0,
 	#if NCINE_WITH_WEBP
-					ImGui::SameLine();
-					if (ImGui::Button("Save WebP"))
-					{
-						nc::ImageSaverWebP saver;
-						nc::ImageSaverWebP::WebPProperties webpProps;
-						webpProps.lossless = true;
-
-						nc::Texture &tex = *currentViewport.texture();
-						nctl::UniquePtr<unsigned char[]> buffer = nctl::makeUnique<unsigned char[]>(tex.dataSize());
-						const bool savedToMemory = tex.saveToMemory(buffer.get());
-						if (savedToMemory)
-						{
-							props.pixels = buffer.get();
-							// Recycling comboString for screenshot filename
-							comboString.format("viewport%d_%dx%d.webp", currentComboViewport, currentViewportSize.x, currentViewportSize.y);
-							saver.saveToFile(props, webpProps, comboString.data());
-						}
-					}
+					       FormatWebP,
 	#endif
 	#if NCINE_WITH_QOI
-					ImGui::SameLine();
-					if (ImGui::Button("Save QOI"))
-					{
-						nc::ImageSaverQoi saver;
-						nc::ImageSaverQoi::QoiProperties qoiProps;
-						qoiProps.colorSpace = nc::ImageSaverQoi::ColorSpace::LINEAR;
+					       FormatQoi,
+	#endif
+					};
 
+					static int selectedFormat = 0;
+					const char *extensions[] = { "png",
+	#if NCINE_WITH_WEBP
+						"webp",
+	#endif
+	#if NCINE_WITH_QOI
+						"qoi",
+	#endif
+					};
+	#if NCINE_WITH_WEBP || NCINE_WITH_QOI
+					const char *formats[] = { "Png",
+		#if NCINE_WITH_WEBP
+						"WebP",
+		#endif
+		#if NCINE_WITH_QOI
+						"QOI",
+		#endif
+					};
+					ImGui::SameLine();
+					ImGui::PushItemWidth(ImGui::GetFontSize() * 5.0f);
+					ImGui::Combo("##SaveFormat", &selectedFormat, formats, IM_COUNTOF(formats));
+					ImGui::PopItemWidth();
+	#endif
+
+					ImGui::SameLine();
+					if (ImGui::Button("Save"))
+					{
 						nc::Texture &tex = *currentViewport.texture();
 						nctl::UniquePtr<unsigned char[]> buffer = nctl::makeUnique<unsigned char[]>(tex.dataSize());
 						const bool savedToMemory = tex.saveToMemory(buffer.get());
@@ -377,11 +365,12 @@ void MyEventHandler::onFrameStart()
 						{
 							props.pixels = buffer.get();
 							// Recycling comboString for screenshot filename
-							comboString.format("viewport%d_%dx%d.qoi", currentComboViewport, currentViewportSize.x, currentViewportSize.y);
-							saver.saveToFile(props, qoiProps, comboString.data());
+							comboString.format("viewport%d_%dx%d.%s", currentComboViewport, currentViewportSize.x, currentViewportSize.y, extensions[selectedFormat]);
+							const bool hasSaved = nc::IImageSaver::save(props, comboString.data());
+							if (hasSaved == false)
+								LOGW_X("Cannot save viewport to \"%s\"", comboString.data());
 						}
 					}
-	#endif
 #endif
 				}
 

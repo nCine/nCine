@@ -144,10 +144,6 @@ class DLL_PUBLIC IFile
 
 	/// File size in bytes
 	unsigned long int fileSize_;
-
-  private:
-	/// The `ImageSaverPng` class needs to access the `filePointer_`
-	friend class ImageSaverPng;
 };
 
 }

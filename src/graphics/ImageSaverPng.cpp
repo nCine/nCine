@@ -27,6 +27,12 @@ namespace {
 			png_destroy_write_struct(&pngPtr, png_infopp(nullptr));
 	}
 
+	void pngWriteCallback(png_structp pngPtr, png_bytep data, png_size_t length)
+	{
+		IFile *file = static_cast<IFile *>(png_get_io_ptr(pngPtr));
+		file->write(data, length);
+	}
+
 }
 
 ///////////////////////////////////////////////////////////
@@ -92,7 +98,7 @@ bool ImageSaverPng::saveToFile(const Properties &properties, const PngProperties
 		return false;
 	}
 
-	png_init_io(pngPtr, fileHandle->filePointer_);
+	png_set_write_fn(pngPtr, fileHandle.get(), pngWriteCallback, nullptr);
 
 	const unsigned int pngColorType = imageFormatToColorType(properties.format);
 	// Write header (8 bit colour depth)
