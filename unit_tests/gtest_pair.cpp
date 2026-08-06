@@ -1,4 +1,5 @@
 #include "gtest_pair.h"
+#include <ncine/Vector2.h>
 
 namespace {
 
@@ -36,6 +37,16 @@ TEST_F(PairTest, ConstructorFromDifferentTypes)
 
 	ASSERT_EQ(pair.first, FirstElement);
 	ASSERT_EQ(pair.second, SecondElement);
+}
+
+TEST_F(PairTest, PiecewiseConstructor)
+{
+	printf("Constructing a pair with the second value built in place from multiple arguments\n");
+	nctl::Pair<int, nc::Vector2i> pair(FirstElement, SecondElement, SecondElement + 1);
+
+	ASSERT_EQ(pair.first, FirstElement);
+	ASSERT_EQ(pair.second.x, SecondElement);
+	ASSERT_EQ(pair.second.y, SecondElement + 1);
 }
 
 TEST_F(PairTest, SwapObjects)
