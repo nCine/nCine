@@ -9,8 +9,7 @@ namespace ncine {
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
 
-unsigned int GLFramebufferObject::readBoundBuffer_ = 0;
-unsigned int GLFramebufferObject::drawBoundBuffer_ = 0;
+GLFramebufferObject::State GLFramebufferObject::state_;
 
 ///////////////////////////////////////////////////////////
 // CONSTRUCTORS and DESTRUCTOR
@@ -24,9 +23,9 @@ GLFramebufferObject::GLFramebufferObject()
 
 GLFramebufferObject::~GLFramebufferObject()
 {
-	if (readBoundBuffer_ == glHandle_)
+	if (state_.readBoundBuffer == glHandle_)
 		unbind(GL_READ_FRAMEBUFFER);
-	if (drawBoundBuffer_ == glHandle_)
+	if (state_.drawBoundBuffer == glHandle_)
 		unbind(GL_DRAW_FRAMEBUFFER);
 
 	glDeleteFramebuffers(1, &glHandle_);
@@ -54,6 +53,13 @@ bool GLFramebufferObject::bind(GLenum target) const
 bool GLFramebufferObject::unbind(GLenum target)
 {
 	return bindHandle(target, 0);
+}
+
+void GLFramebufferObject::setState(State newState)
+{
+	bindHandle(GL_READ_FRAMEBUFFER, newState.readBoundBuffer);
+	bindHandle(GL_DRAW_FRAMEBUFFER, newState.drawBoundBuffer);
+	state_ = newState;
 }
 
 bool GLFramebufferObject::drawBuffers(unsigned int numDrawBuffers)
@@ -151,9 +157,9 @@ GLuint GLFramebufferObject::boundHandle(GLenum target)
 	FATAL_ASSERT(target == GL_FRAMEBUFFER || target == GL_READ_FRAMEBUFFER || target == GL_DRAW_FRAMEBUFFER);
 
 	if (target == GL_FRAMEBUFFER || target == GL_READ_FRAMEBUFFER)
-		return readBoundBuffer_;
+		return state_.readBoundBuffer;
 	else
-		return drawBoundBuffer_;
+		return state_.drawBoundBuffer;
 }
 
 bool GLFramebufferObject::bindHandle(GLenum target, GLuint glHandle)
@@ -161,23 +167,23 @@ bool GLFramebufferObject::bindHandle(GLenum target, GLuint glHandle)
 	FATAL_ASSERT(target == GL_FRAMEBUFFER || target == GL_READ_FRAMEBUFFER || target == GL_DRAW_FRAMEBUFFER);
 
 	if (target == GL_FRAMEBUFFER &&
-	    (readBoundBuffer_ != glHandle || drawBoundBuffer_ != glHandle))
+	    (state_.readBoundBuffer != glHandle || state_.drawBoundBuffer != glHandle))
 	{
 		glBindFramebuffer(target, glHandle);
-		readBoundBuffer_ = glHandle;
-		drawBoundBuffer_ = glHandle;
+		state_.readBoundBuffer = glHandle;
+		state_.drawBoundBuffer = glHandle;
 		return true;
 	}
-	else if (target == GL_READ_FRAMEBUFFER && readBoundBuffer_ != glHandle)
+	else if (target == GL_READ_FRAMEBUFFER && state_.readBoundBuffer != glHandle)
 	{
 		glBindFramebuffer(target, glHandle);
-		readBoundBuffer_ = glHandle;
+		state_.readBoundBuffer = glHandle;
 		return true;
 	}
-	else if (target == GL_DRAW_FRAMEBUFFER && drawBoundBuffer_ != glHandle)
+	else if (target == GL_DRAW_FRAMEBUFFER && state_.drawBoundBuffer != glHandle)
 	{
 		glBindFramebuffer(target, glHandle);
-		drawBoundBuffer_ = glHandle;
+		state_.drawBoundBuffer = glHandle;
 		return true;
 	}
 	return false;
@@ -188,10 +194,10 @@ void GLFramebufferObject::setBoundHandle(GLenum target, GLuint glHandle)
 	FATAL_ASSERT(target == GL_FRAMEBUFFER || target == GL_READ_FRAMEBUFFER || target == GL_DRAW_FRAMEBUFFER);
 
 	if (target == GL_FRAMEBUFFER || target == GL_READ_FRAMEBUFFER)
-		readBoundBuffer_ = glHandle;
+		state_.readBoundBuffer = glHandle;
 
 	if (target == GL_FRAMEBUFFER || target == GL_DRAW_FRAMEBUFFER)
-		drawBoundBuffer_ = glHandle;
+		state_.drawBoundBuffer = glHandle;
 }
 
 }

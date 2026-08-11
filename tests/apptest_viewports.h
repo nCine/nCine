@@ -4,15 +4,10 @@
 #include <ncine/IAppEventHandler.h>
 #include <ncine/IInputEventHandler.h>
 #include <nctl/StaticArray.h>
+#include <nctl/String.h>
 #include <ncine/Rect.h>
 #include <ncine/Colorf.h>
 #include <ncine/TimeStamp.h>
-
-namespace nctl {
-
-class String;
-
-}
 
 namespace ncine {
 
@@ -38,6 +33,7 @@ class MyEventHandler :
 	void onPreInit(nc::AppConfiguration &config) override;
 	void onInit() override;
 	void onFrameStart() override;
+	void onFrameEnd() override;
 	void onResizeWindow(int width, int height) override;
 
 	void onKeyReleased(const nc::KeyboardEvent &event) override;
@@ -95,6 +91,11 @@ class MyEventHandler :
 
 	nctl::StaticArray<nctl::UniquePtr<nc::Sprite>, NumSprites> sprites_;
 	nctl::StaticArray<nc::Vector2f, NumSprites> spritePos_;
+
+	/// The viewport requested for deferred saving (after drawing ends)
+	nc::Viewport *pendingSaveViewport_ = nullptr;
+	bool pendingSaveIsScreen_ = false;
+	nctl::String pendingSaveFilename_ = nctl::String(64);
 
 	void resetCamera();
 };

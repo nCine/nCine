@@ -46,6 +46,7 @@ class QtGfxDevice : public IGfxDevice
 	void initGlew();
 #endif
 	void resetTextureBinding();
+	void bindDefaultReadFramebufferObject();
 	void bindDefaultDrawFramebufferObject();
 	/// Resets the OpenGL state cache to bind the default Qt Framebuffer Object
 	void resetFramebufferObjectBinding();

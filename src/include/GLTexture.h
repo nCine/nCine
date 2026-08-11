@@ -11,6 +11,12 @@ class GLTexture
   public:
 	static const unsigned int MaxTextureUnits = 4;
 
+	struct State
+	{
+		GLuint handle = 0;
+		unsigned int unit = 0;
+	};
+
 	explicit GLTexture(GLenum target_);
 	~GLTexture();
 
@@ -22,6 +28,9 @@ class GLTexture
 	bool unbind() const;
 	static bool unbind(GLenum target, unsigned int textureUnit);
 	static bool unbind(unsigned int textureUnit);
+
+	static State state(GLenum target, unsigned int textureUnit = 0);
+	static void setState(GLenum target, State state);
 
 	void texImage2D(GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data);
 	void texSubImage2D(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data);
@@ -52,7 +61,7 @@ class GLTexture
 	GLTexture &operator=(const GLTexture &) = delete;
 
 	static GLuint boundHandle(GLenum target, unsigned int textureUnit);
-	static GLuint boundHandle(GLenum target) { return bindHandle(target, 0); }
+	static GLuint boundHandle(GLenum target) { return boundHandle(target, 0); }
 
 	static bool bindHandle(GLenum target, GLuint glHandle, unsigned int textureUnit);
 	static bool bindHandle(GLenum target, GLuint glHandle) { return bindHandle(target, glHandle, 0); }

@@ -190,6 +190,12 @@ void QtGfxDevice::resetTextureBinding()
 	GLTexture::bindHandle(GL_TEXTURE_2D, 0);
 }
 
+void QtGfxDevice::bindDefaultReadFramebufferObject()
+{
+	const GLuint glHandle = widget_.defaultFramebufferObject();
+	GLFramebufferObject::bindHandle(GL_READ_FRAMEBUFFER, glHandle);
+}
+
 void QtGfxDevice::bindDefaultDrawFramebufferObject()
 {
 	const GLuint glHandle = widget_.defaultFramebufferObject();

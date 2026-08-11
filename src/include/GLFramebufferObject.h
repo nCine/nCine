@@ -18,6 +18,12 @@ class GLFramebufferObject
 	static const unsigned int MaxDrawbuffers = 8;
 	static const unsigned int MaxRenderbuffers = 4;
 
+	struct State
+	{
+		GLuint readBoundBuffer = 0;
+		GLuint drawBoundBuffer = 0;
+	};
+
 	explicit GLFramebufferObject();
 	~GLFramebufferObject();
 
@@ -28,6 +34,9 @@ class GLFramebufferObject
 
 	bool bind(GLenum target) const;
 	static bool unbind(GLenum target);
+
+	static State state() { return state_; }
+	static void setState(State newState);
 
 	inline unsigned int numDrawbuffers() const { return numDrawBuffers_; }
 	bool drawBuffers(unsigned int numDrawBuffers);
@@ -46,8 +55,7 @@ class GLFramebufferObject
 	void setObjectLabel(const char *label);
 
   private:
-	static unsigned int readBoundBuffer_;
-	static unsigned int drawBoundBuffer_;
+	static State state_;
 	unsigned int numDrawBuffers_;
 
 	nctl::StaticArray<nctl::UniquePtr<GLRenderbuffer>, MaxRenderbuffers> attachedRenderbuffers_;

@@ -100,6 +100,14 @@ class DLL_PUBLIC Viewport
 	/// Returns the number of color attachments of the viewport's FBO
 	inline unsigned int numColorAttachments() const { return numColorAttachments_; }
 
+	/// Saves the whole content of the viewport in the provided memory buffer
+	/*! \note The screen is saved as RGB8, a texture backed viewport is saved as RGBA8. */
+	bool savePixels(unsigned char *pixels) const;
+	/// Saves the specified rectangular area of the viewport in the provided memory buffer
+	/*! \note The screen is saved as RGB8, a texture backed viewport is saved as RGBA8.
+	 *  \return `false` if the viewport has no render target of its own, or if the rectangle is not entirely inside the viewport */
+	bool savePixels(unsigned char *pixels, const Recti &rect) const;
+
 	/// Returns the OpenGL viewport rectangle
 	inline Recti viewportRect() const { return viewportRect_; }
 	/// Sets the OpenGL viewport rectangle through a `Recti` object

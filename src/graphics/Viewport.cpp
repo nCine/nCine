@@ -257,6 +257,71 @@ bool Viewport::removeAllTextures()
 	return true;
 }
 
+bool Viewport::savePixels(unsigned char *pixels) const
+{
+	return savePixels(pixels, Recti(0, 0, width_, height_));
+}
+
+/*! \note It works for both the screen and texture backed viewports. It leaves GL bindings as they were found.
+ *  \note A rectangle narrower than the whole viewport always goes through `glReadPixels()`, as
+ *  `glGetTexImage()` has no way to read back only a portion of a texture. */
+bool Viewport::savePixels(unsigned char *pixels, const Recti &rect) const
+{
+	if (type_ == Type::NO_TEXTURE)
+		return false;
+
+	if (rect.x < 0 || rect.y < 0 || rect.w <= 0 || rect.h <= 0 ||
+	    rect.x + rect.w > width_ || rect.y + rect.h > height_)
+		return false;
+
+	// OpenGL's Y axis grows upwards, from the bottom-left corner, while `rect` is expressed top-down
+	const int glY = height_ - rect.y - rect.h;
+
+	if (type_ == Type::WITH_TEXTURE)
+	{
+#if !defined(WITH_OPENGLES) && !defined(__EMSCRIPTEN__)
+		const bool wholeViewport = (rect.x == 0 && rect.y == 0 && rect.w == width_ && rect.h == height_);
+		if (wholeViewport)
+		{
+			GLTexture &glTexture = *textures_[0]->glTexture_;
+			const GLTexture::State textureState = GLTexture::state(glTexture.target());
+			glTexture.getTexImage(0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+			GLTexture::setState(glTexture.target(), textureState);
+			return true;
+		}
+#endif
+		const GLFramebufferObject::State fboState = GLFramebufferObject::state();
+		fbo_->bind(GL_READ_FRAMEBUFFER);
+		glReadPixels(rect.x, glY, rect.w, rect.h, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+		GLFramebufferObject::setState(fboState);
+		return true;
+	}
+	else if (type_ == Type::SCREEN)
+	{
+		// The screen is always presented fully opaque, so its alpha channel (which would otherwise
+		// reflect UI/blending leftovers, not real transparency) is skipped by reading as RGB8
+		const GLFramebufferObject::State fboState = GLFramebufferObject::state();
+#if defined(WITH_QT5) || defined(WITH_QT6)
+		// Qt renders into its own FBO rather than the default framebuffer (handle 0)
+		static_cast<QtGfxDevice &>(theApplication().gfxDevice()).bindDefaultReadFramebufferObject();
+#else
+		GLFramebufferObject::unbind(GL_READ_FRAMEBUFFER); // rebinds the default framebuffer
+#endif
+
+		// RGB8 rows are not always a multiple of the default 4-byte pack alignment
+		GLint previousPackAlignment = 4;
+		glGetIntegerv(GL_PACK_ALIGNMENT, &previousPackAlignment);
+		glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		glReadPixels(rect.x, glY, rect.w, rect.h, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+		glPixelStorei(GL_PACK_ALIGNMENT, previousPackAlignment);
+
+		GLFramebufferObject::setState(fboState);
+		return true;
+	}
+
+	return false;
+}
+
 Texture *Viewport::texture(unsigned int index)
 {
 	ASSERT(index < MaxNumTextures);
