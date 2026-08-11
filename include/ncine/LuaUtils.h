@@ -190,8 +190,8 @@ namespace LuaUtils {
 	template <> DLL_PUBLIC bool tryRetrieveField<uint64_t>(lua_State *L, int index, const char *name, uint64_t &value);
 	template <> DLL_PUBLIC bool tryRetrieveField<int32_t>(lua_State *L, int index, const char *name, int32_t &value);
 	template <> DLL_PUBLIC bool tryRetrieveField<uint32_t>(lua_State *L, int index, const char *name, uint32_t &value);
-	DLL_PUBLIC bool tryRetrieveField(lua_State *L, int index, const char *name, const char *value);
-	DLL_PUBLIC bool tryRetrieveField(lua_State *L, int index, const char *name, const char *value, size_t *length);
+	DLL_PUBLIC bool tryRetrieveField(lua_State *L, int index, const char *name, const char *&value);
+	DLL_PUBLIC bool tryRetrieveField(lua_State *L, int index, const char *name, const char *&value, size_t *length);
 	template <> DLL_PUBLIC bool tryRetrieveField<bool>(lua_State *L, int index, const char *name, bool &value);
 	DLL_PUBLIC bool tryRetrieveFieldTable(lua_State *L, int index, const char *name);
 	DLL_PUBLIC bool tryRetrieveFieldFunction(lua_State *L, int index, const char *name);
@@ -251,8 +251,8 @@ namespace LuaUtils {
 	template <> DLL_PUBLIC bool tryRetrieveGlobal<uint64_t>(lua_State *L, const char *name, uint64_t &value);
 	template <> DLL_PUBLIC bool tryRetrieveGlobal<int32_t>(lua_State *L, const char *name, int32_t &value);
 	template <> DLL_PUBLIC bool tryRetrieveGlobal<uint32_t>(lua_State *L, const char *name, uint32_t &value);
-	DLL_PUBLIC bool tryRetrieveGlobal(lua_State *L, const char *name, const char *value);
-	DLL_PUBLIC bool tryRetrieveGlobal(lua_State *L, const char *name, const char *value, size_t *length);
+	DLL_PUBLIC bool tryRetrieveGlobal(lua_State *L, const char *name, const char *&value);
+	DLL_PUBLIC bool tryRetrieveGlobal(lua_State *L, const char *name, const char *&value, size_t *length);
 	template <> DLL_PUBLIC bool tryRetrieveGlobal<bool>(lua_State *L, const char *name, bool &value);
 	DLL_PUBLIC bool tryRetrieveGlobalTable(lua_State *L, const char *name);
 	DLL_PUBLIC bool tryRetrieveGlobalFunction(lua_State *L, const char *name);

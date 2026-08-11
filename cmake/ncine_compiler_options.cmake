@@ -168,7 +168,7 @@ else() # GCC and LLVM
 		endif()
 		if(NCINE_WITH_TRACY)
 			if(MINGW OR MSYS)
-				target_link_libraries(ncine PRIVATE ws2_32 dbghelp)
+				target_link_libraries(ncine PRIVATE ws2_32 dbghelp secur32)
 			elseif(NOT ANDROID AND NOT APPLE)
 				target_link_libraries(ncine PRIVATE dl)
 			endif()

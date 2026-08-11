@@ -295,6 +295,12 @@ void operator delete(void *ptr) noexcept
 		nctl::theDefaultAllocator().deallocate(ptr);
 }
 
+void operator delete(void *ptr, size_t size) noexcept
+{
+	if (ptr != nullptr)
+		nctl::theDefaultAllocator().deallocate(ptr);
+}
+
 void *operator new[](size_t count)
 {
 	if (count == 0)
@@ -304,6 +310,12 @@ void *operator new[](size_t count)
 }
 
 void operator delete[](void *ptr) noexcept
+{
+	if (ptr != nullptr)
+		nctl::theDefaultAllocator().deallocate(ptr);
+}
+
+void operator delete[](void *ptr, size_t size) noexcept
 {
 	if (ptr != nullptr)
 		nctl::theDefaultAllocator().deallocate(ptr);

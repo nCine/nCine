@@ -525,7 +525,7 @@ void LuaUtils::retrieveFieldTable(lua_State *L, int index, const char *name)
 void LuaUtils::retrieveFieldFunction(lua_State *L, int index, const char *name)
 {
 	lua_getfield(L, index, name);
-	LuaDebug::assert(L, lua_istable(L, -1), "Cannot retrieve a function in table field \"%s\"", name);
+	LuaDebug::assert(L, lua_isfunction(L, -1), "Cannot retrieve a function in table field \"%s\"", name);
 }
 
 void *LuaUtils::retrieveFieldLightUserData(lua_State *L, int index, const char *name)
@@ -555,13 +555,11 @@ namespace {
 			return false;
 
 		lua_getfield(L, index, name);
-		if (lua_isnumber(L, -1))
-		{
+		const bool retrieved = lua_isnumber(L, -1);
+		if (retrieved)
 			value = lua_tonumber(L, -1);
-			lua_pop(L, 1);
-			return true;
-		}
-		return false;
+		lua_pop(L, 1);
+		return retrieved;
 	}
 
 	template <>
@@ -571,13 +569,11 @@ namespace {
 			return false;
 
 		lua_getfield(L, index, name);
-		if (lua_isinteger(L, -1))
-		{
+		const bool retrieved = lua_isinteger(L, -1);
+		if (retrieved)
 			value = lua_tointeger(L, -1);
-			lua_pop(L, 1);
-			return true;
-		}
-		return false;
+		lua_pop(L, 1);
+		return retrieved;
 	}
 
 }
@@ -587,7 +583,7 @@ bool LuaUtils::tryRetrieveField<double>(lua_State *L, int index, const char *nam
 {
 	lua_Number number;
 
-	bool retrieved = tryGetField<lua_Number>(L, index, name, number);
+	const bool retrieved = tryGetField<lua_Number>(L, index, name, number);
 	if (retrieved)
 		value = static_cast<double>(number);
 
@@ -599,7 +595,7 @@ bool LuaUtils::tryRetrieveField<float>(lua_State *L, int index, const char *name
 {
 	lua_Number number;
 
-	bool retrieved = tryGetField<lua_Number>(L, index, name, number);
+	const bool retrieved = tryGetField<lua_Number>(L, index, name, number);
 	if (retrieved)
 		value = static_cast<float>(number);
 
@@ -611,7 +607,7 @@ bool LuaUtils::tryRetrieveField<int64_t>(lua_State *L, int index, const char *na
 {
 	lua_Integer integer;
 
-	bool retrieved = tryGetField<lua_Integer>(L, index, name, integer);
+	const bool retrieved = tryGetField<lua_Integer>(L, index, name, integer);
 	if (retrieved)
 		value = static_cast<int64_t>(integer);
 
@@ -623,7 +619,7 @@ bool LuaUtils::tryRetrieveField<uint64_t>(lua_State *L, int index, const char *n
 {
 	lua_Integer integer;
 
-	bool retrieved = tryGetField<lua_Integer>(L, index, name, integer);
+	const bool retrieved = tryGetField<lua_Integer>(L, index, name, integer);
 	if (retrieved)
 	{
 		LuaDebug::assert(L, integer >= 0, "Integer number cannot be negative");
@@ -638,7 +634,7 @@ bool LuaUtils::tryRetrieveField<int32_t>(lua_State *L, int index, const char *na
 {
 	lua_Integer integer;
 
-	bool retrieved = tryGetField<lua_Integer>(L, index, name, integer);
+	const bool retrieved = tryGetField<lua_Integer>(L, index, name, integer);
 	if (retrieved)
 		value = static_cast<int32_t>(integer);
 
@@ -650,7 +646,7 @@ bool LuaUtils::tryRetrieveField<uint32_t>(lua_State *L, int index, const char *n
 {
 	lua_Integer integer;
 
-	bool retrieved = tryGetField<lua_Integer>(L, index, name, integer);
+	const bool retrieved = tryGetField<lua_Integer>(L, index, name, integer);
 	if (retrieved)
 	{
 		LuaDebug::assert(L, integer >= 0, "Integer number cannot be negative");
@@ -660,26 +656,22 @@ bool LuaUtils::tryRetrieveField<uint32_t>(lua_State *L, int index, const char *n
 	return retrieved;
 }
 
-bool LuaUtils::tryRetrieveField(lua_State *L, int index, const char *name, const char *value)
+bool LuaUtils::tryRetrieveField(lua_State *L, int index, const char *name, const char *&value)
 {
 	return tryRetrieveField(L, index, name, value, nullptr);
 }
 
-bool LuaUtils::tryRetrieveField(lua_State *L, int index, const char *name, const char *value, size_t *length)
+bool LuaUtils::tryRetrieveField(lua_State *L, int index, const char *name, const char *&value, size_t *length)
 {
-	ASSERT(value);
-
 	if (lua_istable(L, index) == false)
 		return false;
 
 	lua_getfield(L, index, name);
-	if (lua_isstring(L, -1))
-	{
+	const bool retrieved = lua_isstring(L, -1);
+	if (retrieved)
 		value = lua_tolstring(L, -1, length);
-		lua_pop(L, 1);
-		return true;
-	}
-	return false;
+	lua_pop(L, 1);
+	return retrieved;
 }
 
 template <>
@@ -689,13 +681,11 @@ bool LuaUtils::tryRetrieveField<bool>(lua_State *L, int index, const char *name,
 		return false;
 
 	lua_getfield(L, index, name);
-	if (lua_isboolean(L, -1))
-	{
+	const bool retrieved = lua_isboolean(L, -1);
+	if (retrieved)
 		value = lua_toboolean(L, -1);
-		lua_pop(L, 1);
-		return true;
-	}
-	return false;
+	lua_pop(L, 1);
+	return retrieved;
 }
 
 bool LuaUtils::tryRetrieveFieldTable(lua_State *L, int index, const char *name)
@@ -706,6 +696,7 @@ bool LuaUtils::tryRetrieveFieldTable(lua_State *L, int index, const char *name)
 	lua_getfield(L, index, name);
 	if (lua_istable(L, -1))
 		return true;
+	lua_pop(L, 1);
 	return false;
 }
 
@@ -717,6 +708,7 @@ bool LuaUtils::tryRetrieveFieldFunction(lua_State *L, int index, const char *nam
 	lua_getfield(L, index, name);
 	if (lua_isfunction(L, -1))
 		return true;
+	lua_pop(L, 1);
 	return false;
 }
 
@@ -728,6 +720,7 @@ bool LuaUtils::tryRetrieveFieldLightUserData(lua_State *L, int index, const char
 	lua_getfield(L, index, name);
 	if (lua_islightuserdata(L, -1))
 		return true;
+	lua_pop(L, 1);
 	return false;
 }
 
@@ -897,26 +890,22 @@ namespace {
 	bool tryGetGlobal<lua_Number>(lua_State *L, const char *name, lua_Number &value)
 	{
 		lua_getglobal(L, name);
-		if (lua_isnumber(L, -1))
-		{
+		const bool retrieved = lua_isnumber(L, -1);
+		if (retrieved)
 			value = lua_tonumber(L, -1);
-			lua_pop(L, 1);
-			return true;
-		}
-		return false;
+		lua_pop(L, 1);
+		return retrieved;
 	}
 
 	template <>
 	bool tryGetGlobal<lua_Integer>(lua_State *L, const char *name, lua_Integer &value)
 	{
 		lua_getglobal(L, name);
-		if (lua_isinteger(L, -1))
-		{
+		const bool retrieved = lua_isinteger(L, -1);
+		if (retrieved)
 			value = lua_tointeger(L, -1);
-			lua_pop(L, 1);
-			return true;
-		}
-		return false;
+		lua_pop(L, 1);
+		return retrieved;
 	}
 
 }
@@ -926,7 +915,7 @@ bool LuaUtils::tryRetrieveGlobal<double>(lua_State *L, const char *name, double 
 {
 	lua_Number number;
 
-	bool retrieved = tryGetGlobal<lua_Number>(L, name, number);
+	const bool retrieved = tryGetGlobal<lua_Number>(L, name, number);
 	if (retrieved)
 		value = static_cast<double>(number);
 
@@ -938,7 +927,7 @@ bool LuaUtils::tryRetrieveGlobal<float>(lua_State *L, const char *name, float &v
 {
 	lua_Number number;
 
-	bool retrieved = tryGetGlobal<lua_Number>(L, name, number);
+	const bool retrieved = tryGetGlobal<lua_Number>(L, name, number);
 	if (retrieved)
 		value = static_cast<float>(number);
 
@@ -950,7 +939,7 @@ bool LuaUtils::tryRetrieveGlobal<int64_t>(lua_State *L, const char *name, int64_
 {
 	lua_Integer integer;
 
-	bool retrieved = tryGetGlobal<lua_Integer>(L, name, integer);
+	const bool retrieved = tryGetGlobal<lua_Integer>(L, name, integer);
 	if (retrieved)
 		value = static_cast<int64_t>(integer);
 
@@ -962,7 +951,7 @@ bool LuaUtils::tryRetrieveGlobal<uint64_t>(lua_State *L, const char *name, uint6
 {
 	lua_Integer integer;
 
-	bool retrieved = tryGetGlobal<lua_Integer>(L, name, integer);
+	const bool retrieved = tryGetGlobal<lua_Integer>(L, name, integer);
 	if (retrieved)
 	{
 		LuaDebug::assert(L, integer >= 0, "Integer number cannot be negative");
@@ -977,7 +966,7 @@ bool LuaUtils::tryRetrieveGlobal<int32_t>(lua_State *L, const char *name, int32_
 {
 	lua_Integer integer;
 
-	bool retrieved = tryGetGlobal<lua_Integer>(L, name, integer);
+	const bool retrieved = tryGetGlobal<lua_Integer>(L, name, integer);
 	if (retrieved)
 		value = static_cast<int32_t>(integer);
 
@@ -989,7 +978,7 @@ bool LuaUtils::tryRetrieveGlobal<uint32_t>(lua_State *L, const char *name, uint3
 {
 	lua_Integer integer;
 
-	bool retrieved = tryGetGlobal<lua_Integer>(L, name, integer);
+	const bool retrieved = tryGetGlobal<lua_Integer>(L, name, integer);
 	if (retrieved)
 	{
 		LuaDebug::assert(L, integer >= 0, "Integer number cannot be negative");
@@ -999,36 +988,30 @@ bool LuaUtils::tryRetrieveGlobal<uint32_t>(lua_State *L, const char *name, uint3
 	return retrieved;
 }
 
-bool LuaUtils::tryRetrieveGlobal(lua_State *L, const char *name, const char *value)
+bool LuaUtils::tryRetrieveGlobal(lua_State *L, const char *name, const char *&value)
 {
 	return tryRetrieveGlobal(L, name, value, nullptr);
 }
 
-bool LuaUtils::tryRetrieveGlobal(lua_State *L, const char *name, const char *value, size_t *length)
+bool LuaUtils::tryRetrieveGlobal(lua_State *L, const char *name, const char *&value, size_t *length)
 {
-	ASSERT(value);
-
 	lua_getglobal(L, name);
-	if (lua_isstring(L, -1))
-	{
+	const bool retrieved = lua_isstring(L, -1);
+	if (retrieved)
 		value = lua_tolstring(L, -1, length);
-		lua_pop(L, 1);
-		return true;
-	}
-	return false;
+	lua_pop(L, 1);
+	return retrieved;
 }
 
 template <>
 bool LuaUtils::tryRetrieveGlobal<bool>(lua_State *L, const char *name, bool &value)
 {
 	lua_getglobal(L, name);
-	if (lua_isboolean(L, -1))
-	{
+	const bool retrieved = lua_isboolean(L, -1);
+	if (retrieved)
 		value = lua_toboolean(L, -1);
-		lua_pop(L, 1);
-		return true;
-	}
-	return false;
+	lua_pop(L, 1);
+	return retrieved;
 }
 
 bool LuaUtils::tryRetrieveGlobalTable(lua_State *L, const char *name)
@@ -1036,6 +1019,7 @@ bool LuaUtils::tryRetrieveGlobalTable(lua_State *L, const char *name)
 	lua_getglobal(L, name);
 	if (lua_istable(L, -1))
 		return true;
+	lua_pop(L, 1);
 	return false;
 }
 
@@ -1044,6 +1028,7 @@ bool LuaUtils::tryRetrieveGlobalFunction(lua_State *L, const char *name)
 	lua_getglobal(L, name);
 	if (lua_isfunction(L, -1))
 		return true;
+	lua_pop(L, 1);
 	return false;
 }
 
@@ -1052,6 +1037,7 @@ bool LuaUtils::tryRetrieveGlobalLightUserData(lua_State *L, const char *name)
 	lua_getglobal(L, name);
 	if (lua_islightuserdata(L, -1))
 		return true;
+	lua_pop(L, 1);
 	return false;
 }
 

@@ -26,7 +26,7 @@
 	#define ZoneName(x, y)
 	#define ZoneNameV(x, y, z)
 	#define ZoneNameF(x, ...)
-	#define ZoneNameVF(x, y ,...)
+	#define ZoneNameVF(x, y, ...)
 	#define ZoneColor(x)
 	#define ZoneColorV(x, y)
 	#define ZoneValue(x)
@@ -62,14 +62,9 @@
 	#define TracyAlloc(x, y)
 	#define TracyFree(x)
 	#define TracyMemoryDiscard(x)
-	#define TracySecureAlloc(x, y)
-	#define TracySecureFree(x)
-	#define TracySecureMemoryDiscard(x)
 
 	#define TracyAllocN(x, y, z)
 	#define TracyFreeN(x, y)
-	#define TracySecureAllocN(x, y, z)
-	#define TracySecureFreeN(x, y)
 
 	#define ZoneNamedS(x, y, z)
 	#define ZoneNamedNS(x, y, z, w)
@@ -87,14 +82,9 @@
 	#define TracyAllocS(x, y, z)
 	#define TracyFreeS(x, y)
 	#define TracyMemoryDiscardS(x, y)
-	#define TracySecureAllocS(x, y, z)
-	#define TracySecureFreeS(x, y)
-	#define TracySecureMemoryDiscardS(x, y)
 
 	#define TracyAllocNS(x, y, z, w)
 	#define TracyFreeNS(x, y, z)
-	#define TracySecureAllocNS(x, y, z, w)
-	#define TracySecureFreeNS(x, y, z)
 
 	#define TracyMessageS(x, y, z)
 	#define TracyMessageLS(x, y)
@@ -108,6 +98,11 @@
 	#define TracyIsStarted false
 	#define TracySetProgramName(x)
 
+	#define TracySectionEnter(x, ...) 0
+	#define TracySectionEnterCategory(x, y, ...) 0
+	#define TracySectionLeave(x)
+	#define TracySectionSetup(x, y, ...)
+
 	#define TracyFiberEnter(x)
 	#define TracyFiberEnterHint(x, y)
 	#define TracyFiberLeave
@@ -115,27 +110,27 @@
 	// From TracyC.h
 	typedef const void *TracyCZoneCtx;
 
+	typedef const void *TracyCLockCtx;
+	typedef const void *TracyCSharedLockCtx;
+
 	#define TracyCZone(c, x)
 	#define TracyCZoneN(c, x, y)
 	#define TracyCZoneC(c, x, y)
 	#define TracyCZoneNC(c, x, y, z)
 	#define TracyCZoneEnd(c)
 	#define TracyCZoneText(c, x, y)
+	#define TracyCZoneTextF(c, x, ...)
 	#define TracyCZoneName(c, x, y)
+	#define TracyCZoneNameF(c, x, ...)
 	#define TracyCZoneColor(c, x)
 	#define TracyCZoneValue(c, x)
 
 	#define TracyCAlloc(x, y)
 	#define TracyCFree(x)
 	#define TracyCMemoryDiscard(x)
-	#define TracyCSecureAlloc(x, y)
-	#define TracyCSecureFree(x)
-	#define TracyCSecureMemoryDiscard(x)
 
 	#define TracyCAllocN(x, y, z)
 	#define TracyCFreeN(x, y)
-	#define TracyCSecureAllocN(x, y, z)
-	#define TracyCSecureFreeN(x, y)
 
 	#define TracyCFrameMark
 	#define TracyCFrameMarkNamed(x)
@@ -162,14 +157,9 @@
 	#define TracyCAllocS(x, y, z)
 	#define TracyCFreeS(x, y)
 	#define TracyCMemoryDiscardS(x, y)
-	#define TracyCSecureAllocS(x, y, z)
-	#define TracyCSecureFreeS(x, y)
-	#define TracyCSecureMemoryDiscardS(x, y)
 
 	#define TracyCAllocNS(x, y, z, w)
 	#define TracyCFreeNS(x, y, z)
-	#define TracyCSecureAllocNS(x, y, z, w)
-	#define TracyCSecureFreeNS(x, y, z)
 
 	#define TracyCMessageS(x, y, z)
 	#define TracyCMessageLS(x, y)
@@ -186,8 +176,25 @@
 	#define TracyCLockMark(l)
 	#define TracyCLockCustomName(l, x, y)
 
+	#define TracyCSharedLockCtx(l)
+	#define TracyCSharedLockAnnonce(l)
+	#define TracyCSharedLockTerminate(l)
+	#define TracyCSharedLockBeforeLock(l)
+	#define TracyCSharedLockAfterLock(l)
+	#define TracyCSharedLockAfterUnlock(l)
+	#define TracyCSharedLockAfterTryLock(l, x)
+	#define TracyCSharedLockBeforeSharedLock(l)
+	#define TracyCSharedLockAfterSharedLock(l)
+	#define TracyCSharedLockAfterSharedUnlock(l)
+	#define TracyCSharedLockAfterTrySharedLock(l, x)
+	#define TracyCSharedLockMark(l)
+	#define TracyCSharedLockCustomName(l, x, y)
+
 	#define TracyCIsConnected 0
 	#define TracyCIsStarted 0
+
+	#define TracyCBeginSamplingProfiling() 0
+	#define TracyCEndSamplingProfiling()
 
 	#ifdef TRACY_FIBERS
 		#define TracyCFiberEnter(fiber)

@@ -5,29 +5,43 @@
 #endif
 
 #ifndef OVERRIDE_NEW
+constexpr int CallstackDepth = 5;
+
 void *operator new(std::size_t count)
 {
 	auto ptr = malloc(count);
-	TracyAllocS(ptr, count, 5);
+	TracyAllocS(ptr, count, CallstackDepth);
 	return ptr;
 }
 
 void operator delete(void *ptr) noexcept
 {
-	TracyFreeS(ptr, 5);
+	TracyFreeS(ptr, CallstackDepth);
+	free(ptr);
+}
+
+void operator delete(void *ptr, std::size_t size) noexcept
+{
+	TracyFreeS(ptr, CallstackDepth);
 	free(ptr);
 }
 
 void *operator new[](std::size_t count)
 {
 	auto ptr = malloc(count);
-	TracyAllocS(ptr, count, 5);
+	TracyAllocS(ptr, count, CallstackDepth);
 	return ptr;
 }
 
 void operator delete[](void *ptr) noexcept
 {
-	TracyFreeS(ptr, 5);
+	TracyFreeS(ptr, CallstackDepth);
+	free(ptr);
+}
+
+void operator delete[](void *ptr, std::size_t size) noexcept
+{
+	TracyFreeS(ptr, CallstackDepth);
 	free(ptr);
 }
 #endif

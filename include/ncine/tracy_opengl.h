@@ -29,7 +29,7 @@ class GpuCtxScope
 {
   public:
 	GpuCtxScope(const SourceLocationData *, bool) {}
-	GpuCtxScope(const SourceLocationData *, int, bool) {}
+	GpuCtxScope(const SourceLocationData *, int32_t, bool) {}
 };
 
 }
