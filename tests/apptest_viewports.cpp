@@ -13,6 +13,11 @@
 #include <ncine/IImageSaver.h>
 #include "apptest_datapath.h"
 
+#ifdef __EMSCRIPTEN__
+	#include <ncine/IFile.h>
+	#include <nctl/UniquePtr.h>
+#endif
+
 namespace {
 
 #ifdef __ANDROID__
@@ -688,6 +693,24 @@ void MyEventHandler::onFrameEnd()
 		const bool hasSaved = nc::IImageSaver::save(props, pendingSaveFilename_.data());
 		if (hasSaved == false)
 			LOGW_X("Cannot save viewport to \"%s\"", pendingSaveFilename_.data());
+#ifdef __EMSCRIPTEN__
+		else
+		{
+			// After writing the encoded image to Emscripten's in-memory MEMFS, read it back in an
+			// `EmscriptenLocalFile` so that the browser can offer it to the user as a download.
+			nctl::UniquePtr<nc::IFile> file = nc::IFile::createFileHandle(pendingSaveFilename_.data());
+			file->open(nc::IFile::OpenMode::READ | nc::IFile::OpenMode::BINARY);
+			if (file->isOpened())
+			{
+				nctl::UniquePtr<unsigned char[]> fileBuffer = nctl::makeUnique<unsigned char[]>(file->size());
+				file->read(fileBuffer.get(), file->size());
+				emscriptenLocalFile_.write(fileBuffer.get(), file->size());
+				emscriptenLocalFile_.save(pendingSaveFilename_.data());
+			}
+			else
+				LOGW_X("Cannot reopen \"%s\" to trigger the browser download", pendingSaveFilename_.data());
+		}
+#endif
 	}
 
 	pendingSaveViewport_ = nullptr;

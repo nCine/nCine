@@ -142,6 +142,9 @@ void ImGuiDrawing::newFrame()
 			imguiShaderUniforms_->uniform(UniformNames::GuiProjectionMatrix)->setFloatVector(projectionMatrix_.data());
 			imguiShaderUniforms_->uniform(UniformNames::Depth)->setFloatValue(0.0f);
 			imguiShaderUniforms_->commitUniforms();
+
+			lastFrameWidth_ = static_cast<int>(io.DisplaySize.x);
+			lastFrameHeight_ = static_cast<int>(io.DisplaySize.y);
 		}
 	}
 
@@ -447,10 +450,6 @@ void ImGuiDrawing::draw()
 
 	for (const ImDrawList *imDrawList : drawData->CmdLists)
 	{
-#if (defined(WITH_OPENGLES) && !GL_ES_VERSION_3_2) || defined(__EMSCRIPTEN__)
-		const ImDrawIdx *firstIndex = nullptr;
-#endif
-
 		// Always define vertex format (and bind VAO) before uploading data to buffers
 		imguiShaderProgram_->defineVertexFormat(vbo_.get(), ibo_.get());
 		vbo_->bufferData(static_cast<GLsizeiptr>(imDrawList->VtxBuffer.Size) * sizeof(ImDrawVert), static_cast<const GLvoid *>(imDrawList->VtxBuffer.Data), GL_STREAM_DRAW);
@@ -474,8 +473,8 @@ void ImGuiDrawing::draw()
 			// Bind texture, Draw
 			GLTexture::bindHandle(GL_TEXTURE_2D, reinterpret_cast<GLTexture *>(imCmd->GetTexID())->glHandle());
 #if (defined(WITH_OPENGLES) && !GL_ES_VERSION_3_2) || defined(__EMSCRIPTEN__)
-			glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(imCmd->ElemCount), sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, firstIndex);
-			firstIndex += imCmd->ElemCount;
+			glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(imCmd->ElemCount), sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
+			               reinterpret_cast<void *>(static_cast<intptr_t>(imCmd->IdxOffset * sizeof(ImDrawIdx))));
 #else
 			glDrawElementsBaseVertex(GL_TRIANGLES, static_cast<GLsizei>(imCmd->ElemCount), sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
 			                         reinterpret_cast<void *>(static_cast<intptr_t>(imCmd->IdxOffset * sizeof(ImDrawIdx))), static_cast<GLint>(imCmd->VtxOffset));

@@ -47,7 +47,8 @@ class ImGuiDrawing
 	nctl::UniquePtr<GLBufferObject> vbo_;
 	nctl::UniquePtr<GLBufferObject> ibo_;
 
-	static const int UniformsBufferSize = 65;
+	/// Space for `uGuiProjection` (mat4, 64 bytes) + `uDepth` (float, 4 bytes) + `uTexture` (sampler, 4 bytes)
+	static const int UniformsBufferSize = 72;
 	unsigned char uniformsBuffer_[UniformsBufferSize];
 	nctl::UniquePtr<GLShaderUniforms> imguiShaderUniforms_;
 

@@ -11,6 +11,9 @@
 
 #ifdef __EMSCRIPTEN__
 	#include <emscripten/html5.h>
+	#ifdef EMSCRIPTEN_USE_PORT_CONTRIB_GLFW3
+		#include <GLFW/emscripten_glfw3.h>
+	#endif
 #endif
 
 #define GLFW_VERSION_COMBINED (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 + GLFW_VERSION_REVISION)
@@ -80,6 +83,7 @@ void GlfwGfxDevice::setFullscreen(bool fullscreen)
 	if (fsMonitorIndex_ < 0 || fsMonitorIndex_ > numMonitors_)
 		fsMonitorIndex_ = windowMonitorIndex();
 
+#ifndef __EMSCRIPTEN__
 	// The windows goes in fullscreen on the monitor it was on on the last call to `setVideoMode()`
 	GLFWmonitor *monitor = fullscreen ? monitorPointers_[fsMonitorIndex_] : nullptr;
 
@@ -96,13 +100,17 @@ void GlfwGfxDevice::setFullscreen(bool fullscreen)
 		refreshRate = mode.refreshRate;
 	}
 
-#ifndef __EMSCRIPTEN__
 	glfwSetWindowMonitor(windowHandle_, monitor, 0, 0, width, height, refreshRate);
 	#ifdef _WIN32
 	// The swap interval is reset after going fullscreen on Windows (https://github.com/glfw/glfw/issues/1072)
 	if (isFullscreen_)
 		glfwSwapInterval(swapInterval_);
 	#endif
+#elif defined(EMSCRIPTEN_USE_PORT_CONTRIB_GLFW3)
+	if (fullscreen)
+		emscripten_glfw_request_fullscreen(windowHandle_, EM_FALSE, EM_TRUE);
+	else
+		emscripten_exit_fullscreen();
 #else
 	EmscriptenFullscreenChangeEvent fsce;
 	emscripten_get_fullscreen_status(&fsce);
@@ -245,9 +253,19 @@ const IGfxDevice::VideoMode &GlfwGfxDevice::currentVideoMode(unsigned int monito
 	if (monitorIndex < numMonitors_)
 		monitor = monitorPointers_[monitorIndex];
 
+#ifndef __EMSCRIPTEN__
 	const GLFWvidmode *mode = glfwGetVideoMode(monitor);
 	if (mode != nullptr)
 		convertVideoModeInfo(*mode, currentVideoMode_);
+#else
+	// `glfwGetVideoMode()` is not implemented on Emscripten (always returns `nullptr`),
+	// so the live canvas CSS size is sampled directly instead.
+	double cssWidth = 0.0;
+	double cssHeight = 0.0;
+	emscripten_get_element_css_size("#canvas", &cssWidth, &cssHeight);
+	currentVideoMode_.width = static_cast<unsigned int>(cssWidth);
+	currentVideoMode_.height = static_cast<unsigned int>(cssHeight);
+#endif
 
 	return currentVideoMode_;
 }

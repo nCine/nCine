@@ -395,6 +395,11 @@ void main()
 char const * const multitexture_fs = R"(
 #ifdef GL_ES
 precision mediump float;
+// The light direction needs a high precision on Emscripten in order not to overflow.
+// The same precision has been extended to distance and attenuation for safety.
+#define HIGHP highp
+#else
+#define HIGHP
 #endif
 
 uniform sampler2D uTexture0;
@@ -440,10 +445,10 @@ void main()
 #else
 	vec3 viewDir = normalize(-vFragPos);
 #endif
-	vec3 lightDir = lightPos.xyz - vec3(vFragPos.xy, 0.0);
-	float distance = length(lightDir);
+	HIGHP vec3 lightDir = lightPos.xyz - vec3(vFragPos.xy, 0.0);
+	HIGHP float distance = length(lightDir);
 	lightDir = normalize(lightDir);
-	float attenuation = 1.0 / (attFactors.x + attFactors.y * distance + attFactors.z * distance * distance);
+	HIGHP float attenuation = 1.0 / (attFactors.x + attFactors.y * distance + attFactors.z * distance * distance);
 
 	vec3 reflectDir = reflect(-lightDir, normal);
 #ifdef __ANDROID__

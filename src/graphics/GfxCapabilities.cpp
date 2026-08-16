@@ -102,7 +102,7 @@ void GfxCapabilities::init()
 	glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &glIntValues_[GLIntValues::MAX_VERTEX_UNIFORM_BLOCKS]);
 	glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &glIntValues_[GLIntValues::MAX_FRAGMENT_UNIFORM_BLOCKS]);
 	glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &glIntValues_[GLIntValues::UNIFORM_BUFFER_OFFSET_ALIGNMENT]);
-#if !defined(EMSCRIPTEN) && (!defined(WITH_OPENGLES) || (defined(WITH_OPENGLES) && GL_ES_VERSION_3_1))
+#if !defined(__EMSCRIPTEN__) && (!defined(WITH_OPENGLES) || (defined(WITH_OPENGLES) && GL_ES_VERSION_3_1))
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIB_STRIDE, &glIntValues_[GLIntValues::MAX_VERTEX_ATTRIB_STRIDE]);
 #endif
 	glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &glIntValues_[GLIntValues::MAX_COLOR_ATTACHMENTS]);
@@ -132,7 +132,9 @@ void GfxCapabilities::init()
 	checkGLExtensions(extensionNames, glExtensions_, GLExtensions::COUNT);
 
 	ASSERT(glIntValues_[GLIntValues::NUM_PROGRAM_BINARY_FORMATS] <= MaxProgramBinaryFormats);
+#ifndef __EMSCRIPTEN__
 	glGetIntegerv(GL_PROGRAM_BINARY_FORMATS, programBinaryFormats_);
+#endif
 
 	logGLInfo();
 	logGLExtensions();

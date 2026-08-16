@@ -31,6 +31,20 @@ if(NCINE_WITH_IMGUI)
 		${NCINE_ROOT}/src/input/ImGuiJoyMappedInput.cpp
 	)
 
+	# Dear ImGui relies on strict IEEE-754 float behavior for its table/layout code
+	# so it gets compiled with standard float semantics regardless of config.
+	# This fixes a bug in apptest_bunnymark on Emscripten in release, where widget disappeared after few frames.
+	if(NOT MSVC)
+		set_source_files_properties(
+			${IMGUI_SOURCE_DIR}/imgui.cpp
+			${IMGUI_SOURCE_DIR}/imgui_demo.cpp
+			${IMGUI_SOURCE_DIR}/imgui_draw.cpp
+			${IMGUI_SOURCE_DIR}/imgui_tables.cpp
+			${IMGUI_SOURCE_DIR}/imgui_widgets.cpp
+			PROPERTIES COMPILE_OPTIONS "-fno-fast-math"
+		)
+	endif()
+
 	if(GLFW_FOUND AND NCINE_PREFERRED_BACKEND STREQUAL "GLFW")
 		list(APPEND PRIVATE_HEADERS ${NCINE_ROOT}/src/include/ImGuiGlfwInput.h)
 		list(APPEND SOURCES ${NCINE_ROOT}/src/input/ImGuiGlfwInput.cpp)

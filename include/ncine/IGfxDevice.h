@@ -228,6 +228,11 @@ class DLL_PUBLIC IGfxDevice
 	/// Used as a cache to avoid searching the current video mode in a monitor's array
 	mutable VideoMode currentVideoMode_;
 
+#ifdef __EMSCRIPTEN__
+	/// Number of remaining frames for the per-frame refresh of monitor structures
+	int monitorsRefreshCountdown_;
+#endif
+
 	/// A flag indicating if the backend is responsible for scaling the window size
 	/*! \note Uses `SDL_HINT_WINDOWS_DPI_SCALING` on SDL >= 2.24.0 and `GLFW_SCALE_TO_MONITOR` on GLFW */
 	bool backendScalesWindowSize_;
@@ -261,6 +266,11 @@ class DLL_PUBLIC IGfxDevice
 
 	/// Updates the array of connected monitors
 	inline virtual void updateMonitors() {}
+
+#ifdef __EMSCRIPTEN__
+	/// Updates the monitor structures and setup the per-frame refresh
+	void scheduleMonitorsRefresh();
+#endif
 
   private:
 	/// Sets up the initial OpenGL state for the scenegraph

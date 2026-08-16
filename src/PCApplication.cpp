@@ -26,6 +26,7 @@
 
 #ifdef __EMSCRIPTEN__
 	#include "emscripten.h"
+	#include <emscripten/html5.h>
 #endif
 
 #ifdef WITH_CRASHPAD
@@ -56,6 +57,7 @@ int PCApplication::start(nctl::UniquePtr<IAppEventHandler> (*createAppEventHandl
 	while (app.shouldQuit_ == false)
 		app.run();
 #else
+	emscripten_set_beforeunload_callback(nullptr, PCApplication::emscriptenBeforeUnload);
 	emscripten_set_main_loop(PCApplication::emscriptenStep, 0, 1);
 	emscripten_set_main_loop_timing(EM_TIMING_RAF, 1);
 #endif
@@ -214,6 +216,9 @@ void PCApplication::processEvents()
 					gfxDevice_->width_ = newWidth;
 					gfxDevice_->height_ = newHeight;
 					gfxDevice_->isFullscreen_ = SDL_GetWindowFlags(windowHandle) & SDL_WINDOW_FULLSCREEN;
+#ifdef __EMSCRIPTEN__
+					gfxDevice_->scheduleMonitorsRefresh();
+#endif
 					resizeScreenViewport(newWidth, newHeight);
 				}
 				else if (event.window.event == SDL_WINDOWEVENT_RESIZED)
@@ -266,6 +271,9 @@ void PCApplication::processEvents()
 				gfxDevice_->width_ = newWidth;
 				gfxDevice_->height_ = newHeight;
 				gfxDevice_->isFullscreen_ = SDL_GetWindowFlags(windowHandle) & SDL_WINDOW_FULLSCREEN;
+#ifdef __EMSCRIPTEN__
+				gfxDevice_->scheduleMonitorsRefresh();
+#endif
 				resizeScreenViewport(newWidth, newHeight);
 			}
 				break;
@@ -275,6 +283,9 @@ void PCApplication::processEvents()
 					// Check if the scale factor has changed and the callback needs to be invoked
 					updateScalingFactor();
 				}
+#ifdef __EMSCRIPTEN__
+				gfxDevice_->scheduleMonitorsRefresh();
+#endif
 				break;
 			default:
 				SdlInputManager::parseEvent(event);
@@ -310,7 +321,28 @@ void PCApplication::processEvents()
 #ifdef __EMSCRIPTEN__
 void PCApplication::emscriptenStep()
 {
-	reinterpret_cast<PCApplication &>(theApplication()).run();
+	PCApplication &app = static_cast<PCApplication &>(theApplication());
+	app.run();
+
+	// A quit request will stop the render/update loop
+	if (app.shouldQuit_)
+	{
+		emscripten_cancel_main_loop();
+		app.shutdownCommon();
+	}
+}
+
+const char *PCApplication::emscriptenBeforeUnload(int eventType, const void *reserved, void *userData)
+{
+	PCApplication &app = static_cast<PCApplication &>(theApplication());
+	if (app.appEventHandler_ != nullptr)
+	{
+		emscripten_cancel_main_loop();
+		app.shutdownCommon();
+	}
+
+	// Returning `nullptr` lets the page unload without showing a confirmation prompt
+	return nullptr;
 }
 #endif
 

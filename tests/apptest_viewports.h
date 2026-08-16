@@ -9,6 +9,10 @@
 #include <ncine/Colorf.h>
 #include <ncine/TimeStamp.h>
 
+#ifdef __EMSCRIPTEN__
+	#include <ncine/EmscriptenLocalFile.h>
+#endif
+
 namespace ncine {
 
 class AppConfiguration;
@@ -96,6 +100,10 @@ class MyEventHandler :
 	nc::Viewport *pendingSaveViewport_ = nullptr;
 	bool pendingSaveIsScreen_ = false;
 	nctl::String pendingSaveFilename_ = nctl::String(64);
+#ifdef __EMSCRIPTEN__
+	/// Used to save images as browser downloaded files
+	nc::EmscriptenLocalFile emscriptenLocalFile_;
+#endif
 
 	void resetCamera();
 };

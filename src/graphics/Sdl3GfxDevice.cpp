@@ -376,6 +376,20 @@ void SdlGfxDevice::updateMonitors()
 			convertVideoModeInfo(mode, monitors_[i].videoModes[j]);
 		}
 		SDL_free(displayModes);
+
+#ifdef __EMSCRIPTEN__
+		// The Emscripten SDL3 video driver does not implement fullscreen display mode enumeration, unlike the SDL2 one.
+		// A single mode reflecting the live canvas size is synthesized here instead of leaving `videoModes` empty.
+		if (monitors_[i].numVideoModes == 0)
+		{
+			const SDL_DisplayMode *currentMode = SDL_GetCurrentDisplayMode(displayID);
+			if (currentMode != nullptr)
+			{
+				monitors_[i].numVideoModes = 1;
+				convertVideoModeInfo(*currentMode, monitors_[i].videoModes[0]);
+			}
+		}
+#endif
 	}
 }
 

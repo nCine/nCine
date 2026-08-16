@@ -18,6 +18,10 @@
 	#include "QtGfxDevice.h"
 #endif
 
+#if defined(__EMSCRIPTEN__)
+	#include <nctl/UniquePtr.h>
+#endif
+
 namespace ncine {
 
 namespace {
@@ -308,12 +312,24 @@ bool Viewport::savePixels(unsigned char *pixels, const Recti &rect) const
 		GLFramebufferObject::unbind(GL_READ_FRAMEBUFFER); // rebinds the default framebuffer
 #endif
 
+#if defined(__EMSCRIPTEN__)
+		// Requesting GL_RGB when reading the default framebuyffer is rejected by WebGL (Emscripten)
+		nctl::UniquePtr<unsigned char[]> rgbaPixels = nctl::makeUnique<unsigned char[]>(rect.w * rect.h * 4);
+		glReadPixels(rect.x, glY, rect.w, rect.h, GL_RGBA, GL_UNSIGNED_BYTE, rgbaPixels.get());
+		for (int i = 0; i < rect.w * rect.h; i++)
+		{
+			pixels[i * 3 + 0] = rgbaPixels[i * 4 + 0];
+			pixels[i * 3 + 1] = rgbaPixels[i * 4 + 1];
+			pixels[i * 3 + 2] = rgbaPixels[i * 4 + 2];
+		}
+#else
 		// RGB8 rows are not always a multiple of the default 4-byte pack alignment
 		GLint previousPackAlignment = 4;
 		glGetIntegerv(GL_PACK_ALIGNMENT, &previousPackAlignment);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glReadPixels(rect.x, glY, rect.w, rect.h, GL_RGB, GL_UNSIGNED_BYTE, pixels);
 		glPixelStorei(GL_PACK_ALIGNMENT, previousPackAlignment);
+#endif
 
 		GLFramebufferObject::setState(fboState);
 		return true;

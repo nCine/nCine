@@ -29,6 +29,7 @@ class DLL_PUBLIC PCApplication : public Application
 	void processEvents();
 #ifdef __EMSCRIPTEN__
 	static void emscriptenStep();
+	static const char *emscriptenBeforeUnload(int eventType, const void *reserved, void *userData);
 #endif
 
 	/// Private constructor

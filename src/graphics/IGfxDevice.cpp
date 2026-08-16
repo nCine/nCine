@@ -50,6 +50,7 @@ EM_BOOL IGfxDevice::fullscreenchange_callback(int eventType, const EmscriptenFul
 {
 	IGfxDevice *gfxDevice = reinterpret_cast<IGfxDevice *>(userData);
 	gfxDevice->setFullscreen(event->isFullscreen);
+	gfxDevice->scheduleMonitorsRefresh();
 	return true;
 }
 
@@ -83,6 +84,9 @@ IGfxDevice::IGfxDevice(const WindowMode &windowMode, const GLContextInfo &glCont
       drawableWidth_(windowMode.width), drawableHeight_(windowMode.height),
       isFullscreen_(windowMode.isFullscreen), isResizable_(windowMode.isResizable),
       glContextInfo_(glContextInfo), displayMode_(displayMode), numMonitors_(0),
+#ifdef __EMSCRIPTEN__
+      monitorsRefreshCountdown_(0),
+#endif
       backendScalesWindowSize_(false), previousScalingFactor_(1.0f)
 {
 #ifdef __EMSCRIPTEN__
@@ -218,6 +222,15 @@ int IGfxDevice::containingMonitorIndex(int x, int y) const
 	return index;
 }
 
+#ifdef __EMSCRIPTEN__
+void IGfxDevice::scheduleMonitorsRefresh()
+{
+	// After a fullscreen/resize transition, the layout can keep settling its size for a few frames
+	updateMonitors();
+	monitorsRefreshCountdown_ = 30;
+}
+#endif
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -233,18 +246,26 @@ void IGfxDevice::update()
 {
 	swapBuffers();
 
+#ifdef __EMSCRIPTEN__
+	if (monitorsRefreshCountdown_ > 0)
+	{
+		updateMonitors();
+		monitorsRefreshCountdown_--;
+	}
+#else
 	// If the scenegraph is not enabled or not compiled,
 	// the screen needs to be cleared at some point.
-#if defined(WITH_SCENEGRAPH)
+	#if defined(WITH_SCENEGRAPH)
 	if (theApplication().appConfiguration().features.scenegraph == false)
-#endif
+	#endif
 	{
-#if defined(WITH_QT5) || defined(WITH_QT6)
+	#if defined(WITH_QT5) || defined(WITH_QT6)
 		GLClearColor::setColor(0.0f, 0.0f, 0.0f, 1.0f);
-#else
+	#else
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-#endif
+	#endif
 	}
+#endif
 }
 
 bool IGfxDevice::scaleWindowSize(bool windowScaling)

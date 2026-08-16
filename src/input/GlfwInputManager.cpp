@@ -10,6 +10,12 @@
 #include "Application.h"
 #include "JoyMapping.h"
 
+#ifdef __EMSCRIPTEN__
+	#ifdef EMSCRIPTEN_USE_PORT_CONTRIB_GLFW3
+		#include <GLFW/emscripten_glfw3.h>
+	#endif
+#endif
+
 #ifdef WITH_IMGUI
 	#include "ImGuiGlfwInput.h"
 #endif
@@ -489,7 +495,15 @@ void GlfwInputManager::windowSizeCallback(GLFWwindow *window, int width, int hei
 
 	gfxDevice.width_ = width;
 	gfxDevice.height_ = height;
+#ifdef EMSCRIPTEN_USE_PORT_CONTRIB_GLFW3
+	gfxDevice.isFullscreen_ = emscripten_glfw_is_window_fullscreen(window);
+#else
 	gfxDevice.isFullscreen_ = (glfwGetWindowMonitor(window) != nullptr);
+#endif
+#ifdef __EMSCRIPTEN__
+	// The cached video mode list needs to be refreshed here
+	gfxDevice.scheduleMonitorsRefresh();
+#endif
 }
 
 void GlfwInputManager::framebufferSizeCallback(GLFWwindow *window, int width, int height)
