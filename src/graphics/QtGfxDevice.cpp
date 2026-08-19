@@ -1,7 +1,5 @@
-#ifdef WITH_GLEW
-	#define GLEW_NO_GLU
-	#include <GL/glew.h>
-#endif
+#define NCINE_INCLUDE_OPENGL
+#include "common_headers.h"
 
 #include <cmath>
 #include <QWindow>
@@ -263,7 +261,8 @@ void QtGfxDevice::initDevice(const WindowMode &windowMode)
 	if (glContextInfo_.debugContext)
 		format.setOptions(QSurfaceFormat::DebugContext);
 
-	if (width_ <= 0 || height_ <= 0 || isFullscreen_)
+	const bool desktopFullscreen = (width_ <= 0 || height_ <= 0);
+	if (desktopFullscreen || isFullscreen_)
 	{
 		// Can't set the fullscreen window state in a method called by the constructor
 		isFullscreen_ = true;
@@ -281,6 +280,17 @@ void QtGfxDevice::initDevice(const WindowMode &windowMode)
 		if (windowMode.windowPositionY != AppConfiguration::Window::IgnorePosition)
 			windowPos.setY(windowMode.windowPositionY);
 		window->move(windowPos);
+	}
+
+	if (desktopFullscreen)
+	{
+		// Setting a sensible windowed size to fall back if fullscreen is later disabled
+		const QRect screenGeometry = QApplication::primaryScreen()->geometry();
+		const int windowedWidth = screenGeometry.width() * 3 / 4;
+		const int windowedHeight = screenGeometry.height() * 3 / 4;
+		window->resize(windowedWidth, windowedHeight);
+		window->move(screenGeometry.x() + (screenGeometry.width() - windowedWidth) / 2,
+		             screenGeometry.y() + (screenGeometry.height() - windowedHeight) / 2);
 	}
 
 	const int interval = displayMode_.hasVSync() ? 1 : 0;

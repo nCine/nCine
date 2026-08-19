@@ -278,6 +278,12 @@ void Application::initCommon()
 	RenderDocCapture::init();
 #endif
 
+#ifdef _WIN32
+	// Works around a Windows-specific GLFW/SDL2 issue where the window would otherwise flash white
+	// before the first real frame is presented (see https://github.com/glfw/glfw/issues/1660 for GLFW)
+	gfxDevice_->showWindow();
+#endif
+
 	// Swapping frame now for a cleaner API trace capture when debugging
 	gfxDevice_->update();
 	FrameMark;
@@ -585,6 +591,8 @@ bool Application::resizeScreenViewport(int width, int height)
 	else
 #endif
 	{
+		if (width > 0 && height > 0)
+			gfxDevice_->updateGLViewport();
 		appEventHandler_->onResizeWindow(width, height);
 		return false;
 	}

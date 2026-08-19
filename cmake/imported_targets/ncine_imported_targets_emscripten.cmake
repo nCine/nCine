@@ -9,9 +9,15 @@ if(EMSCRIPTEN)
 	# --------------------------------
 	if(NCINE_WITH_THREADS)
 		add_library(Threads::Threads INTERFACE IMPORTED)
+		# A small pre-spawned pool is kept even without the job system
+		set(EMSCRIPTEN_PTHREAD_POOL_SIZE_OPTION "-s PTHREAD_POOL_SIZE=4")
+		if(NCINE_WITH_JOBSYSTEM)
+			# Pre-spawn a worker pool sized to the device's actual core count when the job system is enabled
+			set(EMSCRIPTEN_PTHREAD_POOL_SIZE_OPTION "-s PTHREAD_POOL_SIZE=navigator.hardwareConcurrency")
+		endif()
 		set_target_properties(Threads::Threads PROPERTIES
 			INTERFACE_COMPILE_OPTIONS "SHELL:-pthread"
-			INTERFACE_LINK_OPTIONS "SHELL:-pthread -s PTHREAD_POOL_SIZE=4 -s WASM_MEM_MAX=128MB")
+			INTERFACE_LINK_OPTIONS "SHELL:-pthread -s WASM_MEM_MAX=128MB ${EMSCRIPTEN_PTHREAD_POOL_SIZE_OPTION}")
 		set(Threads_FOUND 1)
 	endif()
 

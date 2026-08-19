@@ -1,7 +1,5 @@
-#ifdef WITH_GLEW
-	#define GLEW_NO_GLU
-	#include <GL/glew.h>
-#endif
+#define NCINE_INCLUDE_OPENGL
+#include "common_headers.h"
 #include <SDL3/SDL.h>
 
 #include "common_macros.h"
@@ -299,6 +297,15 @@ void SdlGfxDevice::initDevice(const WindowMode &windowMode)
 #ifndef __EMSCRIPTEN__
 	if (isFullscreen_)
 	{
+		if (desktopFullscreen)
+		{
+			// Setting a sensible windowed size to fall back if fullscreen is later disabled
+			const SDL_DisplayMode *currentMode = SDL_GetCurrentDisplayMode(displayID);
+			FATAL_ASSERT_MSG_X(currentMode, "SDL_GetCurrentDisplayMode failed: %s", SDL_GetError());
+			SDL_SetWindowSize(windowHandle_, currentMode->w * 3 / 4, currentMode->h * 3 / 4);
+			SDL_SetWindowPosition(windowHandle_, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+		}
+
 		bool success = false;
 
 		if (desktopFullscreen)
@@ -310,6 +317,9 @@ void SdlGfxDevice::initDevice(const WindowMode &windowMode)
 
 		success = SDL_SetWindowFullscreen(windowHandle_, true);
 		ASSERT_MSG_X(success, "SDL_SetWindowFullscreen failed: %s", SDL_GetError());
+
+		// Entering fullscreen can apply asynchronously depending on the window manager
+		SDL_SyncWindow(windowHandle_);
 	}
 	else
 	{

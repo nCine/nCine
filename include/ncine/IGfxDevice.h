@@ -244,7 +244,12 @@ class DLL_PUBLIC IGfxDevice
 	void initWindowScaling(const WindowMode &windowMode);
 
 	/// Inits the OpenGL viewport based on the drawable resolution
+	/*! \note It only sets the internal viewport cache, without an actual OpenGL call */
 	void initGLViewport();
+	/// Reapplies the OpenGL viewport based on the drawable resolution, always issuing a real OpenGL call
+	void updateGLViewport();
+	/// Shows the application window (if it was created hidden), to work around a Windows-specific white flash before the first frame
+	inline virtual void showWindow() {}
 
 	/// Returns the monitor index that contains the center of the specified rectangle, or -1 if its center is outside the virtual screen
 	/*! \note The special `AppConfiguration::Window::IgnorePosition` value can be used for the `x` and `y` variables */

@@ -40,6 +40,7 @@ class GlfwGfxDevice : public IGfxDevice
 	const VideoMode &currentVideoMode(unsigned int monitorIndex) const override;
 	bool setVideoMode(unsigned int modeIndex) override;
 
+	void showWindow() override;
 	void swapBuffers() override;
 
   private:

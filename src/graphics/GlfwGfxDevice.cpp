@@ -1,7 +1,5 @@
-#ifdef WITH_GLEW
-	#define GLEW_NO_GLU
-	#include <GL/glew.h>
-#endif
+#define NCINE_INCLUDE_OPENGL
+#include "common_headers.h"
 #include <GLFW/glfw3.h>
 
 #include "common_macros.h"
@@ -88,8 +86,8 @@ void GlfwGfxDevice::setFullscreen(bool fullscreen)
 	GLFWmonitor *monitor = fullscreen ? monitorPointers_[fsMonitorIndex_] : nullptr;
 
 	const GLFWvidmode *currentMode = glfwGetVideoMode(monitorPointers_[fsMonitorIndex_]);
-	int width = (monitor != nullptr) ? currentMode->width : width_;
-	int height = (monitor != nullptr) ? currentMode->height : height_;
+	int width = (monitor != nullptr) ? currentMode->width : currentMode->width * 3 / 4;
+	int height = (monitor != nullptr) ? currentMode->height : currentMode->height * 3 / 4;
 	int refreshRate = (monitor != nullptr) ? currentMode->refreshRate : GLFW_DONT_CARE;
 
 	if (fsModeIndex_ >= 0 && fsModeIndex_ < monitors_[fsMonitorIndex_].numVideoModes && fullscreen)
@@ -100,7 +98,19 @@ void GlfwGfxDevice::setFullscreen(bool fullscreen)
 		refreshRate = mode.refreshRate;
 	}
 
-	glfwSetWindowMonitor(windowHandle_, monitor, 0, 0, width, height, refreshRate);
+	// Fullscreen ignores the position arguments, but going windowed needs to be centered on the target monitor explicitly
+	int windowPosX = 0;
+	int windowPosY = 0;
+	if (monitor == nullptr)
+	{
+		int monitorPosX = 0;
+		int monitorPosY = 0;
+		glfwGetMonitorPos(monitorPointers_[fsMonitorIndex_], &monitorPosX, &monitorPosY);
+		windowPosX = monitorPosX + (currentMode->width - width) / 2;
+		windowPosY = monitorPosY + (currentMode->height - height) / 2;
+	}
+
+	glfwSetWindowMonitor(windowHandle_, monitor, windowPosX, windowPosY, width, height, refreshRate);
 	#ifdef _WIN32
 	// The swap interval is reset after going fullscreen on Windows (https://github.com/glfw/glfw/issues/1072)
 	if (isFullscreen_)
@@ -294,6 +304,17 @@ bool GlfwGfxDevice::setVideoMode(unsigned int modeIndex)
 	return false;
 }
 
+void GlfwGfxDevice::showWindow()
+{
+	// Clearing and swapping multiple times to clear all buffers in case double/triple buffering is present
+	for (int i = 0; i < 3; i++)
+	{
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glfwSwapBuffers(windowHandle_);
+	}
+	glfwShowWindow(windowHandle_);
+}
+
 void GlfwGfxDevice::swapBuffers()
 {
 	glfwSwapBuffers(windowHandle_);
@@ -339,6 +360,10 @@ void GlfwGfxDevice::initDevice(const WindowMode &windowMode)
 	}
 
 	// setting window hints and creating a window with GLFW
+#ifdef _WIN32
+	// Keep the window hidden to work around a Windows-specific white flash before the first real frame
+	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+#endif
 	glfwWindowHint(GLFW_RESIZABLE, isResizable_ ? GLFW_TRUE : GLFW_FALSE);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, static_cast<int>(glContextInfo_.majorVersion));
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, static_cast<int>(glContextInfo_.minorVersion));
@@ -371,6 +396,11 @@ void GlfwGfxDevice::initDevice(const WindowMode &windowMode)
 
 	windowHandle_ = glfwCreateWindow(width_, height_, "", monitor, nullptr);
 	FATAL_ASSERT_MSG(windowHandle_, "glfwCreateWindow() failed");
+
+#ifdef EMSCRIPTEN_USE_PORT_CONTRIB_GLFW3
+	// Without this, the canvas backing store never tracks the browser window's size
+	emscripten_glfw_make_canvas_resizable(windowHandle_, "window", nullptr);
+#endif
 
 #if GLFW_VERSION_COMBINED < 3400
 	const bool ignoreBothWindowPosition = (windowMode.windowPositionX == AppConfiguration::Window::IgnorePosition &&

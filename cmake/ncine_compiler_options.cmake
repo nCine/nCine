@@ -13,6 +13,7 @@ if(EMSCRIPTEN)
 		"SHELL:-s DISABLE_EXCEPTION_CATCHING=1"
 		"SHELL:-s FORCE_FILESYSTEM=1"
 		"SHELL:-s STACK_SIZE=131072" # 128 Kb
+		"SHELL:-s EXPORTED_RUNTIME_METHODS=[\"'HEAPU8'\"]" # required by `EmscriptenLocalFile` for `emscripten::val::module_property(\"HEAPU8\")`
 		"SHELL:--bind")
 
 	set(EMSCRIPTEN_LINKER_OPTIONS_DEBUG

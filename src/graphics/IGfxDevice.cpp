@@ -183,6 +183,11 @@ void IGfxDevice::initGLViewport()
 	GLViewport::initRect(0, 0, drawableWidth_, drawableHeight_);
 }
 
+void IGfxDevice::updateGLViewport()
+{
+	GLViewport::setRect(0, 0, drawableWidth_, drawableHeight_);
+}
+
 int IGfxDevice::containingMonitorIndex(int x, int y, int width, int height) const
 {
 	int index = -1;

@@ -124,10 +124,14 @@ namespace {
 #endif
 
 #ifdef __EMSCRIPTEN__
+	// Returning a sum of currently idle workers in the pool of pre-spawned, plus the count of currently running ones
 	EM_JS(int, emscripten_get_thread_pool_size, (), {
-		if (typeof PThread !== 'undefined' && PThread.runningWorkers)
-			return PThread.runningWorkers.length;
-		return 1;
+		if (typeof PThread === 'undefined')
+			return 1;
+		const unusedCount = PThread.unusedWorkers ? PThread.unusedWorkers.length : 0;
+		const runningCount = PThread.pthreads ? Object.keys(PThread.pthreads).length : 0;
+		const total = unusedCount + runningCount;
+		return total > 0 ? total : 1;
 	});
 #endif
 }

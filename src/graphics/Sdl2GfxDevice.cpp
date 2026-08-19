@@ -1,7 +1,5 @@
-#ifdef WITH_GLEW
-	#define GLEW_NO_GLU
-	#include <GL/glew.h>
-#endif
+#define NCINE_INCLUDE_OPENGL
+#include "common_headers.h"
 #include <SDL.h>
 
 #include "common_macros.h"
@@ -187,6 +185,17 @@ bool SdlGfxDevice::setVideoMode(unsigned int modeIndex)
 	return false;
 }
 
+void SdlGfxDevice::showWindow()
+{
+	// Clearing and swapping multiple times to clear all buffers in case double/triple buffering is present
+	for (int i = 0; i < 3; i++)
+	{
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		SDL_GL_SwapWindow(windowHandle_);
+	}
+	SDL_ShowWindow(windowHandle_);
+}
+
 void SdlGfxDevice::swapBuffers()
 {
 	SDL_GL_SwapWindow(windowHandle_);
@@ -233,6 +242,10 @@ void SdlGfxDevice::initDevice(const WindowMode &windowMode)
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 
 	Uint32 flags = SDL_WINDOW_OPENGL;
+#ifdef _WIN32
+	// Keep the window hidden to work around a Windows-specific white flash before the first real frame
+	flags |= SDL_WINDOW_HIDDEN;
+#endif
 #ifndef __EMSCRIPTEN__
 	if (windowMode.hasWindowScaling)
 		flags |= SDL_WINDOW_ALLOW_HIGHDPI;
@@ -251,24 +264,19 @@ void SdlGfxDevice::initDevice(const WindowMode &windowMode)
 
 	const SDL_DisplayMode *closestModePtr = nullptr;
 	SDL_DisplayMode closestMode;
-	if (isFullscreen_)
+	if (isFullscreen_ && desktopFullscreen == false)
 	{
-		if (desktopFullscreen)
-			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-		else
-		{
-			// Either the size or the refresh rate are not equal to current video mode
-			SDL_DisplayMode currentMode;
-			SDL_GetCurrentDisplayMode(monitorIndex, &currentMode);
+		// Either the size or the refresh rate are not equal to current video mode
+		SDL_DisplayMode currentMode;
+		SDL_GetCurrentDisplayMode(monitorIndex, &currentMode);
 
-			SDL_DisplayMode targetMode;
-			targetMode.w = (windowMode.width > 0) ? windowMode.width : currentMode.w;
-			targetMode.h = (windowMode.height > 0) ? windowMode.height : currentMode.h;
-			targetMode.format = 0; // don't care
-			targetMode.refresh_rate = (windowMode.refreshRate > 0.0f) ? static_cast<int>(windowMode.refreshRate) : currentMode.refresh_rate;
-			targetMode.driverdata = nullptr; // initialize to `nullptr`
-			closestModePtr = SDL_GetClosestDisplayMode(monitorIndex, &targetMode, &closestMode);
-		}
+		SDL_DisplayMode targetMode;
+		targetMode.w = (windowMode.width > 0) ? windowMode.width : currentMode.w;
+		targetMode.h = (windowMode.height > 0) ? windowMode.height : currentMode.h;
+		targetMode.format = 0; // don't care
+		targetMode.refresh_rate = (windowMode.refreshRate > 0.0f) ? static_cast<int>(windowMode.refreshRate) : currentMode.refresh_rate;
+		targetMode.driverdata = nullptr; // initialize to `nullptr`
+		closestModePtr = SDL_GetClosestDisplayMode(monitorIndex, &targetMode, &closestMode);
 	}
 #else
 	if (isFullscreen_)
@@ -284,7 +292,17 @@ void SdlGfxDevice::initDevice(const WindowMode &windowMode)
 	FATAL_ASSERT_MSG_X(windowHandle_, "SDL_CreateWindow failed: %s", SDL_GetError());
 
 #ifndef __EMSCRIPTEN__
-	if (closestModePtr != nullptr)
+	if (desktopFullscreen)
+	{
+		// Setting a sensible windowed size to fall back if fullscreen is later disabled
+		// Needs to happen before entering fullscreen, as `SDL_SetWindowSize()`/`SDL_SetWindowPosition()` have no effect afterwards
+		SDL_DisplayMode currentMode;
+		SDL_GetCurrentDisplayMode(monitorIndex, &currentMode);
+		SDL_SetWindowSize(windowHandle_, currentMode.w * 3 / 4, currentMode.h * 3 / 4);
+		SDL_SetWindowPosition(windowHandle_, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+		SDL_SetWindowFullscreen(windowHandle_, SDL_WINDOW_FULLSCREEN_DESKTOP);
+	}
+	else if (closestModePtr != nullptr)
 	{
 		const int result = SDL_SetWindowDisplayMode(windowHandle_, closestModePtr);
 		ASSERT_MSG_X(result == 0, "SDL_SetWindowDisplayMode failed: %s", SDL_GetError());
@@ -306,15 +324,6 @@ void SdlGfxDevice::initDevice(const WindowMode &windowMode)
 	initGLViewport();
 
 	SDL_SetWindowResizable(windowHandle_, isResizable_ ? SDL_TRUE : SDL_FALSE);
-
-#ifndef __EMSCRIPTEN__
-	// resolution should be set to current screen size
-	if (desktopFullscreen)
-	{
-		SDL_GetWindowSize(windowHandle_, &width_, &height_);
-		isFullscreen_ = true;
-	}
-#endif
 
 	glContextHandle_ = SDL_GL_CreateContext(windowHandle_);
 	FATAL_ASSERT_MSG_X(glContextHandle_, "SDL_GL_CreateContext failed: %s", SDL_GetError());

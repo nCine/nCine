@@ -41,6 +41,9 @@ class SdlGfxDevice : public IGfxDevice
 	const VideoMode &currentVideoMode(unsigned int monitorIndex) const override;
 	bool setVideoMode(unsigned int modeIndex) override;
 
+#ifdef WITH_SDL2
+	void showWindow() override;
+#endif
 	void swapBuffers() override;
 
   private:
