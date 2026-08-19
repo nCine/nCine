@@ -158,7 +158,7 @@ void PCApplication::run()
 		step();
 
 #if defined(WITH_QT5) || defined(WITH_QT6)
-	static_cast<QtInputManager &>(*inputManager_).copyButtonStatesToPrev();
+	static_cast<QtInputManager &>(*inputManager_).resetInputStates();
 #endif
 }
 
@@ -167,7 +167,7 @@ void PCApplication::processEvents()
 {
 	ZoneScoped;
 
-	SdlInputManager::copyButtonStatesToPrev();
+	SdlInputManager::resetInputStates();
 
 	SDL_Event event;
 	#ifndef __EMSCRIPTEN__
@@ -303,7 +303,7 @@ void PCApplication::processEvents()
 {
 	ZoneScoped;
 
-	GlfwInputManager::copyButtonStatesToPrev();
+	GlfwInputManager::resetInputStates();
 
 	// GLFW does not seem to correctly handle Emscripten focus and blur events
 	#ifndef __EMSCRIPTEN__

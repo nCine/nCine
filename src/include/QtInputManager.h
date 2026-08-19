@@ -34,14 +34,10 @@ class QtMouseState : public MouseState
 	QtMouseState();
 
 	bool isButtonDown(MouseButton button) const override;
-	bool isButtonPressed(MouseButton button) const override;
-	bool isButtonReleased(MouseButton button) const override;
 
   private:
-	unsigned int currentStateIndex_;
-	Qt::MouseButtons buttonStates_[2];
-
-	void copyButtonStateToPrev();
+	/// Live button mask, kept fresh by every mouse press/release/move event
+	Qt::MouseButtons buttonsDown_;
 
 	friend class QtInputManager;
 };
@@ -67,10 +63,15 @@ class QtKeyboardState : public KeyboardState
 
   private:
 	static const unsigned int NumKeys = static_cast<unsigned int>(KeySym::COUNT);
-	unsigned int currentStateIndex_;
-	unsigned char keys_[2][NumKeys];
 
-	void copyKeyStateToPrev();
+	/// Live "held down" state, kept fresh by every key press/release event
+	bool keysDown_[NumKeys];
+
+	// Edge detection driven by the discrete Qt key events
+	bool keyJustPressed_[NumKeys];
+	bool keyJustReleased_[NumKeys];
+
+	void resetJustPressedReleased();
 
 	friend class QtInputManager;
 };
@@ -142,7 +143,7 @@ class QtInputManager : public IInputManager
 	void updateJoystickStates();
 #endif
 
-	void copyButtonStatesToPrev();
+	void resetInputStates();
 	bool shouldQuitOnRequest();
 	bool event(QEvent *event);
 	void keyPressEvent(QKeyEvent *event);

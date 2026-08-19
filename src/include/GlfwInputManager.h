@@ -24,16 +24,7 @@ class GlfwKeys
 class GlfwMouseState : public MouseState
 {
   public:
-	GlfwMouseState();
-
 	bool isButtonDown(MouseButton button) const override;
-	bool isButtonPressed(MouseButton button) const override;
-	bool isButtonReleased(MouseButton button) const override;
-
-  private:
-	unsigned char prevButtonState_[MouseState::NumButtons];
-
-	void copyButtonStateToPrev();
 
 	friend class GlfwInputManager;
 };
@@ -59,9 +50,12 @@ class GlfwKeyboardState : public KeyboardState
 
   private:
 	static const unsigned int NumKeys = static_cast<unsigned int>(KeySym::COUNT);
-	unsigned char prevKeyState_[NumKeys];
 
-	void copyKeyStateToPrev();
+	// Edge detection driven by the discrete ordered GLFW key events
+	bool keyJustPressed_[NumKeys];
+	bool keyJustReleased_[NumKeys];
+
+	void resetJustPressedReleased();
 
 	friend class GlfwInputManager;
 };
@@ -107,7 +101,7 @@ class GlfwInputManager : public IInputManager
 
 	/// Detects window focus gain/loss events
 	static bool hasFocus();
-	static void copyButtonStatesToPrev();
+	static void resetInputStates();
 	/// Updates joystick state structures and simulates events
 	static void updateJoystickStates();
 

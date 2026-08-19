@@ -30,14 +30,10 @@ class AndroidMouseState : public MouseState
 	AndroidMouseState();
 
 	bool isButtonDown(MouseButton button) const override;
-	bool isButtonPressed(MouseButton button) const override;
-	bool isButtonReleased(MouseButton button) const override;
 
   private:
-	unsigned int currentStateIndex_;
-	int buttonStates_[2];
-
-	void copyButtonStateToPrev();
+	/// Live button mask, kept fresh by every mouse motion/button event
+	int buttonsDown_;
 
 	friend class AndroidInputManager;
 };
@@ -54,10 +50,15 @@ class AndroidKeyboardState : public KeyboardState
 
   private:
 	static const unsigned int NumKeys = static_cast<unsigned int>(KeySym::COUNT);
-	unsigned int currentStateIndex_;
-	unsigned char keys_[2][NumKeys];
 
-	void copyKeyStateToPrev();
+	/// Live "held down" state, kept fresh by every key press/release event
+	bool keysDown_[NumKeys];
+
+	// Edge detection driven by the discrete Android key events
+	bool keyJustPressed_[NumKeys];
+	bool keyJustReleased_[NumKeys];
+
+	void resetJustPressedReleased();
 
 	friend class AndroidInputManager;
 };
@@ -215,7 +216,7 @@ class AndroidInputManager : public IInputManager
 	static bool isDeviceConnected(int deviceId);
 	static void deviceInfo(int deviceId, int joyId);
 
-	static void copyButtonStatesToPrev();
+	static void resetInputStates();
 
 	/// To update joystick connections in `AndroidApplication::androidMain()`
 	friend class AndroidApplication;

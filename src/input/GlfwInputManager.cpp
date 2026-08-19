@@ -90,38 +90,10 @@ namespace {
 // GlfwMouseState
 ///////////////////////////////////////////////////////////
 
-GlfwMouseState::GlfwMouseState()
-{
-	memset(prevButtonState_, GLFW_RELEASE, MouseState::NumButtons * sizeof(unsigned char));
-}
-
 bool GlfwMouseState::isButtonDown(MouseButton button) const
 {
 	const int glfwButton = ncineToGlfwMouseButton(button);
 	return glfwGetMouseButton(GlfwGfxDevice::windowHandle(), glfwButton) == GLFW_PRESS;
-}
-
-bool GlfwMouseState::isButtonPressed(MouseButton button) const
-{
-	const unsigned int buttonIndex = static_cast<unsigned int>(button);
-	const int glfwButton = ncineToGlfwMouseButton(button);
-	return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), glfwButton) == GLFW_PRESS && prevButtonState_[buttonIndex] == GLFW_RELEASE);
-}
-
-bool GlfwMouseState::isButtonReleased(MouseButton button) const
-{
-	const unsigned int buttonIndex = static_cast<unsigned int>(button);
-	const int glfwButton = ncineToGlfwMouseButton(button);
-	return (glfwGetMouseButton(GlfwGfxDevice::windowHandle(), glfwButton) == GLFW_RELEASE && prevButtonState_[buttonIndex] == GLFW_PRESS);
-}
-
-void GlfwMouseState::copyButtonStateToPrev()
-{
-	for (unsigned int i = 0; i < MouseState::NumButtons; i++)
-	{
-		const int glfwButton = ncineToGlfwMouseButton(static_cast<MouseButton>(i));
-		prevButtonState_[i] = glfwGetMouseButton(GlfwGfxDevice::windowHandle(), glfwButton);
-	}
 }
 
 ///////////////////////////////////////////////////////////
@@ -130,7 +102,8 @@ void GlfwMouseState::copyButtonStateToPrev()
 
 GlfwKeyboardState::GlfwKeyboardState()
 {
-	memset(prevKeyState_, GLFW_RELEASE, NumKeys * sizeof(unsigned char));
+	memset(keyJustPressed_, 0, sizeof(keyJustPressed_));
+	memset(keyJustReleased_, 0, sizeof(keyJustReleased_));
 }
 
 bool GlfwKeyboardState::isKeyDown(KeySym key) const
@@ -145,31 +118,25 @@ bool GlfwKeyboardState::isKeyDown(KeySym key) const
 bool GlfwKeyboardState::isKeyPressed(KeySym key) const
 {
 	const unsigned int keyIndex = static_cast<unsigned int>(key);
-	const int glfwKey = GlfwKeys::enumToKeySymValue(key);
-	if (glfwKey == GLFW_KEY_UNKNOWN)
+	if (GlfwKeys::enumToKeySymValue(key) == GLFW_KEY_UNKNOWN)
 		return false;
 	else
-		return (glfwGetKey(GlfwGfxDevice::windowHandle(), glfwKey) == GLFW_PRESS && prevKeyState_[keyIndex] == GLFW_RELEASE);
+		return keyJustPressed_[keyIndex];
 }
 
 bool GlfwKeyboardState::isKeyReleased(KeySym key) const
 {
 	const unsigned int keyIndex = static_cast<unsigned int>(key);
-	const int glfwKey = GlfwKeys::enumToKeySymValue(key);
-	if (glfwKey == GLFW_KEY_UNKNOWN)
+	if (GlfwKeys::enumToKeySymValue(key) == GLFW_KEY_UNKNOWN)
 		return false;
 	else
-		return (glfwGetKey(GlfwGfxDevice::windowHandle(), glfwKey) == GLFW_RELEASE && prevKeyState_[keyIndex] == GLFW_PRESS);
+		return keyJustReleased_[keyIndex];
 }
 
-void GlfwKeyboardState::copyKeyStateToPrev()
+void GlfwKeyboardState::resetJustPressedReleased()
 {
-	for (unsigned int i = 0; i < NumKeys; i++)
-	{
-		const int glfwKey = GlfwKeys::enumToKeySymValue(static_cast<KeySym>(i));
-		if (glfwKey != GLFW_KEY_UNKNOWN)
-			prevKeyState_[i] = glfwGetKey(GlfwGfxDevice::windowHandle(), glfwKey);
-	}
+	memset(keyJustPressed_, 0, sizeof(keyJustPressed_));
+	memset(keyJustReleased_, 0, sizeof(keyJustReleased_));
 }
 
 ///////////////////////////////////////////////////////////
@@ -305,10 +272,10 @@ bool GlfwInputManager::hasFocus()
 	return windowHasFocus_;
 }
 
-void GlfwInputManager::copyButtonStatesToPrev()
+void GlfwInputManager::resetInputStates()
 {
-	mouseState_.copyButtonStateToPrev();
-	keyboardState_.copyKeyStateToPrev();
+	mouseState_.resetJustPressedReleased();
+	keyboardState_.resetJustPressedReleased();
 
 	for (unsigned int joyId = 0; joyId < MaxNumJoysticks; joyId++)
 		joystickStates_[joyId].copyButtonStateToPrev();
@@ -524,6 +491,15 @@ void GlfwInputManager::keyCallback(GLFWwindow *window, int key, int scancode, in
 	keyboardEvent_.sym = GlfwKeys::keySymValueToEnum(key);
 	keyboardEvent_.mod = GlfwKeys::keyModMaskToEnumMask(mods);
 
+	if (keyboardEvent_.sym != KeySym::UNKNOWN)
+	{
+		const unsigned int keyIndex = static_cast<unsigned int>(keyboardEvent_.sym);
+		if (action == GLFW_PRESS)
+			keyboardState_.keyJustPressed_[keyIndex] = true;
+		else if (action == GLFW_RELEASE)
+			keyboardState_.keyJustReleased_[keyIndex] = true;
+	}
+
 	if (action == GLFW_PRESS)
 		inputEventHandler_->onKeyPressed(keyboardEvent_);
 	else if (action == GLFW_RELEASE)
@@ -560,6 +536,12 @@ void GlfwInputManager::mouseButtonCallback(GLFWwindow *window, int button, int a
 	mouseEvent_.x = static_cast<int>(xCursor);
 	mouseEvent_.y = theApplication().heightInt() - static_cast<int>(yCursor);
 	mouseEvent_.button = glfwToNcineMouseButton(button);
+
+	const unsigned int buttonIndex = static_cast<unsigned int>(mouseEvent_.button);
+	if (action == GLFW_PRESS)
+		mouseState_.buttonJustPressed_[buttonIndex] = true;
+	else if (action == GLFW_RELEASE)
+		mouseState_.buttonJustReleased_[buttonIndex] = true;
 
 	if (action == GLFW_PRESS)
 		inputEventHandler_->onMouseButtonPressed(mouseEvent_);

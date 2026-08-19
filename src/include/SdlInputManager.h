@@ -35,14 +35,10 @@ class SdlMouseState : public MouseState
 	SdlMouseState();
 
 	bool isButtonDown(MouseButton button) const override;
-	bool isButtonPressed(MouseButton button) const override;
-	bool isButtonReleased(MouseButton button) const override;
 
   private:
-	unsigned int currentStateIndex_;
-	unsigned int buttons_[2];
-
-	void copyButtonStateToPrev();
+	/// Live button mask, kept fresh by `SdlInputManager::mouseState()` and by motion/button events
+	unsigned int buttons_;
 
 	friend class SdlInputManager;
 };
@@ -72,13 +68,15 @@ class SdlKeyboardState : public KeyboardState
 	int keyStateArrayLength_;
 #ifdef WITH_SDL2
 	const unsigned char *keyState_;
-	unsigned char prevKeyState_[MaxKeyStateArrayLength];
 #else
 	const bool *keyState_;
-	bool prevKeyState_[MaxKeyStateArrayLength];
 #endif
 
-	void copyKeyStateToPrev();
+	// Edge detection driven by the discrete ordered SDL key events
+	bool keyJustPressed_[MaxKeyStateArrayLength];
+	bool keyJustReleased_[MaxKeyStateArrayLength];
+
+	void resetJustPressedReleased();
 
 	friend class SdlInputManager;
 };
@@ -123,7 +121,7 @@ class SdlInputManager : public IInputManager
 	~SdlInputManager() override;
 
 	static bool shouldQuitOnRequest();
-	static void copyButtonStatesToPrev();
+	static void resetInputStates();
 	static void parseEvent(const SDL_Event &event);
 
 	const MouseState &mouseState() const override;

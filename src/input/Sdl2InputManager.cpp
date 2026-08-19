@@ -82,35 +82,14 @@ namespace {
 ///////////////////////////////////////////////////////////
 
 SdlMouseState::SdlMouseState()
-    : currentStateIndex_(0), buttons_{0, 0}
+    : buttons_(0)
 {
 }
 
 bool SdlMouseState::isButtonDown(MouseButton button) const
 {
 	const int sdlButtonMask = ncineToSdlMouseButtonMask(button);
-	return (buttons_[currentStateIndex_] & sdlButtonMask) != 0;
-}
-
-bool SdlMouseState::isButtonPressed(MouseButton button) const
-{
-	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
-	const int sdlButtonMask = ncineToSdlMouseButtonMask(button);
-	return ((buttons_[currentStateIndex_] & sdlButtonMask) != 0 && (buttons_[prevStateIndex] & sdlButtonMask) == 0);
-}
-
-bool SdlMouseState::isButtonReleased(MouseButton button) const
-{
-	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
-	const int sdlButtonMask = ncineToSdlMouseButtonMask(button);
-	return ((buttons_[currentStateIndex_] & sdlButtonMask) == 0 && (buttons_[prevStateIndex] & sdlButtonMask) != 0);
-}
-
-void SdlMouseState::copyButtonStateToPrev()
-{
-	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
-	buttons_[prevStateIndex] = buttons_[currentStateIndex_];
-	currentStateIndex_ = prevStateIndex;
+	return (buttons_ & sdlButtonMask) != 0;
 }
 
 ///////////////////////////////////////////////////////////
@@ -123,7 +102,8 @@ SdlKeyboardState::SdlKeyboardState()
 	keyState_ = SDL_GetKeyboardState(&keyStateArrayLength_);
 	FATAL_ASSERT(keyStateArrayLength_ <= MaxKeyStateArrayLength);
 
-	memset(prevKeyState_, 0, keyStateArrayLength_);
+	memset(keyJustPressed_, 0, sizeof(keyJustPressed_));
+	memset(keyJustReleased_, 0, sizeof(keyJustReleased_));
 }
 
 bool SdlKeyboardState::isKeyDown(KeySym key) const
@@ -141,7 +121,7 @@ bool SdlKeyboardState::isKeyPressed(KeySym key) const
 	if (sdlKey == SDL_SCANCODE_UNKNOWN)
 		return false;
 	else
-		return (keyState_[sdlKey] != 0 && prevKeyState_[sdlKey] == 0);
+		return keyJustPressed_[sdlKey];
 }
 
 bool SdlKeyboardState::isKeyReleased(KeySym key) const
@@ -150,12 +130,13 @@ bool SdlKeyboardState::isKeyReleased(KeySym key) const
 	if (sdlKey == SDL_SCANCODE_UNKNOWN)
 		return false;
 	else
-		return (keyState_[sdlKey] == 0 && prevKeyState_[sdlKey] != 0);
+		return keyJustReleased_[sdlKey];
 }
 
-void SdlKeyboardState::copyKeyStateToPrev()
+void SdlKeyboardState::resetJustPressedReleased()
 {
-	memcpy(prevKeyState_, keyState_, keyStateArrayLength_ * sizeof(unsigned char));
+	memset(keyJustPressed_, 0, sizeof(keyJustPressed_));
+	memset(keyJustReleased_, 0, sizeof(keyJustReleased_));
 }
 
 ///////////////////////////////////////////////////////////
@@ -307,10 +288,10 @@ bool SdlInputManager::shouldQuitOnRequest()
 	return shouldQuit;
 }
 
-void SdlInputManager::copyButtonStatesToPrev()
+void SdlInputManager::resetInputStates()
 {
-	mouseState_.copyButtonStateToPrev();
-	keyboardState_.copyKeyStateToPrev();
+	mouseState_.resetJustPressedReleased();
+	keyboardState_.resetJustPressedReleased();
 
 	for (unsigned int joyId = 0; joyId < MaxNumJoysticks; joyId++)
 		joystickStates_[joyId].copyButtonStateToPrev();
@@ -344,6 +325,13 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 			keyboardEvent_.scancode = event.key.keysym.scancode;
 			keyboardEvent_.sym = SdlKeys::keySymValueToEnum(event.key.keysym.sym);
 			keyboardEvent_.mod = SdlKeys::keyModMaskToEnumMask(event.key.keysym.mod);
+			if (event.key.repeat == 0)
+			{
+				if (event.type == SDL_KEYDOWN)
+					keyboardState_.keyJustPressed_[event.key.keysym.scancode] = true;
+				else
+					keyboardState_.keyJustReleased_[event.key.keysym.scancode] = true;
+			}
 			break;
 		case SDL_TEXTINPUT:
 			nctl::strncpy(textInputEvent_.text, event.text.text, 4);
@@ -353,6 +341,19 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 			mouseEvent_.x = event.button.x;
 			mouseEvent_.y = theApplication().heightInt() - event.button.y;
 			mouseEvent_.button = sdlToNcineMouseButton(event.button.button);
+			{
+				const int sdlButtonMask = ncineToSdlMouseButtonMask(mouseEvent_.button);
+				if (event.type == SDL_MOUSEBUTTONDOWN)
+				{
+					mouseState_.buttonJustPressed_[static_cast<unsigned int>(mouseEvent_.button)] = true;
+					mouseState_.buttons_ |= sdlButtonMask;
+				}
+				else
+				{
+					mouseState_.buttonJustReleased_[static_cast<unsigned int>(mouseEvent_.button)] = true;
+					mouseState_.buttons_ &= ~sdlButtonMask;
+				}
+			}
 			break;
 		case SDL_MOUSEMOTION:
 			if (mouseCursorMode_ != MouseCursorMode::DISABLED)
@@ -365,7 +366,7 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 				mouseState_.x += event.motion.xrel;
 				mouseState_.y -= event.motion.yrel;
 			}
-			mouseState_.buttons_[mouseState_.currentStateIndex_] = event.motion.state;
+			mouseState_.buttons_ = event.motion.state;
 			break;
 		case SDL_MOUSEWHEEL:
 			scrollEvent_.x = static_cast<float>(event.wheel.x);
@@ -423,10 +424,12 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 	switch (event.type)
 	{
 		case SDL_KEYDOWN:
-			inputEventHandler_->onKeyPressed(keyboardEvent_);
+			if (event.key.repeat == 0)
+				inputEventHandler_->onKeyPressed(keyboardEvent_);
 			break;
 		case SDL_KEYUP:
-			inputEventHandler_->onKeyReleased(keyboardEvent_);
+			if (event.key.repeat == 0)
+				inputEventHandler_->onKeyReleased(keyboardEvent_);
 			break;
 		case SDL_TEXTINPUT:
 			inputEventHandler_->onTextInput(textInputEvent_);
@@ -485,7 +488,7 @@ void SdlInputManager::parseEvent(const SDL_Event &event)
 
 const MouseState &SdlInputManager::mouseState() const
 {
-	mouseState_.buttons_[mouseState_.currentStateIndex_] = SDL_GetMouseState(&mouseState_.x, &mouseState_.y);
+	mouseState_.buttons_ = SDL_GetMouseState(&mouseState_.x, &mouseState_.y);
 	return mouseState_;
 }
 

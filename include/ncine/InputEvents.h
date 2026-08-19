@@ -70,15 +70,30 @@ class DLL_PUBLIC MouseState
 	/// Pointer position on the Y axis
 	int y;
 
+	MouseState() { resetJustPressedReleased(); }
+
 	/// Returns `true` if the specified button is down this frame
 	virtual bool isButtonDown(MouseButton button) const = 0;
 	/// Returns `true` if the specified button went from not down to down this frame
-	virtual bool isButtonPressed(MouseButton button) const = 0;
+	inline bool isButtonPressed(MouseButton button) const { return buttonJustPressed_[static_cast<unsigned int>(button)]; }
 	/// Returns `true` if the specified button went from down to not down this frame
-	virtual bool isButtonReleased(MouseButton button) const = 0;
+	inline bool isButtonReleased(MouseButton button) const { return buttonJustReleased_[static_cast<unsigned int>(button)]; }
 
   protected:
 	static const unsigned int NumButtons = 5;
+
+	// Edge detection driven by the discrete, ordered button events of each backend
+	bool buttonJustPressed_[NumButtons];
+	bool buttonJustReleased_[NumButtons];
+
+	inline void resetJustPressedReleased()
+	{
+		for (unsigned int i = 0; i < NumButtons; i++)
+		{
+			buttonJustPressed_[i] = false;
+			buttonJustReleased_[i] = false;
+		}
+	}
 };
 
 /// Information about a mouse event

@@ -94,34 +94,13 @@ namespace {
 ///////////////////////////////////////////////////////////
 
 AndroidMouseState::AndroidMouseState()
-    : currentStateIndex_(0), buttonStates_{0, 0}
+    : buttonsDown_(0)
 {
 }
 
 bool AndroidMouseState::isButtonDown(MouseButton button) const
 {
-	return checkMouseButton(buttonStates_[currentStateIndex_], button);
-}
-
-bool AndroidMouseState::isButtonPressed(MouseButton button) const
-{
-	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
-	return (checkMouseButton(buttonStates_[currentStateIndex_], button) == true &&
-	        checkMouseButton(buttonStates_[prevStateIndex], button) == false);
-}
-
-bool AndroidMouseState::isButtonReleased(MouseButton button) const
-{
-	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
-	return (checkMouseButton(buttonStates_[currentStateIndex_], button) == false &&
-	        checkMouseButton(buttonStates_[prevStateIndex], button) == true);
-}
-
-void AndroidMouseState::copyButtonStateToPrev()
-{
-	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
-	buttonStates_[prevStateIndex] = buttonStates_[currentStateIndex_];
-	currentStateIndex_ = prevStateIndex;
+	return checkMouseButton(buttonsDown_, button);
 }
 
 ///////////////////////////////////////////////////////////
@@ -129,10 +108,10 @@ void AndroidMouseState::copyButtonStateToPrev()
 ///////////////////////////////////////////////////////////
 
 AndroidKeyboardState::AndroidKeyboardState()
-    : currentStateIndex_(0)
 {
-	memset(keys_[0], 0, NumKeys * sizeof(unsigned char));
-	memset(keys_[1], 0, NumKeys * sizeof(unsigned char));
+	memset(keysDown_, 0, sizeof(keysDown_));
+	memset(keyJustPressed_, 0, sizeof(keyJustPressed_));
+	memset(keyJustReleased_, 0, sizeof(keyJustReleased_));
 }
 
 bool AndroidKeyboardState::isKeyDown(KeySym key) const
@@ -141,34 +120,29 @@ bool AndroidKeyboardState::isKeyDown(KeySym key) const
 	if (key == KeySym::UNKNOWN)
 		return false;
 	else
-		return keys_[currentStateIndex_][keyIndex] != 0;
+		return keysDown_[keyIndex];
 }
 
 bool AndroidKeyboardState::isKeyPressed(KeySym key) const
 {
-	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
-	const unsigned int keyIndex = static_cast<unsigned int>(key);
 	if (key == KeySym::UNKNOWN)
 		return false;
 	else
-		return keys_[currentStateIndex_][keyIndex] != 0 && keys_[prevStateIndex][keyIndex] == 0;
+		return keyJustPressed_[static_cast<unsigned int>(key)];
 }
 
 bool AndroidKeyboardState::isKeyReleased(KeySym key) const
 {
-	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
-	const unsigned int keyIndex = static_cast<unsigned int>(key);
 	if (key == KeySym::UNKNOWN)
 		return false;
 	else
-		return keys_[currentStateIndex_][keyIndex] == 0 && keys_[prevStateIndex][keyIndex] != 0;
+		return keyJustReleased_[static_cast<unsigned int>(key)];
 }
 
-void AndroidKeyboardState::copyKeyStateToPrev()
+void AndroidKeyboardState::resetJustPressedReleased()
 {
-	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
-	memcpy(keys_[prevStateIndex], keys_[currentStateIndex_], NumKeys * sizeof(unsigned char));
-	currentStateIndex_ = prevStateIndex;
+	memset(keyJustPressed_, 0, sizeof(keyJustPressed_));
+	memset(keyJustReleased_, 0, sizeof(keyJustReleased_));
 }
 
 ///////////////////////////////////////////////////////////
@@ -751,13 +725,23 @@ bool AndroidInputManager::processKeyboardEvent(const AInputEvent *event)
 	{
 		case AKEY_EVENT_ACTION_DOWN:
 			if (keyboardEvent_.sym != KeySym::UNKNOWN)
-				keyboardState_.keys_[keyboardState_.currentStateIndex_][keySym] = 1;
-			inputEventHandler_->onKeyPressed(keyboardEvent_);
+			{
+				keyboardState_.keysDown_[keySym] = true;
+				if (AKeyEvent_getRepeatCount(event) == 0)
+					keyboardState_.keyJustPressed_[keySym] = true;
+			}
+			if (AKeyEvent_getRepeatCount(event) == 0)
+				inputEventHandler_->onKeyPressed(keyboardEvent_);
 			break;
 		case AKEY_EVENT_ACTION_UP:
 			if (keyboardEvent_.sym != KeySym::UNKNOWN)
-				keyboardState_.keys_[keyboardState_.currentStateIndex_][keySym] = 0;
-			inputEventHandler_->onKeyReleased(keyboardEvent_);
+			{
+				keyboardState_.keysDown_[keySym] = false;
+				if (AKeyEvent_getRepeatCount(event) == 0)
+					keyboardState_.keyJustReleased_[keySym] = true;
+			}
+			if (AKeyEvent_getRepeatCount(event) == 0)
+				inputEventHandler_->onKeyReleased(keyboardEvent_);
 			break;
 		case AKEY_EVENT_ACTION_MULTIPLE:
 			inputEventHandler_->onKeyPressed(keyboardEvent_);
@@ -842,10 +826,19 @@ bool AndroidInputManager::processMouseEvent(const AInputEvent *event)
 			buttonState &= ~maskOutButtons;
 			buttonState |= simulatedMouseButtonState_;
 
-			const int button = mouseState_.buttonStates_[mouseState_.currentStateIndex_] ^ buttonState; // pressed button mask
-			mouseEvent_.button = androidToNcineMouseButton(button);
-			mouseState_.buttonStates_[mouseState_.currentStateIndex_] = buttonState;
-			inputEventHandler_->onMouseButtonPressed(mouseEvent_);
+			const int oldButtonState = mouseState_.buttonsDown_;
+			mouseState_.buttonsDown_ = buttonState;
+			// More than one button can change state within the same event, so every button needs to be checked individually
+			for (unsigned int i = 0; i < AndroidMouseState::NumButtons; i++)
+			{
+				const MouseButton button = static_cast<MouseButton>(i);
+				if (checkMouseButton(oldButtonState, button) == false && checkMouseButton(buttonState, button) == true)
+				{
+					mouseEvent_.button = button;
+					mouseState_.buttonJustPressed_[i] = true;
+					inputEventHandler_->onMouseButtonPressed(mouseEvent_);
+				}
+			}
 			break;
 		}
 		case AMOTION_EVENT_ACTION_UP:
@@ -854,10 +847,19 @@ bool AndroidInputManager::processMouseEvent(const AInputEvent *event)
 			buttonState &= ~maskOutButtons;
 			buttonState |= simulatedMouseButtonState_;
 
-			const int button = mouseState_.buttonStates_[mouseState_.currentStateIndex_] ^ buttonState; // released button mask
-			mouseEvent_.button = androidToNcineMouseButton(button);
-			mouseState_.buttonStates_[mouseState_.currentStateIndex_] = buttonState;
-			inputEventHandler_->onMouseButtonReleased(mouseEvent_);
+			const int oldButtonState = mouseState_.buttonsDown_;
+			mouseState_.buttonsDown_ = buttonState;
+			// More than one button can change state within the same event, so every button needs to be checked individually
+			for (unsigned int i = 0; i < AndroidMouseState::NumButtons; i++)
+			{
+				const MouseButton button = static_cast<MouseButton>(i);
+				if (checkMouseButton(oldButtonState, button) == true && checkMouseButton(buttonState, button) == false)
+				{
+					mouseEvent_.button = button;
+					mouseState_.buttonJustReleased_[i] = true;
+					inputEventHandler_->onMouseButtonReleased(mouseEvent_);
+				}
+			}
 			break;
 		}
 		case AMOTION_EVENT_ACTION_MOVE:
@@ -889,7 +891,8 @@ bool AndroidInputManager::processMouseKeyEvent(const AInputEvent *event)
 			oldAction = action;
 			simulatedMouseButtonState_ |= simulatedButton;
 			mouseEvent_.button = androidToNcineMouseButton(simulatedButton);
-			mouseState_.buttonStates_[mouseState_.currentStateIndex_] |= simulatedButton;
+			mouseState_.buttonsDown_ |= simulatedButton;
+			mouseState_.buttonJustPressed_[static_cast<unsigned int>(mouseEvent_.button)] = true;
 			inputEventHandler_->onMouseButtonPressed(mouseEvent_);
 		}
 		else if (action == AKEY_EVENT_ACTION_UP && oldAction == AKEY_EVENT_ACTION_DOWN)
@@ -897,7 +900,8 @@ bool AndroidInputManager::processMouseKeyEvent(const AInputEvent *event)
 			oldAction = action;
 			simulatedMouseButtonState_ &= ~simulatedButton;
 			mouseEvent_.button = androidToNcineMouseButton(simulatedButton);
-			mouseState_.buttonStates_[mouseState_.currentStateIndex_] &= ~simulatedButton;
+			mouseState_.buttonsDown_ &= ~simulatedButton;
+			mouseState_.buttonJustReleased_[static_cast<unsigned int>(mouseEvent_.button)] = true;
 			inputEventHandler_->onMouseButtonReleased(mouseEvent_);
 		}
 	}
@@ -1210,10 +1214,10 @@ void AndroidInputManager::deviceInfo(int deviceId, int joyId)
 	}
 }
 
-void AndroidInputManager::copyButtonStatesToPrev()
+void AndroidInputManager::resetInputStates()
 {
-	keyboardState_.copyKeyStateToPrev();
-	mouseState_.copyButtonStateToPrev();
+	keyboardState_.resetJustPressedReleased();
+	mouseState_.resetJustPressedReleased();
 
 	for (unsigned int joyId = 0; joyId < MaxNumJoysticks; joyId++)
 		joystickStates_[joyId].copyButtonStateToPrev();

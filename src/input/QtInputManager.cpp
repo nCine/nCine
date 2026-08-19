@@ -100,32 +100,13 @@ namespace {
 ///////////////////////////////////////////////////////////
 
 QtMouseState::QtMouseState()
-    : currentStateIndex_(0), buttonStates_{Qt::NoButton, Qt::NoButton} {}
+    : buttonsDown_(Qt::NoButton)
+{
+}
 
 bool QtMouseState::isButtonDown(MouseButton button) const
 {
-	return checkMouseButton(buttonStates_[currentStateIndex_], button);
-}
-
-bool QtMouseState::isButtonPressed(MouseButton button) const
-{
-	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
-	return (checkMouseButton(buttonStates_[currentStateIndex_], button) == true &&
-	        checkMouseButton(buttonStates_[prevStateIndex], button) == false);
-}
-
-bool QtMouseState::isButtonReleased(MouseButton button) const
-{
-	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
-	return (checkMouseButton(buttonStates_[currentStateIndex_], button) == false &&
-	        checkMouseButton(buttonStates_[prevStateIndex], button) == true);
-}
-
-void QtMouseState::copyButtonStateToPrev()
-{
-	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
-	buttonStates_[prevStateIndex] = buttonStates_[currentStateIndex_];
-	currentStateIndex_ = prevStateIndex;
+	return checkMouseButton(buttonsDown_, button);
 }
 
 ///////////////////////////////////////////////////////////
@@ -133,10 +114,10 @@ void QtMouseState::copyButtonStateToPrev()
 ///////////////////////////////////////////////////////////
 
 QtKeyboardState::QtKeyboardState()
-    : currentStateIndex_(0)
 {
-	memset(keys_[0], 0, NumKeys * sizeof(unsigned char));
-	memset(keys_[1], 0, NumKeys * sizeof(unsigned char));
+	memset(keysDown_, 0, sizeof(keysDown_));
+	memset(keyJustPressed_, 0, sizeof(keyJustPressed_));
+	memset(keyJustReleased_, 0, sizeof(keyJustReleased_));
 }
 
 bool QtKeyboardState::isKeyDown(KeySym key) const
@@ -145,34 +126,29 @@ bool QtKeyboardState::isKeyDown(KeySym key) const
 	if (key == KeySym::UNKNOWN)
 		return false;
 	else
-		return keys_[currentStateIndex_][keyIndex] != 0;
+		return keysDown_[keyIndex];
 }
 
 bool QtKeyboardState::isKeyPressed(KeySym key) const
 {
-	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
-	const unsigned int keyIndex = static_cast<unsigned int>(key);
 	if (key == KeySym::UNKNOWN)
 		return false;
 	else
-		return keys_[currentStateIndex_][keyIndex] != 0 && keys_[prevStateIndex][keyIndex] == 0;
+		return keyJustPressed_[static_cast<unsigned int>(key)];
 }
 
 bool QtKeyboardState::isKeyReleased(KeySym key) const
 {
-	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
-	const unsigned int keyIndex = static_cast<unsigned int>(key);
 	if (key == KeySym::UNKNOWN)
 		return false;
 	else
-		return keys_[currentStateIndex_][keyIndex] == 0 && keys_[prevStateIndex][keyIndex] != 0;
+		return keyJustReleased_[static_cast<unsigned int>(key)];
 }
 
-void QtKeyboardState::copyKeyStateToPrev()
+void QtKeyboardState::resetJustPressedReleased()
 {
-	const unsigned int prevStateIndex = (currentStateIndex_ == 0 ? 1 : 0);
-	memcpy(keys_[prevStateIndex], keys_[currentStateIndex_], NumKeys * sizeof(unsigned char));
-	currentStateIndex_ = prevStateIndex;
+	memset(keyJustPressed_, 0, sizeof(keyJustPressed_));
+	memset(keyJustReleased_, 0, sizeof(keyJustReleased_));
 }
 
 ///////////////////////////////////////////////////////////
@@ -459,10 +435,10 @@ void QtInputManager::updateJoystickStates()
 }
 #endif
 
-void QtInputManager::copyButtonStatesToPrev()
+void QtInputManager::resetInputStates()
 {
-	mouseState_.copyButtonStateToPrev();
-	keyboardState_.copyKeyStateToPrev();
+	mouseState_.resetJustPressedReleased();
+	keyboardState_.resetJustPressedReleased();
 
 #ifdef WITH_QT5GAMEPAD
 	for (unsigned int joyId = 0; joyId < MaxNumJoysticks; joyId++)
@@ -541,9 +517,12 @@ void QtInputManager::keyPressEvent(QKeyEvent *event)
 		if (keyboardEvent_.sym != KeySym::UNKNOWN)
 		{
 			const unsigned int keySym = static_cast<unsigned int>(keyboardEvent_.sym);
-			keyboardState_.keys_[keyboardState_.currentStateIndex_][keySym] = 1;
+			keyboardState_.keysDown_[keySym] = true;
+			if (event->isAutoRepeat() == false)
+				keyboardState_.keyJustPressed_[keySym] = true;
 		}
-		inputEventHandler_->onKeyPressed(keyboardEvent_);
+		if (event->isAutoRepeat() == false)
+			inputEventHandler_->onKeyPressed(keyboardEvent_);
 
 		if (event->text().length() > 0)
 		{
@@ -563,9 +542,12 @@ void QtInputManager::keyReleaseEvent(QKeyEvent *event)
 		if (keyboardEvent_.sym != KeySym::UNKNOWN)
 		{
 			const unsigned int keySym = static_cast<unsigned int>(keyboardEvent_.sym);
-			keyboardState_.keys_[keyboardState_.currentStateIndex_][keySym] = 0;
+			keyboardState_.keysDown_[keySym] = false;
+			if (event->isAutoRepeat() == false)
+				keyboardState_.keyJustReleased_[keySym] = true;
 		}
-		inputEventHandler_->onKeyReleased(keyboardEvent_);
+		if (event->isAutoRepeat() == false)
+			inputEventHandler_->onKeyReleased(keyboardEvent_);
 	}
 }
 
@@ -580,7 +562,8 @@ void QtInputManager::mousePressEvent(QMouseEvent *event)
 		mouseEvent_.x = x;
 		mouseEvent_.y = theApplication().heightInt() - y;
 		mouseEvent_.button = qtToNcineMouseButton(event->button());
-		mouseState_.buttonStates_[mouseState_.currentStateIndex_] = event->buttons();
+		mouseState_.buttonsDown_ = event->buttons();
+		mouseState_.buttonJustPressed_[static_cast<unsigned int>(mouseEvent_.button)] = true;
 		inputEventHandler_->onMouseButtonPressed(mouseEvent_);
 	}
 }
@@ -596,7 +579,8 @@ void QtInputManager::mouseReleaseEvent(QMouseEvent *event)
 		mouseEvent_.x = x;
 		mouseEvent_.y = theApplication().heightInt() - y;
 		mouseEvent_.button = qtToNcineMouseButton(event->button());
-		mouseState_.buttonStates_[mouseState_.currentStateIndex_] = event->buttons();
+		mouseState_.buttonsDown_ = event->buttons();
+		mouseState_.buttonJustReleased_[static_cast<unsigned int>(mouseEvent_.button)] = true;
 		inputEventHandler_->onMouseButtonReleased(mouseEvent_);
 	}
 }
@@ -611,7 +595,7 @@ void QtInputManager::mouseMoveEvent(QMouseEvent *event)
 
 		mouseState_.x = x;
 		mouseState_.y = theApplication().heightInt() - y;
-		mouseState_.buttonStates_[mouseState_.currentStateIndex_] = event->buttons();
+		mouseState_.buttonsDown_ = event->buttons();
 		inputEventHandler_->onMouseMoved(mouseState_);
 	}
 }
