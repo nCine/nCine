@@ -16,6 +16,7 @@ set_property(CACHE NCINE_PREFERRED_BACKEND PROPERTY STRINGS "GLFW;SDL3;SDL2;QT6;
 
 if(EMSCRIPTEN)
 	option(NCINE_WITH_THREADS "Enable the Emscripten Pthreads support" OFF)
+	option(NCINE_WITH_OPFS "Enable persistent storage under Emscripten via the Origin Private File System" OFF)
 else()
 	option(NCINE_WITH_THREADS "Enable support for threads" ON)
 endif()

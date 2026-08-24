@@ -36,6 +36,11 @@
 	#include "AndroidJniHelper.h"
 #endif
 
+#if defined(__EMSCRIPTEN__) && defined(WITH_OPFS)
+	#include <emscripten/wasmfs.h>
+	#include <pthread.h>
+#endif
+
 namespace ncine {
 
 #ifdef _WIN32
@@ -176,6 +181,18 @@ namespace {
 	}
 #endif
 
+#if defined(__EMSCRIPTEN__) && defined(WITH_OPFS)
+	// The backend cannot be called from the main thread, it needs it to service its own event loop
+	void *mountOpfsBackend(void *arg)
+	{
+		bool *mounted = static_cast<bool *>(arg);
+		const backend_t opfsBackend = wasmfs_create_opfs_backend();
+		if (opfsBackend != nullptr)
+			*mounted = (wasmfs_create_directory("/persistent", 0777, opfsBackend) == 0);
+		return nullptr;
+	}
+#endif
+
 }
 
 ///////////////////////////////////////////////////////////
@@ -186,6 +203,9 @@ nctl::String FileSystem::dataPath_(MaxPathLength);
 nctl::String FileSystem::homePath_(MaxPathLength);
 nctl::String FileSystem::savePath_(MaxPathLength);
 nctl::String FileSystem::cachePath_(MaxPathLength);
+#ifdef __EMSCRIPTEN__
+bool FileSystem::savePathPersistent_ = false;
+#endif
 
 ///////////////////////////////////////////////////////////
 // PUBLIC FUNCTIONS
@@ -1244,6 +1264,16 @@ const nctl::String &FileSystem::cachePath()
 	return cachePath_;
 }
 
+#ifdef __EMSCRIPTEN__
+bool FileSystem::isSavePathPersistent()
+{
+	if (savePath_.isEmpty())
+		initSavePath();
+
+	return savePathPersistent_;
+}
+#endif
+
 ///////////////////////////////////////////////////////////
 // PRIVATE FUNCTIONS
 ///////////////////////////////////////////////////////////
@@ -1297,6 +1327,21 @@ void FileSystem::initSavePath()
 	savePath_.setLength(length);
 	CoTaskMemFree(wideString);
 	wideString = nullptr;
+#elif defined(__EMSCRIPTEN__) && defined(WITH_OPFS)
+	// A short-lived helper thread makes the OPFS mount call, joined back before continuing
+	pthread_t opfsMountThread;
+	pthread_create(&opfsMountThread, nullptr, mountOpfsBackend, &savePathPersistent_);
+	pthread_join(opfsMountThread, nullptr);
+
+	if (savePathPersistent_)
+		savePath_ = "/persistent/";
+	else
+	{
+		LOGW("Could not mount persistent storage via the Origin Private File System, falling back to non-persistent storage");
+		if (homePath_.isEmpty())
+			initHomePath();
+		savePath_ = homePath_ + "/.config/";
+	}
 #else
 	if (homePath_.isEmpty())
 		initHomePath();

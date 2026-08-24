@@ -481,6 +481,9 @@ void ImGuiDebugOverlay::guiPreprocessorDefines()
 #ifdef WITH_JOBSYSTEM
 			ImGui::TextUnformatted("WITH_JOBSYSTEM");
 #endif
+#ifdef WITH_OPFS
+			ImGui::TextUnformatted("WITH_OPFS");
+#endif
 #ifdef WITH_OPENGLES
 			ImGui::TextUnformatted("WITH_OPENGLES");
 #endif

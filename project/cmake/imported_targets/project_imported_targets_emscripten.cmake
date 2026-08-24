@@ -1,11 +1,17 @@
 if(EMSCRIPTEN)
-	if(NCINE_WITH_THREADS)
+	# OPFS needs the Pthreads runtime for its own internal worker even when `NCINE_WITH_THREADS` is off
+	if(NCINE_WITH_THREADS OR NCINE_WITH_OPFS)
 		add_library(Threads::Threads INTERFACE IMPORTED)
-		# A small pre-spawned pool is kept even without the job system
-		set(EMSCRIPTEN_PTHREAD_POOL_SIZE_OPTION "-s PTHREAD_POOL_SIZE=4")
-		if(NCINE_WITH_JOBSYSTEM)
-			# Pre-spawn a worker pool sized to the device's actual core count when the job system is enabled
-			set(EMSCRIPTEN_PTHREAD_POOL_SIZE_OPTION "-s PTHREAD_POOL_SIZE=navigator.hardwareConcurrency")
+		if(NCINE_WITH_THREADS)
+			# A small pre-spawned pool is kept even without the job system
+			set(EMSCRIPTEN_PTHREAD_POOL_SIZE_OPTION "-s PTHREAD_POOL_SIZE=4")
+			if(NCINE_WITH_JOBSYSTEM)
+				# Pre-spawn a worker pool sized to the device's actual core count when the job system is enabled
+				set(EMSCRIPTEN_PTHREAD_POOL_SIZE_OPTION "-s PTHREAD_POOL_SIZE=navigator.hardwareConcurrency")
+			endif()
+		else()
+			# OPFS alone needs one worker for the helper thread that mounts it and one for its own internal use
+			set(EMSCRIPTEN_PTHREAD_POOL_SIZE_OPTION "-s PTHREAD_POOL_SIZE=2")
 		endif()
 		set_target_properties(Threads::Threads PROPERTIES
 			INTERFACE_COMPILE_OPTIONS "SHELL:-pthread"
@@ -78,7 +84,7 @@ if(EMSCRIPTEN)
 
 	add_library(Lua::Lua STATIC IMPORTED)
 	set(EMSCRIPTEN_LUA_LIBRARY "liblua.a")
-	if(NCINE_WITH_THREADS)
+	if(NCINE_WITH_THREADS OR NCINE_WITH_OPFS)
 		set(EMSCRIPTEN_LUA_LIBRARY "liblua-mt.a")
 	endif()
 	set_target_properties(Lua::Lua PROPERTIES

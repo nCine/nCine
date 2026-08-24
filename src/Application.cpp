@@ -119,6 +119,9 @@ namespace {
 #ifdef WITH_JOBSYSTEM
 		LOGD("WITH_JOBSYSTEM");
 #endif
+#ifdef WITH_OPFS
+		LOGD("WITH_OPFS");
+#endif
 #ifdef WITH_OPENGLES
 		LOGD("WITH_OPENGLES");
 #endif

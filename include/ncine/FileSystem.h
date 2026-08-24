@@ -166,6 +166,10 @@ class DLL_PUBLIC FileSystem
 	static const nctl::String &savePath();
 	/// Returns the writable directory for saving cache data
 	static const nctl::String &cachePath();
+#ifdef __EMSCRIPTEN__
+	/// Returns true if the save path data persists across page reloads
+	static bool isSavePathPersistent();
+#endif
 
   private:
 	/// The path for the application to load files from
@@ -176,6 +180,10 @@ class DLL_PUBLIC FileSystem
 	static nctl::String savePath_;
 	/// The path for the application to write cache files into
 	static nctl::String cachePath_;
+#ifdef __EMSCRIPTEN__
+	/// True if the save path data persists across page reloads
+	static bool savePathPersistent_;
+#endif
 
 	/// Determines the current user home directory based on the platform
 	static void initHomePath();
