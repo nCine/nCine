@@ -26,6 +26,7 @@
             -ms-interpolation-mode: nearest-neighbor;
         }
     </style>
+    @EMSCRIPTEN_COI_SCRIPT@
   </head>
   <body>
     <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>

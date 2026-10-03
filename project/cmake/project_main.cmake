@@ -107,6 +107,11 @@ endif()
 
 if(EMSCRIPTEN)
 	target_link_options(${NCPROJECT_EXE_NAME} PRIVATE "SHELL:--preload-file ${NCPROJECT_DATA_DIR}/data@")
+	if(NCINE_WITH_THREADS OR NCINE_WITH_OPFS)
+		# Pthreads need cross-origin isolation, which hosts like GitHub Pages cannot provide with HTTP headers
+		set(EMSCRIPTEN_COI_SCRIPT "<script src='coi-serviceworker.js'></script>")
+		file(COPY ${NCPROJECT_ROOT}/coi-serviceworker.js DESTINATION ${CMAKE_BINARY_DIR})
+	endif()
 	configure_file(${NCPROJECT_ROOT}/emscripten_shell.html.in ${CMAKE_BINARY_DIR}/${NCPROJECT_EXE_NAME}.html @ONLY)
 	if(EXISTS ${NCPROJECT_ICONS_DIR}/icon.ico)
 		file(COPY ${NCPROJECT_ICONS_DIR}/icon.ico DESTINATION ${CMAKE_BINARY_DIR})
