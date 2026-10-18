@@ -12,7 +12,7 @@ nctl::UniquePtr<nc::IAppEventHandler> createAppEventHandler()
 
 void MyEventHandler::onPreInit(nc::AppConfiguration &config)
 {
-	//config.fileLogLevel = nc::ILogger::LogLevel::OFF;
+	//config.logging.fileLevel = nc::ILogger::LogLevel::OFF;
 	nc::Crashpad::addAnnotation("product", "apptest_crash");
 
 	nctl::String auxString(64);

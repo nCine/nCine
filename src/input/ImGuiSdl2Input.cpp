@@ -19,9 +19,17 @@
 #endif
 #define SDL_HAS_PER_MONITOR_DPI SDL_VERSION_ATLEAST(2,0,4)
 #define SDL_HAS_VULKAN SDL_VERSION_ATLEAST(2, 0, 6)
+#if defined(__APPLE__)
+	#define SDL_HAS_METAL SDL_VERSION_ATLEAST(2,0,14)
+#else
+	#define SDL_HAS_METAL 0
+#endif
 #define SDL_HAS_OPEN_URL SDL_VERSION_ATLEAST(2,0,14)
 #if SDL_HAS_VULKAN
-extern "C" { extern DECLSPEC void SDLCALL SDL_Vulkan_GetDrawableSize(SDL_Window *window, int *w, int *h); }
+	#include <SDL_vulkan.h>
+#endif
+#if SDL_HAS_METAL
+	#include <SDL_metal.h>
 #endif
 
 namespace ncine {
@@ -757,6 +765,10 @@ void ImGuiSdlInput::getWindowSizeAndFramebufferScale(SDL_Window *window, SDL_Ren
 #if SDL_HAS_VULKAN
 	else if (SDL_GetWindowFlags(window) & SDL_WINDOW_VULKAN)
 		SDL_Vulkan_GetDrawableSize(window, &displayW, &displayH);
+#endif
+#if SDL_HAS_METAL
+	else if (SDL_GetWindowFlags(window) & SDL_WINDOW_METAL)
+		SDL_Metal_GetDrawableSize(window, &displayW, &displayH);
 #endif
 	else
 		SDL_GL_GetDrawableSize(window, &displayW, &displayH);

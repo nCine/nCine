@@ -6,6 +6,8 @@
 #else
 
 	// From Tracy.hpp
+	#define TracyNoop
+
 	#define ZoneNamed(x, y)
 	#define ZoneNamedN(x, y, z)
 	#define ZoneNamedC(x, y, z)

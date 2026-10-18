@@ -101,6 +101,12 @@ ImGuiDrawing::ImGuiDrawing(bool withSceneGraph)
 
 	if (withSceneGraph == false)
 		setupBuffersAndShader();
+
+	// Setup Dear ImGui style
+	ImGuiStyle& style = ImGui::GetStyle();
+	ImGui::StyleColorsDark();
+	style.FrameRounding = 3.0f;
+	style.GrabRounding = 3.0f;
 }
 
 ImGuiDrawing::~ImGuiDrawing()
@@ -322,8 +328,8 @@ void ImGuiDrawing::draw(RenderQueue &renderQueue)
 
 	// Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
 	ImGuiIO &io = ImGui::GetIO();
-	const int fbWidth = static_cast<int>(drawData->DisplaySize.x * drawData->FramebufferScale.x);
-	const int fbHeight = static_cast<int>(drawData->DisplaySize.y * drawData->FramebufferScale.y);
+	const int fbWidth = static_cast<int>(drawData->DisplaySize.x * drawData->FramebufferScale.x + 0.5f);
+	const int fbHeight = static_cast<int>(drawData->DisplaySize.y * drawData->FramebufferScale.y + 0.5f);
 	if (fbWidth <= 0 || fbHeight <= 0)
 		return;
 
@@ -424,8 +430,8 @@ void ImGuiDrawing::draw()
 	ImDrawData *drawData = ImGui::GetDrawData();
 
 	// Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
-	const int fbWidth = static_cast<int>(drawData->DisplaySize.x * drawData->FramebufferScale.x);
-	const int fbHeight = static_cast<int>(drawData->DisplaySize.y * drawData->FramebufferScale.y);
+	const int fbWidth = static_cast<int>(drawData->DisplaySize.x * drawData->FramebufferScale.x + 0.5f);
+	const int fbHeight = static_cast<int>(drawData->DisplaySize.y * drawData->FramebufferScale.y + 0.5f);
 	if (fbWidth <= 0 || fbHeight <= 0)
 		return;
 
