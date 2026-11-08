@@ -100,7 +100,6 @@ void NuklearQtInput::newFrame()
 		nk_input_key(ctx, NK_KEY_COPY, 0);
 		nk_input_key(ctx, NK_KEY_PASTE, 0);
 		nk_input_key(ctx, NK_KEY_CUT, 0);
-		nk_input_key(ctx, NK_KEY_SHIFT, 0);
 	}
 
 	const MouseState &mouseState = theApplication().inputManager().mouseState();
@@ -191,7 +190,8 @@ void NuklearQtInput::clipboardCopy(nk_handle usr, const char *text, int len)
 		return;
 
 	QClipboard *clipboard = QApplication::clipboard();
-	clipboard->setText(text);
+	// Nuklear's text is not NUL-terminated
+	clipboard->setText(QString::fromUtf8(text, len));
 }
 
 }

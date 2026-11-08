@@ -138,6 +138,8 @@ bool NuklearDrawing::bakeFonts()
 
 void NuklearDrawing::newFrame()
 {
+	NuklearContext::ctx_.delta_time_seconds = theApplication().frameTime();
+
 #if defined(WITH_GLFW)
 	NuklearGlfwInput::newFrame();
 #elif defined(WITH_SDL2) || defined(WITH_SDL3)
@@ -157,6 +159,9 @@ void NuklearDrawing::newFrame()
 			nuklearShaderUniforms_->uniform(UniformNames::GuiProjectionMatrix)->setFloatVector(projectionMatrix_.data());
 			nuklearShaderUniforms_->uniform(UniformNames::Depth)->setFloatValue(0.0f);
 			nuklearShaderUniforms_->commitUniforms();
+
+			lastFrameWidth_ = NuklearContext::width_;
+			lastFrameHeight_ = NuklearContext::height_;
 		}
 	}
 }

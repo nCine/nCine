@@ -65,6 +65,11 @@ void NuklearAndroidInput::shutdown()
 
 void NuklearAndroidInput::newFrame()
 {
+	NuklearContext::width_ = theApplication().width();
+	NuklearContext::height_ = theApplication().height();
+	NuklearContext::displayWidth_ = NuklearContext::width_;
+	NuklearContext::displayHeight_ = NuklearContext::height_;
+
 	NuklearContext::fbScale_.x = static_cast<float>(NuklearContext::displayWidth_) / static_cast<float>(NuklearContext::width_);
 	NuklearContext::fbScale_.y = static_cast<float>(NuklearContext::displayHeight_) / static_cast<float>(NuklearContext::height_);
 }

@@ -35,7 +35,6 @@ class NuklearDrawing
 
   private:
 	bool withSceneGraph_;
-	nctl::UniquePtr<GLTexture> texture_;
 	nctl::UniquePtr<GLShaderProgram> nuklearShaderProgram_;
 
 	nctl::UniquePtr<GLBufferObject> vbo_;

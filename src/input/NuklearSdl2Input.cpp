@@ -3,6 +3,7 @@
 #include <SDL.h>
 #include <SDL_opengl.h>
 #include "NuklearSdlInput.h"
+#include <nctl/String.h>
 
 namespace ncine {
 
@@ -188,7 +189,11 @@ void NuklearSdlInput::clipboardCopy(nk_handle usr, const char *text, int len)
 {
 	if (len == 0)
 		return;
-	SDL_SetClipboardText(text);
+
+	// Nuklear's text is not NUL-terminated
+	nctl::String str(static_cast<unsigned int>(len) + 1);
+	str.assign(text, static_cast<unsigned int>(len));
+	SDL_SetClipboardText(str.data());
 }
 
 }

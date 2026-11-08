@@ -2,6 +2,7 @@
 
 #include <GLFW/glfw3.h>
 #include "NuklearGlfwInput.h"
+#include <nctl/String.h>
 
 namespace ncine {
 
@@ -127,6 +128,7 @@ void NuklearGlfwInput::newFrame()
 
 	const bool ctrlIsPressed = glfwGetKey(window_, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(window_, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS;
 	nk_input_key(ctx, NK_KEY_CTRL, ctrlIsPressed);
+	nk_input_key(ctx, NK_KEY_SHIFT, glfwGetKey(window_, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS || glfwGetKey(window_, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS);
 
 	if (ctrlIsPressed)
 		updateKeys(nuklearGlfwCtrlKeys, numCtrlKeys);
@@ -246,7 +248,11 @@ void NuklearGlfwInput::clipboardCopy(nk_handle usr, const char *text, int len)
 {
 	if (len == 0)
 		return;
-	glfwSetClipboardString(window_, text);
+
+	// Nuklear's text is not NUL-terminated
+	nctl::String str(static_cast<unsigned int>(len) + 1);
+	str.assign(text, static_cast<unsigned int>(len));
+	glfwSetClipboardString(window_, str.data());
 }
 
 void NuklearGlfwInput::updateKeys(const int keyMap[], unsigned int numKeys)
