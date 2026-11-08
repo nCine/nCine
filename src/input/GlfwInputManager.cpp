@@ -226,6 +226,7 @@ GlfwInputManager::GlfwInputManager()
 	glfwSetWindowContentScaleCallback(GlfwGfxDevice::windowHandle(), windowContentScaleCallback);
 #endif
 	glfwSetWindowSizeCallback(GlfwGfxDevice::windowHandle(), windowSizeCallback);
+	glfwSetWindowFocusCallback(GlfwGfxDevice::windowHandle(), windowFocusCallback);
 	glfwSetFramebufferSizeCallback(GlfwGfxDevice::windowHandle(), framebufferSizeCallback);
 	glfwSetKeyCallback(GlfwGfxDevice::windowHandle(), keyCallback);
 	glfwSetCharCallback(GlfwGfxDevice::windowHandle(), charCallback);
@@ -263,12 +264,6 @@ GlfwInputManager::~GlfwInputManager()
 
 bool GlfwInputManager::hasFocus()
 {
-	const bool glfwFocused = (glfwGetWindowAttrib(GlfwGfxDevice::windowHandle(), GLFW_FOCUSED) != 0);
-
-	// A focus event has occurred (either gain or loss)
-	if (windowHasFocus_ != glfwFocused)
-		windowHasFocus_ = glfwFocused;
-
 	return windowHasFocus_;
 }
 
@@ -471,6 +466,11 @@ void GlfwInputManager::windowSizeCallback(GLFWwindow *window, int width, int hei
 	// The cached video mode list needs to be refreshed here
 	gfxDevice.scheduleMonitorsRefresh();
 #endif
+}
+
+void GlfwInputManager::windowFocusCallback(GLFWwindow *window, int focus)
+{
+	windowHasFocus_ = (focus != 0);
 }
 
 void GlfwInputManager::framebufferSizeCallback(GLFWwindow *window, int width, int height)

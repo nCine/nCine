@@ -49,11 +49,11 @@ void Mutex::lock()
 
 void Mutex::unlock()
 {
-	pthread_mutex_unlock(&mutex_);
-
 #ifdef WITH_TRACY
-	tracyCtx_.AfterUnlock();
+	tracyCtx_.BeforeUnlock();
 #endif
+
+	pthread_mutex_unlock(&mutex_);
 }
 
 bool Mutex::tryLock()

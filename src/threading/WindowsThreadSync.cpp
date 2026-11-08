@@ -43,11 +43,11 @@ void Mutex::lock()
 
 void Mutex::unlock()
 {
-	LeaveCriticalSection(&handle_);
-
 #ifdef WITH_TRACY
-	tracyCtx_.AfterUnlock();
+	tracyCtx_.BeforeUnlock();
 #endif
+
+	LeaveCriticalSection(&handle_);
 }
 
 bool Mutex::tryLock()

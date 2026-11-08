@@ -174,6 +174,7 @@ class GlfwInputManager : public IInputManager
 	static void windowCloseCallback(GLFWwindow *window);
 	static void windowContentScaleCallback(GLFWwindow *window, float xscale, float yscale);
 	static void windowSizeCallback(GLFWwindow *window, int width, int height);
+	static void windowFocusCallback(GLFWwindow *window, int focus);
 	static void framebufferSizeCallback(GLFWwindow *window, int width, int height);
 	static void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
 	static void charCallback(GLFWwindow *window, unsigned int c);
