@@ -263,4 +263,4 @@ jobs:
 
         git add $manifest "$package"
         git commit --amend -m "$env:DEPLOY_MESSAGE"; if (-not $?) { git commit -m "$env:DEPLOY_MESSAGE" }
-        git push --force; if (-not $?) { git push --set-upstream origin $env:DEPLOY_BRANCH }
+        git push --force; if (-not $?) { git push --force --set-upstream origin $env:DEPLOY_BRANCH }

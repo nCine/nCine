@@ -189,7 +189,12 @@ jobs:
         DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/BRANCH_NAME/'"$BRANCH_NAME"'/'`
         DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/OS/'"$OS"'/'`
         DEPLOY_BRANCH=`echo $DEPLOY_BRANCH | sed 's/COMPILER/'"$CC"'/'`
-        git clone https://$PUBLIC_REPO_TOKEN@github.com/nCine/nCine-artifacts.git >/dev/null 2>&1
+        export AUTH_HEADER=$(printf "x-access-token:%s" $PUBLIC_REPO_TOKEN | base64)
+        echo "::add-mask::$AUTH_HEADER"
+        export GIT_CONFIG_COUNT=1
+        export GIT_CONFIG_KEY_0=http.extraheader
+        export GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $AUTH_HEADER"
+        git clone https://github.com/nCine/nCine-artifacts.git >/dev/null 2>&1
 
         cd nCine-artifacts
         git checkout $DEPLOY_BRANCH || git checkout --orphan $DEPLOY_BRANCH
@@ -201,4 +206,4 @@ jobs:
 
         git add $MANIFEST $PACKAGE
         git commit --amend -m "$DEPLOY_MESSAGE" || git commit -m "$DEPLOY_MESSAGE"
-        git push --force || git push --set-upstream origin $DEPLOY_BRANCH
+        git push --force || git push --force --set-upstream origin $DEPLOY_BRANCH

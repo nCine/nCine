@@ -266,4 +266,4 @@ jobs:
 
         git add $MANIFEST $PACKAGE
         git commit --amend -m "$DEPLOY_MESSAGE" || git commit -m "$DEPLOY_MESSAGE"
-        git push --force || git push --set-upstream origin $DEPLOY_BRANCH
+        git push --force || git push --force --set-upstream origin $DEPLOY_BRANCH
